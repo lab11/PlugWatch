@@ -1,0 +1,40 @@
+apply from: 'dependencies.gradle'
+apply from: 'checkstyle.gradle'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.12.0'
+        classpath 'me.tatarka:gradle-retrolambda:3.2.5'
+        classpath 'me.tatarka.retrolambda.projectlombok:lombok.ast:0.2.3.a2'
+        classpath 'org.codehaus.groovy:groovy-android-gradle-plugin:1.1.0'
+        classpath "io.realm:realm-gradle-plugin:1.0.1"
+
+
+        classpath 'com.google.gms:google-services:3.0.0'
+    }
+
+    configurations.classpath.exclude group: 'com.android.tools.external.lombok'
+}
+
+allprojects {
+    apply plugin: 'com.github.ben-manes.versions'
+
+    repositories {
+        jcenter()
+    }
+
+    buildscript {
+        repositories {
+            jcenter()
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
