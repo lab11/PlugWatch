@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.evernote.android.job.Job;
-import com.evernote.android.job.JobRequest;
 
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
@@ -32,12 +31,6 @@ public class ConnectivityJob extends Job {
         Log.e("wd: connectivity", String.valueOf(cur_time - last_time));
         Log.e("wd", String.valueOf(cur_time));
         Log.e("wd", String.valueOf(last_time));
-
-        int jobId = new JobRequest.Builder(ConnectivityJob.TAG)
-                .setExact(SensorConfig.CONNECTION_TIMEOUT)
-                .setUpdateCurrent(true)
-                .build()
-                .schedule();
 
         if (last_time != -1) {
             if (cur_time - last_time < SensorConfig.CONNECTION_THRESHOLD) {

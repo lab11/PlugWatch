@@ -35,23 +35,19 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import gridwatch.plugwatch.WitEnergyVersionTwo;
-import gridwatch.plugwatch.callbacks.ConnectivityJob;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.BluetoothConfig;
-import gridwatch.plugwatch.configs.DatabaseConfig;
 import gridwatch.plugwatch.configs.IntentConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
-import gridwatch.plugwatch.database.GWDump;
-import gridwatch.plugwatch.database.ID;
 import gridwatch.plugwatch.database.MeasurementRealm;
 import gridwatch.plugwatch.gridWatch.GridWatch;
 import gridwatch.plugwatch.network.WitJob;
 import gridwatch.plugwatch.network.WitRetrofit;
+import gridwatch.plugwatch.utilities.PhoneIDWriter;
 import gridwatch.plugwatch.utilities.Restart;
 import io.realm.Realm;
-import io.realm.RealmResults;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -71,9 +67,8 @@ public class PlugWatchService extends Service {
     Handler handler;
     private PublishSubject<Void> disconnectTriggerSubject = PublishSubject.create();
     private Observable<RxBleConnection> connectionObservable;
-    Realm realm = Realm.getDefaultInstance();
-    final RealmResults<MeasurementRealm> wit_db = realm.where(MeasurementRealm.class).findAll();
-    final RealmResults<GWDump> gw_db = realm.where(GWDump.class).findAll();
+
+    Realm realm;
 
     long last_good_data = System.currentTimeMillis();
 
@@ -98,20 +93,21 @@ public class PlugWatchService extends Service {
             Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
                     WitEnergyBluetoothActivity.class));
         }
-        broadcaster = LocalBroadcastManager.getInstance(getBaseContext());
+        realm = Realm.getDefaultInstance();
         initIntentReceiver();
         registerReceiver(mPowerReceiver, makePowerIntentFilter());
         settings = getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
         rxBleClient = WitEnergyVersionTwo.getRxBleClient(this);
-        realm = Realm.getDefaultInstance();
         FirebaseApp.initializeApp(getBaseContext());
-        setup_connection_alarm();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) return START_STICKY;
+
+
         if (intent.getStringExtra(IntentConfig.PLUGWATCHSERVICE_REQ).equals(IntentConfig.START_SCANNING)) {
+            Log.e("restarting service", "scanning");
             start_scanning();
         }
         if (intent.getStringExtra(IntentConfig.PLUGWATCHSERVICE_REQ).equals(IntentConfig.TYPE_ALARM)) {
@@ -138,8 +134,15 @@ public class PlugWatchService extends Service {
 
     private void do_gw(Intent intent) {
         GridWatch g = null;
-        if (phone_id == null) {
-            phone_id = realm.where(ID.class).equalTo(DatabaseConfig.TYPE, DatabaseConfig.PHONE).findAll().sort(DatabaseConfig.TIME).last().getID();
+        try {
+            if (phone_id == null) {
+                PhoneIDWriter a = new PhoneIDWriter(getBaseContext());
+                phone_id = a.get_last_value();
+            }
+        } catch (java.lang.IndexOutOfBoundsException e) {
+            Log.e("error", "couldn't find phone id");
+            //FirebaseCrash.log("plugwatchservice: do_gw, could't find phone id");
+            phone_id = "-1";
         }
         if (intent.getAction().equals(Intent.ACTION_POWER_CONNECTED)) {
             g = new GridWatch(getBaseContext(), SensorConfig.PLUGGED, phone_id);
@@ -207,11 +210,13 @@ public class PlugWatchService extends Service {
 
     private void connect() {
         Log.e("connect", "hit");
-        connectionObservable.subscribe(rxBleConnection -> {
-            Log.d(getClass().getSimpleName(), "Hey, connection has been established!");
-            //runOnUiThread(this::updateUI);
-        }, this::onConnectionFailure);
-        getWiTenergy();
+        if (!isConnected) {
+            connectionObservable.subscribe(rxBleConnection -> {
+                Log.d(getClass().getSimpleName(), "Hey, connection has been established!");
+                //runOnUiThread(this::updateUI);
+            }, this::onConnectionFailure);
+            getWiTenergy();
+        }
     }
 
     private void write_command(UUID charac, byte[] data, int length) {
@@ -263,13 +268,13 @@ public class PlugWatchService extends Service {
     }
 
     private void updateUI() {
-        WitEnergyVersionTwo.getInstance().isConnected = isConnected;
+        WitEnergyVersionTwo.getInstance().set_is_connected(isConnected);
+
         Intent i = new Intent(IntentConfig.TYPE_UI);
         i.putExtra(IntentConfig.GW_SIZE, cur_gw_size);
         i.putExtra(IntentConfig.WIT_SIZE, cur_wit_size);
         i.putExtra(IntentConfig.IS_CONNECTED, isConnected);
         i.putExtra(IntentConfig.MAC_ADDRESS, macAddress);
-        broadcaster.sendBroadcast(i);
     }
 
     private static final int COUNT_DOWN_TIMER = 1;
@@ -326,7 +331,7 @@ public class PlugWatchService extends Service {
             if (System.currentTimeMillis() - last_good_data > SensorConfig.NOTIFICATION_BUT_NO_DECODE_TIMEOUT) {
                 Log.e("connection timeout", String.valueOf(System.currentTimeMillis() - last_good_data));
                 Restart r = new Restart();
-                r.do_restart(this, WitEnergyBluetoothActivity.class, new Throwable("Restart due to notification but no decode"));
+                r.do_restart(this, WitEnergyVersionTwo.class, new Throwable("Restart due to notification but no decode")); //figure out why this sometimes launches many services
             }
         }
 
@@ -420,18 +425,22 @@ public class PlugWatchService extends Service {
         Log.d("MEASUREMENT: time", String.valueOf(time));
         updateUI();
 
+
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm bgRealm) {
                 try {
+                    //bgRealm.setAutoRefresh(true);
                     MeasurementRealm cur = new MeasurementRealm(mCurrent, mFrequency,
                             mPower, mPowerFactor, mVoltage);
 
                     bgRealm.copyToRealm(cur);
                     SharedPreferences meta_data = getSharedPreferences("META_DATA", 0);
 
+                    PhoneIDWriter b = new PhoneIDWriter(getBaseContext());
+                    String phone_id = b.get_last_value();
                     WitRetrofit a = new WitRetrofit(mCurrent, mFrequency, mPower, mPowerFactor,
-                            mVoltage, System.currentTimeMillis(), -1, -1, meta_data.getString(SettingsConfig.PHONE_ID, "-1"),
+                            mVoltage, System.currentTimeMillis(), -1, -1, phone_id,
                             -1, "");
                     int jobId = new JobRequest.Builder(WitJob.TAG)
                             .setExecutionWindow(1_000L, 20_000L)
@@ -452,9 +461,9 @@ public class PlugWatchService extends Service {
             public void onSuccess() {
                 SharedPreferences meta_data = getBaseContext().getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
                 meta_data.edit().putLong(SettingsConfig.LAST_WIT, System.currentTimeMillis()).apply();
-                Log.e("REALM", "new size is: " + String.valueOf(wit_db.size()));
-                WitEnergyVersionTwo.getInstance().num_wit = wit_db.size();
-                WitEnergyVersionTwo.getInstance().last_time = new Date();
+                //Log.e("REALM", "new size is: " + String.valueOf(wit_db.size()));
+                //WitEnergyVersionTwo.getInstance().num_wit = wit_db.size();
+                //WitEnergyVersionTwo.getInstance().last_time = new Date();
             }
         });
     }
@@ -535,14 +544,7 @@ public class PlugWatchService extends Service {
         updateUI();
     }
 
-    private void setup_connection_alarm() {
-        int jobId = new JobRequest.Builder(ConnectivityJob.TAG)
-                .setExecutionWindow(1_000L, 10_000L)
-                .setRequiresCharging(false)
-                .setRequiresDeviceIdle(false)
-                .build()
-                .schedule();
-    }
+
 
 
     @Nullable

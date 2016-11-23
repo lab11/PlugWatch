@@ -243,7 +243,8 @@ public class GridWatch {
                             @Override
                             public void onSuccess() {
                                 Log.e("GridWatch", "event saved in realm");
-                                WitEnergyVersionTwo.getInstance().num_gw = realm.where(GWDump.class).findAll().size();
+                                WitEnergyVersionTwo.getInstance().set_num_gw(realm.where(GWDump.class).findAll().size());
+
                             }
                         });
                         Logger.e(o.toString());

@@ -56,7 +56,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".callbacks.StartConnectivityTimerAtBoot"
             android:label="StartAtBoot">
@@ -64,7 +63,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".inputs.SMSAPI"
             android:permission="android.permission.BROADCAST_SMS">
@@ -92,7 +90,8 @@
         </service>
         <service
             android:name=".gridWatch.AudioService"
-            android:exported="false"></service>
+            android:exported="false" />
+
     </application>
 
 </manifest>

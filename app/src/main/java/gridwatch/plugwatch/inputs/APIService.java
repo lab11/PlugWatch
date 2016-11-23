@@ -108,8 +108,8 @@ public class APIService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
 
-        mGWID = WitEnergyVersionTwo.getInstance().phone_id_cur;
-        mGroupId = WitEnergyVersionTwo.getInstance().group_id_cur;
+        mGWID = WitEnergyVersionTwo.getInstance().get_phone_id().getID();
+        mGroupId = WitEnergyVersionTwo.getInstance().get_group_id().getID();
 
         if (intent != null && intent.getExtras() != null) {
             if (intent.getExtras().getString("msg") != null) { //MSG formated as <phone_id,cmd:parameters>

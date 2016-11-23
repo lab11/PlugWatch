@@ -19,13 +19,12 @@ public class SensorConfig {
     public final static Boolean FFT_ON = true;
 
     //CONFIGURE THE AUDIO RECORDING
-    public final static int MICROPHONE_SAMPLE_TIME_MS = 10000;
+    public final static int MICROPHONE_SAMPLE_TIME_MS = 3000;
     public final static int MICROPHONE_SAMPLE_FREQUENCY = 44100;
     public final static byte MICROPHONE_BIT_RATE = 16;
     public final static String recordingFileTmpName = "wit_tmp.raw";
     public final static String recordingFolder = "wit_audio";
     public final static String recordingExtension = ".wav";
-    public final static Boolean MICROPHONE_ON = false;
 
     public final static String PLUGGED = "PLUGGED";
     public final static String UNPLUGGED = "UNPLUGGED";
@@ -33,7 +32,7 @@ public class SensorConfig {
     public final static int CONNECTION_TIMEOUT = 10000; //interval to check connection
     public final static int CONNECTION_THRESHOLD = 10000*20; //after this number of connection checks restart the app
     public final static int REBOOT_THRESHOLD = 5; // after this threshold of restarts, reboot the phone
-    public final static int NOTIFICATION_BUT_NO_DECODE_TIMEOUT = 10000 * 60; //state that exists when notifications are coming that can't be decoded
+    public final static int NOTIFICATION_BUT_NO_DECODE_TIMEOUT = 10000 * 60 * 2; //state that exists when notifications are coming that can't be decoded
 
 }
 

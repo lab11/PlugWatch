@@ -16,14 +16,10 @@ public class IntentConfig {
     public final static String START_SCANNING = "START_SCANNING";
 
 
-
-    public final static String TYPE = "WIT";
     public final static String TYPE_ALARM = "ALARM";
-    public final static String TYPE_NORMAL = "NORMAL";
     public final static String TYPE_UI = "UI";
 
 
-    private static final String ACTION_REBOOT = "gridwatch.blerxtest.Utilities.action.reboot";
 
 
 

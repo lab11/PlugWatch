@@ -1,6 +1,5 @@
 package gridwatch.plugwatch.utilities;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Process;
@@ -24,13 +23,11 @@ public class Restart {
         System.err.println(stackTrace);// You can use LogCat too
         if (context != null && c != null) {
             Intent intent = new Intent(context, c);
-            //FirebaseCrash.log(s);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
-            BluetoothAdapter.getDefaultAdapter().enable();
             Process.killProcess(Process.myPid());
             System.exit(0);
         } else {
-//            FirebaseCrash.log("bad restart on exception handler " + exception.getMessage());
             Reboot r = new Reboot();
             r.reboot();
         }
