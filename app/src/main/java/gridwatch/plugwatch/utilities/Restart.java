@@ -29,7 +29,7 @@ public class Restart {
             System.exit(0);
         } else {
             Reboot r = new Reboot();
-            r.reboot();
+            r.do_reboot(new Throwable("something went wrong... rebooting from restart"));
         }
     }
 

@@ -3,11 +3,13 @@ package gridwatch.plugwatch;
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -18,16 +20,16 @@ import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.internal.RxBleLog;
 
 import java.io.File;
-import java.util.Date;
 
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
+import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.database.ID;
 import gridwatch.plugwatch.database.Migration;
 import gridwatch.plugwatch.network.WitJobCreator;
 import gridwatch.plugwatch.network.WitRetrofitService;
-import gridwatch.plugwatch.wit.WitEnergyBluetoothActivity;
+import gridwatch.plugwatch.wit.PlugWatchUIActivity;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import okhttp3.Interceptor;
@@ -41,11 +43,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by nklugman on 11/1/16.
  */
 
-public class WitEnergyVersionTwo extends Application {
+public class PlugWatchApp extends Application {
 
     public String buildStr;
     private RxBleClient rxBleClient;
-    private static WitEnergyVersionTwo instance;
+    private static PlugWatchApp instance;
     private JobManager jobManager;
 
     private final static int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_STEREO;
@@ -59,7 +61,7 @@ public class WitEnergyVersionTwo extends Application {
     private static boolean isConnected = false;
     private static int num_wit = -1;
     private static int num_gw = -1;
-    private static Date last_time = new Date();
+    private static long last_time = System.currentTimeMillis();
     private static Realm realm;
     private static ID group_id;
     private static ID phone_id;
@@ -68,12 +70,12 @@ public class WitEnergyVersionTwo extends Application {
     private String phone_id_cur;
     private String group_id_cur;
 
-    public WitEnergyVersionTwo() throws PackageManager.NameNotFoundException {
+    public PlugWatchApp() throws PackageManager.NameNotFoundException {
         instance = this;
     }
 
     public static RxBleClient getRxBleClient(Context context) {
-        WitEnergyVersionTwo application = (WitEnergyVersionTwo) context.getApplicationContext();
+        PlugWatchApp application = (PlugWatchApp) context.getApplicationContext();
         return application.rxBleClient;
     }
 
@@ -108,9 +110,9 @@ public class WitEnergyVersionTwo extends Application {
         super.onCreate();
         if (AppConfig.RESTART_ON_EXCEPTION) {
             Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
-                    WitEnergyBluetoothActivity.class));
+                    PlugWatchUIActivity.class));
         }
-
+        setup_settings();
         setup_build_str();
         setup_bluetooth();
         setup_network();
@@ -118,6 +120,11 @@ public class WitEnergyVersionTwo extends Application {
         setup_realm(); //database
         setup_retrofit();
         setup_job_manager(); //for all jobs
+    }
+
+    private void setup_settings() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        sp.edit().putInt(SettingsConfig.NUM_CONNECTION_REBOOTS, 0).commit();
     }
 
     private void setup_bluetooth() {
@@ -149,7 +156,7 @@ public class WitEnergyVersionTwo extends Application {
     }
 
 
-    public static WitEnergyVersionTwo getInstance() {
+    public static PlugWatchApp getInstance() {
         return instance;
     }
 
@@ -236,11 +243,11 @@ public class WitEnergyVersionTwo extends Application {
         return isConnected;
     }
 
-    public void set_date(Date e) {
+    public void set_date(long e) {
         last_time = e;
     }
 
-    public Date get_last_time() {
+    public long get_last_time() {
         return last_time;
     }
 

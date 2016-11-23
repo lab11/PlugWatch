@@ -57,10 +57,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import cz.msebera.android.httpclient.Header;
-import gridwatch.plugwatch.WitEnergyVersionTwo;
+import gridwatch.plugwatch.PlugWatchApp;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.database.Command;
-import gridwatch.plugwatch.wit.WitEnergyBluetoothActivity;
+import gridwatch.plugwatch.wit.PlugWatchUIActivity;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -108,8 +108,8 @@ public class APIService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
 
-        mGWID = WitEnergyVersionTwo.getInstance().get_phone_id().getID();
-        mGroupId = WitEnergyVersionTwo.getInstance().get_group_id().getID();
+        mGWID = PlugWatchApp.getInstance().get_phone_id().getID();
+        mGroupId = PlugWatchApp.getInstance().get_group_id().getID();
 
         if (intent != null && intent.getExtras() != null) {
             if (intent.getExtras().getString("msg") != null) { //MSG formated as <phone_id,cmd:parameters>
@@ -176,7 +176,7 @@ public class APIService extends Service {
         super.onCreate();
 
         Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
-                WitEnergyBluetoothActivity.class));
+                PlugWatchUIActivity.class));
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         sp.edit().putLong("reboot", -1).apply();

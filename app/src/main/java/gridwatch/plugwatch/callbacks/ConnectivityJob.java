@@ -12,7 +12,7 @@ import com.evernote.android.job.Job;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.utilities.Reboot;
-import gridwatch.plugwatch.wit.WitEnergyBluetoothActivity;
+import gridwatch.plugwatch.wit.PlugWatchUIActivity;
 
 /**
  * Created by nklugman on 11/21/16.
@@ -34,7 +34,7 @@ public class ConnectivityJob extends Job {
 
         if (last_time != -1) {
             if (cur_time - last_time < SensorConfig.CONNECTION_THRESHOLD) {
-                Intent intent = new Intent(getContext(), WitEnergyBluetoothActivity.class);
+                Intent intent = new Intent(getContext(), PlugWatchUIActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 //FirebaseCrash.log(s);
                 long connection_timeouts = meta_data.getLong(SettingsConfig.NUM_CONNECTION_TIMEOUTS, 0);
@@ -51,7 +51,7 @@ public class ConnectivityJob extends Job {
                     int reboot_timeouts = meta_data.getInt(SettingsConfig.NUM_CONNECTION_REBOOTS, 0);
                     meta_data.edit().putLong(SettingsConfig.NUM_CONNECTION_REBOOTS, reboot_timeouts + 1).apply();
                     Reboot r = new Reboot();
-                    r.reboot();
+                    r.do_reboot(new Throwable("rebooting from connectivity job"));
                 }
             }
         }

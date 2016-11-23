@@ -15,7 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import gridwatch.plugwatch.WitEnergyVersionTwo;
+import gridwatch.plugwatch.PlugWatchApp;
 import gridwatch.plugwatch.configs.SensorConfig;
 
 /**
@@ -75,7 +75,7 @@ public class AudioService extends IntentService {
             recBufferSize = AudioRecord.getMinBufferSize(SAMPLE_FREQUENCY,
                     RECORDER_CHANNELS,
                     RECORDER_ENCODING);
-            mRecorder = WitEnergyVersionTwo.getInstance().mRecorder;
+            mRecorder = PlugWatchApp.getInstance().mRecorder;
             run();
         }
     }

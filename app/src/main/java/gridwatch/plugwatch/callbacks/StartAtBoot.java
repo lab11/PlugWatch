@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import gridwatch.plugwatch.configs.SettingsConfig;
-import gridwatch.plugwatch.wit.WitEnergyBluetoothActivity;
+import gridwatch.plugwatch.wit.PlugWatchUIActivity;
 
 
 /**
@@ -18,7 +18,7 @@ public class StartAtBoot extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-            Intent activityIntent = new Intent(context, WitEnergyBluetoothActivity.class);
+            Intent activityIntent = new Intent(context, PlugWatchUIActivity.class);
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(activityIntent);
 

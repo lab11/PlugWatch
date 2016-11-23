@@ -1,6 +1,8 @@
 package gridwatch.plugwatch.wit;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,24 +23,23 @@ import com.polidea.rxandroidble.RxBleDevice;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.Random;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnFocusChange;
 import gridwatch.plugwatch.R;
-import gridwatch.plugwatch.WitEnergyVersionTwo;
+import gridwatch.plugwatch.PlugWatchApp;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.DatabaseConfig;
 import gridwatch.plugwatch.configs.IntentConfig;
-import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.database.GWDump;
 import gridwatch.plugwatch.database.ID;
 import gridwatch.plugwatch.database.MeasurementRealm;
-import gridwatch.plugwatch.gridWatch.GridWatch;
 import gridwatch.plugwatch.utilities.GroupID;
 import gridwatch.plugwatch.utilities.PhoneIDWriter;
 import gridwatch.plugwatch.utilities.RootChecker;
@@ -49,7 +50,7 @@ import rx.Observable;
 import rx.Subscription;
 import rx.subjects.PublishSubject;
 
-public class WitEnergyBluetoothActivity extends Activity {
+public class PlugWatchUIActivity extends Activity {
 
     private RxBleClient rxBleClient;
     private Subscription scanSubscription;
@@ -68,6 +69,9 @@ public class WitEnergyBluetoothActivity extends Activity {
     final RealmResults<ID> group_id_db = realm.where(ID.class).equalTo(DatabaseConfig.TYPE, DatabaseConfig.GROUP).findAll().sort(DatabaseConfig.TIME);
     final RealmResults<ID> phone_id_db = realm.where(ID.class).equalTo(DatabaseConfig.TYPE, DatabaseConfig.PHONE).findAll().sort(DatabaseConfig.TIME);
 
+    PendingIntent servicePendingIntent;
+    private Handler handler = new Handler(Looper.getMainLooper()); //this is fine for UI
+    Context ctx;
 
     SimpleDateFormat date_format = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
 
@@ -77,7 +81,7 @@ public class WitEnergyBluetoothActivity extends Activity {
     GroupID groupIDWriter;
 
     private boolean isRooted;
-
+    AlarmManager am;
     SharedPreferences settings;
 
     @Bind(R.id.version_number)
@@ -125,29 +129,7 @@ public class WitEnergyBluetoothActivity extends Activity {
 
     @OnClick(R.id.graph)
     public void onGraphClick() {
-        realm.executeTransactionAsync(new Realm.Transaction() {
-            @Override
-            public void execute(Realm bgRealm) {
-                try {
-                    MeasurementRealm cur = new MeasurementRealm("-1", "-1",
-                            "-1", "-1", "-1");
-                    bgRealm.copyToRealm(cur);
-                } catch (android.database.sqlite.SQLiteConstraintException e) {
-                    Log.e("error", e.getMessage());
-                }
-            }
-        }, new Realm.Transaction.OnSuccess() {
-            @Override
-            public void onSuccess() {
-                SharedPreferences meta_data = getBaseContext().getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
-                meta_data.edit().putLong(SettingsConfig.LAST_WIT, System.currentTimeMillis()).apply();
-                Log.e("REALM", "new size is: " + String.valueOf(realm.where(MeasurementRealm.class).findAll().size()));
-                //WitEnergyVersionTwo.getInstance().num_wit = wit_db.size();
-                //WitEnergyVersionTwo.getInstance().last_time = new Date();
-            }
-        });
-
-
+        TestLinker r = new TestLinker(getApplicationContext());
     }
 
 
@@ -189,10 +171,15 @@ public class WitEnergyBluetoothActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         if (AppConfig.RESTART_ON_EXCEPTION) {
             Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
-                    WitEnergyBluetoothActivity.class));
+                    PlugWatchUIActivity.class));
         }
+
+        setContentView(R.layout.activity_wit_energy_bluetooth);
+        ButterKnife.bind(this);
+
         /*
         if (!isRooted) { //ensure that app is rooted... will be called lots of times...
             RootChecker a = new RootChecker();
@@ -202,38 +189,36 @@ public class WitEnergyBluetoothActivity extends Activity {
 
         phoneIDWriter = new PhoneIDWriter(getApplicationContext());
         groupIDWriter = new GroupID(getApplicationContext());
-
-        setContentView(R.layout.activity_wit_energy_bluetooth);
-        ButterKnife.bind(this);
-
         settings = getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
 
-        Intent a = new Intent(this, PlugWatchService.class);
-        a.putExtra(IntentConfig.PLUGWATCHSERVICE_REQ, IntentConfig.START_SCANNING);
-        a.putExtra(IntentConfig.PLUGWATCHSERVICE_REQ, IntentConfig.TYPE_ALARM);
-        startService(a);
-
         initUI();
-
 
         wit_db.addChangeListener(new RealmChangeListener<RealmResults<MeasurementRealm>>() {
             @Override
             public void onChange(RealmResults<MeasurementRealm> element) {
-                WitEnergyVersionTwo.getInstance().set_num_wit(wit_db.size());
-                WitEnergyVersionTwo.getInstance().set_date(new Date());
+                PlugWatchApp.getInstance().set_num_wit(wit_db.size());
+                PlugWatchApp.getInstance().set_date(System.currentTimeMillis());
             }
         });
         gw_db.addChangeListener(new RealmChangeListener<RealmResults<GWDump>>() {
             @Override
             public void onChange(RealmResults<GWDump> element) {
-                WitEnergyVersionTwo.getInstance().set_num_gw(gw_db.size());
+                PlugWatchApp.getInstance().set_num_gw(gw_db.size());
             }
         });
-    }
 
-    private void test_network() {
-        GridWatch gw = new GridWatch(getBaseContext(), SensorConfig.PLUGGED, phone_id);
-        gw.run();
+        ctx = getApplicationContext();
+        am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+        connection_check_alarm();
+
+        /*
+        Intent plug_watch_intent = new Intent(this, PlugWatchService.class);
+        plug_watch_intent.putExtra(IntentConfig.PLUGWATCHSERVICE_REQ, IntentConfig.START_SCANNING);
+        //plug_watch_intent.putExtra(IntentConfig.PLUGWATCHSERVICE_REQ, IntentConfig.TYPE_ALARM);
+        startService(plug_watch_intent);
+        */
+
+        runnable.run();
     }
 
     @Override
@@ -262,22 +247,6 @@ public class WitEnergyBluetoothActivity extends Activity {
         */
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        Bundle extras = intent.getExtras();
-        Log.e("intent", "new intent");
-    }
-
     private void save_phone_id(String phone_id_to_save) { //TODO: persist to file
         phoneIDWriter.log(String.valueOf(System.currentTimeMillis()), phone_id_to_save.substring(3), "");
         phone_id = phone_id_to_save.substring(3);
@@ -302,44 +271,52 @@ public class WitEnergyBluetoothActivity extends Activity {
 
 
     @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        Bundle extras = intent.getExtras();
+        Log.e("intent", "new intent");
+    }
+
+    @Override
     protected void onPause() {
         //unregisterReceiver(receiver);
         super.onPause();
     }
 
-    private void updateUI() {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    int cur_wit_cnt = WitEnergyVersionTwo.getInstance().get_num_wit();
-                    if (cur_wit_cnt != -1) {
-                        num_packets.setText(String.valueOf(cur_wit_cnt));
-                    }
-                    int cur_gw_cnt = WitEnergyVersionTwo.getInstance().get_num_gw();
-                    if (cur_gw_cnt != -1) {
-                        num_gw.setText(String.valueOf(cur_gw_cnt));
-                    }
-                    total_data.setText(String.valueOf(WitEnergyVersionTwo.getInstance().get_network_data()));
-                    status.setText(WitEnergyVersionTwo.getInstance().get_is_connected() ? "Connected" : "Disconnected");
-                    status.setTextColor(WitEnergyVersionTwo.getInstance().get_is_connected() ? Color.GREEN : Color.RED);
-                    seconds_since_last.setText(date_format.format(WitEnergyVersionTwo.getInstance().get_last_time()));
-                    group_id_cur.setText(group_id);
-                    phone_id_cur.setText(phone_id);
-                    root_status.setText(isRooted ? "Rooted" : "Not Rooted");
-                    root_status.setTextColor(isRooted ? Color.GREEN : Color.RED);
-                } catch (java.lang.NullPointerException e) {
-                    Log.e("error updating UI", "null pointer... continuing");
-                }
-
-            }
-        });
-    }
-
-
     @Override
     public void onDestroy() {
         super.onDestroy();
+        am.cancel(servicePendingIntent);
+    }
+
+    private void updateUI() {
+        /*
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Log.e("ui", "attempting UI update ");
+                num_packets.setText(String.valueOf(realm.where(MeasurementRealm.class).findAll().size()));
+                num_gw.setText(String.valueOf(realm.where(GWDump.class).findAll().size()));
+                total_data.setText(String.valueOf(WitEnergyVersionTwo.getInstance().get_network_data()));
+                status.setText(WitEnergyVersionTwo.getInstance().get_is_connected() ? "Connected" : "Disconnected");
+                status.setTextColor(WitEnergyVersionTwo.getInstance().get_is_connected() ? Color.GREEN : Color.RED);
+                seconds_since_last.setText(date_format.format(WitEnergyVersionTwo.getInstance().get_last_time()));
+                group_id_cur.setText(group_id);
+                phone_id_cur.setText(phone_id);
+                root_status.setText(isRooted ? "Rooted" : "Not Rooted");
+                root_status.setTextColor(isRooted ? Color.GREEN : Color.RED);
+            }
+        });
+        */
     }
 
     private void initUI() {
@@ -348,12 +325,12 @@ public class WitEnergyBluetoothActivity extends Activity {
             public void run() {
                 phone_id = phoneIDWriter.get_last_value();
                 group_id = groupIDWriter.get_last_value();
-                version_number.setText("v." + WitEnergyVersionTwo.getInstance().buildStr);
+                version_number.setText("v." + PlugWatchApp.getInstance().buildStr);
                 num_packets.setText(String.valueOf(wit_db.size()));
                 num_gw.setText(String.valueOf(gw_db.size()));
-                total_data.setText(String.valueOf(WitEnergyVersionTwo.getInstance().get_network_data()));
-                status.setText(WitEnergyVersionTwo.getInstance().get_is_connected() ? "Connected" : "Disconnected");
-                status.setTextColor(WitEnergyVersionTwo.getInstance().get_is_connected() ? Color.GREEN : Color.RED);
+                total_data.setText(String.valueOf(PlugWatchApp.getInstance().get_network_data()));
+                status.setText(PlugWatchApp.getInstance().get_is_connected() ? "Connected" : "Disconnected");
+                status.setTextColor(PlugWatchApp.getInstance().get_is_connected() ? Color.GREEN : Color.RED);
                 group_id_cur.setText(group_id);
                 phone_id_cur.setText(phone_id);
                 root_status.setText(isRooted ? "Rooted" : "Not Rooted");
@@ -362,8 +339,54 @@ public class WitEnergyBluetoothActivity extends Activity {
         });
     }
 
+    /*
+    public void plugwatch_alarm() {
+        Context ctx = getApplicationContext();
+        Random r = new Random();
+        Calendar cal = Calendar.getInstance();
+        AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+        long interval = 1000 * 30; // 5 seconds in milliseconds
+        Intent serviceIntent = new Intent(ctx, PlugWatchService.class);
+        serviceIntent.putExtra(IntentConfig.PLUGWATCHSERVICE_REQ, IntentConfig.TYPE_ALARM);
+        PendingIntent servicePendingIntent =
+                PendingIntent.getService(ctx,
+                        r.nextInt(), //integer constant used to identify the service
+                        serviceIntent,
+                        PendingIntent.FLAG_CANCEL_CURRENT);
+        am.setRepeating(
+                AlarmManager.RTC_WAKEUP,
+                cal.getTimeInMillis(),
+                interval,
+                servicePendingIntent
+        );
+    }
+    */
+
+    public void connection_check_alarm() {
+        Random r = new Random();
+        Calendar cal = Calendar.getInstance();
+        long interval = 1000 * 30; // 30 seconds in milliseconds
+        Intent serviceIntent = new Intent(ctx, ConnectionCheckService.class);
+        servicePendingIntent =
+                PendingIntent.getService(ctx,
+                        r.nextInt(), //integer constant used to identify the service
+                        serviceIntent,
+                        PendingIntent.FLAG_CANCEL_CURRENT);
+        am.setRepeating(
+                AlarmManager.RTC_WAKEUP,
+                cal.getTimeInMillis(),
+                interval,
+                servicePendingIntent
+        );
+    }
 
 
+    private Runnable runnable = new Runnable() {
+        public void run() {
+            updateUI();
+            handler.postDelayed(this, 1000);
+        }
+    };
 
 
 

@@ -10,14 +10,12 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.evernote.android.job.JobRequest;
 import com.google.firebase.FirebaseApp;
-import com.orhanobut.logger.Logger;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.RxBleConnection;
 import com.polidea.rxandroidble.RxBleDevice;
@@ -34,7 +32,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import gridwatch.plugwatch.WitEnergyVersionTwo;
+import gridwatch.plugwatch.PlugWatchApp;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.BluetoothConfig;
@@ -51,6 +49,7 @@ import io.realm.Realm;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
 public class PlugWatchService extends Service {
@@ -79,10 +78,6 @@ public class PlugWatchService extends Service {
 
     SharedPreferences settings;
 
-    private LocalBroadcastManager broadcaster;
-
-    private int cur_wit_size;
-    private int cur_gw_size;
     private boolean isConnected;
     private String macAddress;
 
@@ -91,13 +86,12 @@ public class PlugWatchService extends Service {
     public void onCreate() {
         if (AppConfig.RESTART_ON_EXCEPTION) {
             Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
-                    WitEnergyBluetoothActivity.class));
+                    PlugWatchUIActivity.class));
         }
         realm = Realm.getDefaultInstance();
-        initIntentReceiver();
         registerReceiver(mPowerReceiver, makePowerIntentFilter());
         settings = getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
-        rxBleClient = WitEnergyVersionTwo.getRxBleClient(this);
+        rxBleClient = PlugWatchApp.getRxBleClient(this);
         FirebaseApp.initializeApp(getBaseContext());
     }
 
@@ -114,23 +108,14 @@ public class PlugWatchService extends Service {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String currentDateTime = dateFormat.format(new Date());
             Log.e("connection", "check " + currentDateTime);
-            if (!isConnected) {
-                Logger.e("connection timeout", "restarting service");
-                start_scanning();
-            }
+            //if (!isConnected) {
+                //Logger.e("connection timeout", "restarting service");
+                //start_scanning();
+            //}
         }
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
-
-    BroadcastReceiver br = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.w("ALARM", "Inside On Receiver");
-            Toast.makeText(getApplicationContext(), "received",
-                    Toast.LENGTH_SHORT).show();
-        }
-    };
 
     private void do_gw(Intent intent) {
         GridWatch g = null;
@@ -180,6 +165,13 @@ public class PlugWatchService extends Service {
                 .subscribe(this::addScanResult, this::onScanFailure);
     }
 
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        connectionObservable = null;
+    }
+
     private void addScanResult(RxBleScanResult bleScanResult) {
         //Log.e("Scan name", bleScanResult.getBleDevice().getName());
         if (bleScanResult.getBleDevice().getName().contains("Smart")) {
@@ -187,11 +179,11 @@ public class PlugWatchService extends Service {
             connectionObservable = bleDevice
                     .establishConnection(this, false)
                     .takeUntil(disconnectTriggerSubject)
-                    //.compose(bindUntilEvent(PAUSE))
                     .doOnUnsubscribe(this::clearSubscription)
                     .compose(new ConnectionSharingAdapter());
             macAddress = bleDevice.getMacAddress();
-            connect();
+            getWiTenergy();
+            //connect();
             scanSubscription.unsubscribe();
         } else {
             start_scanning();
@@ -202,7 +194,12 @@ public class PlugWatchService extends Service {
         Log.e("getWiTenergy", "hit");
         connectionObservable
                 .flatMap(rxBleConnection -> rxBleConnection.setupNotification(BluetoothConfig.UUID_WIT_FFE1))
-                //.doOnNext(notificationObservable -> runOnUiThread(this::notificationHasBeenSetUp))
+                .doOnNext(new Action1<Observable<byte[]>>() {
+                    @Override
+                    public void call(Observable<byte[]> observable) {
+                        notificationHasBeenSetUp();
+                    }
+                })
                 .flatMap(notificationObservable -> notificationObservable)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onNotificationReceivedFFE1, this::onNotificationSetupFailure);
@@ -260,21 +257,9 @@ public class PlugWatchService extends Service {
         }
     }
 
-    public void initIntentReceiver() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(IntentConfig.TYPE_ALARM);
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-        registerReceiver(br, filter);
-    }
 
     private void updateUI() {
-        WitEnergyVersionTwo.getInstance().set_is_connected(isConnected);
-
-        Intent i = new Intent(IntentConfig.TYPE_UI);
-        i.putExtra(IntentConfig.GW_SIZE, cur_gw_size);
-        i.putExtra(IntentConfig.WIT_SIZE, cur_wit_size);
-        i.putExtra(IntentConfig.IS_CONNECTED, isConnected);
-        i.putExtra(IntentConfig.MAC_ADDRESS, macAddress);
+        //PlugWatchApp.getInstance().set_is_connected(isConnected);
     }
 
     private static final int COUNT_DOWN_TIMER = 1;
@@ -331,7 +316,7 @@ public class PlugWatchService extends Service {
             if (System.currentTimeMillis() - last_good_data > SensorConfig.NOTIFICATION_BUT_NO_DECODE_TIMEOUT) {
                 Log.e("connection timeout", String.valueOf(System.currentTimeMillis() - last_good_data));
                 Restart r = new Restart();
-                r.do_restart(this, WitEnergyVersionTwo.class, new Throwable("Restart due to notification but no decode")); //figure out why this sometimes launches many services
+                r.do_restart(this, PlugWatchApp.class, new Throwable("Restart due to notification but no decode")); //figure out why this sometimes launches many services
             }
         }
 
@@ -461,7 +446,8 @@ public class PlugWatchService extends Service {
             public void onSuccess() {
                 SharedPreferences meta_data = getBaseContext().getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
                 meta_data.edit().putLong(SettingsConfig.LAST_WIT, System.currentTimeMillis()).apply();
-                //Log.e("REALM", "new size is: " + String.valueOf(wit_db.size()));
+
+                Log.e("REALM", "new size is: " + String.valueOf(realm.where(MeasurementRealm.class).findAll().size()));
                 //WitEnergyVersionTwo.getInstance().num_wit = wit_db.size();
                 //WitEnergyVersionTwo.getInstance().last_time = new Date();
             }
@@ -511,36 +497,42 @@ public class PlugWatchService extends Service {
     #############################################################################################*/
     private void onNotificationSetupFailure(Throwable throwable) {
         isConnected = false;
-        start_scanning();
+        PlugWatchApp.getInstance().set_is_connected(false);
+        //start_scanning();
         updateUI();
     }
 
     private void notificationHasBeenSetUp() {
         isConnected = true;
         clearSubscription();
+        PlugWatchApp.getInstance().set_is_connected(true);
         updateUI();
     }
 
     private void onConnectionFailure(Throwable throwable) {
         isConnected = false;
-        start_scanning();
+        PlugWatchApp.getInstance().set_is_connected(false);
+        //start_scanning();
         updateUI();
     }
 
     private void onReadFailure(Throwable throwable) {
         isConnected = false;
-        start_scanning();
+        PlugWatchApp.getInstance().set_is_connected(false);
+        //start_scanning();
         updateUI();
     }
 
     private void onWriteSuccess() {
         isConnected = true;
+        PlugWatchApp.getInstance().set_is_connected(true);
         clearSubscription();
         updateUI();
     }
 
     private void onWriteFailure(Throwable throwable) {
         isConnected = false;
+        PlugWatchApp.getInstance().set_is_connected(false);
         updateUI();
     }
 

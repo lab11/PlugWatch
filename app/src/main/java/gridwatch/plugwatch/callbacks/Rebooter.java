@@ -39,7 +39,7 @@ public class Rebooter extends IntentService {
 
     private void reboot_now() {
         Reboot rebooter = new Reboot();
-        rebooter.reboot();
+        rebooter.do_reboot(new Throwable("rebooted from Rebooter"));
     }
 
 

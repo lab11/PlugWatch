@@ -30,8 +30,8 @@ public class SensorConfig {
     public final static String UNPLUGGED = "UNPLUGGED";
 
     public final static int CONNECTION_TIMEOUT = 10000; //interval to check connection
-    public final static int CONNECTION_THRESHOLD = 10000*20; //after this number of connection checks restart the app
-    public final static int REBOOT_THRESHOLD = 5; // after this threshold of restarts, reboot the phone
+    public final static int CONNECTION_THRESHOLD = 10000 * 20; //after this number of connection checks restart the app
+    public final static int REBOOT_THRESHOLD = 3; // after this threshold of restarts, reboot the phone
     public final static int NOTIFICATION_BUT_NO_DECODE_TIMEOUT = 10000 * 60 * 2; //state that exists when notifications are coming that can't be decoded
 
 }

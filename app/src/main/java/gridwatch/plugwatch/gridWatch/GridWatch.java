@@ -35,13 +35,13 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import gridwatch.plugwatch.WitEnergyVersionTwo;
+import gridwatch.plugwatch.PlugWatchApp;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.database.GWDump;
-import gridwatch.plugwatch.wit.WitEnergyBluetoothActivity;
+import gridwatch.plugwatch.wit.PlugWatchUIActivity;
 import io.realm.Realm;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
@@ -74,7 +74,7 @@ public class GridWatch {
     public GridWatch(Context context, String type, String phone_id) {
         if (AppConfig.RESTART_ON_EXCEPTION) {
             Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(mContext,
-                    WitEnergyBluetoothActivity.class));
+                    PlugWatchUIActivity.class));
         }
 
         mContext = context;
@@ -243,7 +243,7 @@ public class GridWatch {
                             @Override
                             public void onSuccess() {
                                 Log.e("GridWatch", "event saved in realm");
-                                WitEnergyVersionTwo.getInstance().set_num_gw(realm.where(GWDump.class).findAll().size());
+                                PlugWatchApp.getInstance().set_num_gw(realm.where(GWDump.class).findAll().size());
 
                             }
                         });

@@ -8,7 +8,7 @@ import com.evernote.android.job.util.support.PersistableBundleCompat;
 
 import java.io.IOException;
 
-import gridwatch.plugwatch.WitEnergyVersionTwo;
+import gridwatch.plugwatch.PlugWatchApp;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -24,7 +24,7 @@ public class WitJob extends Job {
     @NonNull
     protected Result onRunJob(Params params) {
         Log.e("job", "running!");
-        final WitRetrofitService retrofitService = WitEnergyVersionTwo.getInstance().get_retrofit_service();
+        final WitRetrofitService retrofitService = PlugWatchApp.getInstance().get_retrofit_service();
 
         //WitEnergyVersionTwo.getInstance().getBaseContext()
 
@@ -35,8 +35,8 @@ public class WitJob extends Job {
             public void onResponse(Call<WitRetrofit> call, Response<WitRetrofit> response) {
                 Log.e("network response GOOD", response.body().toString());
                 try {
-                    int cur_network = WitEnergyVersionTwo.getInstance().get_network_data();
-                    WitEnergyVersionTwo.getInstance().set_network_data(cur_network += call.request().body().contentLength());
+                    int cur_network = PlugWatchApp.getInstance().get_network_data();
+                    PlugWatchApp.getInstance().set_network_data(cur_network += call.request().body().contentLength());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -46,8 +46,8 @@ public class WitJob extends Job {
             public void onFailure(Call<WitRetrofit> call, Throwable t) {
                 Log.e("network response FAIL", t.toString());
                 try {
-                    int cur_network = WitEnergyVersionTwo.getInstance().get_network_data();
-                    WitEnergyVersionTwo.getInstance().set_network_data(cur_network += call.request().body().contentLength());
+                    int cur_network = PlugWatchApp.getInstance().get_network_data();
+                    PlugWatchApp.getInstance().set_network_data(cur_network += call.request().body().contentLength());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

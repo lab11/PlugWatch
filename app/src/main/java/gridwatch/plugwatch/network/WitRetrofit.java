@@ -4,7 +4,7 @@ import com.evernote.android.job.util.support.PersistableBundleCompat;
 
 import java.io.Serializable;
 
-import gridwatch.plugwatch.WitEnergyVersionTwo;
+import gridwatch.plugwatch.PlugWatchApp;
 
 /**
  * Created by nklugman on 11/18/16.
@@ -41,7 +41,7 @@ public class WitRetrofit implements Serializable {
         this.i = phone_id;
         this.e = experiment_id;
         this.g = gw_dump;
-        this.b = WitEnergyVersionTwo.getInstance().buildStr;
+        this.b = PlugWatchApp.getInstance().buildStr;
     }
 
     public PersistableBundleCompat toBundle() {
