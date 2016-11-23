@@ -24,14 +24,13 @@ import com.polidea.rxandroidble.RxBleDevice;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Random;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnFocusChange;
-import gridwatch.plugwatch.R;
 import gridwatch.plugwatch.PlugWatchApp;
+import gridwatch.plugwatch.R;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.DatabaseConfig;
@@ -129,7 +128,9 @@ public class PlugWatchUIActivity extends Activity {
 
     @OnClick(R.id.graph)
     public void onGraphClick() {
-        TestLinker r = new TestLinker(getApplicationContext());
+        WitConnector f = new WitConnector();
+        f.start(getApplicationContext());
+
     }
 
 
@@ -363,13 +364,12 @@ public class PlugWatchUIActivity extends Activity {
     */
 
     public void connection_check_alarm() {
-        Random r = new Random();
         Calendar cal = Calendar.getInstance();
         long interval = 1000 * 30; // 30 seconds in milliseconds
         Intent serviceIntent = new Intent(ctx, ConnectionCheckService.class);
         servicePendingIntent =
                 PendingIntent.getService(ctx,
-                        r.nextInt(), //integer constant used to identify the service
+                        123512345, //integer constant used to identify the service
                         serviceIntent,
                         PendingIntent.FLAG_CANCEL_CURRENT);
         am.setRepeating(

@@ -112,6 +112,7 @@ public class PlugWatchApp extends Application {
             Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
                     PlugWatchUIActivity.class));
         }
+
         setup_settings();
         setup_build_str();
         setup_bluetooth();
