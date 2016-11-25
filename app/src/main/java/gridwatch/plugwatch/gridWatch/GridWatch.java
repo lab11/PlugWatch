@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import gridwatch.plugwatch.PlugWatchApp;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
@@ -243,7 +242,8 @@ public class GridWatch {
                             @Override
                             public void onSuccess() {
                                 Log.e("GridWatch", "event saved in realm");
-                                PlugWatchApp.getInstance().set_num_gw(realm.where(GWDump.class).findAll().size());
+
+                                //PlugWatchApp.getInstance().set_num_gw(realm.where(GWDump.class).findAll().size());
 
                             }
                         });
@@ -341,17 +341,6 @@ public class GridWatch {
     public void take_audio_recording() {
         Intent audio = new Intent(mContext, AudioService.class);
         mContext.startService(audio);
-        /*
-        Microphone mic = new Microphone(mContext);
-        String filename = mic.run();
-        try {
-            return new JSONObject()
-                    .put("filename", filename);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-        */
     }
 
 

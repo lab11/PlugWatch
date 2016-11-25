@@ -5,11 +5,18 @@ package gridwatch.plugwatch;
 
 interface IPlugWatchService {
 
+    long get_num_data();
+
     long get_last_time();
     boolean get_is_connected();
     int get_num_wit();
     int get_num_gw();
-    void set_phone_id(int phone_id);
-    void set_group_id(int group_id);
+    void set_phone_id(String phone_id);
+    void set_group_id(String group_id);
+
+    String get_mac();
+    void set_whitelist(boolean whitelist, String mac);
+
+    int get_pid();
 
 }

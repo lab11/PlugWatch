@@ -3,6 +3,7 @@ package gridwatch.plugwatch.gridWatch;
 import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.ResultReceiver;
 import android.util.Log;
@@ -13,7 +14,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import gridwatch.plugwatch.PlugWatchApp;
 import gridwatch.plugwatch.configs.SensorConfig;
 
 
@@ -59,7 +59,20 @@ public class Microphone {
         recBufferSize = AudioRecord.getMinBufferSize(SAMPLE_FREQUENCY,
                 RECORDER_CHANNELS,
                 RECORDER_ENCODING);
-        mRecorder = PlugWatchApp.getInstance().mRecorder;
+        //mRecorder = PlugWatchApp.getInstance().mRecorder;
+        setup_audio_recorder();
+    }
+
+    private void setup_audio_recorder(){
+        recBufferSize = AudioRecord.getMinBufferSize(SAMPLE_FREQUENCY,
+                RECORDER_CHANNELS,
+                RECORDER_ENCODING);
+
+        mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
+                SAMPLE_FREQUENCY,
+                RECORDER_CHANNELS,
+                RECORDER_ENCODING,
+                recBufferSize*2);
     }
 
 

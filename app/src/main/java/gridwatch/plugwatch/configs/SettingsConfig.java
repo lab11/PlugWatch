@@ -11,6 +11,9 @@ public class SettingsConfig {
     public final static String TOTAL_DATA = "TOTAL_DATA";
     public final static String SETTINGS_META_DATA = "META_DATA";
 
+
+    public final static String SETTINGS = "SETTINGS";
+
     public final static String BOOT_CNT = "BOOT_CNT";
     public final static String CRASH_CNT = "CRASH_CNT";
     public final static String DUMP_CNT = "DUMP";

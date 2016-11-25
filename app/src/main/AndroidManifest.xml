@@ -25,7 +25,6 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
 
     <application
-        android:name=".PlugWatchApp"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_config"
         android:icon="@mipmap/ic_launcher"
@@ -43,11 +42,19 @@
         </activity>
 
         <service
-            android:name=".callbacks.Rebooter"
-            android:exported="false" />
-        <service
-            android:name=".callbacks.WatchDog"
-            android:exported="false" />
+            android:name=".wit.ConnectionCheckService"
+            android:enabled="true"
+            android:exported="true" />
+        <service android:name=".firebase.RegisterFirebase">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name=".inputs.FirebaseAPI">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <receiver
             android:name=".callbacks.StartAtBoot"
@@ -71,28 +78,38 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".graph.Graph" />
-
+        <!-- PROCESS ! -->
         <service
             android:name=".wit.PlugWatchService"
             android:enabled="true"
             android:exported="true"
-             />
-        <service android:name=".firebase.RegisterFirebase">
+            android:process=".PlugWatch" />
+
+        <!-- PROCESS ! -->
+        <service
+            android:name=".wit.WatchdogService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=".Watchdog" />
+
+        <!-- PROCESS ! -->
+        <service
+            android:name=".wit.FailsafeTimerService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=".Failsafe" />
+
+        <receiver
+            android:name=".network.NetworkJobCreatorReceiver"
+            android:exported="false"
+            android:process=".PlugWatch">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+                <action android:name="com.evernote.android.job.ADD_JOB_CREATOR" />
             </intent-filter>
-        </service>
-        <service android:name=".inputs.FirebaseAPI">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
+        </receiver>
+
         <service
             android:name=".gridWatch.AudioService"
-            android:exported="false" />
-        <service
-            android:name=".wit.ConnectionCheckService"
             android:enabled="true"
             android:exported="true"></service>
     </application>

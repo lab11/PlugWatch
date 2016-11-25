@@ -91,16 +91,6 @@
         android:layout_above="@+id/textView5"
         android:layout_alignParentStart="true" />
 
-    <Button
-        android:text="Update"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/graph"
-        android:layout_above="@+id/dfasdf"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/total_data"
-        android:layout_alignEnd="@+id/dfasdf" />
-
     <TextView
         android:text="version_number"
         android:layout_width="wrap_content"
@@ -157,7 +147,7 @@
         android:text="TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/num_gw"
+        android:id="@+id/num_gw_text"
         android:layout_above="@+id/scan_btn"
         android:layout_toEndOf="@+id/textView14"
         android:layout_marginLeft="20dp" />
@@ -166,7 +156,7 @@
         android:text="TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/seconds_since_last"
+        android:id="@+id/seconds_since_last_text"
         android:textSize="10sp"
         android:layout_marginLeft="20dp"
         android:layout_alignBaseline="@+id/textView9"
@@ -178,9 +168,9 @@
         android:text="TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/num_packets"
+        android:id="@+id/num_packets_text"
         android:layout_marginLeft="20dp"
-        android:layout_above="@+id/seconds_since_last"
+        android:layout_above="@+id/seconds_since_last_text"
         android:layout_alignParentEnd="true"
         android:layout_toEndOf="@+id/textView5" />
 
@@ -188,9 +178,9 @@
         android:text="TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/total_data"
+        android:id="@+id/total_data_text"
         android:layout_marginLeft="20dp"
-        android:layout_above="@+id/num_packets"
+        android:layout_above="@+id/num_packets_text"
         android:layout_alignParentEnd="true"
         android:layout_toEndOf="@+id/textView5" />
 
@@ -202,6 +192,45 @@
         android:id="@+id/group_id_text"
         android:layout_below="@+id/phone_id_text"
         android:layout_toStartOf="@+id/phone_id_cur" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="WhiteListMac"
+        android:ems="10"
+        android:id="@+id/mac_text"
+        android:layout_above="@+id/test"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/mac_toggle"
+        android:visibility="invisible" />
+
+    <ToggleButton
+        android:text="ToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mac_toggle"
+        android:layout_alignBaseline="@+id/mac_text"
+        android:layout_alignBottom="@+id/mac_text"
+        android:layout_alignParentEnd="true"
+        android:visibility="invisible" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/dfasdf"
+        android:layout_alignParentStart="true"
+        android:id="@+id/mac_address_display"
+        android:layout_alignEnd="@+id/dfasdf" />
+
+    <Button
+        android:text="Test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/test"
+        android:layout_above="@+id/mac_address_display"
+        android:layout_alignParentStart="true" />
 
 
 </RelativeLayout>

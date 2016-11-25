@@ -1,10 +1,11 @@
 package gridwatch.plugwatch.gridWatch;
 
 import android.app.IntentService;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.ResultReceiver;
 import android.util.Log;
@@ -15,7 +16,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import gridwatch.plugwatch.PlugWatchApp;
 import gridwatch.plugwatch.configs.SensorConfig;
 
 /**
@@ -75,7 +75,11 @@ public class AudioService extends IntentService {
             recBufferSize = AudioRecord.getMinBufferSize(SAMPLE_FREQUENCY,
                     RECORDER_CHANNELS,
                     RECORDER_ENCODING);
-            mRecorder = PlugWatchApp.getInstance().mRecorder;
+            mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
+                    SAMPLE_FREQUENCY,
+                    RECORDER_CHANNELS,
+                    RECORDER_ENCODING,
+                    recBufferSize*2);
             run();
         }
     }

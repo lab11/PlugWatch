@@ -57,7 +57,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import cz.msebera.android.httpclient.Header;
-import gridwatch.plugwatch.PlugWatchApp;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.database.Command;
 import gridwatch.plugwatch.wit.PlugWatchUIActivity;
@@ -108,8 +107,8 @@ public class APIService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
 
-        mGWID = PlugWatchApp.getInstance().get_phone_id().getID();
-        mGroupId = PlugWatchApp.getInstance().get_group_id().getID();
+        //mGWID = PlugWatchApp.getInstance().get_phone_id().getID();
+        //mGroupId = PlugWatchApp.getInstance().get_group_id().getID();
 
         if (intent != null && intent.getExtras() != null) {
             if (intent.getExtras().getString("msg") != null) { //MSG formated as <phone_id,cmd:parameters>

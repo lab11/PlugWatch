@@ -29,6 +29,9 @@ public class SensorConfig {
     public final static String PLUGGED = "PLUGGED";
     public final static String UNPLUGGED = "UNPLUGGED";
 
+    public final static int WATCHDOG_INTERVAL =  1000 * 60 * 60 * 24; //interval to check connection ms
+
+
     public final static int CONNECTION_INTERVAL =  15000; //interval to check connection ms
     public final static int CONNECTION_THRESHOLD = 50000  ; //after this number of connection checks restart the app ms
     public final static int REBOOT_THRESHOLD = 3; // after this threshold of restarts, reboot the phone
