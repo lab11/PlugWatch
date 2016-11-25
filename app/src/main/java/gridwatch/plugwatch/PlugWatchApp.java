@@ -39,6 +39,8 @@ import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static gridwatch.plugwatch.R.id.num_gw;
+
 /**
  * Created by nklugman on 11/1/16.
  */
@@ -57,18 +59,16 @@ public class PlugWatchApp extends Application {
     private static int recBufferSize;
     public AudioRecord mRecorder;
 
-    private static int network_data = -1;
-    private static boolean isConnected = false;
-    private static int num_wit = -1;
-    private static int num_gw = -1;
-    private static long last_time = System.currentTimeMillis();
-    private static Realm realm;
-    private static ID group_id;
-    private static ID phone_id;
+
+    private volatile static Realm realm;
+    private volatile static ID group_id;
+    private volatile static ID phone_id;
     private WitRetrofitService retrofitService;
     private OkHttpClient.Builder httpClientBuilder;
     private String phone_id_cur;
     private String group_id_cur;
+
+    private RealmConfiguration realmConfiguration;
 
     public PlugWatchApp() throws PackageManager.NameNotFoundException {
         instance = this;
@@ -89,20 +89,28 @@ public class PlugWatchApp extends Application {
         buildStr = String.valueOf(pInfo.versionCode);
     }
 
+    public static synchronized void increment_last_time() {
+        last_time = System.currentTimeMillis();
+    }
+
     private void setup_realm() {
         File f = openRealm();
         Log.e("FILENAME", f.getAbsolutePath().toString() + "/realm_"+Settings.Secure.getString(getBaseContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID));
-        RealmConfiguration realmConfig = new RealmConfiguration.Builder(f)
+        realmConfiguration= new RealmConfiguration.Builder(f)
                 .name("realm_"+Settings.Secure.getString(getBaseContext().getContentResolver(),
                         Settings.Secure.ANDROID_ID))
                 .migration(new Migration())
                 .schemaVersion(5)
                 .build();
-        Realm.setDefaultConfiguration(realmConfig);
+        Realm.setDefaultConfiguration(realmConfiguration);
         Log.e("realm file", f.getAbsolutePath());
         realm = Realm.getDefaultInstance();
         realm.setAutoRefresh(true);
+    }
+
+    public RealmConfiguration getRealmConfiguration() {
+        return realmConfiguration;
     }
 
     @Override
@@ -115,12 +123,15 @@ public class PlugWatchApp extends Application {
 
         setup_settings();
         setup_build_str();
-        setup_bluetooth();
         setup_network();
-        setup_audio_recorder();
-        setup_realm(); //database
         setup_retrofit();
         setup_job_manager(); //for all jobs
+
+
+        setup_bluetooth();
+        setup_audio_recorder();
+        setup_realm(); //database
+
     }
 
     private void setup_settings() {
@@ -196,29 +207,7 @@ public class PlugWatchApp extends Application {
     //#####################################
     //# Getters and Setters
     //#####################################
-    public void set_network_data(int nd) {
-        network_data = nd;
-    }
 
-    public int get_network_data() {
-        return network_data;
-    }
-
-    public void set_num_gw(int nd) {
-        num_gw = nd;
-    }
-
-    public int get_num_gw() {
-        return num_gw;
-    }
-
-    public void set_num_wit(int nd) {
-        num_wit = nd;
-    }
-
-    public int get_num_wit() {
-        return num_wit;
-    }
 
     public void set_phone_id(ID id) {
         phone_id = id;
@@ -236,21 +225,6 @@ public class PlugWatchApp extends Application {
         return group_id;
     }
 
-    public void set_is_connected(boolean a) {
-        isConnected = a;
-    }
-
-    public boolean get_is_connected() {
-        return isConnected;
-    }
-
-    public void set_date(long e) {
-        last_time = e;
-    }
-
-    public long get_last_time() {
-        return last_time;
-    }
 
     public WitRetrofitService get_retrofit_service() {
         return retrofitService;

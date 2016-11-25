@@ -38,14 +38,20 @@ public class ConnectionCheckService extends IntentService {
         super.onCreate();
     }
 
+
     private void run() {
-        long last = PlugWatchApp.getInstance().get_last_time();
+        //SharedPreferences settings = getBaseContext().getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
+        //long last = settings.getLong(SettingsConfig.LAST_WIT, -1);
+
+        //long last = PlugWatchApp.getInstance().get_last_time();
         long diffInMs = System.currentTimeMillis() - last;
-        if (diffInMs > SensorConfig.CONNECTION_THRESHOLD) {
+        Log.e("ConnectionCheckService", "checking");
+        if (diffInMs > SensorConfig.CONNECTION_THRESHOLD && last != -1) {
             int num_previous_reboots = settings.getInt(SettingsConfig.NUM_CONNECTION_REBOOTS, 0);
-            Log.e("ConnectionCheckService", "restarting "+ String.valueOf(diffInMs));
-            Log.e("ConnectionCheckService", "restart number "+ String.valueOf(num_previous_reboots));
-            if (num_previous_reboots+1>SensorConfig.REBOOT_THRESHOLD) { //time to nuke it all
+            Log.e("ConnectionCheckService", "restarting " + String.valueOf(diffInMs));
+            Log.e("ConnectionCheckService", "restart number " + String.valueOf(num_previous_reboots));
+
+            if (num_previous_reboots + 1 > SensorConfig.REBOOT_THRESHOLD) { //time to nuke it all
                 try {
                     settings.edit().putInt(SettingsConfig.NUM_CONNECTION_REBOOTS, 0).commit();
                 } catch (java.lang.NullPointerException e) {
@@ -55,16 +61,17 @@ public class ConnectionCheckService extends IntentService {
                 r.do_reboot(new Throwable("rebooting due to max timeout"));
             } else { //just reboot the app
                 try {
-                    settings.edit().putInt(SettingsConfig.NUM_CONNECTION_REBOOTS, num_previous_reboots+1).commit();
+                    settings.edit().putInt(SettingsConfig.NUM_CONNECTION_REBOOTS, num_previous_reboots + 1).commit();
                 } catch (java.lang.NullPointerException e) {
 
                 }
                 Restart r = new Restart();
-                r.do_restart(getBaseContext(), PlugWatchUIActivity.class, new Throwable("restarting due to timeout"));
+                r.do_restart(getApplicationContext(), PlugWatchUIActivity.class, new Throwable("restarting due to timeout"));
             }
         } else {
             Log.e("ConnectionCheckService", "not restarting " + String.valueOf(diffInMs));
         }
+
     }
 
     @Override

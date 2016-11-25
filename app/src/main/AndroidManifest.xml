@@ -77,7 +77,7 @@
             android:name=".wit.PlugWatchService"
             android:enabled="true"
             android:exported="true"
-            android:process="gridwatch.wit.PlugWatchService" />
+             />
         <service android:name=".firebase.RegisterFirebase">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />

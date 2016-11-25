@@ -7,11 +7,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.google.firebase.FirebaseApp;
 
+import gridwatch.plugwatch.IPlugWatchService;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
@@ -24,6 +25,9 @@ public class PlugWatchService extends Service {
     private String phone_id;
     private String group_id;
     SharedPreferences settings;
+
+
+
 
     @Override
     public void onCreate() {
@@ -53,7 +57,6 @@ public class PlugWatchService extends Service {
             }
         } catch (java.lang.IndexOutOfBoundsException e) {
             Log.e("error", "couldn't find phone id");
-            //FirebaseCrash.log("plugwatchservice: do_gw, could't find phone id");
             phone_id = "-1";
         }
         if (intent.getAction().equals(Intent.ACTION_POWER_CONNECTED)) {
@@ -86,9 +89,42 @@ public class PlugWatchService extends Service {
         super.onDestroy();
     }
 
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
+
+    private final IPlugWatchService.Stub mBinder = new IPlugWatchService.Stub() {
+        @Override
+        public long get_last_time() throws RemoteException {
+            return 0;
+        }
+
+        @Override
+        public boolean get_is_connected() throws RemoteException {
+            return false;
+        }
+
+        @Override
+        public int get_num_wit() throws RemoteException {
+            return 0;
+        }
+
+        @Override
+        public int get_num_gw() throws RemoteException {
+            return 0;
+        }
+
+        @Override
+        public void set_phone_id(int phone_id) throws RemoteException {
+
+        }
+
+        @Override
+        public void set_group_id(int group_id) throws RemoteException {
+
+        }
+    };
+
+
 }

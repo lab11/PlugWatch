@@ -2,7 +2,6 @@ package gridwatch.plugwatch.wit;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -25,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import gridwatch.plugwatch.PlugWatchApp;
 import gridwatch.plugwatch.configs.BluetoothConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
-import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.database.MeasurementRealm;
 import gridwatch.plugwatch.network.WitJob;
 import gridwatch.plugwatch.network.WitRetrofit;
@@ -150,7 +148,7 @@ public class WitConnector {
                     @Override
                     public void call() {
                         isConnected = false;
-                        Log.e("ble on unsubscribe", "restarting scanning");
+                        //Log.e("ble on unsubscribe", "restarting scanning");
                         //start_scanning();
                     }
                 })
@@ -366,6 +364,14 @@ public class WitConnector {
         Log.d("MEASUREMENT: pf", mPowerFactor);
         Log.d("MEASUREMENT: frequency", mFrequency);
         Log.d("MEASUREMENT: time", String.valueOf(time));
+        //PlugWatchApp.getInstance().increment_last_time();
+
+        /*
+        PlugWatchApp.getInstance().set_last_time(System.currentTimeMillis());
+        SharedPreferences settings = mContext.getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
+        settings.edit().putLong(SettingsConfig.LAST_WIT, System.currentTimeMillis()).commit();
+        PlugWatchApp.getInstance().set_is_connected(true);
+        */
 
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
@@ -376,8 +382,6 @@ public class WitConnector {
                             mPower, mPowerFactor, mVoltage);
 
                     bgRealm.copyToRealm(cur);
-                    SharedPreferences meta_data = mContext.getSharedPreferences("META_DATA", 0);
-
                     PhoneIDWriter b = new PhoneIDWriter(mContext);
                     String phone_id = b.get_last_value();
                     WitRetrofit a = new WitRetrofit(mCurrent, mFrequency, mPower, mPowerFactor,
@@ -393,6 +397,7 @@ public class WitConnector {
                             .setPersisted(true)
                             .build()
                             .schedule();
+
                 } catch (android.database.sqlite.SQLiteConstraintException e) {
                     Log.e("error", e.getMessage());
                 }
@@ -400,14 +405,13 @@ public class WitConnector {
         }, new Realm.Transaction.OnSuccess() {
             @Override
             public void onSuccess() {
-                SharedPreferences meta_data = mContext.getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
-                meta_data.edit().putLong(SettingsConfig.LAST_WIT, System.currentTimeMillis()).apply();
 
                 Log.e("REALM", "new size is: " + String.valueOf(realm.where(MeasurementRealm.class).findAll().size()));
                 //WitEnergyVersionTwo.getInstance().num_wit = wit_db.size();
                 //WitEnergyVersionTwo.getInstance().last_time = new Date();
             }
         });
+
     }
 
 
@@ -445,15 +449,12 @@ public class WitConnector {
 
     private void onWriteSuccess() {
         isConnected = true;
-        PlugWatchApp.getInstance().set_is_connected(true);
+        //PlugWatchApp.getInstance().set_is_connected(true);
         clearSubscription();
     }
 
     private void onWriteFailure(Throwable throwable) {
         isConnected = false;
-        PlugWatchApp.getInstance().set_is_connected(false);
+        //PlugWatchApp.getInstance().set_is_connected(false);
     }
-
-
-
 }

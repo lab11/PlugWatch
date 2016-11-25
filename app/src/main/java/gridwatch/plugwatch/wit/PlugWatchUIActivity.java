@@ -33,18 +33,12 @@ import gridwatch.plugwatch.PlugWatchApp;
 import gridwatch.plugwatch.R;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
-import gridwatch.plugwatch.configs.DatabaseConfig;
 import gridwatch.plugwatch.configs.IntentConfig;
+import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
-import gridwatch.plugwatch.database.GWDump;
-import gridwatch.plugwatch.database.ID;
-import gridwatch.plugwatch.database.MeasurementRealm;
 import gridwatch.plugwatch.utilities.GroupID;
 import gridwatch.plugwatch.utilities.PhoneIDWriter;
 import gridwatch.plugwatch.utilities.RootChecker;
-import io.realm.Realm;
-import io.realm.RealmChangeListener;
-import io.realm.RealmResults;
 import rx.Observable;
 import rx.Subscription;
 import rx.subjects.PublishSubject;
@@ -62,11 +56,6 @@ public class PlugWatchUIActivity extends Activity {
     private String mVoltage;
     private PublishSubject<Void> disconnectTriggerSubject = PublishSubject.create();
     private Observable<RxBleConnection> connectionObservable;
-    private Realm realm = Realm.getDefaultInstance();
-    final RealmResults<MeasurementRealm> wit_db = realm.where(MeasurementRealm.class).findAll();
-    final RealmResults<GWDump> gw_db = realm.where(GWDump.class).findAll();
-    final RealmResults<ID> group_id_db = realm.where(ID.class).equalTo(DatabaseConfig.TYPE, DatabaseConfig.GROUP).findAll().sort(DatabaseConfig.TIME);
-    final RealmResults<ID> phone_id_db = realm.where(ID.class).equalTo(DatabaseConfig.TYPE, DatabaseConfig.PHONE).findAll().sort(DatabaseConfig.TIME);
 
     PendingIntent servicePendingIntent;
     private Handler handler = new Handler(Looper.getMainLooper()); //this is fine for UI
@@ -194,30 +183,17 @@ public class PlugWatchUIActivity extends Activity {
 
         initUI();
 
-        wit_db.addChangeListener(new RealmChangeListener<RealmResults<MeasurementRealm>>() {
-            @Override
-            public void onChange(RealmResults<MeasurementRealm> element) {
-                PlugWatchApp.getInstance().set_num_wit(wit_db.size());
-                PlugWatchApp.getInstance().set_date(System.currentTimeMillis());
-            }
-        });
-        gw_db.addChangeListener(new RealmChangeListener<RealmResults<GWDump>>() {
-            @Override
-            public void onChange(RealmResults<GWDump> element) {
-                PlugWatchApp.getInstance().set_num_gw(gw_db.size());
-            }
-        });
 
         ctx = getApplicationContext();
         am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
         connection_check_alarm();
 
-        /*
+
         Intent plug_watch_intent = new Intent(this, PlugWatchService.class);
         plug_watch_intent.putExtra(IntentConfig.PLUGWATCHSERVICE_REQ, IntentConfig.START_SCANNING);
         //plug_watch_intent.putExtra(IntentConfig.PLUGWATCHSERVICE_REQ, IntentConfig.TYPE_ALARM);
         startService(plug_watch_intent);
-        */
+
 
         runnable.run();
     }
@@ -327,8 +303,8 @@ public class PlugWatchUIActivity extends Activity {
                 phone_id = phoneIDWriter.get_last_value();
                 group_id = groupIDWriter.get_last_value();
                 version_number.setText("v." + PlugWatchApp.getInstance().buildStr);
-                num_packets.setText(String.valueOf(wit_db.size()));
-                num_gw.setText(String.valueOf(gw_db.size()));
+                //num_packets.setText(String.valueOf(wit_db.size()));
+                //num_gw.setText(String.valueOf(gw_db.size()));
                 total_data.setText(String.valueOf(PlugWatchApp.getInstance().get_network_data()));
                 status.setText(PlugWatchApp.getInstance().get_is_connected() ? "Connected" : "Disconnected");
                 status.setTextColor(PlugWatchApp.getInstance().get_is_connected() ? Color.GREEN : Color.RED);
@@ -365,7 +341,7 @@ public class PlugWatchUIActivity extends Activity {
 
     public void connection_check_alarm() {
         Calendar cal = Calendar.getInstance();
-        long interval = 1000 * 30; // 30 seconds in milliseconds
+        long interval = SensorConfig.CONNECTION_INTERVAL; // 30 seconds in milliseconds
         Intent serviceIntent = new Intent(ctx, ConnectionCheckService.class);
         servicePendingIntent =
                 PendingIntent.getService(ctx,
@@ -380,6 +356,16 @@ public class PlugWatchUIActivity extends Activity {
         );
     }
 
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if(!hasFocus) {
+            // Close every kind of system dialog
+            Intent closeDialog = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            sendBroadcast(closeDialog);
+        }
+    }
 
     private Runnable runnable = new Runnable() {
         public void run() {
