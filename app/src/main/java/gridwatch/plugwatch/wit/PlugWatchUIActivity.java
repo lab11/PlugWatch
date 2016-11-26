@@ -17,6 +17,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -30,6 +31,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnFocusChange;
+import gridwatch.plugwatch.IFailsafeTimerService;
 import gridwatch.plugwatch.IPlugWatchService;
 import gridwatch.plugwatch.R;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
@@ -37,7 +39,7 @@ import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.IntentConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
-import gridwatch.plugwatch.utilities.GroupID;
+import gridwatch.plugwatch.utilities.GroupIDWriter;
 import gridwatch.plugwatch.utilities.PhoneIDWriter;
 import gridwatch.plugwatch.utilities.RootChecker;
 
@@ -45,11 +47,17 @@ public class PlugWatchUIActivity extends Activity {
 
     public String buildStr;
 
+
+
     private static long last_time = -1;
     private static int num_wit = -1;
     private static int num_gw = -1;
     private static boolean is_connected = false;
     private static int total_network_data = -1;
+    private static int plugwatchservice_pid = -1;
+
+    private static int failsafe_pid = -1;
+
 
     private static boolean is_mac_whitelisted = false;
     private static String mac_whitelist = "";
@@ -58,6 +66,9 @@ public class PlugWatchUIActivity extends Activity {
 
     IPlugWatchService mIPlugWatchService;
     boolean mBoundPlugWatchService = false;
+
+    IFailsafeTimerService mIFailsafeTimerService;
+    boolean mBoundFailsafeTimerService = false;
 
     private PendingIntent servicePendingIntent;
     private Handler handler = new Handler(Looper.getMainLooper()); //this is fine for UI
@@ -69,7 +80,7 @@ public class PlugWatchUIActivity extends Activity {
     private String phone_id;
     private String group_id;
     private PhoneIDWriter phoneIDWriter;
-    private GroupID groupIDWriter;
+    private GroupIDWriter groupIDWriter;
 
     private boolean isRooted;
 
@@ -82,10 +93,17 @@ public class PlugWatchUIActivity extends Activity {
                     PlugWatchUIActivity.class));
         }
 
+        phoneIDWriter = new PhoneIDWriter(getApplicationContext());
+        groupIDWriter = new GroupIDWriter(getApplicationContext());
+        TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+        phone_id = telephonyManager.getDeviceId();
+        phoneIDWriter.log(String.valueOf(System.currentTimeMillis()), phone_id, null);
+        group_id = "-1";
+        groupIDWriter.log(String.valueOf(System.currentTimeMillis()), group_id, null);
+
         setContentView(R.layout.activity_wit_energy_bluetooth);
         ButterKnife.bind(this);
-        phoneIDWriter = new PhoneIDWriter(getApplicationContext());
-        groupIDWriter = new GroupID(getApplicationContext());
+
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
 
@@ -95,15 +113,8 @@ public class PlugWatchUIActivity extends Activity {
         setup_root();
 
         setup_connection_check();
-        setup_failsafe_timer_service();
-        //setup_plugwatch_service();
     }
 
-
-    private void setup_failsafe_timer_service() {
-        Intent a = new Intent(this, FailsafeTimerService.class);
-        startService(a);
-    }
 
     private void setup_root() {
 
@@ -195,6 +206,11 @@ public class PlugWatchUIActivity extends Activity {
             unbindService(plugWatchConnection);
             mBoundPlugWatchService = false;
         }
+
+        if (mBoundFailsafeTimerService) {
+            unbindService(failSafeConnection);
+            mBoundFailsafeTimerService = false;
+        }
     }
 
     @Override
@@ -202,6 +218,9 @@ public class PlugWatchUIActivity extends Activity {
         super.onStart();
         Intent service1Intent = new Intent(this, PlugWatchService.class);
         bindService(service1Intent, plugWatchConnection, Context.BIND_AUTO_CREATE);
+
+        //Intent failsafeService = new Intent(this, FailsafeTimerService.class);
+        //bindService(failsafeService, failSafeConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -229,6 +248,19 @@ public class PlugWatchUIActivity extends Activity {
         }
     };
 
+    private ServiceConnection failSafeConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            mIFailsafeTimerService = IFailsafeTimerService.Stub.asInterface(service);
+            mBoundFailsafeTimerService = true;
+        }
+        public void onServiceDisconnected(ComponentName className) {
+            Log.e("onServiceDisconnected", "Service1 has unexpectedly disconnected");
+            mIFailsafeTimerService = null;
+            mBoundFailsafeTimerService = false;
+        }
+    };
+
+
     //////////////////////
     // UI
     /////////////////////
@@ -247,12 +279,30 @@ public class PlugWatchUIActivity extends Activity {
                 sp.edit().putLong(SettingsConfig.LAST_WIT, last_time).commit();
                 num_gw = mIPlugWatchService.get_num_gw();
                 num_wit = mIPlugWatchService.get_num_wit();
+                if (!is_connected) {
+                    Intent a = new Intent(this, PlugWatchService.class);
+                    a.putExtra(IntentConfig.PLUGWATCHSERVICE_REQ, IntentConfig.START_SCANNING);
+                    startService(a);
+                }
                 is_connected = mIPlugWatchService.get_is_connected();
                 total_network_data = sp.getInt(SettingsConfig.TOTAL_DATA, -1);
                 mac_address_str = mIPlugWatchService.get_mac();
+                plugwatchservice_pid = mIPlugWatchService.get_pid();
+
+
             } catch (RemoteException e) {
                 e.printStackTrace();
             } catch (java.lang.NullPointerException e) {
+                e.printStackTrace();
+            }
+        }
+        if (mBoundFailsafeTimerService) {
+            try {
+                mIFailsafeTimerService.send_is_connected(is_connected);
+                mIFailsafeTimerService.send_last(last_time);
+                mIFailsafeTimerService.send_pid_of_plugwatch_service(plugwatchservice_pid);
+                failsafe_pid = mIFailsafeTimerService.get_pid();
+            } catch (RemoteException e) {
                 e.printStackTrace();
             }
         }
@@ -284,8 +334,6 @@ public class PlugWatchUIActivity extends Activity {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                phone_id = phoneIDWriter.get_last_value();
-                group_id = groupIDWriter.get_last_value();
                 version_number.setText("v." + buildStr);
                 //num_packets.setText(String.valueOf(wit_db.size()));
                 //num_gw.setText(String.valueOf(gw_db.size()));

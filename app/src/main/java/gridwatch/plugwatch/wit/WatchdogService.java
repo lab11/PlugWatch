@@ -7,8 +7,8 @@ import android.os.IBinder;
 public class WatchdogService extends IntentService {
 
 
-    public WatchdogService(String name) {
-        super(name);
+    public WatchdogService() {
+        super("WatchdogService");
     }
 
     @Override

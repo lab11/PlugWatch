@@ -27,7 +27,7 @@ public class WitRetrofit implements Serializable {
                           String power, String powerFactor,
                           String voltage, long now, int lat,
                           int lng, String phone_id, int experiment_id,
-                          String gw_dump) {
+                          String gw_dump, String version_num) {
         this.c = current;
         this.f = frequency;
         this.p = power;
@@ -39,6 +39,7 @@ public class WitRetrofit implements Serializable {
         this.i = phone_id;
         this.e = experiment_id;
         this.g = gw_dump;
+        this.b = version_num;
         //this.b = PlugWatchApp.getInstance().buildStr;
     }
 

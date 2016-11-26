@@ -12,15 +12,6 @@
     android:focusable="true"
     android:focusableInTouchMode="true">
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="numberSigned"
-        android:ems="10"
-        android:layout_marginTop="17dp"
-        android:id="@+id/phone_id_text"
-        android:layout_toEndOf="@+id/root_btn" />
-
 
     <TextView
         android:text="root_status"
@@ -99,49 +90,7 @@
         android:layout_alignParentEnd="true"
         android:id="@+id/version_number" />
 
-    <TextView
-        android:text="-1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/phone_id_cur"
-        android:visibility="visible"
-        android:layout_alignTop="@+id/phone_id_text"
-        android:layout_above="@+id/group_id_cur"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/phone_id_text" />
 
-    <TextView
-        android:text="phone id:"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView"
-        android:layout_alignTop="@+id/phone_id_text"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/phone_id_text"
-        android:layout_above="@+id/textView2"
-        android:layout_alignEnd="@+id/root_btn" />
-
-    <TextView
-        android:text="-1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/group_id_cur"
-        android:visibility="visible"
-        android:layout_below="@+id/phone_id_text"
-        android:layout_alignBottom="@+id/group_id_text"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/phone_id_text" />
-
-    <TextView
-        android:text="group id:"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView2"
-        android:layout_alignBottom="@+id/group_id_text"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/phone_id_text"
-        android:layout_toStartOf="@+id/phone_id_text"
-        android:layout_alignEnd="@+id/textView" />
 
     <TextView
         android:text="TextView"
@@ -184,27 +133,6 @@
         android:layout_alignParentEnd="true"
         android:layout_toEndOf="@+id/textView5" />
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="numberSigned"
-        android:ems="10"
-        android:id="@+id/group_id_text"
-        android:layout_below="@+id/phone_id_text"
-        android:layout_toStartOf="@+id/phone_id_cur" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:text="WhiteListMac"
-        android:ems="10"
-        android:id="@+id/mac_text"
-        android:layout_above="@+id/test"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/mac_toggle"
-        android:visibility="invisible" />
-
     <ToggleButton
         android:text="ToggleButton"
         android:layout_width="wrap_content"
@@ -230,6 +158,88 @@
         android:layout_height="wrap_content"
         android:id="@+id/test"
         android:layout_above="@+id/mac_address_display"
+        android:layout_alignParentStart="true" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/mac_text">
+
+                    <TextView
+                        android:text="phone id:"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView"
+                        android:layout_alignTop="@+id/phone_id_text"
+                        android:layout_alignParentStart="true"
+                        android:layout_toStartOf="@+id/phone_id_text"
+                        android:layout_above="@+id/textView2"
+                        android:layout_alignEnd="@+id/root_btn" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberSigned"
+                        android:ems="10"
+                        android:layout_marginTop="0dp"
+                        android:id="@+id/phone_id_text"
+                        android:layout_toEndOf="@+id/root_btn" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/phone_id_cur"
+                        android:visibility="visible"
+                        android:layout_alignTop="@+id/phone_id_text"
+                        android:layout_above="@+id/group_id_cur"
+                        android:layout_alignParentEnd="true"
+                        android:layout_toEndOf="@+id/phone_id_text" />
+
+                    <TextView
+                        android:text="group id:"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView2"
+                        android:layout_alignBottom="@+id/group_id_text"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@+id/phone_id_text"
+                        android:layout_toStartOf="@+id/phone_id_text"
+                        android:layout_alignEnd="@+id/textView"
+                        android:layout_marginTop="20dp" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberSigned"
+                        android:ems="10"
+                        android:id="@+id/group_id_text"
+                        android:layout_below="@+id/phone_id_text"
+                        android:layout_toStartOf="@+id/phone_id_cur" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/group_id_cur"
+                        android:visibility="visible"
+                        android:layout_below="@+id/phone_id_text"
+                        android:layout_alignBottom="@+id/group_id_text"
+                        android:layout_alignParentEnd="true"
+                        android:layout_toEndOf="@+id/phone_id_text" />
+            </LinearLayout>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="WhiteListMac"
+        android:ems="10"
+        android:id="@+id/mac_text"
+        android:visibility="invisible"
+        android:layout_above="@+id/test"
         android:layout_alignParentStart="true" />
 
 

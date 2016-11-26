@@ -155,6 +155,7 @@ public class PlugWatchService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(mPowerReceiver);
     }
 
     @Override
@@ -263,19 +264,24 @@ public class PlugWatchService extends Service {
     // REALM CONFIGS
     /////////////////////
     private void setup_realm() {
-        File f = openRealm();
-        Log.e("FILENAME", f.getAbsolutePath().toString() + "/realm_"+ Settings.Secure.getString(getBaseContext().getContentResolver(),
-                Settings.Secure.ANDROID_ID));
-        realmConfiguration= new RealmConfiguration.Builder(f)
-                .name("realm_"+Settings.Secure.getString(getBaseContext().getContentResolver(),
-                        Settings.Secure.ANDROID_ID))
-                .migration(new Migration())
-                .schemaVersion(5)
-                .build();
-        Realm.setDefaultConfiguration(realmConfiguration);
-        Log.e("realm file", f.getAbsolutePath());
-        realm = Realm.getDefaultInstance();
-        realm.setAutoRefresh(true);
+        try {
+            File f = openRealm();
+            Log.e("FILENAME", f.getAbsolutePath().toString() + "/realm_" + Settings.Secure.getString(getBaseContext().getContentResolver(),
+                    Settings.Secure.ANDROID_ID));
+            realmConfiguration = new RealmConfiguration.Builder(f)
+                    .name("realm_" + Settings.Secure.getString(getBaseContext().getContentResolver(),
+                            Settings.Secure.ANDROID_ID))
+                    .migration(new Migration())
+                    .schemaVersion(5)
+                    .build();
+            Realm.setDefaultConfiguration(realmConfiguration);
+            Log.e("realm file", f.getAbsolutePath());
+            realm = Realm.getDefaultInstance();
+            realm.setAutoRefresh(true);
+        } catch (Exception e) {
+            Restart r = new Restart();
+            r.do_restart(this, PlugWatchUIActivity.class, new Throwable("realm failed"));
+        }
     }
 
     public RealmConfiguration getRealmConfiguration() {
@@ -361,6 +367,7 @@ public class PlugWatchService extends Service {
                     public void call() {
                         isConnected = false;
                         Log.e("ble on terminate", "restarting scanning");
+                        isClockUpdated = false;
                         //start_scanning();
                     }
                 })
@@ -671,6 +678,7 @@ public class PlugWatchService extends Service {
 
     private void onWriteFailure(Throwable throwable) {
         isConnected = false;
+
         //PlugWatchApp.getInstance().set_is_connected(false);
     }
 

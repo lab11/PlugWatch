@@ -37,5 +37,8 @@ public class SensorConfig {
     public final static int REBOOT_THRESHOLD = 3; // after this threshold of restarts, reboot the phone
     public final static int NOTIFICATION_BUT_NO_DECODE_TIMEOUT = 10000 * 60 * 2; //state that exists when notifications are coming that can't be decoded
 
+    public final static long RESTART_BUFFER = 5000; //when we restart we fake a new wit coming in to allow it to timeout naturally... plus a buffer
+    public final static long REBOOT_BUFFER = 10000; //takes longer to reboot
+
 }
 
