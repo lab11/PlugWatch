@@ -8,6 +8,8 @@ import android.os.Looper;
 import android.os.RemoteException;
 
 import gridwatch.plugwatch.IFailsafeTimerService;
+import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
+import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.utilities.Reboot;
 
 public class FailsafeTimerService extends Service {
@@ -19,6 +21,10 @@ public class FailsafeTimerService extends Service {
 
     public FailsafeTimerService() {
         runnable.run();
+        if (AppConfig.RESTART_ON_EXCEPTION) {
+            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
+                    PlugWatchUIActivity.class));
+        }
     }
 
     @Override

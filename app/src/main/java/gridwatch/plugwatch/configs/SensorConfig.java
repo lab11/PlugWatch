@@ -33,12 +33,16 @@ public class SensorConfig {
 
 
     public final static int CONNECTION_INTERVAL =  15000; //interval to check connection ms
-    public final static int CONNECTION_THRESHOLD = 50000  ; //after this number of connection checks restart the app ms
-    public final static int REBOOT_THRESHOLD = 3; // after this threshold of restarts, reboot the phone
+    public final static int CONNECTION_THRESHOLD = 25000  ; //after this number time restart the app ms
+    public final static int REBOOT_THRESHOLD = 5; // after this threshold of restarts, reboot the phone
     public final static int NOTIFICATION_BUT_NO_DECODE_TIMEOUT = 10000 * 60 * 2; //state that exists when notifications are coming that can't be decoded
 
     public final static long RESTART_BUFFER = 5000; //when we restart we fake a new wit coming in to allow it to timeout naturally... plus a buffer
     public final static long REBOOT_BUFFER = 10000; //takes longer to reboot
 
+
+    public final static int MAX_JOBS = 100;
+
+    public static int NUM_ANY_CRASH_BEFORE_REBOOT = 20;
 }
 

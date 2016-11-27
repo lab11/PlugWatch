@@ -12,6 +12,17 @@ public class SettingsConfig {
     public final static String SETTINGS_META_DATA = "META_DATA";
 
 
+    public final static String VERSION_NUM = "VERSION_NUM";
+    public static final String FREESPACE_INTERNAL = "FREESPACE_INTERNAL";
+    public static final String FREESPACE_EXTERNAL = "FREESPACE_EXTERNAL";
+
+    public final static String WIT_SIZE = "WIT_SIZE";
+    public final static String GW_SIZE = "GW_SIZE";
+
+
+
+    public final static String PID = "PID";
+
     public final static String SETTINGS = "SETTINGS";
 
     public final static String BOOT_CNT = "BOOT_CNT";
@@ -20,8 +31,21 @@ public class SettingsConfig {
 
     public final static String LAST_WIT = "LAST_WIT";
 
+    public final static String REALM_FILENAME = "REALM_FILENAME";
+
+
     public final static String NUM_CONNECTION_TIMEOUTS = "NUM_CONNECTION_TIMEOUTS";
     public final static String NUM_CONNECTION_REBOOTS = "NUM_CONNECTION_REBOOTS";
 
+    public final static String NUM_COMMANDS = "NUM_COMMANDS";
+    public static final String NUM_SIM = "NUM_SIM";
+    public static final String NUM_ERR = "NUM_ERR";
+    public static final String NUM_PHONE = "NUM_PHONE";
+    public static final String NUM_FREE_SPACE = "NUM_FREE_SPACE";
+    public static final String NUM_STATS = "NUM_STATS";
+    public static final String NUM_WD = "NUM_WD";
 
+
+    public class NUM_WD {
+    }
 }

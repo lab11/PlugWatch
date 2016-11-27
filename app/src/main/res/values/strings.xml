@@ -24,4 +24,6 @@
     <string name="title_activity_service_discovery">ServiceDiscoveryActivity</string>
     <string name="title_activity_wit_energy_connector">WitEnergyConnector</string>
     <string name="title_activity_wit_energy_bluetooth">WitEnergyBluetoothActivity</string>
+    <string name="title_activity_command_line">Command Line</string>
+
 </resources>

@@ -133,16 +133,6 @@
         android:layout_alignParentEnd="true"
         android:layout_toEndOf="@+id/textView5" />
 
-    <ToggleButton
-        android:text="ToggleButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/mac_toggle"
-        android:layout_alignBaseline="@+id/mac_text"
-        android:layout_alignBottom="@+id/mac_text"
-        android:layout_alignParentEnd="true"
-        android:visibility="invisible" />
-
     <TextView
         android:text="TextView"
         android:layout_width="wrap_content"
@@ -165,7 +155,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
-        android:layout_above="@+id/mac_text">
+        android:layout_above="@+id/test">
 
                     <TextView
                         android:text="phone id:"
@@ -229,18 +219,40 @@
                         android:layout_alignBottom="@+id/group_id_text"
                         android:layout_alignParentEnd="true"
                         android:layout_toEndOf="@+id/phone_id_text" />
-            </LinearLayout>
 
-    <EditText
+        <Button
+            android:text="Cmd Line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/play_store_btn"
+            android:layout_toStartOf="@+id/root_status"
+            android:id="@+id/cmd_line_btn" />
+
+    </LinearLayout>
+
+    <TextView
+        android:text="isOnline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:text="WhiteListMac"
-        android:ems="10"
-        android:id="@+id/mac_text"
-        android:visibility="invisible"
-        android:layout_above="@+id/test"
-        android:layout_alignParentStart="true" />
+        android:id="@+id/isOnlineText"
+        android:layout_above="@+id/total_data_text"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:text="Update GP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/mac_address_display"
+        android:layout_toEndOf="@+id/test"
+        android:id="@+id/play_store_btn" />
+
+    <TextView
+        android:text="is_gp_good"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/isOnlineText"
+        android:id="@+id/google_play_state"
+        android:layout_alignStart="@+id/isOnlineText" />
 
 
 </RelativeLayout>

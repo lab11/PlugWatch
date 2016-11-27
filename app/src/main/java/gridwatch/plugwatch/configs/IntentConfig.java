@@ -19,6 +19,10 @@ public class IntentConfig {
     public final static String TYPE_ALARM = "ALARM";
     public final static String TYPE_UI = "UI";
 
+    public final static String INCOMING_API_COMMAND = "INCOMING_API_COMMAND";
+    public final static String INCOMING_API_PHONE_ID = "INCOMING_API_PHONE_ID";
+    public final static String INCOMING_API_GROUP_ID = "INCOMING_API_GROUP_ID";
+
 
 
 

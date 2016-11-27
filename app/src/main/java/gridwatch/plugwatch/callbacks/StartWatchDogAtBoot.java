@@ -9,25 +9,23 @@ import android.util.Log;
 
 import java.util.Calendar;
 
-import gridwatch.plugwatch.configs.IntentConfig;
-import gridwatch.plugwatch.wit.PlugWatchService;
+import gridwatch.plugwatch.wit.WatchdogService;
 
 /**
  * Created by nklugman on 11/22/16.
  */
 
-public class StartConnectivityTimerAtBoot extends BroadcastReceiver {
+public class StartWatchDogAtBoot extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             Log.e("alarm", "starting");
             Calendar cal = Calendar.getInstance();
-            Intent a = new Intent(context, PlugWatchService.class);
-            a.putExtra(IntentConfig.PLUGWATCHSERVICE_REQ, IntentConfig.TYPE_ALARM);
+            Intent a = new Intent(context, WatchdogService.class);
             PendingIntent pintent = PendingIntent.getService(context, 0, a, 0);
             AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 60*1000, pintent);
+            alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 60*1000*60, pintent);
         }
     }
 }

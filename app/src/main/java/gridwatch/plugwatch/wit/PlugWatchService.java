@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.v4.view.MotionEventCompat;
@@ -17,7 +18,9 @@ import android.widget.Toast;
 
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
+import com.google.android.gms.location.LocationRequest;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.crash.FirebaseCrash;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.RxBleConnection;
 import com.polidea.rxandroidble.RxBleDevice;
@@ -27,9 +30,11 @@ import com.polidea.rxandroidble.internal.RxBleLog;
 import com.polidea.rxandroidble.utils.ConnectionSharingAdapter;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +51,7 @@ import gridwatch.plugwatch.gridWatch.GridWatch;
 import gridwatch.plugwatch.network.NetworkJob;
 import gridwatch.plugwatch.network.NetworkJobCreator;
 import gridwatch.plugwatch.network.WitRetrofit;
+import gridwatch.plugwatch.utilities.LatLngWriter;
 import gridwatch.plugwatch.utilities.PhoneIDWriter;
 import gridwatch.plugwatch.utilities.Restart;
 import io.realm.Realm;
@@ -105,11 +111,19 @@ public class PlugWatchService extends Service {
     private static final int ID_OPT = 2;
     private boolean isClockUpdated = false;
 
+    private String realm_filename;
+    private String full_realm_filename;
+
+
     private String mac_whitelist;
     private boolean is_whitelisted;
 
+    private LocationRequest location_rec;
+
+
     private String phone_id;
     private String group_id;
+    private String build_str;
 
     //Realm Variables
     private RealmConfiguration realmConfiguration;
@@ -126,13 +140,22 @@ public class PlugWatchService extends Service {
             Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
                     PlugWatchUIActivity.class));
         }
-        Log.e("PlugWatchService:onCreate", "hit");
+        Log.i("PlugWatchService:onCreate", "hit");
+
 
         FirebaseApp.initializeApp(getBaseContext());
         mContext = this;
         setup_gw_callback(); //power disconnected
         setup_bluetooth(); //wit
         setup_realm(); //database
+
+
+        JobManager.create(mContext).addJobCreator(new NetworkJobCreator());
+
+
+        location_rec = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setNumUpdates(1);
 
         gw_db = realm.where(GWDump.class).findAll();
 
@@ -147,7 +170,7 @@ public class PlugWatchService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e("PlugWatchService:onStart", "hit");
+        Log.i("PlugWatchService:onStart", "hit");
         start_ble();
         return START_STICKY;
     }
@@ -174,6 +197,8 @@ public class PlugWatchService extends Service {
         public long get_last_time() throws RemoteException {
             return last_good_data;
         }
+
+
 
         @Override
         public boolean get_is_connected() throws RemoteException {
@@ -212,9 +237,21 @@ public class PlugWatchService extends Service {
         }
 
         @Override
+        public void set_build_str(String cur_build_str) throws RemoteException {
+            build_str = cur_build_str;
+        }
+
+        @Override
+        public String get_realm_filename() throws RemoteException {
+            return full_realm_filename;
+        }
+
+        @Override
         public int get_pid() throws RemoteException {
             return android.os.Process.myPid();
         }
+
+
     };
 
     //////////////////////
@@ -234,6 +271,8 @@ public class PlugWatchService extends Service {
         } catch (java.lang.IndexOutOfBoundsException e) {
             Log.e("error", "couldn't find phone id");
             phone_id = "-1";
+            FirebaseCrash.log("error couldn't find phone id");
+
         }
         if (intent.getAction().equals(Intent.ACTION_POWER_CONNECTED)) {
             g = new GridWatch(getBaseContext(), SensorConfig.PLUGGED, phone_id);
@@ -264,13 +303,16 @@ public class PlugWatchService extends Service {
     // REALM CONFIGS
     /////////////////////
     private void setup_realm() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        String currentDateandTime = sdf.format(new Date());
         try {
             File f = openRealm();
-            Log.e("FILENAME", f.getAbsolutePath().toString() + "/realm_" + Settings.Secure.getString(getBaseContext().getContentResolver(),
-                    Settings.Secure.ANDROID_ID));
+            realm_filename = "realm_" + Settings.Secure.getString(getBaseContext().getContentResolver(),
+                    Settings.Secure.ANDROID_ID) + "_" + currentDateandTime;
+            full_realm_filename = f.getAbsolutePath().toString() + "/" + realm_filename;
+            Log.e("realm filename",  full_realm_filename);
             realmConfiguration = new RealmConfiguration.Builder(f)
-                    .name("realm_" + Settings.Secure.getString(getBaseContext().getContentResolver(),
-                            Settings.Secure.ANDROID_ID))
+                    .name(realm_filename)
                     .migration(new Migration())
                     .schemaVersion(5)
                     .build();
@@ -279,21 +321,17 @@ public class PlugWatchService extends Service {
             realm = Realm.getDefaultInstance();
             realm.setAutoRefresh(true);
         } catch (Exception e) {
+            e.printStackTrace();
             Restart r = new Restart();
-            r.do_restart(this, PlugWatchUIActivity.class, new Throwable("realm failed"));
+            r.do_restart(this, PlugWatchUIActivity.class, new Throwable("realm failed"), -1);
         }
     }
-
-    public RealmConfiguration getRealmConfiguration() {
-        return realmConfiguration;
-    }
-
 
     private File openRealm() {
         File file = this.getExternalFilesDir("/db/");
         if (!file.exists()) {
             boolean result = file.mkdir();
-            Log.e("TTT", "Results: " + result);
+            Log.i("TTT", "Results: " + result);
         }
         return file;
     }
@@ -351,7 +389,7 @@ public class PlugWatchService extends Service {
     }
 
     private void getWiTenergy() {
-        Log.e("getWiTenergy", "hit");
+        Log.i("getWiTenergy", "hit");
         connectionObservable
                 .flatMap(rxBleConnection -> rxBleConnection.setupNotification(BluetoothConfig.UUID_WIT_FFE1))
                 .doOnNext(new Action1<Observable<byte[]>>() {
@@ -367,7 +405,6 @@ public class PlugWatchService extends Service {
                     public void call() {
                         isConnected = false;
                         Log.e("ble on terminate", "restarting scanning");
-                        isClockUpdated = false;
                         //start_scanning();
                     }
                 })
@@ -375,6 +412,7 @@ public class PlugWatchService extends Service {
                     @Override
                     public void call(Throwable throwable) {
                         Log.e("ble disconnected", throwable.getMessage());
+                        FirebaseCrash.log(throwable.getMessage());
                         isConnected = false;
                         //start_scanning();
                     }
@@ -433,9 +471,12 @@ public class PlugWatchService extends Service {
         switch (bleScanException.getReason()) {
             case BleScanException.BLUETOOTH_NOT_AVAILABLE:
                 Toast.makeText(mContext, "Bluetooth is not available", Toast.LENGTH_SHORT).show();
+                FirebaseCrash.log("handleBleScanException: Bluetooth is not available");
                 break;
             case BleScanException.BLUETOOTH_DISABLED:
                 Toast.makeText(mContext, "Enable bluetooth and try again", Toast.LENGTH_SHORT).show();
+                FirebaseCrash.log("handleBleScanException: Enable bluetooth and try again");
+
                 break;
             case BleScanException.LOCATION_PERMISSION_MISSING:
                 Toast.makeText(mContext,
@@ -446,6 +487,7 @@ public class PlugWatchService extends Service {
                 break;
             case BleScanException.BLUETOOTH_CANNOT_START:
             default:
+                FirebaseCrash.log("handleBleScanException: unable to start scanning");
                 Toast.makeText(mContext, "Unable to start scanning", Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -484,17 +526,19 @@ public class PlugWatchService extends Service {
     }
 
     private void onNotificationReceivedFFE1(byte[] value) {
+        Log.i("notification", "FFE1");
+
         //There is a state where notifications are coming in but they are not good. This state requires app reboot
         if (isClockUpdated && to_write_slowly.size() == 0) { //don't do this if we are still setting up the connection with writes
             if (System.currentTimeMillis() - last_good_data > SensorConfig.NOTIFICATION_BUT_NO_DECODE_TIMEOUT) {
                 Log.e("connection timeout", String.valueOf(System.currentTimeMillis() - last_good_data));
                 Restart r = new Restart();
-                r.do_restart(mContext, PlugWatchUIActivity.class, new Throwable("Restart due to notification but no decode")); //figure out why this sometimes launches many services
+                r.do_restart(mContext, PlugWatchUIActivity.class, new Throwable("Restart due to notification but no decode"), Process.myPid()); //figure out why this sometimes launches many services
             }
         }
 
-        Log.e("notification", "FFE1");
         if (!isClockUpdated) {
+            Log.i("notification", "clock not updated");
             int i;
             byte[] data = new byte[10];
             Calendar now = Calendar.getInstance();
@@ -561,11 +605,13 @@ public class PlugWatchService extends Service {
                         .subscribe(bytes -> {
                             onWriteSuccess();
                         }, this::onWriteFailure);
-            } else {
-                good_data(value);
             }
+            good_data(value);
+
+
         }
     }
+
 
     private void good_data(byte[] value) {
         isConnected = true;
@@ -582,31 +628,38 @@ public class PlugWatchService extends Service {
         Log.d("MEASUREMENT: pf", mPowerFactor);
         Log.d("MEASUREMENT: frequency", mFrequency);
         Log.d("MEASUREMENT: time", String.valueOf(time));
-        //PlugWatchApp.getInstance().increment_last_time();
 
-        /*
-        PlugWatchApp.getInstance().set_last_time(System.currentTimeMillis());
-        SharedPreferences settings = mContext.getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
-        settings.edit().putLong(SettingsConfig.LAST_WIT, System.currentTimeMillis()).commit();
-        PlugWatchApp.getInstance().set_is_connected(true);
-        */
 
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm bgRealm) {
                 try {
-                    //bgRealm.setAutoRefresh(true);
                     MeasurementRealm cur = new MeasurementRealm(mCurrent, mFrequency,
                             mPower, mPowerFactor, mVoltage);
-
                     bgRealm.copyToRealm(cur);
                     PhoneIDWriter b = new PhoneIDWriter(mContext);
                     String phone_id = b.get_last_value();
-                    WitRetrofit a = new WitRetrofit(mCurrent, mFrequency, mPower, mPowerFactor,
-                            mVoltage, System.currentTimeMillis(), -1, -1, phone_id,
-                            -1, "");
 
+                    double lat = 0.0;
+                    double lng = 0.0;
                     try {
+                        LatLngWriter c = new LatLngWriter(mContext);
+                        String latlng = c.get_last_value();
+                        lat = Double.valueOf(latlng.split(",")[0]);
+                        lng = Double.valueOf(latlng.split(",")[1]);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    WitRetrofit a = new WitRetrofit(mCurrent, mFrequency, mPower, mPowerFactor,
+                            mVoltage, System.currentTimeMillis(), lat,
+                            lng, phone_id, -1, "", build_str, String.valueOf(num_wit + 1));
+                    Log.i("good_data: network scheduling", a.toString());
+                    Log.i("good_data: number of jobs: ", String.valueOf(JobManager.instance().getAllJobRequests().size()));
+                    if (JobManager.instance().getAllJobRequests().size() > SensorConfig.MAX_JOBS) {
+                        Log.e("good_data: network", "canceling all jobs");
+                        JobManager.instance().cancelAll();
+                    }
                         int jobId = new JobRequest.Builder(NetworkJob.TAG)
                                 .setExecutionWindow(1_000L, 20_000L)
                                 .setBackoffCriteria(5_000L, JobRequest.BackoffPolicy.EXPONENTIAL)
@@ -617,23 +670,38 @@ public class PlugWatchService extends Service {
                                 .setPersisted(true)
                                 .build()
                                 .schedule();
-                    } catch (java.lang.IllegalStateException e) {
-                        JobManager.create(mContext).addJobCreator(new NetworkJobCreator());
-                    }
 
-                } catch (android.database.sqlite.SQLiteConstraintException e) {
-                    Log.e("error", e.getMessage());
+                } catch (java.lang.IllegalStateException e) {
+                    JobManager.create(mContext).addJobCreator(new NetworkJobCreator());
+                    //JobManager.instance().cancelAll();
+                }
+
+
+                catch (Exception e) {
+                    e.printStackTrace();
+                    Log.e("good_data: error", e.getMessage());
+                    FirebaseCrash.log(e.getMessage());
                 }
             }
         }, new Realm.Transaction.OnSuccess() {
             @Override
             public void onSuccess() {
-                Log.e("REALM", "new size is: " + String.valueOf(realm.where(MeasurementRealm.class).findAll().size()));
+                Log.e("good_data: REALM", "new size is: " + String.valueOf(realm.where(MeasurementRealm.class).findAll().size()));
                 num_wit = realm.where(MeasurementRealm.class).findAll().size();
-                //WitEnergyVersionTwo.getInstance().num_wit = wit_db.size();
-                //WitEnergyVersionTwo.getInstance().last_time = new Date();
             }
         });
+
+
+
+        //PlugWatchApp.getInstance().increment_last_time();
+        /*
+        PlugWatchApp.getInstance().set_last_time(System.currentTimeMillis());
+        SharedPreferences settings = mContext.getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
+        settings.edit().putLong(SettingsConfig.LAST_WIT, System.currentTimeMillis()).commit();
+        PlugWatchApp.getInstance().set_is_connected(true);
+        */
+
+
 
     }
 
@@ -669,6 +737,8 @@ public class PlugWatchService extends Service {
         Log.i("encrypt key", "MAC =" + String.format("%x:%x:%x:%x:%x:%x", new Object[]{Byte.valueOf(MAC[PREF_ACT_REQ]), Byte.valueOf(MAC[COUNT_DOWN_TIMER]), Byte.valueOf(MAC[OVERLOAD]), Byte.valueOf(MAC[STANDBY]), Byte.valueOf(MAC[SCHEDULER]), Byte.valueOf(MAC[DEVICESETTING])}));
         return encryptKey;
     }
+
+
 
     private void onWriteSuccess() {
         isConnected = true;

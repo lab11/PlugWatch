@@ -24,6 +24,7 @@
     <uses-permission android:name="android.permission.ACCESS_BLUETOOTH_SHARE" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
 
     <application
         android:allowBackup="true"
@@ -38,19 +39,26 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".wit.CommandLineActivity"
+            android:label="@string/title_activity_command_line" />
 
         <service
             android:name=".wit.ConnectionCheckService"
             android:enabled="true"
             android:exported="true" />
+
         <service android:name=".firebase.RegisterFirebase">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
+
         <service android:name=".inputs.FirebaseAPI">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -65,19 +73,18 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".callbacks.StartConnectivityTimerAtBoot"
-            android:label="StartAtBoot">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-        <receiver
             android:name=".inputs.SMSAPI"
             android:permission="android.permission.BROADCAST_SMS">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".wit.APIService"
+            android:enabled="true"
+            android:exported="true"
+            />
 
         <!-- PROCESS ! -->
         <service
@@ -91,7 +98,7 @@
             android:name=".wit.WatchdogService"
             android:enabled="true"
             android:exported="true"
-            android:process=".Watchdog" />
+            />
 
         <!-- PROCESS ! -->
         <service
@@ -112,7 +119,18 @@
         <service
             android:name=".gridWatch.AudioService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+
+
+        <provider
+            android:name=".firebase.FirebaseContentProvider"
+            android:authorities="gridwatch.wit.firebase"
+            android:process=".PlugWatch"
+            android:exported="false"
+            android:syncable="false" />
+
+
     </application>
 
 </manifest>

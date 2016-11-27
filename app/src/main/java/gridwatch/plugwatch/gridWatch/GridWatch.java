@@ -40,6 +40,7 @@ import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.database.GWDump;
+import gridwatch.plugwatch.utilities.LatLngWriter;
 import gridwatch.plugwatch.wit.PlugWatchUIActivity;
 import io.realm.Realm;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
@@ -236,7 +237,11 @@ public class GridWatch {
                             @Override
                             public void execute(Realm bgRealm) {
                                 GWDump cur = new GWDump(mPhone_id, o.toString());
-                                bgRealm.copyToRealm(cur);
+                                try {
+                                    bgRealm.copyToRealm(cur);
+                                } catch (io.realm.exceptions.RealmError e) {
+                                    bgRealm.close();
+                                }
                             }
                         }, new Realm.Transaction.OnSuccess() {
                             @Override
@@ -267,6 +272,8 @@ public class GridWatch {
     }
 
     private JSONObject loc_transform(Location location) {
+        LatLngWriter r = new LatLngWriter(mContext);
+        r.log(String.valueOf(System.currentTimeMillis()), String.valueOf(location.getLatitude())+","+String.valueOf(location.getLongitude()));
         try {
             return new JSONObject()
                     .put("lat", String.valueOf(location.getLatitude()))

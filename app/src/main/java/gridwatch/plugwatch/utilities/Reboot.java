@@ -1,5 +1,7 @@
 package gridwatch.plugwatch.utilities;
 
+import android.util.Log;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -15,6 +17,7 @@ public class Reboot {
     }
 
     public void do_reboot(Throwable exception) {
+        Log.e("restart", "doing reboot");
         StringWriter stackTrace = new StringWriter();
         exception.printStackTrace(new PrintWriter(stackTrace));
         System.err.println(stackTrace);// You can use LogCat too

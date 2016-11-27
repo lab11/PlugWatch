@@ -3,6 +3,7 @@ package gridwatch.plugwatch.wit;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -11,20 +12,33 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.location.LocationRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
 import java.util.Calendar;
 
 import butterknife.Bind;
@@ -40,13 +54,25 @@ import gridwatch.plugwatch.configs.IntentConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.utilities.GroupIDWriter;
+import gridwatch.plugwatch.utilities.LatLngWriter;
 import gridwatch.plugwatch.utilities.PhoneIDWriter;
 import gridwatch.plugwatch.utilities.RootChecker;
+import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
+
+import static gridwatch.plugwatch.wit.APIService.externalMemoryAvailable;
+import static gridwatch.plugwatch.wit.APIService.formatSize;
 
 public class PlugWatchUIActivity extends Activity {
 
     public String buildStr;
 
+
+    int cnt = 0;
 
 
     private static long last_time = -1;
@@ -55,6 +81,7 @@ public class PlugWatchUIActivity extends Activity {
     private static boolean is_connected = false;
     private static int total_network_data = -1;
     private static int plugwatchservice_pid = -1;
+    private static String realm_filename = "";
 
     private static int failsafe_pid = -1;
 
@@ -72,6 +99,8 @@ public class PlugWatchUIActivity extends Activity {
 
     private PendingIntent servicePendingIntent;
     private Handler handler = new Handler(Looper.getMainLooper()); //this is fine for UI
+    private Handler loc_handler = new Handler(Looper.getMainLooper()); //this is fine for UI
+
     private Context ctx;
     private AlarmManager am;
 
@@ -83,6 +112,8 @@ public class PlugWatchUIActivity extends Activity {
     private GroupIDWriter groupIDWriter;
 
     private boolean isRooted;
+
+    private LocationRequest location_rec;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,11 +137,18 @@ public class PlugWatchUIActivity extends Activity {
 
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
+        location_rec = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setNumUpdates(1);
 
         setup_ui();
         setup_build_str();
         setup_settings();
         setup_root();
+
+        BluetoothAdapter.getDefaultAdapter().enable();
+
+        loc_runnable.run();
 
         setup_connection_check();
     }
@@ -216,8 +254,9 @@ public class PlugWatchUIActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        Intent service1Intent = new Intent(this, PlugWatchService.class);
-        bindService(service1Intent, plugWatchConnection, Context.BIND_AUTO_CREATE);
+            Intent service1Intent = new Intent(this, PlugWatchService.class);
+            bindService(service1Intent, plugWatchConnection, Context.BIND_AUTO_CREATE);
+
 
         //Intent failsafeService = new Intent(this, FailsafeTimerService.class);
         //bindService(failsafeService, failSafeConnection, Context.BIND_AUTO_CREATE);
@@ -234,6 +273,10 @@ public class PlugWatchUIActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (mBoundPlugWatchService) {
+            unbindService(plugWatchConnection);
+            mBoundPlugWatchService = false;
+        }
     }
 
     private ServiceConnection plugWatchConnection = new ServiceConnection() {
@@ -261,6 +304,17 @@ public class PlugWatchUIActivity extends Activity {
     };
 
 
+    ///////////////////////
+    // LOC
+    ///////////////////////
+    private Runnable loc_runnable = new Runnable() {
+        public void run() {
+            update_loc();
+            loc_handler.postDelayed(this, 1000*60*60*8);
+        }
+    };
+
+
     //////////////////////
     // UI
     /////////////////////
@@ -279,6 +333,7 @@ public class PlugWatchUIActivity extends Activity {
                 sp.edit().putLong(SettingsConfig.LAST_WIT, last_time).commit();
                 num_gw = mIPlugWatchService.get_num_gw();
                 num_wit = mIPlugWatchService.get_num_wit();
+                mIPlugWatchService.set_build_str(buildStr);
                 if (!is_connected) {
                     Intent a = new Intent(this, PlugWatchService.class);
                     a.putExtra(IntentConfig.PLUGWATCHSERVICE_REQ, IntentConfig.START_SCANNING);
@@ -288,6 +343,18 @@ public class PlugWatchUIActivity extends Activity {
                 total_network_data = sp.getInt(SettingsConfig.TOTAL_DATA, -1);
                 mac_address_str = mIPlugWatchService.get_mac();
                 plugwatchservice_pid = mIPlugWatchService.get_pid();
+                sp.edit().putInt(SettingsConfig.PID, plugwatchservice_pid).commit();
+                realm_filename = mIPlugWatchService.get_realm_filename();
+                sp.edit().putString(SettingsConfig.REALM_FILENAME, realm_filename ).commit();
+
+
+                sp.edit().putString(SettingsConfig.VERSION_NUM, buildStr).commit();
+                sp.edit().putString(SettingsConfig.FREESPACE_INTERNAL, getAvailableInternalMemorySize()).commit();
+                sp.edit().putString(SettingsConfig.FREESPACE_EXTERNAL, getAvailableExternalMemorySize()).commit();
+                sp.edit().putInt(SettingsConfig.WIT_SIZE, num_wit).commit();
+                sp.edit().putInt(SettingsConfig.GW_SIZE, num_gw).commit();
+                sp.edit().clear();
+
 
 
             } catch (RemoteException e) {
@@ -349,6 +416,56 @@ public class PlugWatchUIActivity extends Activity {
     }
 
 
+    private void update_loc() {
+        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
+        Observable<JSONObject> loc = locationProvider
+                .getUpdatedLocation(location_rec)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(new Func1<Location, JSONObject>() {
+                    @Override
+                    public JSONObject call(Location loc) {
+                        return loc_transform(loc);
+                    }
+                });
+        loc.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .single()
+                .onErrorResumeNext(new Func1<Throwable, Observable<? extends JSONObject>>() {
+                    @Override
+                    public Observable<? extends JSONObject> call(Throwable throwable) {
+//                        FirebaseCrash.log("rx error" + throwable.getMessage());
+                        return null;
+                    }
+                })
+                .subscribe(new Action1<JSONObject>() {
+                    @Override
+                    public void call(JSONObject o) {
+                    }
+                });
+    }
+
+    private JSONObject loc_transform(Location location) {
+        try {
+            LatLngWriter r = new LatLngWriter(this);
+            r.log(String.valueOf(System.currentTimeMillis()), String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            return new JSONObject()
+                    .put("lat", String.valueOf(location.getLatitude()))
+                    .put("lng", String.valueOf(location.getLongitude()))
+                    .put("acc", String.valueOf(location.getAccuracy()))
+                    .put("alt", String.valueOf(location.getAltitude()))
+                    .put("time", String.valueOf(location.getElapsedRealtimeNanos()))
+                    .put("speed", String.valueOf(location.getSpeed()))
+                    .put("provider", String.valueOf(location.getProvider()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 
 
@@ -364,10 +481,7 @@ public class PlugWatchUIActivity extends Activity {
     @Bind(R.id.root_status)
     TextView root_status;
 
-    @Bind(R.id.mac_toggle)
-    Button mac_toggle;
-    @Bind(R.id.mac_text)
-    TextView mac_text;
+
     @Bind(R.id.mac_address_display)
     TextView mac_address_display;
 
@@ -379,6 +493,8 @@ public class PlugWatchUIActivity extends Activity {
     TextView total_data_text;
     @Bind(R.id.num_gw_text)
     TextView num_gw_text;
+    @Bind(R.id.isOnlineText)
+    TextView isOnlineText;
 
     @Bind(R.id.phone_id_cur)
     TextView phone_id_cur;
@@ -396,6 +512,20 @@ public class PlugWatchUIActivity extends Activity {
     Button root_btn;
     @Bind(R.id.test)
     Button graph_btn;
+    @Bind(R.id.play_store_btn)
+    Button play_store_btn;
+    @Bind(R.id.cmd_line_btn)
+    Button cmd_line_btn;
+
+    @OnClick(R.id.play_store_btn)
+    public void onPlayStoreUpdateClick() {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + "com.google.android.gms")));
+        } catch (android.content.ActivityNotFoundException anfe) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.gms")));
+        }
+
+    }
 
     @OnClick(R.id.activity_wit_energy_bluetooth)
     public void onBackgroundClick() {
@@ -425,28 +555,12 @@ public class PlugWatchUIActivity extends Activity {
         updateUI();
     }
 
-    @OnClick(R.id.mac_toggle)
-    public void onMacToggleClick() {
-        if (mac_toggle.isEnabled()) {
-            is_mac_whitelisted = true;
-        } else {
-            is_mac_whitelisted = false;
-        }
-        if (mBoundPlugWatchService) {
-            try {
-                mIPlugWatchService.set_whitelist(is_mac_whitelisted, mac_whitelist);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
+    @OnClick(R.id.cmd_line_btn)
+    public void onCmdLineClick() {
+        Intent a = new Intent(this, CommandLineActivity.class);
+        startActivity(a);
+
     }
-
-    @OnFocusChange(R.id.mac_text)
-    public void onMacFocusChange() {
-        mac_whitelist = mac_text.getText().toString();
-    }
-
-
 
     @OnFocusChange(R.id.group_id_text)
     public void onGroupFocusChange() {
@@ -476,6 +590,35 @@ public class PlugWatchUIActivity extends Activity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_actions, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    public void onCmdLine() {
+        Intent e = new Intent(this, CommandLineActivity.class);
+        startActivity(e);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            case R.id.cmdline:
+                onCmdLine();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+
     private void save_group_id(String group_id_to_save) {
         groupIDWriter.log(String.valueOf(System.currentTimeMillis()), group_id_to_save.substring(3), "");
         group_id = group_id_to_save.substring(3);
@@ -500,7 +643,25 @@ public class PlugWatchUIActivity extends Activity {
         }
     }
 
+    public static String getAvailableInternalMemorySize() {
+        File path = Environment.getDataDirectory();
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = stat.getBlockSize();
+        long availableBlocks = stat.getAvailableBlocks();
+        return formatSize(availableBlocks * blockSize);
+    }
 
+    public static String getAvailableExternalMemorySize() {
+        if (externalMemoryAvailable()) {
+            File path = Environment.getExternalStorageDirectory();
+            StatFs stat = new StatFs(path.getPath());
+            long blockSize = stat.getBlockSize();
+            long availableBlocks = stat.getAvailableBlocks();
+            return formatSize(availableBlocks * blockSize);
+        } else {
+            return "FAILED TO GET AVAILABLE EXTERNAL MEM";
+        }
+    }
 
 
 }

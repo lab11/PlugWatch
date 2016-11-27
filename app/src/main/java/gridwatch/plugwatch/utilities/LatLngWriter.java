@@ -16,31 +16,26 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-public class RestartNumWriter {
+public class LatLngWriter {
 
-	private final static String LOG_NAME = "restart_num.log";
+	private final static String LOG_NAME = "lat_lng.log";
 
-	private static File mLogFile;
-	private static Context mContext;
-	static SharedPreferences prefs = null;
+	private File mLogFile;
+	private Context mContext;
+	SharedPreferences prefs = null;
 
-	public RestartNumWriter(Context context) {
-		mContext = context;
-		create_file();
-	}
-
-	private static void create_file() {
+	public LatLngWriter(Context context) {
 		File root = Environment.getExternalStorageDirectory();
 		mLogFile = new File(root, LOG_NAME);
-		if (mContext != null) {
-			prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+		mContext = context;
+		if (context != null) {
+			prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		} else {
-			Log.e("context restart_num", "null");
+			Log.e("context lat_lng", "null");
 		}
-		//log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
 	}
 
-	public static void log(String time, String num) {
+	public void log(String time, String num) {
 		String l = time + "|" + num;
 		try {
 			FileWriter logFW = null;
@@ -108,8 +103,6 @@ public class RestartNumWriter {
 					}
 				}
 				logBR.close();
-			} catch (java.io.FileNotFoundException e) {
-				create_file();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

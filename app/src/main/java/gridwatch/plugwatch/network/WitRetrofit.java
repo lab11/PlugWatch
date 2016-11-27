@@ -16,18 +16,19 @@ public class WitRetrofit implements Serializable {
     private String r; //powerfactor
     private String v; //voltage
     private long t; //time
-    private int q; //lat
-    private int w; //lng
+    private double q; //lat
+    private double w; //lng
     private String i; //phone_id
     private int e; //group_id
     private String g; //gw dump
     private String b; //version number
+    private String z; //cur size
 
     public WitRetrofit(String current, String frequency,
                           String power, String powerFactor,
-                          String voltage, long now, int lat,
-                          int lng, String phone_id, int experiment_id,
-                          String gw_dump, String version_num) {
+                          String voltage, long now, double lat,
+                       double lng, String phone_id, int experiment_id,
+                          String gw_dump, String version_num, String cur_size) {
         this.c = current;
         this.f = frequency;
         this.p = power;
@@ -40,6 +41,7 @@ public class WitRetrofit implements Serializable {
         this.e = experiment_id;
         this.g = gw_dump;
         this.b = version_num;
+        this.z = cur_size;
         //this.b = PlugWatchApp.getInstance().buildStr;
     }
 
@@ -51,13 +53,23 @@ public class WitRetrofit implements Serializable {
         measurement.putString("r", r);
         measurement.putString("v", v);
         measurement.putLong("t", t);
-        measurement.putInt("q", q);
-        measurement.putLong("w", w);
+        measurement.putDouble("q", q);
+        measurement.putDouble("w", w);
         measurement.putString("i", i);
         measurement.putInt("e", e);
         measurement.putString("g", g);
         measurement.putString("b", b);
+        measurement.putString("z", z);
         return measurement;
+    }
+
+    public String toString() {
+        return "current:" + c + ",frequency:" + f +
+                ",power:" + p + ",powerFactor:" + r + "\n" +
+                ",voltage:" + v + ",now:" + String.valueOf(t) +
+                ",lat:" + String.valueOf(q) + ",lng:" + String.valueOf(w) + "\n" +
+                ",phone_id:" + i + ",group_id:" + e + ",gw:" + g +
+                ",build_num:" + b;
     }
 
     public String getC() {
@@ -108,7 +120,7 @@ public class WitRetrofit implements Serializable {
         this.t = t;
     }
 
-    public int getQ() {
+    public double getQ() {
         return q;
     }
 
@@ -116,7 +128,7 @@ public class WitRetrofit implements Serializable {
         this.q = q;
     }
 
-    public int getW() {
+    public double getW() {
         return w;
     }
 

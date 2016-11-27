@@ -19,4 +19,9 @@ interface IPlugWatchService {
 
     int get_pid();
 
+    void set_build_str(String cur_build_str);
+
+    String get_realm_filename();
+
+
 }

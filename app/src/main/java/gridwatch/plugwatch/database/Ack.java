@@ -2,12 +2,11 @@ package gridwatch.plugwatch.database;
 
 import com.loopj.android.http.RequestParams;
 
-import io.realm.RealmObject;
-
 /**
- * Created by nklugman on 6/30/16.
+ * Created by nklugman on 11/27/16.
  */
-public class Crash extends RealmObject {
+
+public class Ack {
 
 
     private long mTime;
@@ -15,11 +14,11 @@ public class Crash extends RealmObject {
     private String mGWID;
     private String mGroupID;
 
-    public Crash() {
+    public Ack() {
 
     }
 
-    public Crash(long time, String text, String gwid, String groupid) {
+    public Ack(long time, String text, String gwid, String groupid) {
         mTime = time;
         mText = text;
         mGWID = gwid;

@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
+import gridwatch.plugwatch.wit.APIService;
+
 /**
  * Created by nklugman on 6/24/16.
  */

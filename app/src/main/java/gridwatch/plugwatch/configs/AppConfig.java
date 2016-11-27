@@ -7,7 +7,7 @@ package gridwatch.plugwatch.configs;
 public class AppConfig {
 
     public final static boolean DEBUG = true;
-    public final static boolean RESTART_ON_EXCEPTION = false;
+    public final static boolean RESTART_ON_EXCEPTION = true;
 
     public final static int UI_UPDATE_INTERVAL = 5000;
 }

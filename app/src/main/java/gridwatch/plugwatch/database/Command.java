@@ -9,6 +9,7 @@ import io.realm.RealmObject;
  */
 public class Command extends RealmObject {
 
+
     private String mType;
     private long mTime;
     private boolean misText;
@@ -38,4 +39,47 @@ public class Command extends RealmObject {
         values.put("wifi", "yes");
         return values;
     }
+
+    public String getType() {
+        return mType;
+    }
+
+    public void setType(String mType) {
+        this.mType = mType;
+    }
+
+    public long getTime() {
+        return mTime;
+    }
+
+    public void setTime(long time) {
+        this.mTime = time;
+    }
+
+    public boolean getIsText() {
+        return misText;
+    }
+
+    public void setIsText(boolean state) {
+        this.misText = state;
+    }
+
+    public String getPhoneID() {
+        return mGWID;
+    }
+
+    public void setPhoneID(String phone_id) {
+        this.mGWID = phone_id;
+    }
+
+    public String getGroupID() {
+        return mGroupID;
+    }
+
+    public void setGroupID(String mGroupID) {
+        this.mGroupID = mGroupID;
+    }
+
+
+
 }

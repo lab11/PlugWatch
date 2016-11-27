@@ -16,15 +16,15 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-public class RestartNumWriter {
+public class RebootBackOffNumWriter {
 
-	private final static String LOG_NAME = "restart_num.log";
+	private final static String LOG_NAME = "reboot_backoff_num.log";
 
 	private static File mLogFile;
 	private static Context mContext;
 	static SharedPreferences prefs = null;
 
-	public RestartNumWriter(Context context) {
+	public RebootBackOffNumWriter(Context context) {
 		mContext = context;
 		create_file();
 	}
@@ -37,7 +37,7 @@ public class RestartNumWriter {
 		} else {
 			Log.e("context restart_num", "null");
 		}
-		//log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
+		log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
 	}
 
 	public static void log(String time, String num) {
