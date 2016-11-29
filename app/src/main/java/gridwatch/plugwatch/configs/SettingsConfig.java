@@ -44,6 +44,8 @@ public class SettingsConfig {
     public static final String NUM_FREE_SPACE = "NUM_FREE_SPACE";
     public static final String NUM_STATS = "NUM_STATS";
     public static final String NUM_WD = "NUM_WD";
+    public static final String STICKY_MAC = "STICKY_MAC";
+    public static final String NUM_PING = "NUM_PING";
 
 
     public class NUM_WD {

@@ -49,6 +49,8 @@ import com.google.firebase.storage.UploadTask;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.stealthcopter.networktools.Ping;
+import com.stealthcopter.networktools.ping.PingResult;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -57,6 +59,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -73,8 +76,8 @@ import gridwatch.plugwatch.database.Ack;
 import gridwatch.plugwatch.database.Command;
 import gridwatch.plugwatch.database.WD;
 import gridwatch.plugwatch.firebase.FirebaseCrashLogger;
-import gridwatch.plugwatch.utilities.GroupIDWriter;
-import gridwatch.plugwatch.utilities.PhoneIDWriter;
+import gridwatch.plugwatch.logs.GroupIDWriter;
+import gridwatch.plugwatch.logs.PhoneIDWriter;
 import io.realm.Realm;
 
 import static gridwatch.plugwatch.configs.SensorConfig.recordingFolder;
@@ -187,7 +190,26 @@ public class APIService extends Service {
                 }
             }
             do_upload_all();
-        } else if (cmd.contains("httpendpoint")) {
+        } else if (cmd.contains("upload_specific")) {
+            do_upload_specific(cmd);
+        } else if (cmd.contains("uploadaudio")) {
+            do_upload_audio();
+        } else if (cmd.contains("uploadlogs")) {
+            do_upload_logs();
+        } else if (cmd.contains("uploadlog_specific")) {
+            do_upload_logs_specific(cmd);
+        } else if (cmd.contains("deletelog_specific")) {
+            do_delete_log_specific(cmd);
+        } else if (cmd.contains("deletedb_specific")) {
+            do_delete_db_specific(cmd);
+        } else if (cmd.contains("deleteaudio_specific")) {
+            do_delete_audio_specific(cmd);
+        } else if (cmd.contains("ping")) {
+            do_ping(cmd);
+        }
+
+
+        else if (cmd.contains("httpendpoint")) {
             String url = cmd.split(":")[1];
             set_http_endpoint(url);
         } else if (cmd.contains("smsendpoint")) {
@@ -426,26 +448,111 @@ public class APIService extends Service {
     }
 
 
+    public void do_upload_audio() {
+        List<File> files_to_upload = getListFiles(setupFilePaths(), ".wav");
+        for (int i = 0; i < files_to_upload.size(); i++) {
+            Log.e("uploading", files_to_upload.get(i).getName());
+            upload(files_to_upload.get(i));
+        }
+    }
+
+
+    private File setupFilePaths() {
+        String tmpFilePath = "";
+        if (android.os.Build.VERSION.SDK_INT>=19) {
+            File[] possible_kitkat_mounts = mContext.getExternalFilesDirs(null);
+            for (int x = 0; x < possible_kitkat_mounts.length; x++) {
+                if (possible_kitkat_mounts[x] != null){
+                    tmpFilePath = possible_kitkat_mounts[x].toString();
+                }
+            }
+        } else {
+            // Set up the tmp file before WAV conversation
+            tmpFilePath = Environment.getExternalStorageDirectory().getPath();
+        }
+        return new File(tmpFilePath, recordingFolder);
+    }
 
     //Status: needs testing
     public void do_upload_all() {
-        Uri file = Uri.fromFile(new File(sp.getString(SettingsConfig.REALM_FILENAME, "")));
-        StorageReference riversRef = mStorageRef.child("realm/"+cur_phone_id).child(file.getLastPathSegment());
-        UploadTask uploadTask = riversRef.putFile(file);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-                Log.e("api upload", "failed");
+        List<File> files_to_upload = getListFiles(openRealm(), "realm");
+        for (int i = 0; i < files_to_upload.size(); i++) {
+            Log.e("uploading", files_to_upload.get(i).getName());
+            upload(files_to_upload.get(i));
+        }
+    }
 
+
+
+
+    public void do_upload_logs() {
+        File root = Environment.getExternalStorageDirectory();
+        List<File> files_to_upload = getListFiles(root, ".log");
+        for (int i = 0; i < files_to_upload.size(); i++) {
+            Log.e("uploading", files_to_upload.get(i).getName());
+            upload(files_to_upload.get(i));
+        }
+    }
+
+
+    public void do_upload_logs_specific(String cmd) {
+        try {
+            File root = Environment.getExternalStorageDirectory();
+            String date = cmd.split(":")[1];
+            Log.e("uploading", date);
+
+            List<File> files_to_upload = getListFiles(root, date);
+            for (int i = 0; i < files_to_upload.size(); i++) {
+                Log.e("uploading", files_to_upload.get(i).getName());
+                upload(files_to_upload.get(i));
             }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Log.e("api upload", "success");
-                //Uri downloadUrl = taskSnapshot.getDownloadUrl();
+        } catch (Exception e) {
+            return_err("bad parameters " + cmd);
+        }
+    }
+
+    public void do_delete_log_specific(String cmd) {
+        try {
+            File root = Environment.getExternalStorageDirectory();
+            String date = cmd.split(":")[1];
+            Log.e("uploading", date);
+            List<File> file_to_delete = getListFiles(root, date);
+            for (int i = 0; i < file_to_delete.size(); i++) {
+                Log.e("deleting", file_to_delete.get(i).getName());
+                file_to_delete.get(i).delete();
             }
-        });
+        } catch (Exception e) {
+            return_err("bad parameters " + cmd);
+        }
+    }
+
+
+
+
+    public void do_upload_specific(String cmd) {
+        try {
+            String date = cmd.split(":")[1];
+            List<File> files_to_upload = getListFiles(openRealm(), date);
+            for (int i = 0; i < files_to_upload.size(); i++) {
+                Log.e("uploading", files_to_upload.get(i).getName());
+                upload(files_to_upload.get(i));
+            }
+        } catch (Exception e) {
+            return_err("bad parameters " + cmd);
+        }
+    }
+
+    public void do_delete_db_specific(String cmd) {
+        try {
+            String date = cmd.split(":")[1];
+            List<File> file_to_delete = getListFiles(openRealm(), cmd);
+            for (int i = 0; i < file_to_delete.size(); i++) {
+                Log.e("deleting", file_to_delete.get(i).getName());
+                file_to_delete.get(i).delete();
+            }
+        } catch (Exception e) {
+            return_err("bad parameters " + cmd);
+        }
     }
 
 
@@ -601,6 +708,7 @@ public class APIService extends Service {
     }
 
 
+
     public void delete_audiofiles() {
         try {
             File dir = get_audio_file();
@@ -616,6 +724,21 @@ public class APIService extends Service {
         catch (Exception e) {
             e.printStackTrace();
             FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+        }
+    }
+
+    public void do_delete_audio_specific(String cmd) {
+        try {
+            File root = setupFilePaths();
+            String date = cmd.split(":")[1];
+            Log.e("uploading", date);
+            List<File> file_to_delete = getListFiles(root, date);
+            for (int i = 0; i < file_to_delete.size(); i++) {
+                Log.e("deleting", file_to_delete.get(i).getName());
+                file_to_delete.get(i).delete();
+            }
+        } catch (Exception e) {
+            return_err("bad parameters " + cmd);
         }
     }
 
@@ -636,6 +759,28 @@ public class APIService extends Service {
         }
         File fileFolder = new File(tmpFilePath, recordingFolder);
         return fileFolder;
+    }
+
+    public void do_ping(String cmd) {
+        try {
+            String url = cmd.split(":")[1];
+            Ping.onAddress(url).setTimeOutMillis(1000).setTimes(2).doPing(new Ping.PingListener() {
+                @Override
+                public void onResult(PingResult pingResult) {
+                    float res = pingResult.getTimeTaken();
+                    int new_ping_num = sp.getInt(SettingsConfig.NUM_PING, 0) + 1;
+                    sp.edit().putInt(SettingsConfig.NUM_PING, new_ping_num).commit();
+                    mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.PING).child(String.valueOf(new_ping_num)).setValue(res);
+                }
+
+                @Override
+                public void onFinished() {
+
+                }
+            });
+        } catch (Exception e) {
+            return_err("bad parameters " + cmd);
+        }
     }
 
     public void set_settings(String settingscmd, String modifier) {
@@ -985,6 +1130,55 @@ public class APIService extends Service {
             }
         }
     };
+
+    private List<File> getListFiles(File parentDir, String filename) {
+        ArrayList<File> inFiles = new ArrayList<File>();
+        File[] files = parentDir.listFiles();
+        for (File file : files) {
+            if (file.getName().contains(filename) || filename.equals("all")) {
+                if (!file.getName().contains(".lock")) {
+                    Log.e("file", file.getName());
+                    if (file.isDirectory()) {
+                        inFiles.addAll(getListFiles(file, filename));
+                    } else {
+                        inFiles.add(file);
+                    }
+                }
+            }
+        }
+        return inFiles;
+    }
+
+
+    private File openRealm() {
+        File file = this.getExternalFilesDir("/db/");
+        if (!file.exists()) {
+            boolean result = file.mkdir();
+            Log.i("TTT", "Results: " + result);
+        }
+        return file;
+    }
+
+
+    private void upload(File to_upload) {
+        //Uri file = Uri.fromFile(new File(sp.getString(SettingsConfig.REALM_FILENAME, "")));
+        Uri file = Uri.fromFile(to_upload);
+        StorageReference riversRef = mStorageRef.child(cur_phone_id).child(file.getLastPathSegment());
+        UploadTask uploadTask = riversRef.putFile(file);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+                Log.e("api upload", "failed");
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.e("api upload", "success");
+                //Uri downloadUrl = taskSnapshot.getDownloadUrl();
+            }
+        });
+    }
 
 
 }

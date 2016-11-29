@@ -23,5 +23,5 @@ public class DatabaseConfig {
     public static final String GET_PHONENUM = "GET_PHONENUM";
     public static final String GET_STATS = "GET_STATS";
     public static final String WD = "WD";
-
+    public static final String PING = "PING";
 }

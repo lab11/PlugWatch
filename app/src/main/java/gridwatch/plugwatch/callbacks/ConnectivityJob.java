@@ -11,7 +11,7 @@ import com.evernote.android.job.Job;
 
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
-import gridwatch.plugwatch.utilities.Reboot;
+import gridwatch.plugwatch.utilities.Rebooter;
 import gridwatch.plugwatch.wit.PlugWatchUIActivity;
 
 /**
@@ -50,8 +50,7 @@ public class ConnectivityJob extends Job {
                     meta_data.edit().putLong(SettingsConfig.NUM_CONNECTION_TIMEOUTS, 0).apply();
                     int reboot_timeouts = meta_data.getInt(SettingsConfig.NUM_CONNECTION_REBOOTS, 0);
                     meta_data.edit().putLong(SettingsConfig.NUM_CONNECTION_REBOOTS, reboot_timeouts + 1).apply();
-                    Reboot r = new Reboot();
-                    r.do_reboot(new Throwable("rebooting from connectivity job"));
+                    Rebooter r = new Rebooter(getContext(), new Throwable("rebooting from connectivity job"));
                 }
             }
         }

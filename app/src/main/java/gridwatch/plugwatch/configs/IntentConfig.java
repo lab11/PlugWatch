@@ -24,7 +24,6 @@ public class IntentConfig {
     public final static String INCOMING_API_GROUP_ID = "INCOMING_API_GROUP_ID";
 
 
-
-
-
+    public static final String FAIL_PACKET = "FAIL_PACKET";
+    public static final String TEST = "TEST";
 }

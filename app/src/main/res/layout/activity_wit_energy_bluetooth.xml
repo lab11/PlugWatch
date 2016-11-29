@@ -19,7 +19,10 @@
         android:layout_height="wrap_content"
         android:id="@+id/root_status"
         android:layout_alignTop="@+id/scan_btn"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/status"
+        android:layout_toEndOf="@+id/scan_btn"
+        android:gravity="right" />
 
     <Button
         android:text="Root"
@@ -47,23 +50,6 @@
         android:layout_above="@+id/textView9"
         android:layout_alignParentStart="true"
         android:layout_alignEnd="@+id/textView9" />
-
-    <Button
-        android:text="Scan"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/scan_btn"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:text="status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/status"
-        android:layout_alignBaseline="@+id/scan_btn"
-        android:layout_alignBottom="@+id/scan_btn"
-        android:layout_alignParentEnd="true" />
 
     <TextView
         android:text="Last Recieved:"
@@ -133,15 +119,6 @@
         android:layout_alignParentEnd="true"
         android:layout_toEndOf="@+id/textView5" />
 
-    <TextView
-        android:text="TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/dfasdf"
-        android:layout_alignParentStart="true"
-        android:id="@+id/mac_address_display"
-        android:layout_alignEnd="@+id/dfasdf" />
-
     <Button
         android:text="Test"
         android:layout_width="wrap_content"
@@ -150,12 +127,22 @@
         android:layout_above="@+id/mac_address_display"
         android:layout_alignParentStart="true" />
 
+    <Button
+        android:text="Update GP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/mac_address_display"
+        android:layout_toEndOf="@+id/test"
+        android:id="@+id/play_store_btn" />
+
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
-        android:layout_above="@+id/test">
+        android:layout_above="@+id/textView7">
 
                     <TextView
                         android:text="phone id:"
@@ -221,38 +208,130 @@
                         android:layout_toEndOf="@+id/phone_id_text" />
 
         <Button
-            android:text="Cmd Line"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/play_store_btn"
-            android:layout_toStartOf="@+id/root_status"
-            android:id="@+id/cmd_line_btn" />
+                android:text="Cmd Line"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/play_store_btn"
+                android:layout_toStartOf="@+id/root_status"
+                android:id="@+id/cmd_line_btn" />
 
     </LinearLayout>
 
+
+    <Button
+        android:text="MAC Sticky"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/sticky_btn"
+        android:layout_above="@+id/test"
+        />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:ems="10"
+        android:id="@+id/sticky_mac_pw"
+        android:layout_above="@+id/play_store_btn"
+        android:layout_below="@+id/sticky_mac_display"
+        android:width="80dp"
+        android:layout_alignEnd="@+id/play_store_btn"
+        android:layout_marginLeft="20dp"
+        android:layout_toEndOf="@+id/sticky_btn" />
+
     <TextView
-        android:text="isOnline"
+        android:text="sticky mac:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:id="@+id/textView7"
+        android:layout_above="@+id/sticky_btn"
+        android:layout_alignTop="@+id/sticky_mac_display" />
+
+    <TextView
+        android:text="not_set"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/textView7"
+        android:id="@+id/sticky_mac_display"
+        android:layout_marginLeft="20dp"
+        android:layout_above="@+id/sticky_btn" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mac_address_display"
+        android:layout_above="@+id/dfasdf"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/dfasdf"
+        android:layout_marginLeft="20dp" />
+
+    <TextView
+        android:text="Current MAC:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView4"
+        android:layout_below="@+id/test"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/dfasdf" />
+
+    <ToggleButton
+        android:text="Ping"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ping_btn"
+        android:textOff="Not Pinging"
+        android:textOn="Pinging"
+        android:layout_alignBaseline="@+id/sticky_mac_pw"
+        android:layout_alignBottom="@+id/sticky_mac_pw"
+        android:layout_alignParentEnd="true"
+        android:layout_marginLeft="5dp" />
+
+    <TextView
+        android:text="ping is off"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/isOnlineText"
-        android:layout_above="@+id/total_data_text"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@+id/ping_btn"
+        android:layout_alignParentEnd="true"
+        android:layout_alignStart="@+id/is_cross_paired_text" />
 
-    <Button
-        android:text="Update GP"
-        android:layout_width="wrap_content"
+    <TextView
+        android:text="is_cross_paired"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/mac_address_display"
-        android:layout_toEndOf="@+id/test"
-        android:id="@+id/play_store_btn" />
+        android:id="@+id/is_cross_paired_text"
+
+        android:layout_toEndOf="@+id/play_store_btn"
+        android:layout_below="@+id/isOnlineText"
+        android:layout_above="@+id/mac_address_display" />
 
     <TextView
         android:text="is_gp_good"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/isOnlineText"
         android:id="@+id/google_play_state"
-        android:layout_alignStart="@+id/isOnlineText" />
+        android:layout_above="@+id/ping_btn"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:text="status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/status"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignStart="@+id/root_status"
+        android:gravity="right" />
+
+    <Button
+        android:text="Scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scan_btn"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/sticky_mac_display" />
 
 
 </RelativeLayout>

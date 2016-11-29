@@ -16,8 +16,8 @@ import gridwatch.plugwatch.R;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.IntentConfig;
-import gridwatch.plugwatch.utilities.GroupIDWriter;
-import gridwatch.plugwatch.utilities.PhoneIDWriter;
+import gridwatch.plugwatch.logs.GroupIDWriter;
+import gridwatch.plugwatch.logs.PhoneIDWriter;
 
 
 public class CommandLineActivity extends Activity {
@@ -29,6 +29,10 @@ public class CommandLineActivity extends Activity {
 
     String[] TESTS = new String[] {
             "-1,uploadall",
+            "-1,uploadspecific:20161128",
+            "-1,uploadaudio",
+            "-1,uploadlogs",
+            "-1,uploadlogspecific",
             "-1,report",
             "-1,free_space",
             "-1,stats",

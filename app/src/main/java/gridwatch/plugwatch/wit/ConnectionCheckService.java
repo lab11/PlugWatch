@@ -13,9 +13,9 @@ import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
-import gridwatch.plugwatch.utilities.Reboot;
+import gridwatch.plugwatch.logs.RestartNumWriter;
+import gridwatch.plugwatch.utilities.Rebooter;
 import gridwatch.plugwatch.utilities.Restart;
-import gridwatch.plugwatch.utilities.RestartNumWriter;
 
 public class ConnectionCheckService extends IntentService {
 
@@ -51,8 +51,6 @@ public class ConnectionCheckService extends IntentService {
         long last = sp.getLong(SettingsConfig.LAST_WIT, -1);
         long diffInMs = System.currentTimeMillis() - last;
 
-
-
         int num_previous_reboots = Integer.valueOf(numWriter.get_last_value());
         Log.i("ConnectionCheckService", "restart checking " + String.valueOf(last) + " num previous reboots: " + String.valueOf(num_previous_reboots));
 
@@ -67,9 +65,8 @@ public class ConnectionCheckService extends IntentService {
         if (diffInMs > new_connection_threshold && last != -1) {
             if (incremented_num_previous_reboots > SensorConfig.REBOOT_THRESHOLD) {
                 numWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
-                Reboot r = new Reboot();
                 FirebaseCrash.log("ConnectionCheckService: rebooting due to max timeout");
-                r.do_reboot(new Throwable("restart rebooting due to max timeout"));
+                Rebooter r = new Rebooter(getApplicationContext(), new Throwable("restart rebooting due to max timeout"));
             } else {
                 numWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(incremented_num_previous_reboots));
                 Restart r = new Restart();
@@ -79,7 +76,6 @@ public class ConnectionCheckService extends IntentService {
         } else {
             Log.i("ConnectionCheckService", "restart not restarting " + String.valueOf(diffInMs));
         }
-
     }
 
 
@@ -113,8 +109,7 @@ public class ConnectionCheckService extends IntentService {
                 } catch (java.lang.NullPointerException e) {
 
                 }
-                Reboot r = new Reboot();
-                r.do_reboot(new Throwable("rebooting due to max timeout"));
+                Rebooter r = new Rebooter(getApplicationContext(), new Throwable("rebooting due to max timeout"));
             } else { //just reboot the app
                 try {
                     sp.edit().putInt(SettingsConfig.NUM_CONNECTION_REBOOTS, num_previous_reboots + 1).commit();

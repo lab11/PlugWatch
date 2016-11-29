@@ -10,7 +10,7 @@ import android.os.RemoteException;
 import gridwatch.plugwatch.IFailsafeTimerService;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
-import gridwatch.plugwatch.utilities.Reboot;
+import gridwatch.plugwatch.utilities.Rebooter;
 
 public class FailsafeTimerService extends Service {
 
@@ -58,8 +58,7 @@ public class FailsafeTimerService extends Service {
     private Runnable runnable = new Runnable() {
         public void run() {
             if (!is_connected) {
-                Reboot r = new Reboot();
-                r.do_reboot(new Throwable("rebooting due to failsafe timer"));
+                Rebooter r = new Rebooter(getApplicationContext(), new Throwable("rebooting due to failsafe timer"));
             }
             handler.postDelayed(this, 1000*60*30);
         }

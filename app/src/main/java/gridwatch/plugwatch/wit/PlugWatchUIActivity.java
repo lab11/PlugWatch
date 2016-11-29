@@ -33,12 +33,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.LocationRequest;
+import com.stealthcopter.networktools.Ping;
+import com.stealthcopter.networktools.ping.PingResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.net.UnknownHostException;
 import java.util.Calendar;
 
 import butterknife.Bind;
@@ -53,9 +58,12 @@ import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.IntentConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
-import gridwatch.plugwatch.utilities.GroupIDWriter;
-import gridwatch.plugwatch.utilities.LatLngWriter;
-import gridwatch.plugwatch.utilities.PhoneIDWriter;
+import gridwatch.plugwatch.logs.GroupIDWriter;
+import gridwatch.plugwatch.logs.LatLngWriter;
+import gridwatch.plugwatch.logs.MacWriter;
+import gridwatch.plugwatch.logs.PhoneIDWriter;
+import gridwatch.plugwatch.utilities.Reboot;
+import gridwatch.plugwatch.utilities.Restart;
 import gridwatch.plugwatch.utilities.RootChecker;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
@@ -74,6 +82,7 @@ public class PlugWatchUIActivity extends Activity {
 
     int cnt = 0;
 
+    private boolean amPinging;
 
     private static long last_time = -1;
     private static int num_wit = -1;
@@ -85,6 +94,7 @@ public class PlugWatchUIActivity extends Activity {
 
     private static int failsafe_pid = -1;
 
+    private static boolean is_cross_pair = false;
 
     private static boolean is_mac_whitelisted = false;
     private static String mac_whitelist = "";
@@ -103,6 +113,8 @@ public class PlugWatchUIActivity extends Activity {
 
     private Context ctx;
     private AlarmManager am;
+
+    private boolean is_google_play;
 
     private String mac_address_str;
 
@@ -124,13 +136,17 @@ public class PlugWatchUIActivity extends Activity {
                     PlugWatchUIActivity.class));
         }
 
+        if (AppConfig.DEBUG) {
+            //Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+            // Vibrate for 500 milliseconds
+            //v.vibrate(500);
+        }
+
         phoneIDWriter = new PhoneIDWriter(getApplicationContext());
         groupIDWriter = new GroupIDWriter(getApplicationContext());
         TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
         phone_id = telephonyManager.getDeviceId();
-        phoneIDWriter.log(String.valueOf(System.currentTimeMillis()), phone_id, null);
-        group_id = "-1";
-        groupIDWriter.log(String.valueOf(System.currentTimeMillis()), group_id, null);
+
 
         setContentView(R.layout.activity_wit_energy_bluetooth);
         ButterKnife.bind(this);
@@ -140,6 +156,7 @@ public class PlugWatchUIActivity extends Activity {
         location_rec = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setNumUpdates(1);
+        check_google_play();
 
         setup_ui();
         setup_build_str();
@@ -163,6 +180,16 @@ public class PlugWatchUIActivity extends Activity {
         }
         */
 
+    }
+
+
+    private void check_google_play() {
+        int state = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext());
+        if (state == ConnectionResult.SUCCESS) {
+            is_google_play = true;
+        } else {
+            is_google_play = false;
+        }
     }
 
     private void setup_connection_check() {
@@ -255,6 +282,7 @@ public class PlugWatchUIActivity extends Activity {
     protected void onStart() {
         super.onStart();
             Intent service1Intent = new Intent(this, PlugWatchService.class);
+            service1Intent.setAction(IntentConfig.START_SCANNING);
             bindService(service1Intent, plugWatchConnection, Context.BIND_AUTO_CREATE);
 
 
@@ -288,6 +316,8 @@ public class PlugWatchUIActivity extends Activity {
             Log.e("onServiceDisconnected", "Service1 has unexpectedly disconnected");
             mIPlugWatchService = null;
             mBoundPlugWatchService = false;
+            Restart r = new Restart();
+            r.do_restart(getApplicationContext(), PlugWatchUIActivity.class, new Throwable("service disconnected"), -1);
         }
     };
 
@@ -341,11 +371,46 @@ public class PlugWatchUIActivity extends Activity {
                 }
                 is_connected = mIPlugWatchService.get_is_connected();
                 total_network_data = sp.getInt(SettingsConfig.TOTAL_DATA, -1);
+                String cur_mac = mIPlugWatchService.get_mac();
+
+
+                try {
+                    if (mac_address_str != null) {
+                        if (!cur_mac.equals(mac_address_str)) {
+                            MacWriter r = new MacWriter(getApplicationContext());
+                            r.log(String.valueOf(System.currentTimeMillis()), cur_mac, "n");
+                            String sticky = r.get_last_sticky_value();
+                            if (!cur_mac.equals(sticky)) {
+                                is_cross_pair = false;
+                            } else {
+                                is_cross_pair = true;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
                 mac_address_str = mIPlugWatchService.get_mac();
                 plugwatchservice_pid = mIPlugWatchService.get_pid();
                 sp.edit().putInt(SettingsConfig.PID, plugwatchservice_pid).commit();
                 realm_filename = mIPlugWatchService.get_realm_filename();
                 sp.edit().putString(SettingsConfig.REALM_FILENAME, realm_filename ).commit();
+
+                if (amPinging) {
+                    Ping.onAddress("8.8.8.8").doPing(new Ping.PingListener() {
+                        @Override
+                        public void onResult(PingResult pingResult) {
+                            isOnlineText.setText(String.valueOf(pingResult.getTimeTaken()));
+                        }
+
+                        @Override
+                        public void onFinished() {
+
+                        }
+                    });
+                }
 
 
                 sp.edit().putString(SettingsConfig.VERSION_NUM, buildStr).commit();
@@ -360,6 +425,8 @@ public class PlugWatchUIActivity extends Activity {
             } catch (RemoteException e) {
                 e.printStackTrace();
             } catch (java.lang.NullPointerException e) {
+                e.printStackTrace();
+            } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
         }
@@ -389,12 +456,16 @@ public class PlugWatchUIActivity extends Activity {
                 root_status.setText(isRooted ? "Rooted" : "Not Rooted");
                 root_status.setTextColor(isRooted ? Color.GREEN : Color.RED);
                 mac_address_display.setText(mac_address_str);
+                is_cross_paired_text.setText(is_cross_pair ? "Cross paired" : "Not Cross paired");
+                is_cross_paired_text.setTextColor(is_cross_pair ? Color.RED : Color.GREEN);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
+
+
 
     private void setup_ui() {
         runnable.run(); //start UI loop
@@ -407,10 +478,20 @@ public class PlugWatchUIActivity extends Activity {
                 //total_data.setText(String.valueOf(PlugWatchApp.getInstance().get_network_data()));
                 //status.setText(PlugWatchApp.getInstance().get_is_connected() ? "Connected" : "Disconnected");
                 //status.setTextColor(PlugWatchApp.getInstance().get_is_connected() ? Color.GREEN : Color.RED);
+
+
+                MacWriter r = new MacWriter(getApplicationContext());
+                if (r.get_last_value() != null) {
+                    sticky_mac_display.setText(r.get_last_value());
+                }
+
+
                 group_id_cur.setText(group_id);
                 phone_id_cur.setText(phone_id);
                 root_status.setText(isRooted ? "Rooted" : "Not Rooted");
                 root_status.setTextColor(isRooted ? Color.GREEN : Color.RED);
+                google_play_status_text.setText(is_google_play ? "GP Good" : "GP Need Update");
+                google_play_status_text.setTextColor(is_google_play ? Color.GREEN : Color.RED);
             }
         });
     }
@@ -496,6 +577,22 @@ public class PlugWatchUIActivity extends Activity {
     @Bind(R.id.isOnlineText)
     TextView isOnlineText;
 
+    @Bind(R.id.sticky_btn)
+    Button sticky_btn;
+    @Bind(R.id.sticky_mac_display)
+    TextView sticky_mac_display;
+    @Bind(R.id.sticky_mac_pw)
+    EditText sticky_mac_pwd;
+    @Bind(R.id.is_cross_paired_text)
+    TextView is_cross_paired_text;
+
+    @Bind(R.id.ping_btn)
+    Button ping_btn;
+
+    @Bind(R.id.google_play_state)
+    TextView google_play_status_text;
+
+
     @Bind(R.id.phone_id_cur)
     TextView phone_id_cur;
     @Bind(R.id.group_id_cur)
@@ -527,6 +624,11 @@ public class PlugWatchUIActivity extends Activity {
 
     }
 
+
+
+
+
+
     @OnClick(R.id.activity_wit_energy_bluetooth)
     public void onBackgroundClick() {
         View r = findViewById(R.id.activity_wit_energy_bluetooth);
@@ -538,6 +640,19 @@ public class PlugWatchUIActivity extends Activity {
     @OnClick(R.id.test)
     public void onTestClick() {
 
+        /*
+        Intent a = new Intent(this, PlugWatchService.class);
+        a.putExtra(IntentConfig.TEST, IntentConfig.TEST);
+        startService(a);
+        */
+
+        Intent a = new Intent(this, Reboot.class);
+        startService(a);
+
+        //Rebooter r = new Rebooter(getApplicationContext(), new Throwable("test"));
+
+        //Restart r = new Restart();
+        //r.do_restart(getApplicationContext(), PlugWatchUIActivity.class, new Throwable("restarting due to timeout"), plugwatchservice_pid);
     }
 
     @OnClick(R.id.scan_btn)
@@ -550,9 +665,24 @@ public class PlugWatchUIActivity extends Activity {
 
     @OnClick(R.id.root_btn)
     public void onRootClick() {
-        RootChecker a = new RootChecker();
+        RootChecker a = new RootChecker(getApplicationContext());
         isRooted = a.isRoot();
         updateUI();
+    }
+
+    @OnClick(R.id.sticky_btn)
+    public void onStickyMacClick() {
+        Log.e("sticky mac", sticky_mac_pwd.getText().toString());
+        if (sticky_mac_pwd.getText().toString().startsWith("000")) { //TODO: add in manual sticky
+            Log.e("sticky mac", "pwd correct");
+            sticky_mac_display.setText(mac_address_str);
+            MacWriter r = new MacWriter(getApplicationContext());
+            r.log(String.valueOf(System.currentTimeMillis()), mac_address_str, "sticky");
+            sp.edit().putString(SettingsConfig.STICKY_MAC, mac_address_str).commit();
+            Log.e("sticky mac", "set to: " + mac_address_str);
+        } else {
+            Log.e("sticky mac", "pwd incorrect");
+        }
     }
 
     @OnClick(R.id.cmd_line_btn)
@@ -571,6 +701,10 @@ public class PlugWatchUIActivity extends Activity {
     }
 
 
+    @OnFocusChange(R.id.sticky_mac_pw)
+    public void onStickyMacFocusChange() {
+        sticky_mac_pwd.setText("");
+    }
 
     @OnFocusChange(R.id.phone_id_text)
     public void onPhoneFocusChange() {
@@ -578,6 +712,18 @@ public class PlugWatchUIActivity extends Activity {
             save_phone_id(phone_id_text.getText().toString());
         }
         phone_id_text.setText("");
+    }
+
+    @OnClick(R.id.ping_btn)
+    public void onOnlineTextClick() {
+
+        if (amPinging) {
+            isOnlineText.setText("ping is off");
+            amPinging = false;
+        } else {
+            amPinging = true;
+        }
+
     }
 
     @Override
@@ -662,6 +808,8 @@ public class PlugWatchUIActivity extends Activity {
             return "FAILED TO GET AVAILABLE EXTERNAL MEM";
         }
     }
+
+
 
 
 }

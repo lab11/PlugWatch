@@ -5,10 +5,10 @@ import android.util.Log;
 
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.firebase.FirebaseCrashLogger;
-import gridwatch.plugwatch.utilities.Reboot;
-import gridwatch.plugwatch.utilities.RebootBackOffNumWriter;
+import gridwatch.plugwatch.logs.RebootBackOffNumWriter;
+import gridwatch.plugwatch.logs.RestartNumWriter;
+import gridwatch.plugwatch.utilities.Rebooter;
 import gridwatch.plugwatch.utilities.Restart;
-import gridwatch.plugwatch.utilities.RestartNumWriter;
 
 /**
  * Created by nklugman on 6/24/16.
@@ -39,9 +39,8 @@ public class RestartOnExceptionHandler extends Throwable implements
         if (restart_num + 1 > reboot_thresh) {
             r.log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
 
-            //CHECK FOR UPDATES...
-            Reboot reboot = new Reboot();
-            reboot.do_reboot(new Throwable("REBOOTING DUE TO RANDOM CRASHES"));
+            //CHECK FOR UPDATES... TODO
+            Rebooter reboot = new Rebooter(myContext, new Throwable("REBOOTING DUE TO RANDOM CRASHES"));
         } else {
             r.log(String.valueOf(System.currentTimeMillis()), String.valueOf(restart_num + 1));
             Restart restarter = new Restart();

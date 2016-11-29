@@ -4,8 +4,8 @@ import android.content.Context;
 
 import com.google.firebase.crash.FirebaseCrash;
 
-import gridwatch.plugwatch.utilities.GroupIDWriter;
-import gridwatch.plugwatch.utilities.PhoneIDWriter;
+import gridwatch.plugwatch.logs.GroupIDWriter;
+import gridwatch.plugwatch.logs.PhoneIDWriter;
 
 /**
  * Created by nklugman on 11/27/16.

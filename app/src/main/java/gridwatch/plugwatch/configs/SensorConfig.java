@@ -44,5 +44,8 @@ public class SensorConfig {
     public final static int MAX_JOBS = 100;
 
     public static int NUM_ANY_CRASH_BEFORE_REBOOT = 20;
+    public static int MAX_NUM_REBOOT_BACKOFF = 10;
+    public static int REBOOT_MIN_WAIT = 5000;
+
 }
 

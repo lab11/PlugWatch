@@ -21,6 +21,7 @@ import com.evernote.android.job.JobRequest;
 import com.google.android.gms.location.LocationRequest;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.crash.FirebaseCrash;
+import com.google.firebase.database.FirebaseDatabase;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.RxBleConnection;
 import com.polidea.rxandroidble.RxBleDevice;
@@ -43,16 +44,20 @@ import gridwatch.plugwatch.IPlugWatchService;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.BluetoothConfig;
+import gridwatch.plugwatch.configs.IntentConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.database.GWDump;
 import gridwatch.plugwatch.database.MeasurementRealm;
 import gridwatch.plugwatch.database.Migration;
 import gridwatch.plugwatch.gridWatch.GridWatch;
+import gridwatch.plugwatch.logs.GroupIDWriter;
+import gridwatch.plugwatch.logs.LatLngWriter;
+import gridwatch.plugwatch.logs.MacWriter;
+import gridwatch.plugwatch.logs.PhoneIDWriter;
 import gridwatch.plugwatch.network.NetworkJob;
 import gridwatch.plugwatch.network.NetworkJobCreator;
 import gridwatch.plugwatch.network.WitRetrofit;
-import gridwatch.plugwatch.utilities.LatLngWriter;
-import gridwatch.plugwatch.utilities.PhoneIDWriter;
+import gridwatch.plugwatch.utilities.Rebooter;
 import gridwatch.plugwatch.utilities.Restart;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -120,6 +125,7 @@ public class PlugWatchService extends Service {
 
     private LocationRequest location_rec;
 
+    private String cp;
 
     private String phone_id;
     private String group_id;
@@ -144,6 +150,8 @@ public class PlugWatchService extends Service {
 
 
         FirebaseApp.initializeApp(getBaseContext());
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
         mContext = this;
         setup_gw_callback(); //power disconnected
         setup_bluetooth(); //wit
@@ -158,6 +166,7 @@ public class PlugWatchService extends Service {
                 .setNumUpdates(1);
 
         gw_db = realm.where(GWDump.class).findAll();
+        num_gw = gw_db.size();
 
         gw_db.addChangeListener(new RealmChangeListener<RealmResults<GWDump>>() {
             @Override
@@ -170,8 +179,25 @@ public class PlugWatchService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("PlugWatchService:onStart", "hit");
+
+        if (intent.hasExtra(IntentConfig.FAIL_PACKET)) {
+            Log.e("PlugWatchService:onStart", "hit");
+            send_fail_packet();
+        } else if (intent.hasExtra(IntentConfig.TEST)) {
+            do_gw(null);
+        } else {
+            start_ble();
+        }
+
+        //Log.i("PlugWatchService:onStart", "hit with " + intent.getAction());
+        /*
+        if (intent.getAction().equals(IntentConfig.FAIL_PACKET)) {
+
+        } else {
+        }
         start_ble();
+        */
+
         return START_STICKY;
     }
 
@@ -262,6 +288,7 @@ public class PlugWatchService extends Service {
     }
 
     private void do_gw(Intent intent) {
+
         GridWatch g = null;
         try {
             if (phone_id == null) {
@@ -274,10 +301,18 @@ public class PlugWatchService extends Service {
             FirebaseCrash.log("error couldn't find phone id");
 
         }
+        if (intent == null) {
+            g = new GridWatch(getBaseContext(), SensorConfig.UNPLUGGED, phone_id,
+                    String.valueOf(num_wit), macAddress, build_str, last_good_data);
+            g.run();
+            return;
+        }
         if (intent.getAction().equals(Intent.ACTION_POWER_CONNECTED)) {
-            g = new GridWatch(getBaseContext(), SensorConfig.PLUGGED, phone_id);
+            g = new GridWatch(getBaseContext(), SensorConfig.PLUGGED, phone_id,
+                    String.valueOf(num_wit), macAddress, build_str, last_good_data);
         } else if (intent.getAction().equals(Intent.ACTION_POWER_DISCONNECTED)) {
-            g = new GridWatch(getBaseContext(), SensorConfig.UNPLUGGED, phone_id);
+            g = new GridWatch(getBaseContext(), SensorConfig.UNPLUGGED, phone_id,
+                    String.valueOf(num_wit), macAddress, build_str, last_good_data);
         }
         if (g != null) {
             g.run();
@@ -428,6 +463,43 @@ public class PlugWatchService extends Service {
                 .subscribe(this::onNotificationReceivedFFE1, this::onNotificationSetupFailure);
     }
 
+    private void send_fail_packet() {
+        checkCP();
+        PhoneIDWriter b = new PhoneIDWriter(mContext);
+        String phone_id = b.get_last_value();
+        GroupIDWriter r = new GroupIDWriter(mContext);
+        String group_id = b.get_last_value();
+        double lat = 0.0;
+        double lng = 0.0;
+        try {
+            LatLngWriter c = new LatLngWriter(mContext);
+            String latlng = c.get_last_value();
+            lat = Double.valueOf(latlng.split(",")[0]);
+            lng = Double.valueOf(latlng.split(",")[1]);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        WitRetrofit a = new WitRetrofit("-1", "-1", "-1", "-1",
+                "-1", System.currentTimeMillis(), lat,
+                lng, phone_id, group_id, build_str, String.valueOf(num_wit + 1), macAddress, cp);
+        Log.i("fail packet: network scheduling", a.toString());
+        Log.i("fail packet: number of jobs: ", String.valueOf(JobManager.instance().getAllJobRequests().size()));
+        if (JobManager.instance().getAllJobRequests().size() > SensorConfig.MAX_JOBS) {
+            Log.e("fail packet: network", "canceling all jobs");
+            JobManager.instance().cancelAll();
+        }
+        int jobId = new JobRequest.Builder(NetworkJob.TAG)
+                .setExecutionWindow(1_000L, 20_000L)
+                .setBackoffCriteria(5_000L, JobRequest.BackoffPolicy.EXPONENTIAL)
+                .setRequiresCharging(false)
+                .setExtras(a.toBundle())
+                .setRequiresDeviceIdle(false)
+                .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
+                .setPersisted(true)
+                .build()
+                .schedule();
+    }
+
     private void addScanResult(RxBleScanResult bleScanResult) {
         if (bleScanResult.getBleDevice().getName().contains("Smart")) {
             bleDevice = bleScanResult.getBleDevice();
@@ -467,6 +539,22 @@ public class PlugWatchService extends Service {
         }
     }
 
+    private void checkCP() {
+        try {
+                MacWriter r = new MacWriter(getApplicationContext());
+                r.log(String.valueOf(System.currentTimeMillis()), macAddress, "n");
+                String sticky = r.get_last_sticky_value();
+                if (!macAddress.equals(sticky)) {
+                    cp = "t";
+                } else {
+                    cp = "f";
+                }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void handleBleScanException(BleScanException bleScanException) {
         switch (bleScanException.getReason()) {
             case BleScanException.BLUETOOTH_NOT_AVAILABLE:
@@ -489,6 +577,7 @@ public class PlugWatchService extends Service {
             default:
                 FirebaseCrash.log("handleBleScanException: unable to start scanning");
                 Toast.makeText(mContext, "Unable to start scanning", Toast.LENGTH_SHORT).show();
+                Rebooter r = new Rebooter(mContext, new Throwable("unable to start scanning"));
                 break;
         }
     }
@@ -634,11 +723,14 @@ public class PlugWatchService extends Service {
             @Override
             public void execute(Realm bgRealm) {
                 try {
+                    checkCP();
                     MeasurementRealm cur = new MeasurementRealm(mCurrent, mFrequency,
                             mPower, mPowerFactor, mVoltage);
                     bgRealm.copyToRealm(cur);
                     PhoneIDWriter b = new PhoneIDWriter(mContext);
                     String phone_id = b.get_last_value();
+                    GroupIDWriter r = new GroupIDWriter(mContext);
+                    String group_id = r.get_last_value();
 
                     double lat = 0.0;
                     double lng = 0.0;
@@ -653,31 +745,27 @@ public class PlugWatchService extends Service {
 
                     WitRetrofit a = new WitRetrofit(mCurrent, mFrequency, mPower, mPowerFactor,
                             mVoltage, System.currentTimeMillis(), lat,
-                            lng, phone_id, -1, "", build_str, String.valueOf(num_wit + 1));
+                            lng, phone_id, group_id, build_str, String.valueOf(num_wit + 1), macAddress, cp);
                     Log.i("good_data: network scheduling", a.toString());
                     Log.i("good_data: number of jobs: ", String.valueOf(JobManager.instance().getAllJobRequests().size()));
                     if (JobManager.instance().getAllJobRequests().size() > SensorConfig.MAX_JOBS) {
                         Log.e("good_data: network", "canceling all jobs");
                         JobManager.instance().cancelAll();
                     }
-                        int jobId = new JobRequest.Builder(NetworkJob.TAG)
-                                .setExecutionWindow(1_000L, 20_000L)
-                                .setBackoffCriteria(5_000L, JobRequest.BackoffPolicy.EXPONENTIAL)
-                                .setRequiresCharging(false)
-                                .setExtras(a.toBundle())
-                                .setRequiresDeviceIdle(false)
-                                .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
-                                .setPersisted(true)
-                                .build()
-                                .schedule();
-
+                    int jobId = new JobRequest.Builder(NetworkJob.TAG)
+                            .setExecutionWindow(1_000L, 20_000L)
+                            .setBackoffCriteria(5_000L, JobRequest.BackoffPolicy.EXPONENTIAL)
+                            .setRequiresCharging(false)
+                            .setExtras(a.toBundle())
+                            .setRequiresDeviceIdle(false)
+                            .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
+                            .setPersisted(true)
+                            .build()
+                            .schedule();
                 } catch (java.lang.IllegalStateException e) {
                     JobManager.create(mContext).addJobCreator(new NetworkJobCreator());
                     //JobManager.instance().cancelAll();
-                }
-
-
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("good_data: error", e.getMessage());
                     FirebaseCrash.log(e.getMessage());

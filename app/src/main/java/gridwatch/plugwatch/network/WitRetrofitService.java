@@ -30,6 +30,9 @@ public interface WitRetrofitService {
     @POST("/meta/")
     Call<String> sendMeta(@Body MetaRetrofit metaRetrofit);
 
+    @POST("/gw/")
+    Call<GWRetrofit> sendGW(@Body PersistableBundleCompat gwRetrofit);
+
 }
 
 

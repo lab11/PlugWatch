@@ -2,11 +2,13 @@ package gridwatch.plugwatch.gridWatch;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.location.Location;
 import android.media.MediaRecorder;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Environment;
 import android.telephony.CellIdentityGsm;
@@ -20,11 +22,14 @@ import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.evernote.android.job.JobManager;
+import com.evernote.android.job.JobRequest;
 import com.github.pwittchen.reactivenetwork.library.Connectivity;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.github.pwittchen.reactivesensors.library.ReactiveSensorEvent;
 import com.github.pwittchen.reactivesensors.library.ReactiveSensors;
 import com.google.android.gms.location.LocationRequest;
+import com.google.firebase.crash.FirebaseCrash;
 import com.orhanobut.logger.Logger;
 
 import org.json.JSONException;
@@ -40,7 +45,12 @@ import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.database.GWDump;
-import gridwatch.plugwatch.utilities.LatLngWriter;
+import gridwatch.plugwatch.logs.GroupIDWriter;
+import gridwatch.plugwatch.logs.LatLngWriter;
+import gridwatch.plugwatch.logs.MacWriter;
+import gridwatch.plugwatch.logs.PhoneIDWriter;
+import gridwatch.plugwatch.network.GWJob;
+import gridwatch.plugwatch.network.GWRetrofit;
 import gridwatch.plugwatch.wit.PlugWatchUIActivity;
 import io.realm.Realm;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
@@ -50,7 +60,6 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func6;
 import rx.schedulers.Schedulers;
-
 
 
 public class GridWatch {
@@ -71,7 +80,15 @@ public class GridWatch {
     private String mType;
     private String mPhone_id = "-1";
 
-    public GridWatch(Context context, String type, String phone_id) {
+    private long mLast;
+    private String mSize;
+    private String mCP;
+    private String mVersionNum;
+    private String mMAC;
+
+
+
+    public GridWatch(Context context, String type, String phone_id, String size, String mac, String version_num, long last) {
         if (AppConfig.RESTART_ON_EXCEPTION) {
             Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(mContext,
                     PlugWatchUIActivity.class));
@@ -80,6 +97,11 @@ public class GridWatch {
         mContext = context;
         mType = type;
         mPhone_id = phone_id;
+        mSize = size;
+        mMAC = mac;
+        mVersionNum = version_num;
+        mLast = last;
+
     }
 
     public void run() {
@@ -247,7 +269,7 @@ public class GridWatch {
                             @Override
                             public void onSuccess() {
                                 Log.e("GridWatch", "event saved in realm");
-
+                                send_report();
                                 //PlugWatchApp.getInstance().set_num_gw(realm.where(GWDump.class).findAll().size());
 
                             }
@@ -255,6 +277,80 @@ public class GridWatch {
                         Logger.e(o.toString());
                     }
                 });
+    }
+
+    private String checkCP() {
+        try {
+            MacWriter r = new MacWriter(mContext);
+            String sticky = r.get_last_sticky_value();
+            if (!mMAC.equals(sticky)) {
+                return "t";
+            } else {
+                return "f";
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "-1";
+    }
+
+    private void send_report() {
+        try {
+            PhoneIDWriter b = new PhoneIDWriter(mContext);
+            String phone_id = b.get_last_value();
+            GroupIDWriter d = new GroupIDWriter(mContext);
+            String experiment_id = d.get_last_value();
+
+            IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            Intent batteryStatus = mContext.registerReceiver(null, ifilter);
+            int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+            double lat = 0.0;
+            double lng = 0.0;
+            try {
+                LatLngWriter c = new LatLngWriter(mContext);
+                String latlng = c.get_last_value();
+                lat = Double.valueOf(latlng.split(",")[0]);
+                lng = Double.valueOf(latlng.split(",")[1]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            String event_type = mType;
+            long time = System.currentTimeMillis();
+
+            long last = mLast;
+            String cur_size = String.valueOf(mSize);
+            double battery = level / (double) scale;
+            String cp = checkCP();
+            String version_num = mVersionNum;
+
+            GWRetrofit a = new GWRetrofit(event_type, time, lat, lng,
+                    phone_id, experiment_id, version_num,
+                    cur_size, last, battery, cp);
+            Log.i("gw: network scheduling", a.toString());
+            Log.i("gw: number of jobs: ", java.lang.String.valueOf(JobManager.instance().getAllJobRequests().size()));
+            if (JobManager.instance().getAllJobRequests().size() > SensorConfig.MAX_JOBS) {
+                Log.e("gw: network", "canceling all jobs");
+                JobManager.instance().cancelAll();
+            }
+            int jobId = new JobRequest.Builder(GWJob.TAG)
+                    .setExecutionWindow(1_000L, 20_000L)
+                    .setBackoffCriteria(5_000L, JobRequest.BackoffPolicy.EXPONENTIAL)
+                    .setRequiresCharging(false)
+                    .setExtras(a.toBundle())
+                    .setRequiresDeviceIdle(false)
+                    .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
+                    .setPersisted(true)
+                    .build()
+                    .schedule();
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrash.log(e.getMessage());
+
+        }
     }
 
     //****************************************************************************************
