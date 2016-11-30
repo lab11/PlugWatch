@@ -26,4 +26,5 @@ public class IntentConfig {
 
     public static final String FAIL_PACKET = "FAIL_PACKET";
     public static final String TEST = "TEST";
+    public static final String IS_TEXT = "IS_TEXT";
 }

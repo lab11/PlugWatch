@@ -1,7 +1,5 @@
 package gridwatch.plugwatch.database;
 
-import com.loopj.android.http.RequestParams;
-
 /**
  * Created by nklugman on 11/27/16.
  */
@@ -23,6 +21,8 @@ public class WD {
     private String mExternalFreespace;
     private String mInternalFreespace;
 
+    private double mBattery;
+
 
 
 
@@ -31,7 +31,7 @@ public class WD {
     }
 
     public WD(long time, long time_size_last_wit_ms, String measurementSize, String GWSize, String versionNum,
-              String external_freespace, String internal_freespace, String gwid, String groupid) {
+              String external_freespace, String internal_freespace, String gwid, String groupid, double battery) {
         mTime = time;
         mTime_size_last_wit_ms = time_size_last_wit_ms;
         mPhoneId = gwid;
@@ -41,16 +41,7 @@ public class WD {
         mVersionNum = versionNum;
         mExternalFreespace = external_freespace;
         mInternalFreespace = internal_freespace;
-    }
-
-    public RequestParams toRequestParams() {
-        RequestParams values = new RequestParams();
-        values.put("type", "crash");
-        values.put("time", mTime);
-        values.put("id", mPhoneId);
-        values.put("group", mGroupID);
-        values.put("wifi", "no");
-        return values;
+        mBattery = battery;
     }
 
     public long getTime() {
@@ -61,6 +52,13 @@ public class WD {
         this.mTime = mTime;
     }
 
+    public double getBattery() {
+        return mBattery;
+    }
+
+    public void setBattery(double battery) {
+        this.mBattery = battery;
+    }
 
     public String getGWID() {
         return mPhoneId;

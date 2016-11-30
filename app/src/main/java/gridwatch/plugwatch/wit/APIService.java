@@ -98,7 +98,7 @@ public class APIService extends Service {
 
     private Context mContext;
 
-    private boolean isText;
+    private boolean isText = false;
     private boolean isForced;
     private String mAckstate = "high";
 
@@ -123,6 +123,7 @@ public class APIService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.e("api", "start");
         PhoneIDWriter r = new PhoneIDWriter(getApplicationContext());
         cur_phone_id = r.get_last_value();
         GroupIDWriter p = new GroupIDWriter(getApplicationContext());
@@ -132,6 +133,9 @@ public class APIService extends Service {
             String cmd = intent.getStringExtra(IntentConfig.INCOMING_API_COMMAND);
             String phone_id = intent.getStringExtra(IntentConfig.INCOMING_API_PHONE_ID);
             String group_id = intent.getStringExtra(IntentConfig.INCOMING_API_GROUP_ID);
+            if (intent.hasExtra(IntentConfig.IS_TEXT)) {
+                isText = true;
+            }
             if (cmd.startsWith("@")) {
                 isForced = true;
                 Log.e("api FORCING CMD DANGER ZONE", cmd);
@@ -206,6 +210,8 @@ public class APIService extends Service {
             do_delete_audio_specific(cmd);
         } else if (cmd.contains("ping")) {
             do_ping(cmd);
+        } else if (cmd.contains("sendsms")) {
+            send_sms();
         }
 
 
@@ -344,6 +350,10 @@ public class APIService extends Service {
                 break;
             }
         }
+    }
+
+    public void send_sms() {
+        sendSMS(cur_phone_id);
     }
 
     public void do_topup(String name, String voucher_num, String location) {
@@ -600,6 +610,13 @@ public class APIService extends Service {
     //Status: needs testing
     public void get_report() {
 
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = mContext.registerReceiver(null, ifilter);
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        double battery = level / (double) scale;
+
+
 
         long time = System.currentTimeMillis();
 
@@ -614,7 +631,7 @@ public class APIService extends Service {
         String internalFreespace = sp.getString(SettingsConfig.FREESPACE_INTERNAL, "");
 
         WD cur = new WD(time, time_since_last_wit_ms, measurementSize, gwSize, versionNum, externalFreespace, internalFreespace,
-                cur_phone_id, cur_group_id);
+                cur_phone_id, cur_group_id, battery);
         int new_wd_num = sp.getInt(SettingsConfig.NUM_WD, 0) + 1;
         sp.edit().putInt(SettingsConfig.NUM_WD, new_wd_num).commit();
         mDatabase.child(cur_phone_id).child(DatabaseConfig.WD).child(String.valueOf(new_wd_num)).setValue(cur);

@@ -2,7 +2,9 @@ package gridwatch.plugwatch.wit;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.BatteryManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -40,6 +42,13 @@ public class WatchdogService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         try {
             Log.e("WATCHDOG", "hit");
+
+            IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            Intent batteryStatus = getApplicationContext().registerReceiver(null, ifilter);
+            int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+            double battery = level / (double) scale;
+
             mDatabase = FirebaseDatabase.getInstance().getReference();
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             long time = System.currentTimeMillis();
@@ -52,7 +61,7 @@ public class WatchdogService extends IntentService {
             String phone_id = sp.getString(SettingsConfig.PHONE_ID, "");
             String group_id = sp.getString(SettingsConfig.GROUP_ID, "");
             WD cur = new WD(time, time_since_last_wit_ms, measurementSize, gwSize, versionNum, externalFreespace, internalFreespace,
-                    phone_id, group_id);
+                    phone_id, group_id, battery);
             int new_wd_num = sp.getInt(SettingsConfig.NUM_WD, 0) + 1;
             sp.edit().putInt(SettingsConfig.NUM_WD, new_wd_num).commit();
             mDatabase.child(phone_id).child(DatabaseConfig.WD).child(String.valueOf(new_wd_num)).setValue(cur);

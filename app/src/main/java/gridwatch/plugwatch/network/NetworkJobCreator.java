@@ -14,6 +14,8 @@ public class NetworkJobCreator implements JobCreator {
         switch (tag) {
             case NetworkJob.TAG:
                 return new NetworkJob();
+            case GWJob.TAG:
+                return new GWJob();
             default:
                 return null;
         }

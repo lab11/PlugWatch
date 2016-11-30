@@ -1,12 +1,17 @@
 package gridwatch.plugwatch.wit;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.os.IBinder;
 import android.os.Process;
@@ -41,6 +46,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import gridwatch.plugwatch.IPlugWatchService;
+import gridwatch.plugwatch.R;
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.BluetoothConfig;
@@ -131,6 +137,8 @@ public class PlugWatchService extends Service {
     private String group_id;
     private String build_str;
 
+    private String wifi_res;
+
     //Realm Variables
     private RealmConfiguration realmConfiguration;
     private Realm realm;
@@ -149,14 +157,25 @@ public class PlugWatchService extends Service {
         Log.i("PlugWatchService:onCreate", "hit");
 
 
-        FirebaseApp.initializeApp(getBaseContext());
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        AudioManager audiomanage = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        audiomanage.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+        audiomanage.setVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER,
+                AudioManager.VIBRATE_SETTING_OFF);
+        audiomanage.setMode(AudioManager.ROUTE_SPEAKER);
+        audiomanage.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_HEADSET, AudioManager.ROUTE_ALL);
+
+        try {
+            FirebaseApp.initializeApp(getApplicationContext());
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        } catch (Exception e) {
+            Log.e("critical", "need to fix google play");
+        }
 
         mContext = this;
         setup_gw_callback(); //power disconnected
         setup_bluetooth(); //wit
         setup_realm(); //database
-
+        create_sticky_notification(); //hack to help with long running service
 
         JobManager.create(mContext).addJobCreator(new NetworkJobCreator());
 
@@ -270,6 +289,11 @@ public class PlugWatchService extends Service {
         @Override
         public String get_realm_filename() throws RemoteException {
             return full_realm_filename;
+        }
+
+        @Override
+        public void set_wifi(String wifi) throws RemoteException {
+            wifi_res = wifi;
         }
 
         @Override
@@ -463,6 +487,28 @@ public class PlugWatchService extends Service {
                 .subscribe(this::onNotificationReceivedFFE1, this::onNotificationSetupFailure);
     }
 
+    private void create_sticky_notification() {
+            Intent intent = new Intent(this, PlugWatchUIActivity.class);
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                    247281938, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Notification.Builder builder = new Notification.Builder(this)
+                    .setContentTitle("PlugWatch")
+                    .setContentText("Long running service")
+                    .setContentIntent(pendingIntent)
+                    .setSmallIcon(R.drawable.common_google_signin_btn_icon_light)
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.common_google_signin_btn_icon_dark_disabled))
+                    ;
+            Notification n;
+            n = builder.build();
+            n.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
+            NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            mNotifyMgr.notify(247281938, n);
+
+    }
+
     private void send_fail_packet() {
         checkCP();
         PhoneIDWriter b = new PhoneIDWriter(mContext);
@@ -479,9 +525,10 @@ public class PlugWatchService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         WitRetrofit a = new WitRetrofit("-1", "-1", "-1", "-1",
                 "-1", System.currentTimeMillis(), lat,
-                lng, phone_id, group_id, build_str, String.valueOf(num_wit + 1), macAddress, cp);
+                lng, phone_id, group_id, build_str, String.valueOf(num_wit + 1), macAddress, cp, wifi_res);
         Log.i("fail packet: network scheduling", a.toString());
         Log.i("fail packet: number of jobs: ", String.valueOf(JobManager.instance().getAllJobRequests().size()));
         if (JobManager.instance().getAllJobRequests().size() > SensorConfig.MAX_JOBS) {
@@ -702,6 +749,8 @@ public class PlugWatchService extends Service {
     }
 
 
+
+
     private void good_data(byte[] value) {
         isConnected = true;
         last_good_data = System.currentTimeMillis();
@@ -731,7 +780,6 @@ public class PlugWatchService extends Service {
                     String phone_id = b.get_last_value();
                     GroupIDWriter r = new GroupIDWriter(mContext);
                     String group_id = r.get_last_value();
-
                     double lat = 0.0;
                     double lng = 0.0;
                     try {
@@ -743,9 +791,10 @@ public class PlugWatchService extends Service {
                         e.printStackTrace();
                     }
 
+
                     WitRetrofit a = new WitRetrofit(mCurrent, mFrequency, mPower, mPowerFactor,
                             mVoltage, System.currentTimeMillis(), lat,
-                            lng, phone_id, group_id, build_str, String.valueOf(num_wit + 1), macAddress, cp);
+                            lng, phone_id, group_id, build_str, String.valueOf(num_wit + 1), macAddress, cp, wifi_res);
                     Log.i("good_data: network scheduling", a.toString());
                     Log.i("good_data: number of jobs: ", String.valueOf(JobManager.instance().getAllJobRequests().size()));
                     if (JobManager.instance().getAllJobRequests().size() > SensorConfig.MAX_JOBS) {

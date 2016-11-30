@@ -14,6 +14,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -33,18 +35,27 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.github.javiersantos.appupdater.AppUpdater;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.LocationRequest;
+import com.google.firebase.crash.FirebaseCrash;
 import com.stealthcopter.networktools.Ping;
 import com.stealthcopter.networktools.ping.PingResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -62,7 +73,7 @@ import gridwatch.plugwatch.logs.GroupIDWriter;
 import gridwatch.plugwatch.logs.LatLngWriter;
 import gridwatch.plugwatch.logs.MacWriter;
 import gridwatch.plugwatch.logs.PhoneIDWriter;
-import gridwatch.plugwatch.utilities.Reboot;
+import gridwatch.plugwatch.utilities.Rebooter;
 import gridwatch.plugwatch.utilities.Restart;
 import gridwatch.plugwatch.utilities.RootChecker;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
@@ -78,6 +89,8 @@ import static gridwatch.plugwatch.wit.APIService.formatSize;
 public class PlugWatchUIActivity extends Activity {
 
     public String buildStr;
+
+    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
 
 
     int cnt = 0;
@@ -116,7 +129,11 @@ public class PlugWatchUIActivity extends Activity {
 
     private boolean is_google_play;
 
+    private boolean is_lpm;
+
     private String mac_address_str;
+
+    private String wifi_res = "";
 
     private String phone_id;
     private String group_id;
@@ -142,10 +159,14 @@ public class PlugWatchUIActivity extends Activity {
             //v.vibrate(500);
         }
 
+        AppUpdater appUpdater = new AppUpdater(this);
+        appUpdater.start();
+
         phoneIDWriter = new PhoneIDWriter(getApplicationContext());
         groupIDWriter = new GroupIDWriter(getApplicationContext());
         TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
         phone_id = telephonyManager.getDeviceId();
+        phoneIDWriter.log(String.valueOf(System.currentTimeMillis()), phone_id, "");
 
 
         setContentView(R.layout.activity_wit_energy_bluetooth);
@@ -158,16 +179,16 @@ public class PlugWatchUIActivity extends Activity {
                 .setNumUpdates(1);
         check_google_play();
 
+
+        loc_runnable.run(); //get new location
         setup_ui();
         setup_build_str();
         setup_settings();
         setup_root();
+        setup_connection_check();
 
         BluetoothAdapter.getDefaultAdapter().enable();
 
-        loc_runnable.run();
-
-        setup_connection_check();
     }
 
 
@@ -189,6 +210,7 @@ public class PlugWatchUIActivity extends Activity {
             is_google_play = true;
         } else {
             is_google_play = false;
+
         }
     }
 
@@ -373,6 +395,8 @@ public class PlugWatchUIActivity extends Activity {
                 total_network_data = sp.getInt(SettingsConfig.TOTAL_DATA, -1);
                 String cur_mac = mIPlugWatchService.get_mac();
 
+                getWifi(); //TODO talk with jay
+                mIPlugWatchService.set_wifi(wifi_res);
 
                 try {
                     if (mac_address_str != null) {
@@ -390,14 +414,11 @@ public class PlugWatchUIActivity extends Activity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-
                 mac_address_str = mIPlugWatchService.get_mac();
                 plugwatchservice_pid = mIPlugWatchService.get_pid();
                 sp.edit().putInt(SettingsConfig.PID, plugwatchservice_pid).commit();
                 realm_filename = mIPlugWatchService.get_realm_filename();
                 sp.edit().putString(SettingsConfig.REALM_FILENAME, realm_filename ).commit();
-
                 if (amPinging) {
                     Ping.onAddress("8.8.8.8").doPing(new Ping.PingListener() {
                         @Override
@@ -411,17 +432,12 @@ public class PlugWatchUIActivity extends Activity {
                         }
                     });
                 }
-
-
                 sp.edit().putString(SettingsConfig.VERSION_NUM, buildStr).commit();
                 sp.edit().putString(SettingsConfig.FREESPACE_INTERNAL, getAvailableInternalMemorySize()).commit();
                 sp.edit().putString(SettingsConfig.FREESPACE_EXTERNAL, getAvailableExternalMemorySize()).commit();
                 sp.edit().putInt(SettingsConfig.WIT_SIZE, num_wit).commit();
                 sp.edit().putInt(SettingsConfig.GW_SIZE, num_gw).commit();
                 sp.edit().clear();
-
-
-
             } catch (RemoteException e) {
                 e.printStackTrace();
             } catch (java.lang.NullPointerException e) {
@@ -450,14 +466,18 @@ public class PlugWatchUIActivity extends Activity {
                 total_data_text.setText(String.valueOf(total_network_data));
                 status.setText(is_connected ? "Connected" : "Disconnected");
                 status.setTextColor(is_connected ? Color.GREEN : Color.RED);
-                seconds_since_last.setText(String.valueOf(last_time));
+                seconds_since_last.setText(sdf.format(new Date(last_time)));
                 group_id_cur.setText(group_id);
                 phone_id_cur.setText(phone_id);
                 root_status.setText(isRooted ? "Rooted" : "Not Rooted");
                 root_status.setTextColor(isRooted ? Color.GREEN : Color.RED);
                 mac_address_display.setText(mac_address_str);
-                is_cross_paired_text.setText(is_cross_pair ? "Cross paired" : "Not Cross paired");
+                is_cross_paired_text.setText(is_cross_pair ? "Cross-paired" : "Not Cross-paired");
                 is_cross_paired_text.setTextColor(is_cross_pair ? Color.RED : Color.GREEN);
+                is_lpm_text.setText(is_lpm ? "LPM Set" : "LPM Not Set");
+                is_lpm_text.setTextColor(is_lpm ? Color.GREEN : Color.RED);
+
+
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -492,6 +512,10 @@ public class PlugWatchUIActivity extends Activity {
                 root_status.setTextColor(isRooted ? Color.GREEN : Color.RED);
                 google_play_status_text.setText(is_google_play ? "GP Good" : "GP Need Update");
                 google_play_status_text.setTextColor(is_google_play ? Color.GREEN : Color.RED);
+
+                is_lpm = check_lpm();
+                is_lpm_text.setText(is_lpm ? "LPM Set" : "LPM Not Set");
+                is_lpm_text.setTextColor(is_lpm ? Color.GREEN : Color.RED);
             }
         });
     }
@@ -562,6 +586,8 @@ public class PlugWatchUIActivity extends Activity {
     @Bind(R.id.root_status)
     TextView root_status;
 
+    @Bind(R.id.is_lpm_text)
+    TextView is_lpm_text;
 
     @Bind(R.id.mac_address_display)
     TextView mac_address_display;
@@ -592,6 +618,8 @@ public class PlugWatchUIActivity extends Activity {
     @Bind(R.id.google_play_state)
     TextView google_play_status_text;
 
+    @Bind(R.id.deployment_audit)
+    Button deployment_audit_btn;
 
     @Bind(R.id.phone_id_cur)
     TextView phone_id_cur;
@@ -613,6 +641,33 @@ public class PlugWatchUIActivity extends Activity {
     Button play_store_btn;
     @Bind(R.id.cmd_line_btn)
     Button cmd_line_btn;
+    @Bind(R.id.write_lpm)
+    Button write_lpm;
+
+    @OnClick(R.id.deployment_audit)
+    public void onDeploymentAuditClick() {
+        //get imei
+        //get has set a sticky mac?
+        //get has checked google?
+        //does have root?
+        //does have lpm?
+        //has set group_id?
+        //has set phone_id?
+        //get current data
+        //get phone number
+        //get current airtime
+        //get current location
+        //has current app?
+        //is play running
+        //has settings set correctly
+        //is play setup for auto update?
+
+
+    }
+
+    public void set_settings() {
+
+    }
 
     @OnClick(R.id.play_store_btn)
     public void onPlayStoreUpdateClick() {
@@ -621,13 +676,7 @@ public class PlugWatchUIActivity extends Activity {
         } catch (android.content.ActivityNotFoundException anfe) {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.gms")));
         }
-
     }
-
-
-
-
-
 
     @OnClick(R.id.activity_wit_energy_bluetooth)
     public void onBackgroundClick() {
@@ -646,10 +695,10 @@ public class PlugWatchUIActivity extends Activity {
         startService(a);
         */
 
-        Intent a = new Intent(this, Reboot.class);
-        startService(a);
+        //Intent a = new Intent(this, Reboot.class);
+        //startService(a);
 
-        //Rebooter r = new Rebooter(getApplicationContext(), new Throwable("test"));
+        Rebooter r = new Rebooter(getApplicationContext(), new Throwable("test"));
 
         //Restart r = new Restart();
         //r.do_restart(getApplicationContext(), PlugWatchUIActivity.class, new Throwable("restarting due to timeout"), plugwatchservice_pid);
@@ -724,6 +773,72 @@ public class PlugWatchUIActivity extends Activity {
             amPinging = true;
         }
 
+    }
+
+    @OnClick(R.id.write_lpm)
+    public void onWriteLPMClick() {
+        try {
+
+            java.lang.Process proc = Runtime.getRuntime()
+                    .exec(new String[]{"su", "-c", "mount -o remount,rw /system /system"});
+            proc.waitFor();
+
+            String data = "#!/system/bin/sh\n" + "/system/bin/reboot\n";
+            String filename = "lpm";
+            FileOutputStream outputStream;
+            try {
+                outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                outputStream.write(data.getBytes());
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            java.lang.Process proc2 = Runtime.getRuntime()
+                    .exec(new String[]{"su", "-c",  "cp " + this.getFilesDir() + "/lpm ../../../../system/bin/."});
+            proc2.waitFor();
+
+
+
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            if (ex.getCause().getMessage().toString().equals("Permission denied")) {
+
+            }
+        }
+        is_lpm = check_lpm();
+    }
+
+    public boolean check_lpm() {
+        BufferedReader buffered_reader=null;
+        try
+        {
+            buffered_reader = new BufferedReader(new FileReader("/system/bin/lpm"));
+            String line;
+            while ((line = buffered_reader.readLine()) != null)
+            {
+                Log.e("check lpm", line);
+                if (line.contains("/system/bin/sh")) {
+                    if (buffered_reader != null) {
+                        buffered_reader.close();
+                    }
+                    return true;
+                }
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if (buffered_reader != null)
+                    buffered_reader.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return true;
     }
 
     @Override
@@ -809,6 +924,30 @@ public class PlugWatchUIActivity extends Activity {
         }
     }
 
+
+    private void getWifi() {
+        WifiManager mWifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        if (mWifi.isWifiEnabled() != false) {
+            List<ScanResult> results = mWifi.getScanResults();
+            //Log.d("ssids", results.toString());
+            for (int i = 0; i < results.size(); i++) {
+                ScanResult a = results.get(i);
+                //Log.e("SSID", a.SSID);
+                //Log.e("BSID", a.BSSID);
+                //Log.e("LEVEL", String.valueOf(a.level));
+                String resStr = a.SSID + "," + String.valueOf(a.level);
+                wifi_res = wifi_res + resStr + ":";
+            }
+        } else {
+            Log.d("wifi err", "wifi not enabled");
+            FirebaseCrash.log("wifi not enabled");
+        }
+        if (wifi_res.length() > 0) {
+            wifi_res = wifi_res.substring(0, wifi_res.length() - 1);
+        } else {
+            wifi_res = "none";
+        }
+    }
 
 
 

@@ -91,8 +91,10 @@ public class MacWriter {
 				//Log.e("testing get_last_sticky", cur);
 				String[] fields = cur.split("\\|");
 				if (fields.length >= 2) {
-					if (fields[2].equals("sticky")) {
-						return fields[1];
+					if (fields.length >= 3) {
+						if (fields[2].equals("sticky")) {
+							return fields[1];
+						}
 					}
 				}
 			}

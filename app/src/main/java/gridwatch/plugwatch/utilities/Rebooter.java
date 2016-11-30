@@ -36,35 +36,39 @@ public class Rebooter {
         //if this number is greater than a threshold reset it
         //use this number to multiply a time threshold to schedule the reboot
 
-        int num_previous_reboots_cnt = Integer.valueOf(numWriter.get_last_value());
-        int incremented_num_previous_reboots = num_previous_reboots_cnt + 1;
-        Log.e("rebooter", "num previous reboots: " + String.valueOf(num_previous_reboots_cnt));
-        Log.e("rebooter", "threshold is: " + String.valueOf(incremented_num_previous_reboots * SensorConfig.REBOOT_MIN_WAIT));
-        Log.e("rebooter", "time is: " + String.valueOf(System.currentTimeMillis()));
 
-        if (incremented_num_previous_reboots > SensorConfig.MAX_NUM_REBOOT_BACKOFF) {
-            numWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
-        } else {
-            numWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(incremented_num_previous_reboots));
-        }
 
-        int interval = SensorConfig.REBOOT_MIN_WAIT;
-        interval = interval * incremented_num_previous_reboots;
-        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        Calendar cal = Calendar.getInstance();
-        Intent serviceIntent = new Intent(mContext, Reboot.class);
-        PendingIntent servicePendingIntent =
-                PendingIntent.getService(mContext,
-                        48281723,
-                        serviceIntent,
-                        PendingIntent.FLAG_CANCEL_CURRENT);
-        am.setExact(
-                AlarmManager.RTC_WAKEUP,
-                interval,
-                servicePendingIntent
-        );
+            int num_previous_reboots_cnt = Integer.valueOf(numWriter.get_last_value());
+            int incremented_num_previous_reboots = num_previous_reboots_cnt + 1;
+            Log.e("rebooter", "num previous reboots: " + String.valueOf(num_previous_reboots_cnt));
+            Log.e("rebooter", "threshold is: " + String.valueOf(incremented_num_previous_reboots * SensorConfig.REBOOT_MIN_WAIT));
+            Log.e("rebooter", "time is: " + String.valueOf(System.currentTimeMillis()));
 
-        send_dead_packet();
+            if (incremented_num_previous_reboots > SensorConfig.MAX_NUM_REBOOT_BACKOFF) {
+                numWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
+            } else {
+                numWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(incremented_num_previous_reboots));
+            }
+
+            int interval = SensorConfig.REBOOT_MIN_WAIT;
+            interval = interval * incremented_num_previous_reboots;
+            Log.e("rebooter", "scheduling reboot at: " + String.valueOf(interval));
+            AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+            Calendar cal = Calendar.getInstance();
+            Intent serviceIntent = new Intent(mContext, Reboot.class);
+            PendingIntent servicePendingIntent =
+                    PendingIntent.getService(mContext,
+                            48281723,
+                            serviceIntent,
+                            PendingIntent.FLAG_CANCEL_CURRENT);
+            am.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    cal.getTimeInMillis() + interval,
+                    servicePendingIntent
+            );
+
+            send_dead_packet();
+
     }
 
     private void send_dead_packet() {

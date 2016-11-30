@@ -8,6 +8,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.location.Location;
 import android.media.MediaRecorder;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Environment;
@@ -58,7 +60,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.functions.Func6;
+import rx.functions.Func7;
 import rx.schedulers.Schedulers;
 
 
@@ -209,6 +211,13 @@ public class GridWatch {
             }
         });
 
+        Observable<JSONObject> wifi = Observable.fromCallable(new Callable<JSONObject>() {
+            @Override
+            public JSONObject call() throws Exception {
+                return wifi_transform(mContext);
+            }
+        });
+
 
         //****************************************************************************************
         //* STREAMS
@@ -233,11 +242,12 @@ public class GridWatch {
                         accel,
                         cell,
                         network,
-                        new Func6<JSONObject, JSONObject, JSONObject, JSONObject, JSONObject, JSONObject, JSONObject>() {
+                        wifi,
+                        new Func7<JSONObject, JSONObject, JSONObject, JSONObject, JSONObject, JSONObject, JSONObject, JSONObject>() {
                             @Override
-                            public JSONObject call(JSONObject o, JSONObject o2, JSONObject o3, JSONObject o4, JSONObject o5, JSONObject o6) {
+                            public JSONObject call(JSONObject o, JSONObject o2, JSONObject o3, JSONObject o4, JSONObject o5, JSONObject o6, JSONObject o7) {
                                 take_audio_recording(); //I HATE THIS
-                                return merge(o, o2, o3, o4, o5, o6);
+                                return merge(o, o2, o3, o4, o5, o6, o7);
                             }
                         });
 
@@ -444,6 +454,30 @@ public class GridWatch {
     public void take_audio_recording() {
         Intent audio = new Intent(mContext, AudioService.class);
         mContext.startService(audio);
+    }
+
+    public static JSONObject wifi_transform(Context ctx) {
+        try {
+            WifiManager mWifi = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
+            JSONObject to_ret = new JSONObject();
+            if (mWifi.isWifiEnabled() != false) {
+                List<ScanResult> results = mWifi.getScanResults();
+                Log.d("ssids", results.toString());
+                for (int i = 0; i < results.size(); i++) {
+                    ScanResult a = results.get(i);
+                    Log.e("SSID", a.SSID);
+                    Log.e("BSID", a.BSSID);
+                    Log.e("LEVEL", String.valueOf(a.level));
+                    to_ret.put(a.SSID, a.BSSID + "," + String.valueOf(a.level) + "," + String.valueOf(a.timestamp));
+                }
+                return to_ret;
+            } else {
+               return null;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 

@@ -27,6 +27,7 @@ public class WitRetrofit implements Serializable {
     private String h; //geohash
     private String m; //mac
     private String y; //cross posted
+    private String u;
 
 
     public WitRetrofit(String current, String frequency,
@@ -34,7 +35,7 @@ public class WitRetrofit implements Serializable {
                           String voltage, long now, double lat,
                        double lng, String phone_id, String experiment_id,
                        String version_num, String cur_size,
-                       String mac, String cp) {
+                       String mac, String cp, String wifi) {
         this.c = current;
         this.f = frequency;
         this.p = power;
@@ -50,6 +51,7 @@ public class WitRetrofit implements Serializable {
         this.h = GeoHash.geoHashStringWithCharacterPrecision(lat,lng,10);
         this.m = mac;
         this.y = cp;
+        this.u = wifi;
     }
 
     public PersistableBundleCompat toBundle() {
@@ -69,6 +71,7 @@ public class WitRetrofit implements Serializable {
         measurement.putString("h", h);
         measurement.putString("m", m);
         measurement.putString("y", y);
+        measurement.putString("u", u);
         return measurement;
     }
 
@@ -79,7 +82,7 @@ public class WitRetrofit implements Serializable {
                 ",lat:" + String.valueOf(q) + ",lng:" + String.valueOf(w) + "\n" +
                 ",phone_id:" + i + ",group_id:" + e +
                 ",build_num:" + b + ",cur_size:" + z + ",geohash:" + h +
-                ",mac:" + m + ",cp:" + y;
+                ",mac:" + m + ",cp:" + y + ",wifi:" + u;
     }
 
     public String getC() {
@@ -200,6 +203,14 @@ public class WitRetrofit implements Serializable {
 
     public void setY(String y) {
         this.y = y;
+    }
+
+    public String getU() {
+        return u;
+    }
+
+    public void setU(String y) {
+        this.u = u;
     }
 }
 

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -22,7 +23,7 @@ public class PhoneIDWriter {
 	private static SharedPreferences prefs;
 
 	private static File mLogFile;
-	private Context mContext;
+	private static Context mContext;
 
 	public PhoneIDWriter(Context context) {
 		File root = Environment.getExternalStorageDirectory();
@@ -115,8 +116,9 @@ public class PhoneIDWriter {
 				}
 				logBR.close();
 			} catch (IOException e) {
+				TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
 				if (e.getCause().toString().contains("No such file")) {
-					log(String.valueOf(System.currentTimeMillis()), "start", "");
+					log(String.valueOf(System.currentTimeMillis()), telephonyManager.getDeviceId(), "");
 					Log.e("LOG CREATED", LOG_NAME);
 				} else {
 					// TODO Auto-generated catch block

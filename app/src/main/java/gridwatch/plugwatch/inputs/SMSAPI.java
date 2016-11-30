@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
+import com.google.firebase.crash.FirebaseCrash;
+
+import gridwatch.plugwatch.configs.IntentConfig;
 import gridwatch.plugwatch.wit.APIService;
 
 /**
@@ -18,6 +21,7 @@ public class SMSAPI extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.e("sms", "rx");
         Bundle intentExtras = intent.getExtras();
         if (intentExtras != null) {
             Object[] sms = (Object[]) intentExtras.get(SMS_BUNDLE);
@@ -26,8 +30,21 @@ public class SMSAPI extends BroadcastReceiver {
                 SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) sms[i]);
                 smsBody = smsMessage.getMessageBody().toString();
             }
-            Log.e("SMS", smsBody);
-            context.startService(new Intent(context, APIService.class).putExtra("msg", smsBody).putExtra("type", "sms"));
+            try {
+                Log.e("sms", "body:" + smsBody);
+                String cmd = smsBody.split(":")[2];
+                String group_id = smsBody.split(":")[1];
+                String phone_id = smsBody.split(":")[0];
+                Intent a = new Intent(context, APIService.class);
+                a.putExtra(IntentConfig.INCOMING_API_COMMAND, cmd);
+                a.putExtra(IntentConfig.INCOMING_API_PHONE_ID, phone_id);
+                a.putExtra(IntentConfig.INCOMING_API_GROUP_ID, group_id);
+                a.putExtra(IntentConfig.IS_TEXT, IntentConfig.IS_TEXT);
+                context.startService(a);
+            } catch (Exception e){
+                FirebaseCrash.log(e.getMessage());
+
+            }
         }
     }
 }

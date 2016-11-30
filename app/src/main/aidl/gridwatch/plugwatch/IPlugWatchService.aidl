@@ -23,5 +23,7 @@ interface IPlugWatchService {
 
     String get_realm_filename();
 
+    void set_wifi(String wifi);
+
 
 }

@@ -52,7 +52,7 @@
         android:layout_alignEnd="@+id/textView9" />
 
     <TextView
-        android:text="Last Recieved:"
+        android:text="Last Received:"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textView9"
@@ -109,16 +109,6 @@
         android:layout_alignParentEnd="true"
         android:layout_toEndOf="@+id/textView5" />
 
-    <TextView
-        android:text="TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/total_data_text"
-        android:layout_marginLeft="20dp"
-        android:layout_above="@+id/num_packets_text"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/textView5" />
-
     <Button
         android:text="Test"
         android:layout_width="wrap_content"
@@ -134,88 +124,6 @@
         android:layout_above="@+id/mac_address_display"
         android:layout_toEndOf="@+id/test"
         android:id="@+id/play_store_btn" />
-
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_above="@+id/textView7">
-
-                    <TextView
-                        android:text="phone id:"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/textView"
-                        android:layout_alignTop="@+id/phone_id_text"
-                        android:layout_alignParentStart="true"
-                        android:layout_toStartOf="@+id/phone_id_text"
-                        android:layout_above="@+id/textView2"
-                        android:layout_alignEnd="@+id/root_btn" />
-
-                    <EditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberSigned"
-                        android:ems="10"
-                        android:layout_marginTop="0dp"
-                        android:id="@+id/phone_id_text"
-                        android:layout_toEndOf="@+id/root_btn" />
-
-                    <TextView
-                        android:text="-1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/phone_id_cur"
-                        android:visibility="visible"
-                        android:layout_alignTop="@+id/phone_id_text"
-                        android:layout_above="@+id/group_id_cur"
-                        android:layout_alignParentEnd="true"
-                        android:layout_toEndOf="@+id/phone_id_text" />
-
-                    <TextView
-                        android:text="group id:"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/textView2"
-                        android:layout_alignBottom="@+id/group_id_text"
-                        android:layout_alignParentStart="true"
-                        android:layout_below="@+id/phone_id_text"
-                        android:layout_toStartOf="@+id/phone_id_text"
-                        android:layout_alignEnd="@+id/textView"
-                        android:layout_marginTop="20dp" />
-
-                    <EditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberSigned"
-                        android:ems="10"
-                        android:id="@+id/group_id_text"
-                        android:layout_below="@+id/phone_id_text"
-                        android:layout_toStartOf="@+id/phone_id_cur" />
-
-                    <TextView
-                        android:text="-1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/group_id_cur"
-                        android:visibility="visible"
-                        android:layout_below="@+id/phone_id_text"
-                        android:layout_alignBottom="@+id/group_id_text"
-                        android:layout_alignParentEnd="true"
-                        android:layout_toEndOf="@+id/phone_id_text" />
-
-        <Button
-                android:text="Cmd Line"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/play_store_btn"
-                android:layout_toStartOf="@+id/root_status"
-                android:id="@+id/cmd_line_btn" />
-
-    </LinearLayout>
 
 
     <Button
@@ -236,7 +144,7 @@
         android:layout_below="@+id/sticky_mac_display"
         android:width="80dp"
         android:layout_alignEnd="@+id/play_store_btn"
-        android:layout_marginLeft="20dp"
+        android:layout_marginLeft="10dp"
         android:layout_toEndOf="@+id/sticky_btn" />
 
     <TextView
@@ -295,7 +203,8 @@
         android:id="@+id/isOnlineText"
         android:layout_below="@+id/ping_btn"
         android:layout_alignParentEnd="true"
-        android:layout_alignStart="@+id/is_cross_paired_text" />
+        android:layout_alignStart="@+id/is_cross_paired_text"
+        android:gravity="right" />
 
     <TextView
         android:text="is_cross_paired"
@@ -305,7 +214,8 @@
 
         android:layout_toEndOf="@+id/play_store_btn"
         android:layout_below="@+id/isOnlineText"
-        android:layout_above="@+id/mac_address_display" />
+        android:layout_above="@+id/mac_address_display"
+        android:gravity="right" />
 
     <TextView
         android:text="is_gp_good"
@@ -315,16 +225,6 @@
         android:layout_above="@+id/ping_btn"
         android:layout_alignParentEnd="true" />
 
-    <TextView
-        android:text="status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/status"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignStart="@+id/root_status"
-        android:gravity="right" />
-
     <Button
         android:text="Scan"
         android:layout_width="wrap_content"
@@ -332,6 +232,143 @@
         android:id="@+id/scan_btn"
         android:layout_alignParentBottom="true"
         android:layout_alignStart="@+id/sticky_mac_display" />
+
+    <TextView
+        android:text="status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/status"
+        android:gravity="right"
+        android:layout_alignBaseline="@+id/scan_btn"
+        android:layout_alignBottom="@+id/scan_btn"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/total_data_text"
+        android:layout_marginLeft="20dp"
+        android:layout_below="@+id/mac_address_display"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/textView5" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/isOnlineText">
+
+                    <TextView
+                        android:text="phone id:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView"
+                        android:layout_alignTop="@+id/phone_id_text"
+                        android:layout_alignParentStart="true"
+                        android:layout_toStartOf="@+id/phone_id_text"
+                        android:layout_above="@+id/textView2"
+                        android:layout_alignEnd="@+id/root_btn" />
+
+                    <EditText
+                        android:layout_width="353dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberSigned"
+                        android:ems="10"
+                        android:layout_marginTop="0dp"
+                        android:id="@+id/phone_id_text"
+                        android:layout_toEndOf="@+id/root_btn" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/phone_id_cur"
+                        android:visibility="visible"
+                        android:layout_alignTop="@+id/phone_id_text"
+                        android:layout_above="@+id/group_id_cur"
+                        android:layout_alignParentEnd="true"
+                        android:layout_toEndOf="@+id/phone_id_text" />
+
+                    <TextView
+                        android:text="group id:"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView2"
+                        android:layout_alignBottom="@+id/group_id_text"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@+id/phone_id_text"
+                        android:layout_toStartOf="@+id/phone_id_text"
+                        android:layout_alignEnd="@+id/textView"
+                        android:layout_marginTop="20dp" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberSigned"
+                        android:ems="10"
+                        android:id="@+id/group_id_text"
+                        android:layout_below="@+id/phone_id_text"
+                        android:layout_toStartOf="@+id/phone_id_cur" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/group_id_cur"
+                        android:visibility="visible"
+                        android:layout_below="@+id/phone_id_text"
+                        android:layout_alignBottom="@+id/group_id_text"
+                        android:layout_alignParentEnd="true"
+                        android:layout_toEndOf="@+id/phone_id_text" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <Button
+                    android:text="Cmd Line"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/play_store_btn"
+                    android:layout_toStartOf="@+id/root_status"
+                    android:id="@+id/cmd_line_btn" />
+
+            <Button
+                android:text="Write LPM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/write_lpm" />
+
+            <TextView
+                android:text="is_lpm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/is_lpm_text"
+                android:layout_weight="0.26"
+                android:gravity="right" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:text="Update PW"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/google_play_state"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/update_pw" />
+
+    <Button
+        android:text="Deploy Audit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/update_pw"
+        android:layout_alignStart="@+id/update_pw"
+        android:id="@+id/deployment_audit" />
 
 
 </RelativeLayout>
