@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 
 public class RebootBackOffNumWriter {
 
-	private final static String LOG_NAME = "reboot_backoff_num.log";
+	private final static String LOG_NAME = "pw_reboot_backoff_num.log";
 
 	private static File mLogFile;
 	private static Context mContext;
@@ -110,7 +110,7 @@ public class RebootBackOffNumWriter {
 				logBR.close();
 			}  catch (IOException e) {
 				if (e.getCause().toString().contains("No such file")) {
-					log(String.valueOf(System.currentTimeMillis()), "start");
+					log(String.valueOf(System.currentTimeMillis()), "-1");
 					Log.e("LOG CREATED", LOG_NAME);
 				} else {
 					// TODO Auto-generated catch block

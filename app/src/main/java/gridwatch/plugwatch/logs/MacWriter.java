@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 
 public class MacWriter {
 
-	private final static String LOG_NAME = "mac.log";
+	private final static String LOG_NAME = "pw_mac.log";
 
 	private static File mLogFile;
 	private static Context mContext;

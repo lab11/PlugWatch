@@ -156,6 +156,8 @@ public class PlugWatchService extends Service {
         }
         Log.i("PlugWatchService:onCreate", "hit");
 
+        JobManager.create(this).addJobCreator(new NetworkJobCreator());
+
 
         AudioManager audiomanage = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         audiomanage.setRingerMode(AudioManager.RINGER_MODE_SILENT);
@@ -177,7 +179,6 @@ public class PlugWatchService extends Service {
         setup_realm(); //database
         create_sticky_notification(); //hack to help with long running service
 
-        JobManager.create(mContext).addJobCreator(new NetworkJobCreator());
 
 
         location_rec = LocationRequest.create()
@@ -590,9 +591,13 @@ public class PlugWatchService extends Service {
         try {
                 MacWriter r = new MacWriter(getApplicationContext());
                 r.log(String.valueOf(System.currentTimeMillis()), macAddress, "n");
-                String sticky = r.get_last_sticky_value();
-                if (!macAddress.equals(sticky)) {
-                    cp = "t";
+                if (macAddress != null) {
+                    String sticky = r.get_last_sticky_value();
+                    if (!macAddress.equals(sticky)) {
+                        cp = "t";
+                    } else {
+                        cp = "f";
+                    }
                 } else {
                     cp = "f";
                 }
@@ -611,7 +616,7 @@ public class PlugWatchService extends Service {
             case BleScanException.BLUETOOTH_DISABLED:
                 Toast.makeText(mContext, "Enable bluetooth and try again", Toast.LENGTH_SHORT).show();
                 FirebaseCrash.log("handleBleScanException: Enable bluetooth and try again");
-
+                Rebooter t = new Rebooter(this, new Throwable("bluetooth stack died"));
                 break;
             case BleScanException.LOCATION_PERMISSION_MISSING:
                 Toast.makeText(mContext,

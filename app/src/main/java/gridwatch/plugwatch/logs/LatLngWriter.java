@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 
 public class LatLngWriter {
 
-	private final static String LOG_NAME = "lat_lng.log";
+	private final static String LOG_NAME = "pw_lat_lng.log";
 
 	private static File mLogFile;
 	private Context mContext;
@@ -105,7 +105,7 @@ public class LatLngWriter {
 				logBR.close();
 			} catch (IOException e) {
 				if (e.getCause().toString().contains("No such file")) {
-					log(String.valueOf(System.currentTimeMillis()), "start");
+					log(String.valueOf(System.currentTimeMillis()), "-1,-1");
 					Log.e("LOG CREATED", LOG_NAME);
 				} else {
 					// TODO Auto-generated catch block

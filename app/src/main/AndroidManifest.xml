@@ -27,6 +27,11 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+
+
 
     <application
         android:allowBackup="true"
@@ -78,6 +83,15 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <receiver
+            android:name=".callbacks.StartSMSWatchDogAtBoot"
+            android:label="StartAtBoot">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <receiver
             android:name=".inputs.SMSAPI"
             android:permission="android.permission.BROADCAST_SMS">
@@ -102,6 +116,12 @@
         <!-- PROCESS ! -->
         <service
             android:name=".wit.WatchdogService"
+            android:enabled="true"
+            android:exported="true"
+            />
+
+        <service
+            android:name=".wit.SMSWatchdogService"
             android:enabled="true"
             android:exported="true"
             />
@@ -135,6 +155,19 @@
             android:process=".PlugWatch"
             android:exported="false"
             android:syncable="false" />
+
+
+        <service
+            android:name=".callbacks.NotificationService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibilityservice" />
+        </service>
 
 
     </application>

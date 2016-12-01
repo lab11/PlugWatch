@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_home"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="gridwatch.plugwatch.wit.PlugWatchUIActivity"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="phone id:"
+                android:layout_height="match_parent"
+                android:id="@+id/textView3"
+                android:layout_width="43dp" />
+
+            <EditText
+                android:layout_width="168dp"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:ems="10"
+                android:id="@+id/phone_id_text"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="0.03" />
+
+            <TextView
+                android:text="-1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/phone_id_cur"
+                android:layout_weight="0.39" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="group id:"
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                android:id="@+id/textView6"
+                android:gravity="top"
+                android:layout_weight="0.13" />
+
+            <EditText
+                android:layout_width="167dp"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:ems="10"
+                android:id="@+id/group_id_text"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="0.07" />
+
+            <TextView
+                android:text="-1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/group_id_cur"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:text="CMD "
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/cmd_line_btn"
+                android:layout_weight="1"
+                android:textSize="10sp" />
+
+            <Button
+                android:text="Deploy Audit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/deployment_audit"
+                android:layout_weight="1"
+                android:textSize="10sp" />
+
+            <Button
+                android:text="Deploy Mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/deploy_mode_btn"
+                android:layout_weight="1"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:text="Up PW"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/update_pw"
+                android:layout_weight="1"
+                android:textSize="10sp" />
+
+            <Button
+                android:text="Up GP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/play_store_btn"
+                android:layout_weight="1"
+                android:textSize="10sp" />
+
+            <Button
+                android:text="Write LPM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/write_lpm"
+                android:layout_weight="1"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="Sticky MAC:"
+                android:layout_width="42dp"
+                android:layout_height="match_parent"
+                android:id="@+id/textView16"
+                android:gravity="center_vertical" />
+
+            <TextView
+                android:text="not_set"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/sticky_mac_display"
+                android:layout_weight="5.94"
+                android:layout_marginLeft="5dp"
+                android:textSize="10sp" />
+
+            <EditText
+                android:layout_width="54dp"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:ems="10"
+                android:id="@+id/sticky_mac_pw" />
+
+            <Button
+                android:text="Sticky"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/sticky_btn"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="ping is off"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/isOnlineText"
+                android:layout_weight="1" />
+
+            <ToggleButton
+                android:text="Not Pinging"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ping_btn"
+                android:layout_weight="1"
+                android:textOff="Not Pinging"
+                android:textOn="Pinging"
+                android:textSize="10sp" />
+
+            <Button
+                android:text="Test"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/test"
+                android:layout_weight="1"
+                android:textSize="10sp" />
+
+            <Button
+                android:text="Scan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/scan_btn"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="196dp"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="google_account"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/google_account_text" />
+
+                <TextView
+                    android:text="is_gp_good"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/google_play_state" />
+
+                <TextView
+                    android:text="is_cross_paired"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/is_cross_paired_text" />
+
+                <TextView
+                    android:text="is_lpm"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/is_lpm_text" />
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="# Realm:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView34" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/num_realm_display"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="10dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="Current MAC:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView32" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/mac_address_display"
+                        android:layout_weight="0.58"
+                        android:layout_marginLeft="10dp"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="Total Network Data:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView30" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/total_data_text"
+                        android:layout_marginLeft="10dp"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="Num Wit:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView26" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/num_packets_text"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="10dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="Last RX:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView28" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/seconds_since_last_text"
+                        android:layout_marginLeft="10dp"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:text="# GridWatch:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView41" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/num_gw_text"
+                        android:layout_marginLeft="10dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:weightSum="1"
+                android:layout_marginTop="50dp">
+
+                <TextView
+                    android:text="version_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/version_number"
+                    android:gravity="right" />
+
+                <TextView
+                    android:text="root_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/root_status"
+                    android:gravity="right" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/status"
+                    android:gravity="right"
+                    android:text="status" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>

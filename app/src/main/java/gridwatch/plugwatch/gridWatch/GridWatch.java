@@ -293,10 +293,15 @@ public class GridWatch {
         try {
             MacWriter r = new MacWriter(mContext);
             String sticky = r.get_last_sticky_value();
-            if (!mMAC.equals(sticky)) {
-                return "t";
-            } else {
-                return "f";
+            try {
+                if (!mMAC.equals(sticky)) {
+                    return "t";
+                } else {
+                    return "f";
+                }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+                return "-1";
             }
 
         } catch (Exception e) {

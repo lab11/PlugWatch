@@ -42,6 +42,7 @@ public class SensorConfig {
 
 
     public final static int MAX_JOBS = 100;
+    public static final String SMS_ENDPOINT = "12012317237";
 
     public static int NUM_ANY_CRASH_BEFORE_REBOOT = 20;
     public static int MAX_NUM_REBOOT_BACKOFF = 30;

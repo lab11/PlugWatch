@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 
 public class GroupIDWriter {
 
-	private final static String LOG_NAME = "witenergy_group_ID.log";
+	private final static String LOG_NAME = "pw_group_ID.log";
 
 	private static File mLogFile;
 	private Context mContext;

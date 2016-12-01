@@ -1,6 +1,7 @@
 package gridwatch.plugwatch.wit;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
@@ -20,6 +21,7 @@ import gridwatch.plugwatch.utilities.Restart;
 public class ConnectionCheckService extends IntentService {
 
     RestartNumWriter numWriter;
+    Context mContext;
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -43,14 +45,21 @@ public class ConnectionCheckService extends IntentService {
 
 
     private void run() {
-        numWriter = new RestartNumWriter(getApplicationContext());
+        Log.e("ConnectionCheckService", "hit");
+        if (getBaseContext() == null) {
+            Log.e("ConnectionCheckService", "null context");
 
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        }
+
+        numWriter = new RestartNumWriter(getBaseContext());
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         int plugwatchservice_pid = sp.getInt(SettingsConfig.PID, -1);
 
         long last = sp.getLong(SettingsConfig.LAST_WIT, -1);
         long diffInMs = System.currentTimeMillis() - last;
 
+        Log.e("numWriter last val", numWriter.get_last_value());
         int num_previous_reboots = Integer.valueOf(numWriter.get_last_value());
         Log.i("ConnectionCheckService", "restart checking " + String.valueOf(last) + " num previous reboots: " + String.valueOf(num_previous_reboots));
 
@@ -70,7 +79,7 @@ public class ConnectionCheckService extends IntentService {
             } else {
                 numWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(incremented_num_previous_reboots));
                 Restart r = new Restart();
-                r.do_restart(getApplicationContext(), PlugWatchUIActivity.class, new Throwable("restarting due to timeout"), plugwatchservice_pid);
+                r.do_restart(getBaseContext(), PlugWatchUIActivity.class, new Throwable("restarting due to timeout"), plugwatchservice_pid);
             }
 
         } else {

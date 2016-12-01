@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 
 public class PhoneIDWriter {
 
-	private final static String LOG_NAME = "witenergy_ID.log";
+	private final static String LOG_NAME = "pw_ID.log";
 	private static SharedPreferences prefs;
 
 	private static File mLogFile;

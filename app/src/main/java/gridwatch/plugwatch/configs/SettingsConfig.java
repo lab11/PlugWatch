@@ -46,6 +46,10 @@ public class SettingsConfig {
     public static final String NUM_WD = "NUM_WD";
     public static final String STICKY_MAC = "STICKY_MAC";
     public static final String NUM_PING = "NUM_PING";
+    public static final String PHONE_NUM = "PHONE_NUM";
+    public static final String AIRTIME = "AIRTIME";
+    public static final String NUM_REALMS = "NUM_REALMS";
+    public static final String INTERNET = "INTERNET";
 
 
     public class NUM_WD {

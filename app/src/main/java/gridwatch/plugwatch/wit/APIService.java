@@ -492,6 +492,13 @@ public class APIService extends Service {
         }
     }
 
+    public void get_num_realms() {
+        List<File> files_to_upload = getListFiles(openRealm(), "realm");
+        Ack a = new Ack(System.currentTimeMillis(), String.valueOf(files_to_upload.size()), cur_phone_id, cur_group_id);
+        int new_realm_num = sp.getInt(SettingsConfig.NUM_REALMS, 0) + 1;
+        sp.edit().putInt(SettingsConfig.NUM_REALMS, new_realm_num).commit();
+        mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_REALMS).child(String.valueOf(new_realm_num)).setValue(a);
+    }
 
 
 
