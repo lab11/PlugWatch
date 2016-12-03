@@ -32,4 +32,5 @@ public class DatabaseConfig {
     public static final String TOPUP_AIRTIME = "TOPUP_AIRTIME";
     public static final String TOPUP_INTERNET = "TOPUP_INTERNET";
     public static final String GET_LOCATION = "GET_LOCATION";
+    public static final String GW = "GW";
 }

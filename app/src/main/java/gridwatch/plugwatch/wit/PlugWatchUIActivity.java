@@ -215,6 +215,7 @@ public class PlugWatchUIActivity extends Activity {
         setup_ui();
         setup_build_str();
         setup_settings();
+        setup_random_gw();
         setup_root();
         setup_connection_check();
         setup_watchdog();

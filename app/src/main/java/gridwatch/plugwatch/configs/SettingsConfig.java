@@ -65,6 +65,7 @@ public class SettingsConfig {
     public static final String NUM_TOPUP_INTERNET = "NUM_TOPUP_INTERNET";
     public static final String NUM_LOCATION = "NUM_LOCATION";
     public static final String PING_RES = "PING_RES";
+    public static final String GW = "GW";
 
 
     public class NUM_WD {

@@ -13,6 +13,7 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellInfo;
@@ -32,6 +33,8 @@ import com.github.pwittchen.reactivesensors.library.ReactiveSensorEvent;
 import com.github.pwittchen.reactivesensors.library.ReactiveSensors;
 import com.google.android.gms.location.LocationRequest;
 import com.google.firebase.crash.FirebaseCrash;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.orhanobut.logger.Logger;
 
 import org.json.JSONException;
@@ -44,8 +47,10 @@ import java.util.concurrent.TimeUnit;
 
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
+import gridwatch.plugwatch.configs.DatabaseConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
+import gridwatch.plugwatch.database.Ack;
 import gridwatch.plugwatch.database.GWDump;
 import gridwatch.plugwatch.logs.GroupIDWriter;
 import gridwatch.plugwatch.logs.LatLngWriter;
@@ -73,9 +78,14 @@ public class GridWatch {
     private String filePath;
     SharedPreferences settings;
 
+    SharedPreferences sp;
+
+
     private LocationRequest location_rec;
 
     private MediaRecorder mRecorder;
+
+    private DatabaseReference mDatabase;
 
 
     private Context mContext;
@@ -103,6 +113,8 @@ public class GridWatch {
         mMAC = mac;
         mVersionNum = version_num;
         mLast = last;
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        sp = PreferenceManager.getDefaultSharedPreferences(mContext);
 
     }
 
@@ -361,6 +373,13 @@ public class GridWatch {
                     .setPersisted(true)
                     .build()
                     .schedule();
+
+            Ack gw = new Ack(System.currentTimeMillis(), a.toString(), phone_id, experiment_id);
+            int new_gw_num = sp.getInt(SettingsConfig.GW, 0) + 1;
+            sp.edit().putInt(SettingsConfig.GW, new_gw_num).commit();
+            mDatabase.child(phone_id).child(DatabaseConfig.GW).child(String.valueOf(new_gw_num)).setValue(gw);
+
+
         } catch (Exception e) {
             e.printStackTrace();
             FirebaseCrash.log(e.getMessage());

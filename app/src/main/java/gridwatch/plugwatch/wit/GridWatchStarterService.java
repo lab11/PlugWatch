@@ -17,9 +17,9 @@ public class GridWatchStarterService extends Service {
         int gw_select = r.nextInt(10);
         if (gw_select == 1) {
             Log.e("GridWatch", "doing random sample");
-            Intent a = new Intent(this, PlugWatchService.class);
+            Intent a = new Intent(getApplicationContext(), PlugWatchService.class);
             a.putExtra(IntentConfig.FALSE_GW, IntentConfig.FALSE_GW);
-            sendBroadcast(a);
+            startService(a); //TODO
         }
     }
 
