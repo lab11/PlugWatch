@@ -30,6 +30,7 @@ import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
+import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Patterns;
@@ -83,6 +84,7 @@ import gridwatch.plugwatch.logs.GroupIDWriter;
 import gridwatch.plugwatch.logs.LatLngWriter;
 import gridwatch.plugwatch.logs.MacWriter;
 import gridwatch.plugwatch.logs.PhoneIDWriter;
+import gridwatch.plugwatch.logs.WifiWriter;
 import gridwatch.plugwatch.utilities.Restart;
 import gridwatch.plugwatch.utilities.RootChecker;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
@@ -109,6 +111,8 @@ public class PlugWatchUIActivity extends Activity {
 
     private boolean deploy_mode;
 
+    private boolean is_sms_good;
+
     private boolean amPinging;
 
     private static int num_realms = -1;
@@ -117,9 +121,11 @@ public class PlugWatchUIActivity extends Activity {
     private static int num_wit = -1;
     private static int num_gw = -1;
     private static boolean is_connected = false;
-    private static int total_network_data = -1;
+    private static long total_network_data = -1;
     private static int plugwatchservice_pid = -1;
     private static String realm_filename = "";
+
+    private static WifiWriter wifi_writer;
 
     private static int failsafe_pid = -1;
 
@@ -181,11 +187,15 @@ public class PlugWatchUIActivity extends Activity {
         //AppUpdater appUpdater = new AppUpdater(this);
         //appUpdater.start();
 
+
+
+        wifi_writer = new WifiWriter(getApplicationContext());
         phoneIDWriter = new PhoneIDWriter(getApplicationContext());
         groupIDWriter = new GroupIDWriter(getApplicationContext());
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        phone_id = telephonyManager.getDeviceId();
-        phoneIDWriter.log(String.valueOf(System.currentTimeMillis()), phone_id, "");
+        //TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        //phone_id = telephonyManager.getDeviceId();
+        //phoneIDWriter.log(String.valueOf(System.currentTimeMillis()), phone_id, "");
+        phone_id = phoneIDWriter.get_last_value();
         group_id = groupIDWriter.get_last_value();
 
 
@@ -207,8 +217,9 @@ public class PlugWatchUIActivity extends Activity {
         setup_settings();
         setup_root();
         setup_connection_check();
-
+        setup_watchdog();
         BluetoothAdapter.getDefaultAdapter().enable();
+
 
     }
 
@@ -305,6 +316,25 @@ public class PlugWatchUIActivity extends Activity {
         );
     }
 
+    private void setup_random_gw() {
+        ctx = getApplicationContext();
+        am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+        Calendar cal = Calendar.getInstance();
+        long interval = SensorConfig.GRIDWATCH_INTERVAL;
+        Intent serviceIntent = new Intent(ctx, GridWatchStarterService.class);
+        servicePendingIntent =
+                PendingIntent.getService(ctx,
+                        321321321, //integer constant used to identify the service
+                        serviceIntent,
+                        PendingIntent.FLAG_CANCEL_CURRENT);
+        am.setRepeating(
+                AlarmManager.RTC_WAKEUP,
+                cal.getTimeInMillis(),
+                interval,
+                servicePendingIntent
+        );
+    }
+
 
     /*
     private void setup_plugwatch_service() {
@@ -336,6 +366,8 @@ public class PlugWatchUIActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        App.activityResumed();
+
     }
 
     @Override
@@ -350,6 +382,7 @@ public class PlugWatchUIActivity extends Activity {
             unbindService(failSafeConnection);
             mBoundFailsafeTimerService = false;
         }
+        App.activityStopped();
     }
 
     @Override
@@ -376,6 +409,7 @@ public class PlugWatchUIActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        App.activityPaused();
     }
 
     @Override
@@ -385,6 +419,7 @@ public class PlugWatchUIActivity extends Activity {
             unbindService(plugWatchConnection);
             mBoundPlugWatchService = false;
         }
+        App.activityStopped();
     }
 
     private ServiceConnection plugWatchConnection = new ServiceConnection() {
@@ -398,7 +433,7 @@ public class PlugWatchUIActivity extends Activity {
             mIPlugWatchService = null;
             mBoundPlugWatchService = false;
             Restart r = new Restart();
-            r.do_restart(getApplicationContext(), PlugWatchUIActivity.class, new Throwable("service disconnected"), -1);
+            r.do_restart(getApplicationContext(), PlugWatchUIActivity.class, getClass().getName(), new Throwable("service disconnected"), -1);
         }
     };
 
@@ -452,7 +487,7 @@ public class PlugWatchUIActivity extends Activity {
                     startService(a);
                 }
                 is_connected = mIPlugWatchService.get_is_connected();
-                total_network_data = sp.getInt(SettingsConfig.TOTAL_DATA, -1);
+                total_network_data = sp.getLong(SettingsConfig.TOTAL_DATA, -1);
                 String cur_mac = mIPlugWatchService.get_mac();
 
                 getWifi(); //TODO talk with jay
@@ -460,12 +495,14 @@ public class PlugWatchUIActivity extends Activity {
 
                 num_realms = num_realms();
 
+
                 try {
                     if (mac_address_str != null && cur_mac != null) {
                         if (!cur_mac.equals(mac_address_str)) {
                             MacWriter r = new MacWriter(getApplicationContext());
                             r.log(String.valueOf(System.currentTimeMillis()), cur_mac, "n");
                             String sticky = r.get_last_sticky_value();
+                            sticky_mac_display.setText(sticky);
                             if (!cur_mac.equals(sticky)) {
                                 is_cross_pair = false;
                             } else {
@@ -485,7 +522,7 @@ public class PlugWatchUIActivity extends Activity {
                     Ping.onAddress("8.8.8.8").doPing(new Ping.PingListener() {
                         @Override
                         public void onResult(PingResult pingResult) {
-                            isOnlineText.setText(String.valueOf(pingResult.getTimeTaken()));
+                            sp.edit().putFloat(SettingsConfig.PING_RES, pingResult.getTimeTaken()).commit();
                         }
 
                         @Override
@@ -499,6 +536,7 @@ public class PlugWatchUIActivity extends Activity {
                 sp.edit().putString(SettingsConfig.FREESPACE_EXTERNAL, getAvailableExternalMemorySize()).commit();
                 sp.edit().putInt(SettingsConfig.WIT_SIZE, num_wit).commit();
                 sp.edit().putInt(SettingsConfig.GW_SIZE, num_gw).commit();
+                sp.edit().putInt(SettingsConfig.NUM_REALMS, num_realms).commit();
                 sp.edit().clear();
             } catch (RemoteException e) {
                 e.printStackTrace();
@@ -533,11 +571,14 @@ public class PlugWatchUIActivity extends Activity {
                 phone_id_cur.setText(phone_id);
                 root_status.setText(isRooted ? "Rooted" : "Not Rooted");
                 root_status.setTextColor(isRooted ? Color.GREEN : Color.RED);
+                is_SMS_good_text.setText(is_sms_good ? "SMS Good" : "SMS Not Good");
+                is_SMS_good_text.setTextColor(is_sms_good ? Color.GREEN : Color.RED);
                 mac_address_display.setText(mac_address_str);
                 is_cross_paired_text.setText(is_cross_pair ? "Cross-paired" : "Not Cross-paired");
                 is_cross_paired_text.setTextColor(is_cross_pair ? Color.RED : Color.GREEN);
                 is_lpm_text.setText(is_lpm ? "LPM Set" : "LPM Not Set");
                 is_lpm_text.setTextColor(is_lpm ? Color.GREEN : Color.RED);
+                isOnlineText.setText(String.valueOf(sp.getFloat(SettingsConfig.PING_RES, -1)));
                 if (sticky_mac_display.getText().equals("start")) {
                     MacWriter r = new MacWriter(getApplicationContext());
                     if (r.get_last_value() != null) {
@@ -572,7 +613,7 @@ public class PlugWatchUIActivity extends Activity {
                 }
 
                 if (email != null) {
-                google_account_text.setText(email);
+                    google_account_text.setText(email);
                 }
 
                 group_id_cur.setText(group_id);
@@ -696,6 +737,10 @@ public class PlugWatchUIActivity extends Activity {
     @Bind(R.id.group_id_cur)
     TextView group_id_cur;
 
+    @Bind(R.id.is_SMS_good)
+    TextView is_SMS_good_text;
+
+
     @Bind(R.id.phone_id_text)
     EditText phone_id_text;
     @Bind(R.id.group_id_text)
@@ -703,6 +748,9 @@ public class PlugWatchUIActivity extends Activity {
 
     @Bind(R.id.scan_btn)
     Button scan_btn;
+
+    @Bind(R.id.sms_btn)
+    Button sms_btn;
 
     @Bind(R.id.test)
     Button test_btn;
@@ -721,6 +769,16 @@ public class PlugWatchUIActivity extends Activity {
 
     @Bind(R.id.num_realm_display)
     TextView num_realm_display;
+
+    @OnClick(R.id.sms_btn)
+    public void onSMSClick() {
+        String to_send = "test";
+        SmsManager smsManager = SmsManager.getDefault();
+        Log.e("texting msg", to_send);
+        smsManager.sendTextMessage("12012317237", null, to_send, null, null);
+        smsManager.sendTextMessage("20880", null, "GridWatch: " + phone_id + "," + to_send, null, null);
+        is_sms_good = true;
+    }
 
     @OnClick(R.id.deployment_audit)
     public void onDeploymentAuditClick() {
@@ -741,7 +799,7 @@ public class PlugWatchUIActivity extends Activity {
 
         //is play running
         //has settings set correctly
-
+        //check sms
 
         LatLngWriter l = new LatLngWriter(this);
         String loc = l.get_last_value();
@@ -812,7 +870,7 @@ public class PlugWatchUIActivity extends Activity {
         Pop.on(this).with().title("Check Airtime Balance").body("Do it.").when(new Pop.Yah() {
             @Override
             public void clicked(DialogInterface dialog, View view) {
-                sp.edit().putString("action", "check_airtime").commit();
+                sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_CHECK_AIRTIME).commit();
                 do_call(AIRTIME);
             }
         }).show();
@@ -820,7 +878,7 @@ public class PlugWatchUIActivity extends Activity {
         Pop.on(this).with().title("Check Data Balance").body("Do it.").when(new Pop.Yah() {
             @Override
             public void clicked(DialogInterface dialog, View view) {
-                sp.edit().putString("action", "check_internet").commit();
+                sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_CHECK_INTERNET).commit();
                 do_call(INTERNET);
             }
         }).show();
@@ -828,7 +886,7 @@ public class PlugWatchUIActivity extends Activity {
         Pop.on(this).with().title("Get Phone Number").body("Do it.").when(new Pop.Yah() {
             @Override
             public void clicked(DialogInterface dialog, View view) {
-                sp.edit().putString("action", "phone_num").commit();
+                sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_CHECK_PHONENUM).commit();
                 do_call(AIRTIME);
             }
         }).show();
@@ -878,11 +936,17 @@ public class PlugWatchUIActivity extends Activity {
     public void onTestClick() {
 
 
+        /*
+        Intent a = new Intent(this, PlugWatchService.class);
+        a.putExtra(IntentConfig.FALSE_GW, IntentConfig.FALSE_GW);
+        sendBroadcast(a);
+        */
 
 
         Intent a = new Intent(this, PlugWatchService.class);
-        a.putExtra(IntentConfig.TEST, IntentConfig.TEST);
+        a.putExtra(IntentConfig.FALSE_GW, IntentConfig.FALSE_GW);
         startService(a);
+
 
 
         //Intent a = new Intent(this, Reboot.class);
@@ -1036,8 +1100,8 @@ public class PlugWatchUIActivity extends Activity {
         super.onWindowFocusChanged(hasFocus);
         if (!hasFocus) {
             // Close every kind of system dialog
-            Intent closeDialog = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-            sendBroadcast(closeDialog);
+            //Intent closeDialog = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            //sendBroadcast(closeDialog);
         }
     }
 
@@ -1128,6 +1192,7 @@ public class PlugWatchUIActivity extends Activity {
                     //Log.e("LEVEL", String.valueOf(a.level));
                     String resStr = a.SSID + "," + String.valueOf(a.level);
                     wifi_res = wifi_res + resStr + ":";
+
                 }
             } else {
                 Log.d("wifi err", "wifi not enabled");
@@ -1138,6 +1203,7 @@ public class PlugWatchUIActivity extends Activity {
             } else {
                 wifi_res = "none";
             }
+            wifi_writer.log(String.valueOf(System.currentTimeMillis()), wifi_res);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -16,15 +16,15 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-public class MacWriter {
+public class RebootCauseWriter {
 
-	private final static String LOG_NAME = "pw_mac.log";
+	private final static String LOG_NAME = "pw_reboot_cause.log";
 
 	private static File mLogFile;
 	private static Context mContext;
 	static SharedPreferences prefs = null;
 
-	public MacWriter(Context context) {
+	public RebootCauseWriter(Context context) {
 		mContext = context;
 		create_file();
 	}
@@ -35,16 +35,13 @@ public class MacWriter {
 		if (mContext != null) {
 			prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
 		} else {
-			Log.e("context mac", "null");
+			Log.e("context restart_num", "null");
 		}
 		//log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
 	}
 
-	public static void log(String time, String mac , String info) {
-		String l = time + "|" + mac;
-		if (!info.equals("")) {
-			l += "|" + info;
-		}
+	public static void log(String time, String cause, String type) {
+		String l = time + "|" + cause + "|" + type;
 		try {
 			FileWriter logFW = null;
 			logFW = new FileWriter(mLogFile.getAbsolutePath(), true);
@@ -55,18 +52,6 @@ public class MacWriter {
 			e.printStackTrace();
 		}
 
-	}
-
-	public static void init() {
-		try {
-			FileWriter logFW = null;
-			logFW = new FileWriter(mLogFile.getAbsolutePath(), true);
-			logFW.write("\n");
-			logFW.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 
@@ -81,26 +66,6 @@ public class MacWriter {
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	public String get_last_sticky_value() {
-		Log.e("get_last_sticky", "getting");
-		ArrayList<String> log = read();
-		if (!log.isEmpty()) {
-			for (int i = log.size()-1; i >= 0; i--) {
-				String cur = log.get(i);
-				//Log.e("testing get_last_sticky", cur);
-				String[] fields = cur.split("\\|");
-				if (fields.length >= 2) {
-					if (fields.length >= 3) {
-						if (fields[2].equals("sticky")) {
-							return fields[1];
-						}
-					}
-				}
-			}
-		}
-		return "0";
 	}
 
 
@@ -143,9 +108,9 @@ public class MacWriter {
 					}
 				}
 				logBR.close();
-			}  catch (IOException e) {
+			} catch (IOException e) {
 				if (e.getCause().toString().contains("No such file")) {
-					log(String.valueOf(System.currentTimeMillis()), "start", "");
+					log(String.valueOf(System.currentTimeMillis()), "start", "start");
 					Log.e("LOG CREATED", LOG_NAME);
 				} else {
 					// TODO Auto-generated catch block

@@ -26,4 +26,10 @@ public class DatabaseConfig {
     public static final String PING = "PING";
     public static final String NUM_REALMS = "NUM_REALMS";
 
+    public static final String PHONENUM = "PHONENUM";
+    public static final String AIRTIME_BALANCE = "AIRTIME_BALANCE" ;
+    public static final String INTERNET_BALANCE = "INTERNET_BALANCE";
+    public static final String TOPUP_AIRTIME = "TOPUP_AIRTIME";
+    public static final String TOPUP_INTERNET = "TOPUP_INTERNET";
+    public static final String GET_LOCATION = "GET_LOCATION";
 }

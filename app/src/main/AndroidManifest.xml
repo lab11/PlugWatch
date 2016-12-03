@@ -25,15 +25,14 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
-
-
     <application
+        android:name=".wit.App"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_config"
         android:icon="@mipmap/ic_launcher"
@@ -45,11 +44,11 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".wit.CommandLineActivity"
             android:label="@string/title_activity_command_line" />
@@ -58,18 +57,15 @@
             android:name=".wit.ConnectionCheckService"
             android:enabled="true"
             android:exported="true" />
-
         <service
             android:name=".utilities.Reboot"
             android:enabled="true"
             android:exported="true" />
-
         <service android:name=".firebase.RegisterFirebase">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-
         <service android:name=".inputs.FirebaseAPI">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -83,7 +79,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".callbacks.StartSMSWatchDogAtBoot"
             android:label="StartAtBoot">
@@ -91,7 +86,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".inputs.SMSAPI"
             android:permission="android.permission.BROADCAST_SMS">
@@ -103,8 +97,7 @@
         <service
             android:name=".wit.APIService"
             android:enabled="true"
-            android:exported="true"
-            />
+            android:exported="true" />
 
         <!-- PROCESS ! -->
         <service
@@ -117,14 +110,11 @@
         <service
             android:name=".wit.WatchdogService"
             android:enabled="true"
-            android:exported="true"
-            />
-
+            android:exported="true" />
         <service
             android:name=".wit.SMSWatchdogService"
             android:enabled="true"
-            android:exported="true"
-            />
+            android:exported="true" />
 
         <!-- PROCESS ! -->
         <service
@@ -147,19 +137,16 @@
             android:enabled="true"
             android:exported="true" />
 
-
-
         <provider
             android:name=".firebase.FirebaseContentProvider"
             android:authorities="gridwatch.wit.firebase"
-            android:process=".PlugWatch"
             android:exported="false"
+            android:process=".PlugWatch"
             android:syncable="false" />
-
 
         <service
             android:name=".callbacks.NotificationService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
@@ -168,8 +155,10 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibilityservice" />
         </service>
-
-
+        <service
+            android:name=".wit.GridWatchStarterService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

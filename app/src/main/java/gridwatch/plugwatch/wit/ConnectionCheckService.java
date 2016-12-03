@@ -75,11 +75,11 @@ public class ConnectionCheckService extends IntentService {
             if (incremented_num_previous_reboots > SensorConfig.REBOOT_THRESHOLD) {
                 numWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
                 FirebaseCrash.log("ConnectionCheckService: rebooting due to max timeout");
-                Rebooter r = new Rebooter(getApplicationContext(), new Throwable("restart rebooting due to max timeout"));
+                Rebooter r = new Rebooter(getApplicationContext(), this.getClass().getName(), new Throwable("restart rebooting due to max timeout"));
             } else {
                 numWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(incremented_num_previous_reboots));
                 Restart r = new Restart();
-                r.do_restart(getBaseContext(), PlugWatchUIActivity.class, new Throwable("restarting due to timeout"), plugwatchservice_pid);
+                r.do_restart(getBaseContext(), PlugWatchUIActivity.class, this.getClass().getName(), new Throwable("restarting due to timeout"), plugwatchservice_pid);
             }
 
         } else {
@@ -118,7 +118,7 @@ public class ConnectionCheckService extends IntentService {
                 } catch (java.lang.NullPointerException e) {
 
                 }
-                Rebooter r = new Rebooter(getApplicationContext(), new Throwable("rebooting due to max timeout"));
+                Rebooter r = new Rebooter(getApplicationContext(), getClass().getName(), new Throwable("rebooting due to max timeout"));
             } else { //just reboot the app
                 try {
                     sp.edit().putInt(SettingsConfig.NUM_CONNECTION_REBOOTS, num_previous_reboots + 1).commit();

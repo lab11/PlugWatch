@@ -20,6 +20,7 @@ public class WD {
     private String mVersionNum;
     private String mExternalFreespace;
     private String mInternalFreespace;
+    private String mNumRealms;
 
     private double mBattery;
 
@@ -30,7 +31,7 @@ public class WD {
 
     }
 
-    public WD(long time, long time_size_last_wit_ms, String measurementSize, String GWSize, String versionNum,
+    public WD(long time, long time_size_last_wit_ms, String measurementSize, String GWSize, String numRealms, String versionNum,
               String external_freespace, String internal_freespace, String gwid, String groupid, double battery) {
         mTime = time;
         mTime_size_last_wit_ms = time_size_last_wit_ms;
@@ -42,6 +43,7 @@ public class WD {
         mExternalFreespace = external_freespace;
         mInternalFreespace = internal_freespace;
         mBattery = battery;
+        mNumRealms = numRealms;
     }
 
     public long getTime() {
@@ -66,6 +68,14 @@ public class WD {
 
     public void setGWID(String mGWID) {
         this.mPhoneId = mGWID;
+    }
+
+    public String getNumRealms() {
+        return mNumRealms;
+    }
+
+    public void setNumRealms(String num) {
+        this.mNumRealms = num;
     }
 
     public String getGroupID() {

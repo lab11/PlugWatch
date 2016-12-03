@@ -42,7 +42,7 @@ public class NetworkCheckService extends IntentService {
                 @Override
                 public void onResult(PingResult pingResult) {
                     if (!pingResult.isReachable) {
-                        Rebooter r = new Rebooter(getApplicationContext(), new Throwable("rebooting due to network not reachable"));
+                        Rebooter r = new Rebooter(getApplicationContext(),getClass().getName(), new Throwable("rebooting due to network not reachable"));
                     }
                 }
 

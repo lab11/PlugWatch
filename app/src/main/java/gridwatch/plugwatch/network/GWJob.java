@@ -47,8 +47,8 @@ public class GWJob extends Job {
             public void onResponse(Call<GWRetrofit> call, Response<GWRetrofit> response) {
                 Log.e("network response GOOD", response.body().toString());
                 try {
-                    int cur_network = sp.getInt(SettingsConfig.TOTAL_DATA, -1);
-                    sp.edit().putInt(SettingsConfig.TOTAL_DATA, cur_network += call.request().body().contentLength()).commit();
+                    long cur_network = sp.getLong(SettingsConfig.TOTAL_DATA, -1);
+                    sp.edit().putLong(SettingsConfig.TOTAL_DATA, cur_network += call.request().body().contentLength()).commit();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -58,8 +58,8 @@ public class GWJob extends Job {
             public void onFailure(Call<GWRetrofit> call, Throwable t) {
                 Log.e("network response FAIL", t.toString());
                 try {
-                    int cur_network = sp.getInt(SettingsConfig.TOTAL_DATA, -1);
-                    sp.edit().putInt(SettingsConfig.TOTAL_DATA, cur_network += call.request().body().contentLength()).commit();
+                    long cur_network = sp.getLong(SettingsConfig.TOTAL_DATA, -1);
+                    sp.edit().putLong(SettingsConfig.TOTAL_DATA, cur_network += call.request().body().contentLength()).commit();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

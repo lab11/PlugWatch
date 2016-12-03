@@ -77,9 +77,12 @@ import gridwatch.plugwatch.database.Command;
 import gridwatch.plugwatch.database.WD;
 import gridwatch.plugwatch.firebase.FirebaseCrashLogger;
 import gridwatch.plugwatch.logs.GroupIDWriter;
+import gridwatch.plugwatch.logs.LatLngWriter;
 import gridwatch.plugwatch.logs.PhoneIDWriter;
 import io.realm.Realm;
 
+import static gridwatch.plugwatch.configs.SMSConfig.AIRTIME;
+import static gridwatch.plugwatch.configs.SMSConfig.INTERNET;
 import static gridwatch.plugwatch.configs.SensorConfig.recordingFolder;
 
 
@@ -128,6 +131,8 @@ public class APIService extends Service {
         cur_phone_id = r.get_last_value();
         GroupIDWriter p = new GroupIDWriter(getApplicationContext());
         cur_group_id = p.get_last_value();
+
+
 
         if (intent != null && intent.getExtras() != null) {
             String cmd = intent.getStringExtra(IntentConfig.INCOMING_API_COMMAND);
@@ -183,6 +188,9 @@ public class APIService extends Service {
         sp.edit().putInt(SettingsConfig.NUM_COMMANDS, new_cmd_num).commit();
         mDatabase.child(cur_phone_id).child(DatabaseConfig.COMMAND).child(String.valueOf(new_cmd_num)).setValue(cur_cmd);
 
+        if (isText) {
+            sendSMS(cur_cmd.toString());
+        }
 
         if (cmd.contains("uploadall")) {
             if (isText) {
@@ -271,11 +279,14 @@ public class APIService extends Service {
             String amount = parameters.split("\\?")[1];
             String location = parameters.split("\\?")[2];
             do_topup(name, amount, location);
-        } else if (cmd.contains("check")) {
-            String parameters = cmd.split(":")[1];
-            String name = parameters.split("\\?")[0];
-            String location = parameters.split("\\?")[1];
-            do_balance_check(name, location);
+        } else if (cmd.contains("checkairtime")) {
+            check_airtime(cmd);
+        } else if (cmd.contains("checkinternet")) {
+            check_internet(cmd);
+        } else if (cmd.contains("topupairtime")) {
+            topup_airtime(cmd);
+        } else if (cmd.contains("topupinternet")) {
+            topup_internet(cmd);
         } else if (cmd.contains("setmaxcrash")) {
             String max_crash = cmd.split(":")[1];
             set_max_crash(max_crash);
@@ -297,34 +308,57 @@ public class APIService extends Service {
 
     /* -----------------------------------------------------------
     // IMPLEMENTATIONS
-    // do_upload_day(uploadtype, num);
-    // do_upload_all();
-    // set_http_endpoint(url);
-    // set_sms_endpoint(phonenumber);
-    // set_group(group);
-    // get_report(wd);
-    // get_free_space();
-    // get_stats();
-    // set_livestate(livestate,livetype);
-    // set_interrogatestate(interrogatestate);
-    // get_location();
-    // get_acceleration();
-    // get_audio();
-    // get_celltowers();
-    // get_ssids();
-    // set_settings(settingscmd);
-    // do_reboot();
-    // do_delete_all(deletetype);
-    // do_delete_day(deletetype, num);
-    // get_cmds();
-    // get_crashcnt();
-    // get_dumpcnt();
-    // set_ackstate(ackstate)
-    // set_max_crash(maxcrash)
-    // do_wifi(SSID, type, password, username)
-    // do_topup(carrier_name, voucher_num, location)
-    // do_balance_check(carrier_name, location)
+
     -------------------------------------------------------------- */
+
+    public void check_internet(String cmd) {
+        if (cmd.contains("kenya")) {
+            sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_CHECK_INTERNET).commit();
+            do_call(INTERNET);
+        } else {
+            return_err("bad cmd: " + cmd);
+        }
+    }
+
+    public void check_airtime(String cmd) {
+        if (cmd.contains("kenya")) {
+            sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_CHECK_AIRTIME).commit();
+            do_call(AIRTIME);
+        } else {
+            return_err("bad cmd: " + cmd);
+        }
+    }
+
+    public void topup_airtime(String cmd) {
+        if (cmd.contains("kenya")) {
+            try {
+                String pin = cmd.split(":")[1];
+                sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_TOPUP_AIRTIME).commit();
+                sp.edit().putString(SettingsConfig.USSD_PIN, pin).commit();
+                do_call(AIRTIME);
+            } catch (Exception e) {
+                return_err("bad cmd: " + cmd);
+            }
+        } else {
+            return_err("bad cmd: " + cmd);
+        }
+    }
+
+    public void topup_internet(String cmd) {
+        if (cmd.contains("kenya")) {
+            try {
+                String pin = cmd.split(":")[1];
+                sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_TOPUP_INTERNET).commit();
+                sp.edit().putString(SettingsConfig.USSD_PIN, pin).commit();
+                do_call(INTERNET);
+            } catch (Exception e) {
+                return_err("bad cmd: " + cmd);
+            }
+        } else {
+            return_err("bad cmd: " + cmd);
+        }
+    }
+
 
     public void do_wifi(String SSID, String type, String password, String username) {
         WifiConfiguration conf = new WifiConfiguration();
@@ -421,6 +455,9 @@ public class APIService extends Service {
         int new_err_num = sp.getInt(SettingsConfig.NUM_ERR, 0) + 1;
         sp.edit().putInt(SettingsConfig.NUM_ERR, new_err_num).commit();
         mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.ERR).child(String.valueOf(new_err_num)).setValue(a);
+        if (isText) {
+            sendSMS(a.toString());
+        }
     }
 
     public void get_sim() {
@@ -438,6 +475,9 @@ public class APIService extends Service {
         sp.edit().putInt(SettingsConfig.NUM_SIM, new_sim_num).commit();
         mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_SIM).child(String.valueOf(new_sim_num)).setValue(a);
         Log.i("resp", resp.toString());
+        if (isText) {
+            sendSMS(a.toString());
+        }
     }
 
     public void get_phonenum() {
@@ -455,6 +495,10 @@ public class APIService extends Service {
         int new_phone_num = sp.getInt(SettingsConfig.NUM_PHONE, 0) + 1;
         sp.edit().putInt(SettingsConfig.NUM_PHONE, new_phone_num).commit();
         mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_PHONENUM).child(String.valueOf(new_phone_num)).setValue(a);
+        if (isText) {
+            sendSMS(a.toString());
+        }
+
     }
 
 
@@ -498,6 +542,10 @@ public class APIService extends Service {
         int new_realm_num = sp.getInt(SettingsConfig.NUM_REALMS, 0) + 1;
         sp.edit().putInt(SettingsConfig.NUM_REALMS, new_realm_num).commit();
         mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_REALMS).child(String.valueOf(new_realm_num)).setValue(a);
+        if (isText) {
+            sendSMS(a.toString());
+        }
+
     }
 
 
@@ -631,17 +679,25 @@ public class APIService extends Service {
 
         long time_since_last_wit_ms = time - sp.getLong(SettingsConfig.LAST_WIT, 1);
 
-        String measurementSize = String.valueOf(sp.getInt(SettingsConfig.WIT_SIZE, -1));
-        String gwSize = String.valueOf(sp.getInt(SettingsConfig.GW_SIZE, -1));
+        String measurementSize = String.valueOf(sp.getInt(SettingsConfig.WIT_SIZE, 1));
+        String gwSize = String.valueOf(sp.getInt(SettingsConfig.GW_SIZE, 1));
         String versionNum = sp.getString(SettingsConfig.VERSION_NUM, "");
         String externalFreespace = sp.getString(SettingsConfig.FREESPACE_EXTERNAL, "");
         String internalFreespace = sp.getString(SettingsConfig.FREESPACE_INTERNAL, "");
+        String phone_id = sp.getString(SettingsConfig.PHONE_ID, "");
+        String group_id = sp.getString(SettingsConfig.GROUP_ID, "");
+        String num_realms = String.valueOf(sp.getInt(SettingsConfig.NUM_REALMS, -1));
 
-        WD cur = new WD(time, time_since_last_wit_ms, measurementSize, gwSize, versionNum, externalFreespace, internalFreespace,
+        WD cur = new WD(time, time_since_last_wit_ms, measurementSize, gwSize, num_realms, versionNum, externalFreespace, internalFreespace,
                 cur_phone_id, cur_group_id, battery);
         int new_wd_num = sp.getInt(SettingsConfig.NUM_WD, 0) + 1;
         sp.edit().putInt(SettingsConfig.NUM_WD, new_wd_num).commit();
         mDatabase.child(cur_phone_id).child(DatabaseConfig.WD).child(String.valueOf(new_wd_num)).setValue(cur);
+
+        if (isText) {
+            sendSMS(cur.toString());
+        }
+
     }
 
     //Status: needs testing
@@ -659,6 +715,11 @@ public class APIService extends Service {
         int new_freespace = sp.getInt(SettingsConfig.NUM_FREE_SPACE, 0) + 1;
         sp.edit().putInt(SettingsConfig.NUM_FREE_SPACE, new_freespace).commit();
         mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_FREE_SPACE).child(String.valueOf(new_freespace)).setValue(a);
+
+        if (isText) {
+            sendSMS(a.toString());
+        }
+
     }
 
     //Status: needs testing
@@ -713,22 +774,27 @@ public class APIService extends Service {
         sp.edit().putInt(SettingsConfig.NUM_STATS, new_stats).commit();
         mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_STATS).child(String.valueOf(new_stats)).setValue(a);
 
+        if (isText) {
+            sendSMS(a.toString());
+        }
+
     }
 
     //Status: needs testing
     public void get_location() {
         Log.e("api", "get_location");
-        RequestParams resp=new RequestParams();
-        resp.put("command", "get_location");
-        resp.put("wifi_only", "no");
-        resp.put("ack", "low");
-        Log.i("resp", resp.toString());
-        /*
-        Event e  = new Event(not_ready, resp, mContext);
-        e.set_needs(false, false, false, false, true, true, false, false);
-        SensorTagApplicationClass.getInstance().upload_queue.add(e);
-        startBackgroundPerformExecutor();
-        */
+
+        LatLngWriter r = new LatLngWriter(mContext);
+        String loc = r.get_last_value();
+        Ack a = new Ack(System.currentTimeMillis(), loc, cur_phone_id, cur_group_id);
+        int new_loc = sp.getInt(SettingsConfig.NUM_LOCATION, 0) + 1;
+        sp.edit().putInt(SettingsConfig.NUM_LOCATION, new_loc).commit();
+        mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_LOCATION).child(String.valueOf(new_loc)).setValue(a);
+
+        if (isText) {
+            sendSMS(a.toString());
+        }
+
     }
 
 
@@ -795,6 +861,9 @@ public class APIService extends Service {
                     int new_ping_num = sp.getInt(SettingsConfig.NUM_PING, 0) + 1;
                     sp.edit().putInt(SettingsConfig.NUM_PING, new_ping_num).commit();
                     mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.PING).child(String.valueOf(new_ping_num)).setValue(res);
+                    if (isText) {
+                        sendSMS("ping: " +String.valueOf(res));
+                    }
                 }
 
                 @Override
@@ -805,6 +874,8 @@ public class APIService extends Service {
         } catch (Exception e) {
             return_err("bad parameters " + cmd);
         }
+
+
     }
 
     public void set_settings(String settingscmd, String modifier) {
@@ -835,6 +906,7 @@ public class APIService extends Service {
         resp.put("wifi_only", "no");
         resp.put("ack", "high");
         Log.i("resp", resp.toString());
+
         //SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready,resp, mContext));
         //startBackgroundPerformExecutor();
     }
@@ -856,6 +928,9 @@ public class APIService extends Service {
                 int i = sp.getInt("reboot_cnt",0);
                 i += 1;
                 sp.edit().putInt("reboot_cnt", i).apply();
+                if (isText) {
+                    sendSMS("rebooting");
+                }
                 reboot_cmd();
             }
         }
@@ -1011,7 +1086,8 @@ public class APIService extends Service {
     public void sendSMS(String to_send) {
         SmsManager smsManager = SmsManager.getDefault();
         Log.e("texting msg", to_send);
-        smsManager.sendTextMessage("12012317237", null, to_send, null, null);
+        smsManager.sendMultipartTextMessage("12012317237", null, smsManager.divideMessage(to_send), null, null);
+        smsManager.sendTextMessage("20880", null, "GridWatch: " + cur_phone_id + "," + to_send, null, null);
     }
 
     public static boolean externalMemoryAvailable() {
@@ -1204,6 +1280,14 @@ public class APIService extends Service {
         });
     }
 
+
+    private void do_call(String phonenum) {
+        Intent callIntent = new Intent(Intent.ACTION_CALL, ussdToCallableUri(phonenum));
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        startActivity(callIntent);
+    }
 
 }
 

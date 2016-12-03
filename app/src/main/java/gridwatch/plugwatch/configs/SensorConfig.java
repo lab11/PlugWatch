@@ -43,6 +43,8 @@ public class SensorConfig {
 
     public final static int MAX_JOBS = 100;
     public static final String SMS_ENDPOINT = "12012317237";
+    public static final long GRIDWATCH_INTERVAL = 1000*60; //12 hrs
+    public static final String FALSE_GW = "FALSE_GW";
 
     public static int NUM_ANY_CRASH_BEFORE_REBOOT = 20;
     public static int MAX_NUM_REBOOT_BACKOFF = 30;

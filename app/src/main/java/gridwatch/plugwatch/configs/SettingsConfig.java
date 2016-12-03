@@ -8,7 +8,7 @@ public class SettingsConfig {
 
     public final static String PHONE_ID = "PHONE_ID";
     public final static String GROUP_ID = "GROUP_ID";
-    public final static String TOTAL_DATA = "TOTAL_DATA";
+    public final static String TOTAL_DATA = "TOTAL_DATA_LONG";
     public final static String SETTINGS_META_DATA = "META_DATA";
 
 
@@ -50,6 +50,21 @@ public class SettingsConfig {
     public static final String AIRTIME = "AIRTIME";
     public static final String NUM_REALMS = "NUM_REALMS";
     public static final String INTERNET = "INTERNET";
+
+    public static final String USSD_ACTION = "USSD_ACTION";
+    public static final String USSD_CHECK_PHONENUM = "USSD_CHECK_PHONENUM";
+    public static final String USSD_CHECK_INTERNET = "USSD_CHECK_INTERNET";
+    public static final String USSD_CHECK_AIRTIME = "USSD_CHECK_AIRTIME";
+    public static final String USSD_TOPUP_INTERNET = "USSD_TOPUP_INTERNET";
+    public static final String USSD_TOPUP_AIRTIME = "USSD_TOPUP_AIRTIME";
+    public static final String USSD_PIN = "USSD_PIN";
+    public static final String NUM_PHONENUM_CHECK = "NUM_PHONENUM_CHECK";
+    public static final String NUM_AIRTIME_CHECK = "NUM_AIRTIME_CHECK";
+    public static final String NUM_INTERNET_CHECK = "NUM_INTERNET_CHECK";
+    public static final String NUM_TOPUP_AIRTIME = "NUM_TOPUP_AIRTIME";
+    public static final String NUM_TOPUP_INTERNET = "NUM_TOPUP_INTERNET";
+    public static final String NUM_LOCATION = "NUM_LOCATION";
+    public static final String PING_RES = "PING_RES";
 
 
     public class NUM_WD {

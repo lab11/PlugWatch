@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import gridwatch.plugwatch.configs.IntentConfig;
+import gridwatch.plugwatch.logs.RebootCauseWriter;
 import gridwatch.plugwatch.wit.PlugWatchService;
 
 /**
@@ -22,12 +23,13 @@ public class Restart {
     int cnt = 0;
 
     private Context mContext;
+    private String calling_class_name;
 
     public Restart() {
 
     }
 
-    public void do_restart(Context context, Class<?> c, Throwable exception, int pid) {
+    public void do_restart(Context context, Class<?> c, String guilty_class, Throwable exception, int pid) {
         //send_dead_packet();
         StringWriter stackTrace = new StringWriter();
         exception.printStackTrace(new PrintWriter(stackTrace));
@@ -35,8 +37,15 @@ public class Restart {
         if (context != null && c != null) {
             mContext = context;
 
+
             send_dead_packet();
 
+            try {
+                RebootCauseWriter r = new RebootCauseWriter(mContext);
+                r.log(String.valueOf(System.currentTimeMillis()), exception.getMessage(), "restart");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             Intent intent = new Intent(context, c);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -48,7 +57,7 @@ public class Restart {
             System.exit(0);
 
         } else { //something went wrong
-            Rebooter r = new Rebooter(context, new Throwable("something went wrong... rebooting from restart"));
+            Rebooter r = new Rebooter(context, calling_class_name, new Throwable(this.getClass().getName() + ": something went wrong... rebooting from restart"));
         }
     }
 

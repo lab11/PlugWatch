@@ -40,11 +40,11 @@ public class RestartOnExceptionHandler extends Throwable implements
             r.log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
 
             //CHECK FOR UPDATES... TODO
-            Rebooter reboot = new Rebooter(myContext, new Throwable("REBOOTING DUE TO RANDOM CRASHES"));
+            Rebooter reboot = new Rebooter(myContext, this.getClass().getName(), new Throwable(this.getClass().getName() + ": REBOOTING DUE TO RANDOM CRASHES"));
         } else {
             r.log(String.valueOf(System.currentTimeMillis()), String.valueOf(restart_num + 1));
             Restart restarter = new Restart();
-            restarter.do_restart(myContext, myActivityClass, exception, -1);
+            restarter.do_restart(myContext,  myActivityClass, this.getClass().getName(), exception, -1);
         }
 
 

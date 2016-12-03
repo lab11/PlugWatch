@@ -27,29 +27,29 @@ public class CommandLineActivity extends Activity {
     private ListView mListView;
 
 
-    String[] TESTS = new String[] {
+    String[] TESTS = new String[]{
             "-1,uploadall",
-            "-1,uploadspecific:20161128",
+            "-1,upload_specific:20161128",
             "-1,uploadaudio",
             "-1,uploadlogs",
-            "-1,uploadlogspecific",
+            "-1,uploadlog_specific:gw_mac.log",
+            "-1,deletelog_specific:gw_mac.log",
+            "-1,deletedb_specific:20161128",
+            "-1,deleteaudio_specific:1",
+            "-1,ping",
+            "-1,sendsms",
             "-1,report",
             "-1,free_space",
             "-1,stats",
-            "-2,reboot",
-            "-1,getcmds",
-            "-1,getcrashes",
+            "-1,reboot",
             "-1,getversion",
-            "-1,wd",
             "-1,sim",
-            "setmaxcrash",
-            "nuke_audio",
-            "-1,httpendpoint:www.google.com",
-            "-1,smsendpoint:123",
-            "-1,setgroupid:2",
-            "wifi",
-            "check",
-            "80,topup:safaricom?12345678?kenya"
+            "-1,topup:1234",
+            "-1,checkairtime",
+            "-1,checkinternet",
+            "-1,topupairtime:1234",
+            "-1,topupinternet:1234",
+            "-1,nuke_audio"
     };
 
 
@@ -90,7 +90,7 @@ public class CommandLineActivity extends Activity {
                 i.putExtra(IntentConfig.INCOMING_API_COMMAND, mCmd.getText().toString());
                 i.putExtra(IntentConfig.INCOMING_API_GROUP_ID, g.get_last_value());
                 if (misText.isChecked()) {
-                    i.putExtra("type", "text");
+                    i.putExtra(IntentConfig.IS_TEXT, IntentConfig.IS_TEXT);
                 }
                 startService(i);
             }

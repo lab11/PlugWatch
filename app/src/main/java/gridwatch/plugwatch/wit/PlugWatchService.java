@@ -24,9 +24,7 @@ import android.widget.Toast;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 import com.google.android.gms.location.LocationRequest;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.crash.FirebaseCrash;
-import com.google.firebase.database.FirebaseDatabase;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.RxBleConnection;
 import com.polidea.rxandroidble.RxBleDevice;
@@ -166,12 +164,7 @@ public class PlugWatchService extends Service {
         audiomanage.setMode(AudioManager.ROUTE_SPEAKER);
         audiomanage.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_HEADSET, AudioManager.ROUTE_ALL);
 
-        try {
-            FirebaseApp.initializeApp(getApplicationContext());
-            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-        } catch (Exception e) {
-            Log.e("critical", "need to fix google play");
-        }
+
 
         mContext = this;
         setup_gw_callback(); //power disconnected
@@ -205,7 +198,11 @@ public class PlugWatchService extends Service {
             send_fail_packet();
         } else if (intent.hasExtra(IntentConfig.TEST)) {
             do_gw(null);
-        } else {
+        } else if (intent.hasExtra(IntentConfig.FALSE_GW)) {
+            do_gw(intent);
+
+        }
+        else {
             start_ble();
         }
 
@@ -332,7 +329,10 @@ public class PlugWatchService extends Service {
             g.run();
             return;
         }
-        if (intent.getAction().equals(Intent.ACTION_POWER_CONNECTED)) {
+        if (intent.hasExtra(IntentConfig.FALSE_GW)) {
+            g = new GridWatch(getBaseContext(), SensorConfig.FALSE_GW, phone_id,
+                    String.valueOf(num_wit), macAddress, build_str, last_good_data);
+        } else if (intent.getAction().equals(Intent.ACTION_POWER_CONNECTED)) {
             g = new GridWatch(getBaseContext(), SensorConfig.PLUGGED, phone_id,
                     String.valueOf(num_wit), macAddress, build_str, last_good_data);
         } else if (intent.getAction().equals(Intent.ACTION_POWER_DISCONNECTED)) {
@@ -383,7 +383,7 @@ public class PlugWatchService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
             Restart r = new Restart();
-            r.do_restart(this, PlugWatchUIActivity.class, new Throwable("realm failed"), -1);
+            r.do_restart(this, PlugWatchUIActivity.class, getClass().getName(), new Throwable("realm failed"), -1);
         }
     }
 
@@ -552,6 +552,7 @@ public class PlugWatchService extends Service {
         if (bleScanResult.getBleDevice().getName().contains("Smart")) {
             bleDevice = bleScanResult.getBleDevice();
 
+            //TODO: cache this
             connectionObservable = bleDevice
                     .establishConnection(mContext, false)
                     .takeUntil(disconnectTriggerSubject)
@@ -616,7 +617,7 @@ public class PlugWatchService extends Service {
             case BleScanException.BLUETOOTH_DISABLED:
                 Toast.makeText(mContext, "Enable bluetooth and try again", Toast.LENGTH_SHORT).show();
                 FirebaseCrash.log("handleBleScanException: Enable bluetooth and try again");
-                Rebooter t = new Rebooter(this, new Throwable("bluetooth stack died"));
+                Rebooter t = new Rebooter(this, getClass().getName(), new Throwable("bluetooth stack died"));
                 break;
             case BleScanException.LOCATION_PERMISSION_MISSING:
                 Toast.makeText(mContext,
@@ -629,7 +630,7 @@ public class PlugWatchService extends Service {
             default:
                 FirebaseCrash.log("handleBleScanException: unable to start scanning");
                 Toast.makeText(mContext, "Unable to start scanning", Toast.LENGTH_SHORT).show();
-                Rebooter r = new Rebooter(mContext, new Throwable("unable to start scanning"));
+                Rebooter r = new Rebooter(mContext, getClass().getName(), new Throwable("unable to start scanning"));
                 break;
         }
     }
@@ -674,7 +675,7 @@ public class PlugWatchService extends Service {
             if (System.currentTimeMillis() - last_good_data > SensorConfig.NOTIFICATION_BUT_NO_DECODE_TIMEOUT) {
                 Log.e("connection timeout", String.valueOf(System.currentTimeMillis() - last_good_data));
                 Restart r = new Restart();
-                r.do_restart(mContext, PlugWatchUIActivity.class, new Throwable("Restart due to notification but no decode"), Process.myPid()); //figure out why this sometimes launches many services
+                r.do_restart(mContext, PlugWatchUIActivity.class, getClass().getName(), new Throwable("Restart due to notification but no decode"), Process.myPid()); //figure out why this sometimes launches many services
             }
         }
 
@@ -738,6 +739,7 @@ public class PlugWatchService extends Service {
             }
         } else {
             if (to_write_slowly.size() != 0) {
+                Log.e("to write", String.valueOf(to_write_slowly.size()));
                 connectionObservable
                         .flatMap(rxBleConnection -> rxBleConnection.writeCharacteristic(BluetoothConfig.UUID_WIT_FFE3, to_write_slowly.remove(0)))
                         .observeOn(AndroidSchedulers.mainThread())

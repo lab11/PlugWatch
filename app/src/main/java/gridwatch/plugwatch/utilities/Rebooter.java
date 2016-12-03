@@ -10,6 +10,7 @@ import java.util.Calendar;
 
 import gridwatch.plugwatch.configs.IntentConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
+import gridwatch.plugwatch.logs.RebootCauseWriter;
 import gridwatch.plugwatch.logs.RestartNumWriter;
 import gridwatch.plugwatch.wit.PlugWatchService;
 
@@ -21,13 +22,18 @@ public class Rebooter {
 
     Context mContext;
     RestartNumWriter numWriter;
+    Throwable cause;
+    String class_name;
 
 
-    public Rebooter(Context context, Throwable n) {
+    public Rebooter(Context context, String calling_class_name, Throwable n) {
         mContext = context;
         numWriter = new RestartNumWriter(context);
         n.printStackTrace();
+        cause = n;
+        class_name = calling_class_name;
         setup_reboot();
+
     }
 
     private void setup_reboot() {
@@ -66,6 +72,9 @@ public class Rebooter {
                     cal.getTimeInMillis() + interval,
                     servicePendingIntent
             );
+
+        RebootCauseWriter r = new RebootCauseWriter(mContext);
+        r.log(String.valueOf(System.currentTimeMillis()), class_name + ":" + cause.getMessage(), "reboot");
 
             send_dead_packet();
 
