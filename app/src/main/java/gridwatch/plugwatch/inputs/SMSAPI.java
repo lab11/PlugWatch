@@ -46,9 +46,9 @@ public class SMSAPI extends BroadcastReceiver {
                     }
 
                 } else {
-                    String cmd = smsBody.split(":")[2];
-                    String group_id = smsBody.split(":")[1];
-                    String phone_id = smsBody.split(":")[0];
+                    String cmd = smsBody.split(",")[2];
+                    String group_id = smsBody.split(",")[1];
+                    String phone_id = smsBody.split(",")[0];
                     Intent a = new Intent(context, APIService.class);
                     a.putExtra(IntentConfig.INCOMING_API_COMMAND, cmd);
                     a.putExtra(IntentConfig.INCOMING_API_PHONE_ID, phone_id);

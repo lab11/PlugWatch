@@ -28,6 +28,10 @@ public class GWDump extends RealmObject {
         mDump = dump;
     }
 
+    public String toString() {
+        return mDump;
+    }
+
     public RequestParams toRequestParams() {
         RequestParams values = new RequestParams();
         values.put(DatabaseConfig.TYPE, mDump);

@@ -66,6 +66,18 @@ public class SettingsConfig {
     public static final String NUM_LOCATION = "NUM_LOCATION";
     public static final String PING_RES = "PING_RES";
     public static final String GW = "GW";
+    public static final String NUM_REALM_SIZE = "NUM_REALM_SIZE";
+    public static final String NUM_LOG_SIZE = "NUM_LOG_SIZE";
+    public static final String NUM_SPECIFIC_LOG_SIZE = "NUM_SPECIFIC_LOG_SIZE";
+    public static final String NUM_DELETE_LOG_SPECIFIC = "NUM_DELETE_LOG_SPECIFIC";
+    public static final String NUM_DELETE_DB_SPECIFIC = "NUM_DELETE_DB_SPECIFIC";
+    public static final String NUM_SET_GROUP = "NUM_SET_GROUP";
+    public static final String NUM_DELETE_AUDIO_FILES = "NUM_DELETE_AUDIO_FILES";
+    public static final String NUM_DELETE_SPECIFIC_AUDIO_FILES = "NUM_DELETE_SPECIFIC_AUDIO_FILES";
+    public static final String NUM_GET_VERSION = "NUM_GET_VERSION";
+    public static final String NUM_IS_ONLINE = "NUM_IS_ONLINE";
+    public static final String NUM_GET_SETTINGS = "NUM_GET_SETTINGS";
+    public static final String NUM_AUDIO_SIZE = "NUM_AUDIO_SIZE";
 
 
     public class NUM_WD {

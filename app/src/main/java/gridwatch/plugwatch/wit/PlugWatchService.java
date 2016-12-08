@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -55,6 +56,7 @@ import gridwatch.plugwatch.database.MeasurementRealm;
 import gridwatch.plugwatch.database.Migration;
 import gridwatch.plugwatch.gridWatch.GridWatch;
 import gridwatch.plugwatch.logs.GroupIDWriter;
+import gridwatch.plugwatch.logs.LastGoodWitWriter;
 import gridwatch.plugwatch.logs.LatLngWriter;
 import gridwatch.plugwatch.logs.MacWriter;
 import gridwatch.plugwatch.logs.PhoneIDWriter;
@@ -120,6 +122,8 @@ public class PlugWatchService extends Service {
     private static final int ID_OPT = 2;
     private boolean isClockUpdated = false;
 
+    private static LastGoodWitWriter witWriter;
+
     private String realm_filename;
     private String full_realm_filename;
 
@@ -149,12 +153,13 @@ public class PlugWatchService extends Service {
     @Override
     public void onCreate() {
         if (AppConfig.RESTART_ON_EXCEPTION) {
-            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
+            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(getBaseContext(), getClass().getName(),
                     PlugWatchUIActivity.class));
         }
         Log.i("PlugWatchService:onCreate", "hit");
 
         JobManager.create(this).addJobCreator(new NetworkJobCreator());
+
 
 
         AudioManager audiomanage = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
@@ -172,6 +177,7 @@ public class PlugWatchService extends Service {
         setup_realm(); //database
         create_sticky_notification(); //hack to help with long running service
 
+        witWriter = new LastGoodWitWriter(getClass().getName());
 
 
         location_rec = LocationRequest.create()
@@ -190,17 +196,27 @@ public class PlugWatchService extends Service {
 
     }
 
+    private void crash() {
+        Log.e("crashing", null);
+    }
+
+
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         if (intent.hasExtra(IntentConfig.FAIL_PACKET)) {
-            Log.e("PlugWatchService:onStart", "hit");
+            Log.e("PlugWatchService:onStart", "FAIL_PACKET");
             send_fail_packet();
         } else if (intent.hasExtra(IntentConfig.TEST)) {
+            Log.e("PlugWatchService:onStart", "TEST");
             do_gw(null);
         } else if (intent.hasExtra(IntentConfig.FALSE_GW)) {
+            Log.e("PlugWatchService:onStart", "FALSE_GW");
             do_gw(intent);
-
+        } else if (intent.hasExtra(IntentConfig.CRASH_PLUGWATCH_SERVICE)) {
+            Log.e("PlugWatchService:onStart", "WILL CRASH");
+            crash();
         }
         else {
             start_ble();
@@ -311,31 +327,34 @@ public class PlugWatchService extends Service {
 
     private void do_gw(Intent intent) {
 
+        Log.e("GridWatch", "hit");
         GridWatch g = null;
         try {
             if (phone_id == null) {
-                PhoneIDWriter a = new PhoneIDWriter(getBaseContext());
+                PhoneIDWriter a = new PhoneIDWriter(getBaseContext(),getClass().getName());
                 phone_id = a.get_last_value();
             }
         } catch (java.lang.IndexOutOfBoundsException e) {
             Log.e("error", "couldn't find phone id");
             phone_id = "-1";
             FirebaseCrash.log("error couldn't find phone id");
-
         }
         if (intent == null) {
-            g = new GridWatch(getBaseContext(), SensorConfig.UNPLUGGED, phone_id,
+            g = new GridWatch(getBaseContext(), SensorConfig.NULL, phone_id,
                     String.valueOf(num_wit), macAddress, build_str, last_good_data);
             g.run();
             return;
         }
         if (intent.hasExtra(IntentConfig.FALSE_GW)) {
+            Log.e("GridWatch", "doing false_gw");
             g = new GridWatch(getBaseContext(), SensorConfig.FALSE_GW, phone_id,
                     String.valueOf(num_wit), macAddress, build_str, last_good_data);
         } else if (intent.getAction().equals(Intent.ACTION_POWER_CONNECTED)) {
+            Log.e("GridWatch", "doing power_connected");
             g = new GridWatch(getBaseContext(), SensorConfig.PLUGGED, phone_id,
                     String.valueOf(num_wit), macAddress, build_str, last_good_data);
         } else if (intent.getAction().equals(Intent.ACTION_POWER_DISCONNECTED)) {
+            Log.e("GridWatch", "doing power_disconnected");
             g = new GridWatch(getBaseContext(), SensorConfig.UNPLUGGED, phone_id,
                     String.valueOf(num_wit), macAddress, build_str, last_good_data);
         }
@@ -374,7 +393,7 @@ public class PlugWatchService extends Service {
             realmConfiguration = new RealmConfiguration.Builder(f)
                     .name(realm_filename)
                     .migration(new Migration())
-                    .schemaVersion(5)
+                    .schemaVersion(10)
                     .build();
             Realm.setDefaultConfiguration(realmConfiguration);
             Log.e("realm file", f.getAbsolutePath());
@@ -382,18 +401,21 @@ public class PlugWatchService extends Service {
             realm.setAutoRefresh(true);
         } catch (Exception e) {
             e.printStackTrace();
+            Realm.deleteRealm(realmConfiguration);
             Restart r = new Restart();
             r.do_restart(this, PlugWatchUIActivity.class, getClass().getName(), new Throwable("realm failed"), -1);
         }
     }
 
     private File openRealm() {
-        File file = this.getExternalFilesDir("/db/");
-        if (!file.exists()) {
-            boolean result = file.mkdir();
+        //File file = this.getExternalFilesDir("/db/");
+        String secStore = System.getenv("SECONDARY_STORAGE");
+        File f_secs = new File(secStore);
+        if (!f_secs.exists()) {
+            boolean result = f_secs.mkdir();
             Log.i("TTT", "Results: " + result);
         }
-        return file;
+        return f_secs;
     }
 
 
@@ -512,14 +534,14 @@ public class PlugWatchService extends Service {
 
     private void send_fail_packet() {
         checkCP();
-        PhoneIDWriter b = new PhoneIDWriter(mContext);
+        PhoneIDWriter b = new PhoneIDWriter(mContext,getClass().getName());
         String phone_id = b.get_last_value();
-        GroupIDWriter r = new GroupIDWriter(mContext);
+        GroupIDWriter r = new GroupIDWriter(getClass().getName());
         String group_id = b.get_last_value();
         double lat = 0.0;
         double lng = 0.0;
         try {
-            LatLngWriter c = new LatLngWriter(mContext);
+            LatLngWriter c = new LatLngWriter(getClass().getName());
             String latlng = c.get_last_value();
             lat = Double.valueOf(latlng.split(",")[0]);
             lng = Double.valueOf(latlng.split(",")[1]);
@@ -590,7 +612,7 @@ public class PlugWatchService extends Service {
 
     private void checkCP() {
         try {
-                MacWriter r = new MacWriter(getApplicationContext());
+                MacWriter r = new MacWriter(getClass().getName());
                 r.log(String.valueOf(System.currentTimeMillis()), macAddress, "n");
                 if (macAddress != null) {
                     String sticky = r.get_last_sticky_value();
@@ -668,7 +690,7 @@ public class PlugWatchService extends Service {
     }
 
     private void onNotificationReceivedFFE1(byte[] value) {
-        Log.i("notification", "FFE1");
+       // Log.i("notification", "FFE1");
 
         //There is a state where notifications are coming in but they are not good. This state requires app reboot
         if (isClockUpdated && to_write_slowly.size() == 0) { //don't do this if we are still setting up the connection with writes
@@ -751,7 +773,6 @@ public class PlugWatchService extends Service {
             }
             good_data(value);
 
-
         }
     }
 
@@ -761,6 +782,7 @@ public class PlugWatchService extends Service {
     private void good_data(byte[] value) {
         isConnected = true;
         last_good_data = System.currentTimeMillis();
+        witWriter.log(String.valueOf(last_good_data), "");
         mVoltage = (decode_energyData(value, ID_ACC));
         mCurrent = (decode_energyData(value, ID_OBJ));
         mPower = decode_energyData(value, ID_BAR);
@@ -781,16 +803,16 @@ public class PlugWatchService extends Service {
                 try {
                     checkCP();
                     MeasurementRealm cur = new MeasurementRealm(mCurrent, mFrequency,
-                            mPower, mPowerFactor, mVoltage);
+                            mPower, mPowerFactor, mVoltage, macAddress);
                     bgRealm.copyToRealm(cur);
-                    PhoneIDWriter b = new PhoneIDWriter(mContext);
+                    PhoneIDWriter b = new PhoneIDWriter(mContext,getClass().getName());
                     String phone_id = b.get_last_value();
-                    GroupIDWriter r = new GroupIDWriter(mContext);
+                    GroupIDWriter r = new GroupIDWriter(getClass().getName());
                     String group_id = r.get_last_value();
                     double lat = 0.0;
                     double lng = 0.0;
                     try {
-                        LatLngWriter c = new LatLngWriter(mContext);
+                        LatLngWriter c = new LatLngWriter(getClass().getName());
                         String latlng = c.get_last_value();
                         lat = Double.valueOf(latlng.split(",")[0]);
                         lng = Double.valueOf(latlng.split(",")[1]);
@@ -835,6 +857,19 @@ public class PlugWatchService extends Service {
             }
         });
 
+
+
+        try {
+            Random rand = new Random();
+            int randomNum = rand.nextInt((60*60*5 - 0) + 1) + 0;
+            if (randomNum == 0) {
+                Intent a = new Intent();
+                a.putExtra(IntentConfig.FALSE_GW, IntentConfig.FALSE_GW);
+                do_gw(a);
+            }
+        } catch (Exception e) {
+            Log.e("random gw", "failed");
+        }
 
 
         //PlugWatchApp.getInstance().increment_last_time();

@@ -29,13 +29,13 @@ public class SensorConfig {
     public final static String PLUGGED = "PLUGGED";
     public final static String UNPLUGGED = "UNPLUGGED";
 
-    public final static int WATCHDOG_INTERVAL =  1000 * 60 * 60 * 24; //interval to check connection ms
+    public final static int WATCHDOG_INTERVAL =  1000 * 60 * 60 * 12; //interval to check connection ms
 
 
     public final static int CONNECTION_INTERVAL =  15000; //interval to check connection ms
-    public final static int CONNECTION_THRESHOLD = 25000  ; //after this number time restart the app ms
-    public final static int REBOOT_THRESHOLD = 5; // after this threshold of restarts, reboot the phone
-    public final static int NOTIFICATION_BUT_NO_DECODE_TIMEOUT = 10000 * 60 * 2; //state that exists when notifications are coming that can't be decoded
+    public final static int CONNECTION_THRESHOLD = 50000; //after this number time restart the app ms
+    public final static int REBOOT_THRESHOLD = 7; // after this threshold of restarts, reboot the phone
+    public final static int NOTIFICATION_BUT_NO_DECODE_TIMEOUT = 1000 * 60 * 2; //state that exists when notifications are coming that can't be decoded
 
     public final static long RESTART_BUFFER = 5000; //when we restart we fake a new wit coming in to allow it to timeout naturally... plus a buffer
     public final static long REBOOT_BUFFER = 10000; //takes longer to reboot
@@ -43,12 +43,25 @@ public class SensorConfig {
 
     public final static int MAX_JOBS = 100;
     public static final String SMS_ENDPOINT = "12012317237";
-    public static final long GRIDWATCH_INTERVAL = 1000*60*60*12; //12 hrs
+    public static final long GRIDWATCH_INTERVAL = 1000 * 60 * 60 * 12; //*60*60*12; //12 hrs
     public static final String FALSE_GW = "FALSE_GW";
+    public static final String NULL = "NULL_GW";
 
-    public static int NUM_ANY_CRASH_BEFORE_REBOOT = 20;
+    public static final String WD_TYPE_DEPLOY_AUDIT = "DA";
+    public static final String WD_TYPE_API = "API";
+    public static final String WD_TYPE_SMSWD = "WSMS";
+    public static final String WD_TYPE_WD = "WD";
+    public static final long LOCATION_TIMEOUT_IN_SECONDS = 10;
+    public static final long LOCATION_UPDATE_INTERVAL = 100;
+    public static final long NETWORK_TIMEOUT_SECONDS = 5;
+    public static final long WIFI_LOGGER_CONNECTION_INTERVAL = 1000 * 60 * 10; //10 minutes
+    public static final long WATCHDOG2_INTERVAL = 1000 * 60; //1 minute
+    public static final long SMS_WATCHDOG_INTERVAL = 1000 * 60 * 60 * 12;
+
+    public static int NUM_ANY_CRASH_BEFORE_REBOOT = 5;
     public static int MAX_NUM_REBOOT_BACKOFF = 30;
-    public static int REBOOT_MIN_WAIT = 5000;
+    public static int REBOOT_MIN_WAIT = 15000;
 
+    public static int MAX_DELAY_BEFORE_REBOOT = 1000 * 60 * 10;
 }
 

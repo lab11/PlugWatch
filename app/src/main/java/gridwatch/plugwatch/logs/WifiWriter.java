@@ -1,11 +1,7 @@
 package gridwatch.plugwatch.logs;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -23,17 +19,16 @@ public class WifiWriter {
 	private static SharedPreferences prefs;
 
 	private static File mLogFile;
-	private static Context mContext;
 
-	public WifiWriter(Context context) {
-		File root = Environment.getExternalStorageDirectory();
-		mLogFile = new File(root, LOG_NAME);
-		mContext = context;
-		if (context != null) {
-			prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		} else {
-			Log.e("context gw_id", "null");
+	public WifiWriter(String calling_class) {
+		String secStore = System.getenv("SECONDARY_STORAGE");
+		File root = new File(secStore);
+		if (!root.exists()) {
+			boolean result = root.mkdir();
+			Log.i("TTT", "Results: " + result);
 		}
+		mLogFile = new File(root, LOG_NAME);
+		Log.e("context gw_id", "null " + calling_class);
 	}
 
 	public static void log(String time, String event_type) {
@@ -58,12 +53,14 @@ public class WifiWriter {
 	public String get_last_value () {
 		//TODO make async
 		ArrayList<String> log = read();
-		if (!log.isEmpty()) {
-			String last = log.get(log.size() - 1);
-			if (last != null) {
-				String[] last_fields = last.split("\\|");
-				if (last_fields.length > 1) {
-					return last_fields[1];
+		if (log != null) {
+			if (!log.isEmpty()) {
+				String last = log.get(log.size() - 1);
+				if (last != null) {
+					String[] last_fields = last.split("\\|");
+					if (last_fields.length > 1) {
+						return last_fields[1];
+					}
 				}
 			}
 		}
@@ -113,10 +110,11 @@ public class WifiWriter {
 				}
 				logBR.close();
 			} catch (IOException e) {
-				TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
 				if (e.getCause().toString().contains("No such file")) {
 					log(String.valueOf(System.currentTimeMillis()), "start");
 					Log.e("LOG CREATED", LOG_NAME);
+					ret.add("start");
+					return ret;
 				} else {
 					// TODO Auto-generated catch block
 					Log.e("file writer", e.getCause().toString());

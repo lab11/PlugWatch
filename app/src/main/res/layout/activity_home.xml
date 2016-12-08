@@ -38,7 +38,8 @@
                 android:inputType="textPersonName"
                 android:ems="10"
                 android:id="@+id/phone_id_text"
-                android:layout_marginLeft="10dp" />
+                android:layout_marginLeft="10dp"
+                android:textSize="10sp" />
 
             <TextView
                 android:text="-1"
@@ -70,7 +71,8 @@
                 android:inputType="textPersonName"
                 android:ems="10"
                 android:id="@+id/group_id_text"
-                android:layout_marginLeft="10dp" />
+                android:layout_marginLeft="10dp"
+                android:textSize="10sp" />
 
             <TextView
                 android:text="-1"
@@ -238,31 +240,71 @@
                     android:text="google_account"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/google_account_text" />
+                    android:id="@+id/google_account_text"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:text="is_sd_good"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/is_sd_card_text"
+                    android:textSize="10sp" />
 
                 <TextView
                     android:text="is_gp_good"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/google_play_state" />
+                    android:id="@+id/google_play_state"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:text="is_no_reboot"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/is_no_reboot_text"
+                    android:textSize="10sp" />
 
                 <TextView
                     android:text="isSMSgood"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/is_SMS_good" />
+                    android:id="@+id/is_SMS_good"
+                    android:textSize="10sp" />
 
                 <TextView
                     android:text="is_cross_paired"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/is_cross_paired_text" />
+                    android:id="@+id/is_cross_paired_text"
+                    android:textSize="10sp" />
 
                 <TextView
                     android:text="is_lpm"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/is_lpm_text" />
+                    android:id="@+id/is_lpm_text"
+                    android:textSize="10sp" />
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:text="Free Size:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView12"
+                        android:textSize="10sp" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/free_size_text"
+                        android:layout_weight="1"
+                        android:textSize="10sp" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:orientation="horizontal"
@@ -273,7 +315,8 @@
                         android:text="# Realm:"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/textView34" />
+                        android:id="@+id/textView34"
+                        android:textSize="10sp" />
 
                     <TextView
                         android:text="-1"
@@ -281,7 +324,8 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/num_realm_display"
                         android:layout_weight="1"
-                        android:layout_marginLeft="10dp" />
+                        android:layout_marginLeft="10dp"
+                        android:textSize="10sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -293,7 +337,8 @@
                         android:text="Current MAC:"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/textView32" />
+                        android:id="@+id/textView32"
+                        android:textSize="10sp" />
 
                     <TextView
                         android:text="-1"
@@ -314,7 +359,8 @@
                         android:text="Total Network Data:"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/textView30" />
+                        android:id="@+id/textView30"
+                        android:textSize="10sp" />
 
                     <TextView
                         android:text="-1"
@@ -334,7 +380,8 @@
                         android:text="Num Wit:"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/textView26" />
+                        android:id="@+id/textView26"
+                        android:textSize="10sp" />
 
                     <TextView
                         android:text="-1"
@@ -342,7 +389,8 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/num_packets_text"
                         android:layout_weight="1"
-                        android:layout_marginLeft="10dp" />
+                        android:layout_marginLeft="10dp"
+                        android:textSize="10sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -354,7 +402,8 @@
                         android:text="Last RX:"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/textView28" />
+                        android:id="@+id/textView28"
+                        android:textSize="10sp" />
 
                     <TextView
                         android:text="-1"
@@ -374,14 +423,16 @@
                         android:text="# GridWatch:"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/textView41" />
+                        android:id="@+id/textView41"
+                        android:textSize="10sp" />
 
                     <TextView
                         android:text="-1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/num_gw_text"
-                        android:layout_marginLeft="10dp" />
+                        android:layout_marginLeft="10dp"
+                        android:textSize="10sp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -392,6 +443,14 @@
                 android:layout_height="wrap_content"
                 android:weightSum="1"
                 android:layout_marginTop="50dp">
+
+                <TextView
+                    android:text="build_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/build_name"
+                    android:textSize="14sp"
+                    android:gravity="right" />
 
                 <TextView
                     android:text="version_number"

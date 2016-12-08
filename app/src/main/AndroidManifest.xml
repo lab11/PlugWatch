@@ -77,15 +77,21 @@
             android:label="StartAtBoot">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
+
+        <!--
         <receiver
             android:name=".callbacks.StartSMSWatchDogAtBoot"
             android:label="StartAtBoot">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
+        -->
+
         <receiver
             android:name=".inputs.SMSAPI"
             android:permission="android.permission.BROADCAST_SMS">
@@ -158,7 +164,18 @@
         <service
             android:name=".wit.GridWatchStarterService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+        <service
+            android:name=".wit.WatchdogService2"
+            android:enabled="true"
+            android:process=".Watchdog"
+            android:exported="true" />
+
+        <service
+            android:name=".wit.Watchdog2IntentService"
+            android:enabled="true"
+            android:process=".Watchdog"
+            android:exported="true" />
     </application>
 
 </manifest>

@@ -22,7 +22,7 @@ public class FailsafeTimerService extends Service {
     public FailsafeTimerService() {
         runnable.run();
         if (AppConfig.RESTART_ON_EXCEPTION) {
-            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
+            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(getBaseContext(), getClass().getName(),
                     PlugWatchUIActivity.class));
         }
     }

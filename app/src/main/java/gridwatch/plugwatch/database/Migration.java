@@ -44,7 +44,13 @@ public class Migration implements RealmMigration {
             RealmObjectSchema GWDumpSchema = schema.create("GWDump")
                     .addField("mID", String.class)
                     .addField("mDump", String.class);
+            WitEnergyMeasurement.addField("mMac", String.class);
+            oldVersion++;
 
+        }
+        else if (oldVersion == 7) {
+
+            oldVersion++;
         }
     }
 }

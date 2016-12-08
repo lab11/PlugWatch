@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import gridwatch.plugwatch.configs.SettingsConfig;
+import gridwatch.plugwatch.logs.LastGoodWitWriter;
 import gridwatch.plugwatch.wit.PlugWatchUIActivity;
 
 
@@ -18,10 +19,13 @@ public class StartAtBoot extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+
+            LastGoodWitWriter r = new LastGoodWitWriter(getClass().getName());
+            r.log(String.valueOf(System.currentTimeMillis()+5000), "reboot");
+
             Intent activityIntent = new Intent(context, PlugWatchUIActivity.class);
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(activityIntent);
-
             SharedPreferences pref = context.getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
             int i = pref.getInt(SettingsConfig.BOOT_CNT, -1);
             if (i == -1) {

@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.util.Calendar;
 
+import gridwatch.plugwatch.logs.LastGoodWitWriter;
 import gridwatch.plugwatch.wit.WatchdogService;
 
 /**
@@ -21,6 +22,9 @@ public class StartWatchDogAtBoot extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             Log.e("alarm", "starting");
+
+
+
             Calendar cal = Calendar.getInstance();
             Intent a = new Intent(context, WatchdogService.class);
             PendingIntent pintent = PendingIntent.getService(context, 0, a, 0);

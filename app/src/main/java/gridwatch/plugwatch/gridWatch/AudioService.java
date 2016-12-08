@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Environment;
 import android.os.ResultReceiver;
 import android.util.Log;
 
@@ -86,7 +85,7 @@ public class AudioService extends IntentService {
 
 
     public String run() {
-        Log.d(runTag, "hit");
+        Log.e("GridWatch SENSOR AUDIO", "Starting");
 
         // TODO should never be false... cut this off earlier. Hack
         // TODO, check for available memory before trying this
@@ -112,7 +111,7 @@ public class AudioService extends IntentService {
             }
             stopRecording();
             constructWAVFile();
-            Log.e("SENSOR AUDIO", "DONE");
+            Log.e("GridWatch SENSOR AUDIO", "DONE");
             return time;
         }
         else {
@@ -123,19 +122,15 @@ public class AudioService extends IntentService {
 
     private void setupFilePaths() {
         String tmpFilePath = "";
-        if (android.os.Build.VERSION.SDK_INT>=19) {
-            File[] possible_kitkat_mounts = mContext.getExternalFilesDirs(null);
-            for (int x = 0; x < possible_kitkat_mounts.length; x++) {
-                if (possible_kitkat_mounts[x] != null){
-                    Log.d(setupFilePathsTag, "possible_kitkat_mounts " + possible_kitkat_mounts[x].toString());
-                    tmpFilePath = possible_kitkat_mounts[x].toString();
-                }
-            }
-        } else {
-            // Set up the tmp file before WAV conversation
-            tmpFilePath = Environment.getExternalStorageDirectory().getPath();
-            Log.d(setupFilePathsTag + ":RECORDING PATH", tmpFilePath);
+
+
+        String secStore = System.getenv("SECONDARY_STORAGE");
+        File f_secs = new File(secStore);
+        if (!f_secs.exists()) {
+            boolean result = f_secs.mkdir();
+            Log.i("TTT", "Results: " + result);
         }
+        tmpFilePath = f_secs.getPath();
         fileFolder = new File(tmpFilePath, recordingFolder);
         if (!fileFolder.exists()) fileFolder.mkdirs();
         tmpFile = new File(tmpFilePath, recordingFileTmpName);

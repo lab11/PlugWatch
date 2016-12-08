@@ -1,10 +1,7 @@
 package gridwatch.plugwatch.logs;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -21,23 +18,20 @@ public class RebootBackOffNumWriter {
 	private final static String LOG_NAME = "pw_reboot_backoff_num.log";
 
 	private static File mLogFile;
-	private static Context mContext;
 	static SharedPreferences prefs = null;
 
-	public RebootBackOffNumWriter(Context context) {
-		mContext = context;
-		create_file();
+	public RebootBackOffNumWriter(String calling_class) {
+		create_file(calling_class);
 	}
 
-	private static void create_file() {
-		File root = Environment.getExternalStorageDirectory();
-		mLogFile = new File(root, LOG_NAME);
-		if (mContext != null) {
-			prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-		} else {
-			Log.e("context restart_num", "null");
+	private static void create_file(String calling_class) {
+		String secStore = System.getenv("SECONDARY_STORAGE");
+		File root = new File(secStore);
+		if (!root.exists()) {
+			boolean result = root.mkdir();
+			Log.i("TTT", "Results: " + result);
 		}
-		log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
+		mLogFile = new File(root, LOG_NAME);
 	}
 
 	public static void log(String time, String num) {
@@ -71,12 +65,14 @@ public class RebootBackOffNumWriter {
 
 	public String get_last_value () {
 		ArrayList<String> log = read();
-		if (!log.isEmpty()) {
-			String last = log.get(log.size() - 1);
-			if (last != null) {
-				String[] last_fields = last.split("\\|");
-				if (last_fields.length > 1) {
-					return last_fields[1];
+		if (log != null) {
+			if (!log.isEmpty()) {
+				String last = log.get(log.size() - 1);
+				if (last != null) {
+					String[] last_fields = last.split("\\|");
+					if (last_fields.length > 1) {
+						return last_fields[1];
+					}
 				}
 			}
 		}
@@ -110,8 +106,10 @@ public class RebootBackOffNumWriter {
 				logBR.close();
 			}  catch (IOException e) {
 				if (e.getCause().toString().contains("No such file")) {
-					log(String.valueOf(System.currentTimeMillis()), "-1");
+					log(String.valueOf(System.currentTimeMillis()), "0");
 					Log.e("LOG CREATED", LOG_NAME);
+					ret.add("0");
+					return ret;
 				} else {
 					// TODO Auto-generated catch block
 					Log.e("file writer", e.getCause().toString());

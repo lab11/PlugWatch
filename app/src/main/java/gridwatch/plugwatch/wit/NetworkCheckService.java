@@ -24,7 +24,7 @@ public class NetworkCheckService extends IntentService {
     public NetworkCheckService() {
         super("NetworkCheckService");
         if (AppConfig.RESTART_ON_EXCEPTION) {
-            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
+            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(getBaseContext(), getClass().getName(),
                     PlugWatchUIActivity.class));
         }
     }

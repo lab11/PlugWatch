@@ -40,6 +40,10 @@ public class Command extends RealmObject {
         return values;
     }
 
+    public String toString() {
+        return "t:" + String.valueOf(mTime) + ",m:" + mType + ",i:" + String.valueOf(misText);
+    }
+
     public String getType() {
         return mType;
     }

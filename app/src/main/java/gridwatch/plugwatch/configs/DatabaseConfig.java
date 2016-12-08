@@ -33,4 +33,16 @@ public class DatabaseConfig {
     public static final String TOPUP_INTERNET = "TOPUP_INTERNET";
     public static final String GET_LOCATION = "GET_LOCATION";
     public static final String GW = "GW";
+    public static final String NUM_REALM_SIZE = "REALM_SIZE";
+    public static final String NUM_LOG_SIZE = "LOG_SIZE";
+    public static final String NUM_SPECIFIC_LOG_SIZE = "SPECIFIC_LOG_SIZE";
+    public static final String NUM_DELETE_LOG_SPECIFIC = "DELETE_LOG_SPECIFIC";
+    public static final String NUM_DELETE_DB_SPECIFIC = "DELETE_DB_SPECIFIC";
+    public static final String NUM_SET_GROUP = "SET_GROUP";
+    public static final String NUM_DELETE_AUDIO_FILES = "DELETE_AUDIO_FILES";
+    public static final String NUM_DELETE_SPECIFIC_AUDIO_FILES = "DELETE_SPECIFIC_AUDIO_FILES";
+    public static final String NUM_GET_VERSION = "GET_VERSION";
+    public static final String NUM_IS_ONLINE = "IS_ONLINE";
+    public static final String NUM_GET_SETTINGS = "GET_SETTINGS";
+    public static final String NUM_AUDIO_SIZE = "AUDIO_SIZE";
 }

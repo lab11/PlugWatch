@@ -27,13 +27,19 @@ public class CommandLineActivity extends Activity {
     private ListView mListView;
 
 
-    String[] TESTS = new String[]{
+
+        String[] TESTS = new String[]{
+            "-1,getrealmsizes",
+            "-1,getlogsizes",
+            "-1,get_specific_log_size:pw_mac.log",
+            "-1,get_audio_size",
+            "-1,num_realms",
             "-1,uploadall",
             "-1,upload_specific:20161128",
             "-1,uploadaudio",
             "-1,uploadlogs",
-            "-1,uploadlog_specific:gw_mac.log",
-            "-1,deletelog_specific:gw_mac.log",
+            "-1,uploadlog_specific:pw_mac.log",
+            "-1,deletelog_specific:pw_mac.log",
             "-1,deletedb_specific:20161128",
             "-1,deleteaudio_specific:1",
             "-1,ping",
@@ -50,6 +56,7 @@ public class CommandLineActivity extends Activity {
             "-1,topupairtime:1234",
             "-1,topupinternet:1234",
             "-1,nuke_audio"
+
     };
 
 
@@ -59,7 +66,7 @@ public class CommandLineActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (AppConfig.RESTART_ON_EXCEPTION) {
-            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
+            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(getBaseContext(), getClass().getName(),
                     PlugWatchUIActivity.class));
         }
         super.onCreate(savedInstanceState);
@@ -77,8 +84,8 @@ public class CommandLineActivity extends Activity {
             }
         });
 
-        PhoneIDWriter r = new PhoneIDWriter(getApplicationContext());
-        GroupIDWriter g = new GroupIDWriter(getApplicationContext());
+        PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(),getClass().getName());
+        GroupIDWriter g = new GroupIDWriter(getClass().getName());
 
 
         mExe.setOnClickListener(new View.OnClickListener() {

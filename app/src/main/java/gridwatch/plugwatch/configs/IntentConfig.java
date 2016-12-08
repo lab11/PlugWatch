@@ -28,4 +28,7 @@ public class IntentConfig {
     public static final String TEST = "TEST";
     public static final String IS_TEXT = "IS_TEXT";
     public static final String FALSE_GW = "FALSE_GW";
+    public static final String NO_REBOOT = "NO_REBOOT";
+    public static final String CONTEXT = "CONTEXT";
+    public static final String CRASH_PLUGWATCH_SERVICE = "CRASH_PLUGWATCH_SERVICE";
 }

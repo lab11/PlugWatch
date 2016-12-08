@@ -37,6 +37,10 @@ public class Crash extends RealmObject {
         return values;
     }
 
+    public String toString() {
+        return "t:" + String.valueOf(mTime) + ",m:" + mText;
+    }
+
     public long getTime() {
         return mTime;
     }

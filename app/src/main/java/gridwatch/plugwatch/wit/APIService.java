@@ -58,7 +58,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +70,7 @@ import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.DatabaseConfig;
 import gridwatch.plugwatch.configs.IntentConfig;
+import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.database.Ack;
 import gridwatch.plugwatch.database.Command;
@@ -79,6 +79,7 @@ import gridwatch.plugwatch.firebase.FirebaseCrashLogger;
 import gridwatch.plugwatch.logs.GroupIDWriter;
 import gridwatch.plugwatch.logs.LatLngWriter;
 import gridwatch.plugwatch.logs.PhoneIDWriter;
+import gridwatch.plugwatch.utilities.SharedPreferencesToString;
 import io.realm.Realm;
 
 import static gridwatch.plugwatch.configs.SMSConfig.AIRTIME;
@@ -127,9 +128,9 @@ public class APIService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("api", "start");
-        PhoneIDWriter r = new PhoneIDWriter(getApplicationContext());
+        PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(), getClass().getName());
         cur_phone_id = r.get_last_value();
-        GroupIDWriter p = new GroupIDWriter(getApplicationContext());
+        GroupIDWriter p = new GroupIDWriter(getClass().getName());
         cur_group_id = p.get_last_value();
 
 
@@ -161,7 +162,7 @@ public class APIService extends Service {
     public void onCreate(){
         super.onCreate();
         if (AppConfig.RESTART_ON_EXCEPTION) {
-            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(this,
+            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(getBaseContext(), getClass().getName(),
                     PlugWatchUIActivity.class));
         }
 
@@ -192,43 +193,56 @@ public class APIService extends Service {
             sendSMS(cur_cmd.toString());
         }
 
-        if (cmd.contains("uploadall")) {
-            if (isText) {
-                return_err("invalid cmd for SMS " + cmd);
+        if (cmd.contains("uploadall")) { //good
+            do_upload_all();
+        } else if (cmd.contains("upload_specific")) { //err
+            do_upload_specific(cmd);
+        } else if (cmd.contains("getrealmsizes")) { //good
+            do_realm_sizes();
+        } else if (cmd.contains("deletedb_specific")) {
+            do_delete_db_specific(cmd);
+        }
+
+
+        else if (cmd.contains("uploadaudio")) { //good
+            do_upload_audio();
+        } else if (cmd.contains("deleteaudio_specific")) { //good
+            do_delete_audio_specific(cmd);
+        } else if (cmd.contains("get_audio_size")) { //good
+            do_get_audio_size();
+        } else if (cmd.contains("nuke_audio")) { //good
+            if (!isIndividual) {
+                return_err("too large of an id for cmd " + cmd);
                 if (!isForced) {
                     return;
                 } else {
                     return_err("Forcing " + cmd);
                 }
             }
-            do_upload_all();
-        } else if (cmd.contains("upload_specific")) {
-            do_upload_specific(cmd);
-        } else if (cmd.contains("uploadaudio")) {
-            do_upload_audio();
-        } else if (cmd.contains("uploadlogs")) {
+            delete_audiofiles();
+        }
+
+
+        else if (cmd.contains("uploadlogs")) { //good
             do_upload_logs();
         } else if (cmd.contains("uploadlog_specific")) {
             do_upload_logs_specific(cmd);
         } else if (cmd.contains("deletelog_specific")) {
             do_delete_log_specific(cmd);
-        } else if (cmd.contains("deletedb_specific")) {
-            do_delete_db_specific(cmd);
-        } else if (cmd.contains("deleteaudio_specific")) {
-            do_delete_audio_specific(cmd);
+        } else if (cmd.contains("getlogsizes")) {
+            do_log_sizes();
+        } else if (cmd.contains("get_specific_log_size")) {
+            do_specific_log_size(cmd);
         } else if (cmd.contains("ping")) {
             do_ping(cmd);
         } else if (cmd.contains("sendsms")) {
             send_sms();
-        }
-
-
-        else if (cmd.contains("httpendpoint")) {
-            String url = cmd.split(":")[1];
-            set_http_endpoint(url);
-        } else if (cmd.contains("smsendpoint")) {
-            String phonenumber = cmd.split(":")[1];
-            set_sms_endpoint(phonenumber);
+        }  else if (cmd.contains("num_realms")) {
+            get_num_realms();
+        } else if (cmd.contains("location")) {
+            get_location();
+        } else if (cmd.contains("isonline")) {
+            isOnline();
         } else if (cmd.contains("setgroupid")) {
             String group = cmd.split(":")[1];
             set_group(group);
@@ -248,37 +262,13 @@ public class APIService extends Service {
                 }
             }
             do_reboot();
-        } else if (cmd.equals("getcmds")) {
-            get_cmds();
-
-        } else if (cmd.equals("getcrashes")) {
-            if (!isIndividual) {
-                return_err("too large of an id for cmd " + cmd);
-                if (!isForced) {
-                    return;
-                } else {
-                    return_err("Forcing " + cmd);
-                }
-            }
-            get_crashes();
-        } else if (cmd.equals("wifi")) {
-            String parameters = cmd.split(":")[1];
-            String ssid = parameters.split("\\?")[0];
-            String type = parameters.split("\\?")[1];
-            String username = parameters.split("\\?")[2];
-            String password = parameters.split("\\?")[3];
-            do_wifi(ssid, type, username, password);
         } else if (cmd.equals("getversion")) {
             get_version();
+        } else if (cmd.equals("get_settings")) {
+            get_settings();
         } else if (cmd.equals("sim")) {
             get_sim();
             get_phonenum();
-        } else if (cmd.contains("topup")) {
-            String parameters = cmd.split(":")[1];
-            String name = parameters.split("\\?")[0];
-            String amount = parameters.split("\\?")[1];
-            String location = parameters.split("\\?")[2];
-            do_topup(name, amount, location);
         } else if (cmd.contains("checkairtime")) {
             check_airtime(cmd);
         } else if (cmd.contains("checkinternet")) {
@@ -287,19 +277,6 @@ public class APIService extends Service {
             topup_airtime(cmd);
         } else if (cmd.contains("topupinternet")) {
             topup_internet(cmd);
-        } else if (cmd.contains("setmaxcrash")) {
-            String max_crash = cmd.split(":")[1];
-            set_max_crash(max_crash);
-        } else if (cmd.contains("nuke_audio")) {
-            if (!isIndividual) {
-                return_err("too large of an id for cmd " + cmd);
-                if (!isForced) {
-                    return;
-                } else {
-                    return_err("Forcing " + cmd);
-                }
-            }
-            delete_audiofiles();
         } else {
             return_err("invalid command! not understood... " + cmd);
         }
@@ -312,50 +289,74 @@ public class APIService extends Service {
     -------------------------------------------------------------- */
 
     public void check_internet(String cmd) {
-        if (cmd.contains("kenya")) {
-            sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_CHECK_INTERNET).commit();
-            do_call(INTERNET);
-        } else {
-            return_err("bad cmd: " + cmd);
+        try {
+            if (cmd.contains("kenya")) {
+                sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_CHECK_INTERNET).commit();
+                do_call(INTERNET);
+            } else {
+                return_err("bad cmd: " + cmd);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " check_internet " + e.getMessage());
         }
     }
 
     public void check_airtime(String cmd) {
-        if (cmd.contains("kenya")) {
-            sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_CHECK_AIRTIME).commit();
-            do_call(AIRTIME);
-        } else {
-            return_err("bad cmd: " + cmd);
+        try {
+            if (cmd.contains("kenya")) {
+                sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_CHECK_AIRTIME).commit();
+                do_call(AIRTIME);
+            } else {
+                return_err("bad cmd: " + cmd);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " check_airtime " + e.getMessage());
         }
     }
 
     public void topup_airtime(String cmd) {
-        if (cmd.contains("kenya")) {
-            try {
-                String pin = cmd.split(":")[1];
-                sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_TOPUP_AIRTIME).commit();
-                sp.edit().putString(SettingsConfig.USSD_PIN, pin).commit();
-                do_call(AIRTIME);
-            } catch (Exception e) {
+        try {
+            if (cmd.contains("kenya")) {
+                try {
+                    String pin = cmd.split(":")[1];
+                    sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_TOPUP_AIRTIME).commit();
+                    sp.edit().putString(SettingsConfig.USSD_PIN, pin).commit();
+                    do_call(AIRTIME);
+                } catch (Exception e) {
+                    return_err("bad cmd: " + cmd);
+                }
+            } else {
                 return_err("bad cmd: " + cmd);
             }
-        } else {
-            return_err("bad cmd: " + cmd);
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " topup_airtime " + e.getMessage());
         }
     }
 
     public void topup_internet(String cmd) {
-        if (cmd.contains("kenya")) {
-            try {
-                String pin = cmd.split(":")[1];
-                sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_TOPUP_INTERNET).commit();
-                sp.edit().putString(SettingsConfig.USSD_PIN, pin).commit();
-                do_call(INTERNET);
-            } catch (Exception e) {
+        try {
+            if (cmd.contains("kenya")) {
+                try {
+                    String pin = cmd.split(":")[1];
+                    sp.edit().putString(SettingsConfig.USSD_ACTION, SettingsConfig.USSD_TOPUP_INTERNET).commit();
+                    sp.edit().putString(SettingsConfig.USSD_PIN, pin).commit();
+                    do_call(INTERNET);
+                } catch (Exception e) {
+                    return_err("bad cmd: " + cmd);
+                }
+            } else {
                 return_err("bad cmd: " + cmd);
             }
-        } else {
-            return_err("bad cmd: " + cmd);
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " topup_internet " + e.getMessage());
         }
     }
 
@@ -444,13 +445,6 @@ public class APIService extends Service {
     }
 
     public void return_err(String msg) {
-        Log.e("error", msg);
-        RequestParams resp = new RequestParams();
-        resp.put("error", msg);
-        resp.put("command", "return_err");
-        resp.put("wifi_only", "no");
-        resp.put("ack", "low");
-
         Ack a = new Ack(System.currentTimeMillis(), "error: " + msg, cur_phone_id, cur_group_id);
         int new_err_num = sp.getInt(SettingsConfig.NUM_ERR, 0) + 1;
         sp.edit().putInt(SettingsConfig.NUM_ERR, new_err_num).commit();
@@ -461,89 +455,230 @@ public class APIService extends Service {
     }
 
     public void get_sim() {
-        TelephonyManager telemamanger = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        String getSimSerialNumber = telemamanger.getSimSerialNumber();
-        Log.e("get_phonenum", "hit");
-        RequestParams resp=new RequestParams();
-        resp.put("command", "get_phonenum");
-        resp.put("wifi_only", "no");
-        resp.put("ack", "high");
-        resp.put("sim_serial", getSimSerialNumber);
+        try {
+            TelephonyManager telemamanger = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String getSimSerialNumber = telemamanger.getSimSerialNumber();
+            Log.e("get_phonenum", "hit");
+            RequestParams resp=new RequestParams();
+            resp.put("command", "get_phonenum");
+            resp.put("wifi_only", "no");
+            resp.put("ack", "high");
+            resp.put("sim_serial", getSimSerialNumber);
 
-        Ack a = new Ack(System.currentTimeMillis(), resp.toString(), cur_phone_id, cur_group_id);
-        int new_sim_num = sp.getInt(SettingsConfig.NUM_SIM, 0) + 1;
-        sp.edit().putInt(SettingsConfig.NUM_SIM, new_sim_num).commit();
-        mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_SIM).child(String.valueOf(new_sim_num)).setValue(a);
-        Log.i("resp", resp.toString());
-        if (isText) {
-            sendSMS(a.toString());
+            Ack a = new Ack(System.currentTimeMillis(), resp.toString(), cur_phone_id, cur_group_id);
+            int new_sim_num = sp.getInt(SettingsConfig.NUM_SIM, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_SIM, new_sim_num).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_SIM).child(String.valueOf(new_sim_num)).setValue(a);
+            Log.i("resp", resp.toString());
+            if (isText) {
+                sendSMS(a.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " get_sim " + e.getMessage());
         }
     }
 
     public void get_phonenum() {
-        TelephonyManager telemamanger = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        String getSimNumber = telemamanger.getLine1Number();
-        Log.e("get_phonenum", "hit");
-        RequestParams resp=new RequestParams();
-        resp.put("command", "get_phonenum");
-        resp.put("wifi_only", "no");
-        resp.put("ack", "high");
-        resp.put("sim_serial", getSimNumber);
-        Log.i("resp", resp.toString());
+        try {
+            TelephonyManager telemamanger = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String getSimNumber = telemamanger.getLine1Number();
+            Log.e("get_phonenum", "hit");
+            RequestParams resp=new RequestParams();
+            resp.put("command", "get_phonenum");
+            resp.put("wifi_only", "no");
+            resp.put("ack", "high");
+            resp.put("sim_serial", getSimNumber);
+            Log.i("resp", resp.toString());
 
-        Ack a = new Ack(System.currentTimeMillis(), resp.toString(), cur_phone_id, cur_group_id);
-        int new_phone_num = sp.getInt(SettingsConfig.NUM_PHONE, 0) + 1;
-        sp.edit().putInt(SettingsConfig.NUM_PHONE, new_phone_num).commit();
-        mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_PHONENUM).child(String.valueOf(new_phone_num)).setValue(a);
-        if (isText) {
-            sendSMS(a.toString());
+            Ack a = new Ack(System.currentTimeMillis(), resp.toString(), cur_phone_id, cur_group_id);
+            int new_phone_num = sp.getInt(SettingsConfig.NUM_PHONE, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_PHONE, new_phone_num).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_PHONENUM).child(String.valueOf(new_phone_num)).setValue(a);
+            if (isText) {
+                sendSMS(a.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " get_phonenum " + e.getMessage());
         }
 
     }
 
 
     public void do_upload_audio() {
-        List<File> files_to_upload = getListFiles(setupFilePaths(), ".wav");
-        for (int i = 0; i < files_to_upload.size(); i++) {
-            Log.e("uploading", files_to_upload.get(i).getName());
-            upload(files_to_upload.get(i));
-        }
-    }
-
-
-    private File setupFilePaths() {
-        String tmpFilePath = "";
-        if (android.os.Build.VERSION.SDK_INT>=19) {
-            File[] possible_kitkat_mounts = mContext.getExternalFilesDirs(null);
-            for (int x = 0; x < possible_kitkat_mounts.length; x++) {
-                if (possible_kitkat_mounts[x] != null){
-                    tmpFilePath = possible_kitkat_mounts[x].toString();
-                }
+        try {
+            List<File> files_to_upload = getListFiles(setupFilePaths(), ".wav");
+            for (int i = 0; i < files_to_upload.size(); i++) {
+                Log.e("uploading", files_to_upload.get(i).getName());
+                upload(files_to_upload.get(i));
             }
-        } else {
-            // Set up the tmp file before WAV conversation
-            tmpFilePath = Environment.getExternalStorageDirectory().getPath();
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " do_upload_audio " + e.getMessage());
         }
-        return new File(tmpFilePath, recordingFolder);
     }
+
+
+
 
     //Status: needs testing
     public void do_upload_all() {
-        List<File> files_to_upload = getListFiles(openRealm(), "realm");
-        for (int i = 0; i < files_to_upload.size(); i++) {
-            Log.e("uploading", files_to_upload.get(i).getName());
-            upload(files_to_upload.get(i));
+        try {
+            List<File> files_to_upload = getListFiles(openRealm(), "realm");
+            for (int i = 0; i < files_to_upload.size(); i++) {
+                Log.e("uploading", files_to_upload.get(i).getName());
+                upload(files_to_upload.get(i));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " do_upload_all " + e.getMessage());
+        }
+
+    }
+
+
+
+
+    public void do_get_audio_size() {
+        try {
+            int num_wavs = 0;
+            long size = 0;
+            try {
+                File dir = setupFilePaths();
+                if (dir.exists()) {
+                    File[] files = dir.listFiles();
+                    if (null != files) {
+                        for (int i = 0; i < files.length; i++) {
+                            if (files[i].getName().contains(".wav")) {
+                                size += files[i].length();
+                                num_wavs++;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            }
+            Ack a = new Ack(System.currentTimeMillis(), String.valueOf(size) + " " + String.valueOf(num_wavs), cur_phone_id, cur_group_id);
+            int new_num_audio_size = sp.getInt(SettingsConfig.NUM_AUDIO_SIZE, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_AUDIO_SIZE, new_num_audio_size).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_AUDIO_SIZE).child(String.valueOf(new_num_audio_size)).setValue(a);
+            if (isText) {
+                sendSMS(a.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " do_get_audio_size " + e.getMessage());
+        }
+    }
+
+    public void do_realm_sizes() {
+        try {
+
+            long size = 0;
+            List<File> files_to_upload = getListFiles(openRealm(), "realm");
+            for (int i = 0; i < files_to_upload.size(); i++) {
+                Log.e("size", String.valueOf(files_to_upload.get(i).length()));
+                size += files_to_upload.get(i).length();
+            }
+            Ack a = new Ack(System.currentTimeMillis(), String.valueOf(size), cur_phone_id, cur_group_id);
+            int new_num_realm_size = sp.getInt(SettingsConfig.NUM_REALM_SIZE, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_REALM_SIZE, new_num_realm_size).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_REALM_SIZE).child(String.valueOf(new_num_realm_size)).setValue(a);
+            if (isText) {
+                sendSMS(a.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " do_realm_size " + e.getMessage());
+        }
+    }
+
+    public void do_log_sizes() {
+        try {
+
+            String report = "";
+            long size = 0;
+            String secStore = System.getenv("SECONDARY_STORAGE");
+            File root = new File(secStore);
+            if (!root.exists()) {
+                boolean result = root.mkdir();
+                Log.i("TTT", "Results: " + result);
+            }
+            List<File> files_to_upload = getListFiles(root, ".log");
+            for (int i = 0; i < files_to_upload.size(); i++) {
+                Log.e("getting size", String.valueOf(files_to_upload.get(i).length()));
+                report += files_to_upload.get(i).getName() + ":" + String.valueOf(files_to_upload.get(i).length()) + " ";
+                size += files_to_upload.get(i).length();
+            }
+            Ack a = new Ack(System.currentTimeMillis(), report + " tot: " + String.valueOf(size), cur_phone_id, cur_group_id);
+            int new_num_log_sizes = sp.getInt(SettingsConfig.NUM_LOG_SIZE, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_LOG_SIZE, new_num_log_sizes).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_LOG_SIZE).child(String.valueOf(new_num_log_sizes)).setValue(a);
+            if (isText) {
+                sendSMS(a.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " do_log_size " + e.getMessage());
+        }
+    }
+
+    public void do_specific_log_size(String cmd) {
+        try {
+            long size = 0;
+            String filename = cmd.split(":")[1];
+            String secStore = System.getenv("SECONDARY_STORAGE");
+            File root = new File(secStore);
+            if (!root.exists()) {
+                boolean result = root.mkdir();
+                Log.i("TTT", "Results: " + result);
+            }
+            List<File> files_to_upload = getListFiles(root, ".log");
+            for (int i = 0; i < files_to_upload.size(); i++) {
+                if (files_to_upload.get(i).getName().contains(filename)) {
+                    Log.e("uploading", String.valueOf(files_to_upload.get(i).length()));
+                    size += files_to_upload.get(i).length();
+                }
+            }
+            Ack a = new Ack(System.currentTimeMillis(), filename + " size: " + String.valueOf(size), cur_phone_id, cur_group_id);
+            int new_num_specific_log_size = sp.getInt(SettingsConfig.NUM_SPECIFIC_LOG_SIZE, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_SPECIFIC_LOG_SIZE, new_num_specific_log_size).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_SPECIFIC_LOG_SIZE).child(String.valueOf(new_num_specific_log_size)).setValue(a);
+            if (isText) {
+                sendSMS(a.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + cmd + " " + e.getMessage());
         }
     }
 
     public void get_num_realms() {
-        List<File> files_to_upload = getListFiles(openRealm(), "realm");
-        Ack a = new Ack(System.currentTimeMillis(), String.valueOf(files_to_upload.size()), cur_phone_id, cur_group_id);
-        int new_realm_num = sp.getInt(SettingsConfig.NUM_REALMS, 0) + 1;
-        sp.edit().putInt(SettingsConfig.NUM_REALMS, new_realm_num).commit();
-        mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_REALMS).child(String.valueOf(new_realm_num)).setValue(a);
-        if (isText) {
-            sendSMS(a.toString());
+        try {
+            List<File> files_to_upload = getListFiles(openRealm(), "realm");
+            Ack a = new Ack(System.currentTimeMillis(), String.valueOf(files_to_upload.size()), cur_phone_id, cur_group_id);
+            int new_realm_num = sp.getInt(SettingsConfig.NUM_REALMS, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_REALMS, new_realm_num).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_REALMS).child(String.valueOf(new_realm_num)).setValue(a);
+            if (isText) {
+                sendSMS(a.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " get_num_realms " + e.getMessage());
         }
 
     }
@@ -551,44 +686,76 @@ public class APIService extends Service {
 
 
     public void do_upload_logs() {
-        File root = Environment.getExternalStorageDirectory();
-        List<File> files_to_upload = getListFiles(root, ".log");
-        for (int i = 0; i < files_to_upload.size(); i++) {
-            Log.e("uploading", files_to_upload.get(i).getName());
-            upload(files_to_upload.get(i));
+        try {
+            String secStore = System.getenv("SECONDARY_STORAGE");
+            File root = new File(secStore);
+            if (!root.exists()) {
+                boolean result = root.mkdir();
+                Log.i("TTT", "Results: " + result);
+            }
+            List<File> files_to_upload = getListFiles(root, ".log");
+            for (int i = 0; i < files_to_upload.size(); i++) {
+                Log.e("uploading", files_to_upload.get(i).getName());
+                upload(files_to_upload.get(i));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " do_upload_logs " + e.getMessage());
         }
     }
 
 
     public void do_upload_logs_specific(String cmd) {
         try {
-            File root = Environment.getExternalStorageDirectory();
+            String secStore = System.getenv("SECONDARY_STORAGE");
+            File root = new File(secStore);
+            if (!root.exists()) {
+                boolean result = root.mkdir();
+                Log.i("TTT", "Results: " + result);
+            }
             String date = cmd.split(":")[1];
-            Log.e("uploading", date);
-
             List<File> files_to_upload = getListFiles(root, date);
             for (int i = 0; i < files_to_upload.size(); i++) {
                 Log.e("uploading", files_to_upload.get(i).getName());
                 upload(files_to_upload.get(i));
             }
         } catch (Exception e) {
-            return_err("bad parameters " + cmd);
-        }
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + cmd + " " + e.getMessage());        }
     }
 
     public void do_delete_log_specific(String cmd) {
         try {
-            File root = Environment.getExternalStorageDirectory();
+            String filename = "";
+            String secStore = System.getenv("SECONDARY_STORAGE");
+            File root = new File(secStore);
+            if (!root.exists()) {
+                boolean result = root.mkdir();
+                Log.i("TTT", "Results: " + result);
+            }
             String date = cmd.split(":")[1];
-            Log.e("uploading", date);
+            Log.e("deleting", date);
             List<File> file_to_delete = getListFiles(root, date);
             for (int i = 0; i < file_to_delete.size(); i++) {
-                Log.e("deleting", file_to_delete.get(i).getName());
-                file_to_delete.get(i).delete();
+                Log.e("checking", file_to_delete.get(i).getName());
+                if (cmd.equals(file_to_delete.get(i).getName())) {
+                    filename += file_to_delete.get(i).getName() + ",";
+                    file_to_delete.get(i).delete();
+                    Log.e("deleting", file_to_delete.get(i).getName());
+                }
             }
+
+            Ack a = new Ack(System.currentTimeMillis(), filename, cur_phone_id, cur_group_id);
+            int new_delete_log_specific_num = sp.getInt(SettingsConfig.NUM_DELETE_LOG_SPECIFIC, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_DELETE_LOG_SPECIFIC, new_delete_log_specific_num).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_DELETE_LOG_SPECIFIC).child(String.valueOf(new_delete_log_specific_num)).setValue(a);
+
         } catch (Exception e) {
-            return_err("bad parameters " + cmd);
-        }
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + cmd + " " + e.getMessage());        }
     }
 
 
@@ -600,23 +767,36 @@ public class APIService extends Service {
             List<File> files_to_upload = getListFiles(openRealm(), date);
             for (int i = 0; i < files_to_upload.size(); i++) {
                 Log.e("uploading", files_to_upload.get(i).getName());
+
                 upload(files_to_upload.get(i));
             }
         } catch (Exception e) {
-            return_err("bad parameters " + cmd);
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + cmd + " " + e.getMessage());
         }
     }
 
     public void do_delete_db_specific(String cmd) {
         try {
-            String date = cmd.split(":")[1];
+            String filename = "";
+            String db = cmd.split(":")[1];
             List<File> file_to_delete = getListFiles(openRealm(), cmd);
             for (int i = 0; i < file_to_delete.size(); i++) {
-                Log.e("deleting", file_to_delete.get(i).getName());
-                file_to_delete.get(i).delete();
+                if (file_to_delete.get(i).getName().contains(cmd)) {
+                    Log.e("deleting", file_to_delete.get(i).getName());
+                    filename += file_to_delete.get(i).getName() + ",";
+                    file_to_delete.get(i).delete();
+                }
             }
+            Ack a = new Ack(System.currentTimeMillis(), filename, cur_phone_id, cur_group_id);
+            int new_delete_db_specific_num = sp.getInt(SettingsConfig.NUM_DELETE_DB_SPECIFIC, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_DELETE_DB_SPECIFIC, new_delete_db_specific_num).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_DELETE_DB_SPECIFIC).child(String.valueOf(new_delete_db_specific_num)).setValue(a);
         } catch (Exception e) {
-            return_err("bad parameters " + cmd);
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + cmd + " " + e.getMessage());
         }
     }
 
@@ -647,152 +827,183 @@ public class APIService extends Service {
 
     //Status: needs testing
     public void set_group(String group) {
-        DateFormat df = DateFormat.getDateTimeInstance();
-        if (!group.startsWith("g")) {
-            return_err("can't set group " + group);
-            return;
-        }
-        //mGroupId.log(df.format(new Date()), group, null);
-        RequestParams resp=new RequestParams();
-        resp.put("command", "set_group " + group);
-        resp.put("wifi_only", "no");
-        resp.put("ack", "high");
-        Log.i("resp", resp.toString());
-        //SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready, resp, mContext));
-        //startBackgroundPerformExecutor();
-    }
+        try {
+            GroupIDWriter r = new GroupIDWriter(getClass().getName());
+            r.log(String.valueOf(System.currentTimeMillis()), group, "api");
 
+            Ack a = new Ack(System.currentTimeMillis(), group, cur_phone_id, cur_group_id);
+            int new_set_group_num = sp.getInt(SettingsConfig.NUM_SET_GROUP, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_SET_GROUP, new_set_group_num).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_SET_GROUP).child(String.valueOf(new_set_group_num)).setValue(a);
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + group + " " + e.getMessage());
+        }
+    }
     //Status: needs testing
     public void get_report() {
+        try {
 
-        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent batteryStatus = mContext.registerReceiver(null, ifilter);
-        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-        double battery = level / (double) scale;
+            IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            Intent batteryStatus = mContext.registerReceiver(null, ifilter);
+            int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+            double battery = level / (double) scale;
 
 
+            long time = System.currentTimeMillis();
 
-        long time = System.currentTimeMillis();
+            Log.e("PID", String.valueOf(android.os.Process.myPid()));
 
-        Log.e("PID", String.valueOf(android.os.Process.myPid()));
+            long time_since_last_wit_ms = time - sp.getLong(SettingsConfig.LAST_WIT, 1);
 
-        long time_since_last_wit_ms = time - sp.getLong(SettingsConfig.LAST_WIT, 1);
+            String measurementSize = String.valueOf(sp.getInt(SettingsConfig.WIT_SIZE, 1));
+            String gwSize = String.valueOf(sp.getInt(SettingsConfig.GW_SIZE, 1));
+            String versionNum = sp.getString(SettingsConfig.VERSION_NUM, "");
+            String externalFreespace = sp.getString(SettingsConfig.FREESPACE_EXTERNAL, "");
+            String internalFreespace = sp.getString(SettingsConfig.FREESPACE_INTERNAL, "");
+            PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(), getClass().getName());
+            String phone_id = r.get_last_value();
+            GroupIDWriter w = new GroupIDWriter(getClass().getName());
+            String group_id = w.get_last_value();
+            String num_realms = String.valueOf(sp.getInt(SettingsConfig.NUM_REALMS, -1));
+            long network_size = sp.getLong(SettingsConfig.TOTAL_DATA, -1);
+            LatLngWriter l = new LatLngWriter(getClass().getName());
+            String loc = l.get_last_value();
+            TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String iemi = telephonyManager.getDeviceId();
 
-        String measurementSize = String.valueOf(sp.getInt(SettingsConfig.WIT_SIZE, 1));
-        String gwSize = String.valueOf(sp.getInt(SettingsConfig.GW_SIZE, 1));
-        String versionNum = sp.getString(SettingsConfig.VERSION_NUM, "");
-        String externalFreespace = sp.getString(SettingsConfig.FREESPACE_EXTERNAL, "");
-        String internalFreespace = sp.getString(SettingsConfig.FREESPACE_INTERNAL, "");
-        String phone_id = sp.getString(SettingsConfig.PHONE_ID, "");
-        String group_id = sp.getString(SettingsConfig.GROUP_ID, "");
-        String num_realms = String.valueOf(sp.getInt(SettingsConfig.NUM_REALMS, -1));
+            boolean is_online = checkOnline();
 
-        WD cur = new WD(time, time_since_last_wit_ms, measurementSize, gwSize, num_realms, versionNum, externalFreespace, internalFreespace,
-                cur_phone_id, cur_group_id, battery);
-        int new_wd_num = sp.getInt(SettingsConfig.NUM_WD, 0) + 1;
-        sp.edit().putInt(SettingsConfig.NUM_WD, new_wd_num).commit();
-        mDatabase.child(cur_phone_id).child(DatabaseConfig.WD).child(String.valueOf(new_wd_num)).setValue(cur);
+            WD cur = new WD(time, time_since_last_wit_ms, measurementSize, gwSize, num_realms, versionNum, externalFreespace, internalFreespace,
+                    phone_id, group_id, battery, network_size, loc, iemi, is_online, SensorConfig.WD_TYPE_API);
+            int new_wd_num = sp.getInt(SettingsConfig.NUM_WD, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_WD, new_wd_num).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.WD).child(String.valueOf(new_wd_num)).setValue(cur);
 
-        if (isText) {
-            sendSMS(cur.toString());
+            if (isText) {
+                sendSMS(cur.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " get_report " + e.getMessage());
         }
 
     }
 
     //Status: needs testing
     public void get_free_space() {
-        Log.e("free space", "now");
-        RequestParams resp = new RequestParams();
-        resp.put("free space internal", getAvailableInternalMemorySize());
-        resp.put("free space external:", getAvailableExternalMemorySize());
-        resp.put("command", "freeSpace");
-        resp.put("wifi_only", "no");
-        resp.put("ack", "low");
-        Log.i("resp", resp.toString());
+        try {
+            Log.e("free space", "now");
+            RequestParams resp = new RequestParams();
+            resp.put("free space internal", getAvailableInternalMemorySize());
+            resp.put("free space external:", getAvailableExternalMemorySize());
+            resp.put("command", "freeSpace");
+            resp.put("wifi_only", "no");
+            resp.put("ack", "low");
+            Log.i("resp", resp.toString());
 
-        Ack a = new Ack(System.currentTimeMillis(), resp.toString(), cur_phone_id, cur_group_id);
-        int new_freespace = sp.getInt(SettingsConfig.NUM_FREE_SPACE, 0) + 1;
-        sp.edit().putInt(SettingsConfig.NUM_FREE_SPACE, new_freespace).commit();
-        mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_FREE_SPACE).child(String.valueOf(new_freespace)).setValue(a);
+            Ack a = new Ack(System.currentTimeMillis(), resp.toString(), cur_phone_id, cur_group_id);
+            int new_freespace = sp.getInt(SettingsConfig.NUM_FREE_SPACE, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_FREE_SPACE, new_freespace).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_FREE_SPACE).child(String.valueOf(new_freespace)).setValue(a);
 
-        if (isText) {
-            sendSMS(a.toString());
+            if (isText) {
+                sendSMS(a.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " get_free_space " + e.getMessage());
         }
 
     }
 
     //Status: needs testing
     public void get_stats() {
-        //TODO add in audio settings, total data, total data of each type in realm
-        Log.e("stats", "now");
-        RequestParams resp=new RequestParams();
-        Map<String,?> keys = sp.getAll();
-        for(Map.Entry<String,?> entry : keys.entrySet()){
-            resp.put(entry.getKey(), entry.getValue().toString());
-        }
-
-        //RealmResults<WitEnergyMeasurement> res = realm.where(WitEnergyMeasurement.class).findAll();
-        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent batteryStatus = getBaseContext().registerReceiver(null, ifilter);
-        assert batteryStatus != null;
-        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-        float batteryPct = level / (float) scale;
-        final TelephonyManager tm = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
-        final String tmDevice, tmSerial, androidId;
-        tmDevice = "" + tm.getDeviceId();
-        tmSerial = "" + tm.getSimSerialNumber();
-        androidId = "" + android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         try {
-            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            resp.put("lat",String.valueOf(location.getLatitude()));
-            resp.put("lng",String.valueOf(location.getLongitude()));
-        } catch (SecurityException e) {
-            Log.e("loc", e.toString());
-        }
-        resp.put("free space internal", getAvailableInternalMemorySize());
-        resp.put("free space external:", getAvailableExternalMemorySize());
-        //resp.put("app_version",BuildConfig.VERSION_NAME);
-        resp.put("timestamp",String.valueOf(System.currentTimeMillis()));
-        resp.put("uptime",String.valueOf(SystemClock.uptimeMillis()));
-        resp.put("reboot_cnt",String.valueOf(sp.getLong("reboot", -1)));
-        //resp.put("num_measurments",String.valueOf(res.size()));
-        resp.put("battery_life",String.valueOf(batteryPct));
-        resp.put("android_id",deviceUuid.toString());
-        resp.put("fcm_id",sp.getString("token", "-1"));
-        resp.put("fcm_counter", String.valueOf(sp.getLong("fcm_cnt", -1)));
-        resp.put("command", "stats");
-        resp.put("wifi_only", "no");
-        resp.put("ack", "low");
-        Log.i("resp", resp.toString());
+            //TODO add in audio settings, total data, total data of each type in realm
+            Log.e("stats", "now");
+            RequestParams resp = new RequestParams();
+            Map<String, ?> keys = sp.getAll();
+            for (Map.Entry<String, ?> entry : keys.entrySet()) {
+                resp.put(entry.getKey(), entry.getValue().toString());
+            }
 
-        Ack a = new Ack(System.currentTimeMillis(), resp.toString(), cur_phone_id, cur_group_id);
-        int new_stats = sp.getInt(SettingsConfig.NUM_STATS, 0) + 1;
-        sp.edit().putInt(SettingsConfig.NUM_STATS, new_stats).commit();
-        mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_STATS).child(String.valueOf(new_stats)).setValue(a);
+            //RealmResults<WitEnergyMeasurement> res = realm.where(WitEnergyMeasurement.class).findAll();
+            IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            Intent batteryStatus = getBaseContext().registerReceiver(null, ifilter);
+            assert batteryStatus != null;
+            int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+            float batteryPct = level / (float) scale;
+            final TelephonyManager tm = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
+            final String tmDevice, tmSerial, androidId;
+            tmDevice = "" + tm.getDeviceId();
+            tmSerial = "" + tm.getSimSerialNumber();
+            androidId = "" + android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+            UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
+            LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            try {
+                Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                resp.put("lat", String.valueOf(location.getLatitude()));
+                resp.put("lng", String.valueOf(location.getLongitude()));
+            } catch (SecurityException e) {
+                Log.e("loc", e.toString());
+            }
+            resp.put("free space internal", getAvailableInternalMemorySize());
+            resp.put("free space external:", getAvailableExternalMemorySize());
+            //resp.put("app_version",BuildConfig.VERSION_NAME);
+            resp.put("timestamp", String.valueOf(System.currentTimeMillis()));
+            resp.put("uptime", String.valueOf(SystemClock.uptimeMillis()));
+            resp.put("reboot_cnt", String.valueOf(sp.getLong("reboot", -1)));
+            //resp.put("num_measurments",String.valueOf(res.size()));
+            resp.put("battery_life", String.valueOf(batteryPct));
+            resp.put("android_id", deviceUuid.toString());
+            resp.put("fcm_id", sp.getString("token", "-1"));
+            resp.put("fcm_counter", String.valueOf(sp.getLong("fcm_cnt", -1)));
+            resp.put("command", "stats");
+            resp.put("wifi_only", "no");
+            resp.put("ack", "low");
+            Log.i("resp", resp.toString());
 
-        if (isText) {
-            sendSMS(a.toString());
+            Ack a = new Ack(System.currentTimeMillis(), resp.toString(), cur_phone_id, cur_group_id);
+            int new_stats = sp.getInt(SettingsConfig.NUM_STATS, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_STATS, new_stats).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_STATS).child(String.valueOf(new_stats)).setValue(a);
+
+            if (isText) {
+                sendSMS(a.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " get_stats " + e.getMessage());
         }
 
     }
 
     //Status: needs testing
     public void get_location() {
-        Log.e("api", "get_location");
+        try {
+            Log.e("api", "get_location");
 
-        LatLngWriter r = new LatLngWriter(mContext);
-        String loc = r.get_last_value();
-        Ack a = new Ack(System.currentTimeMillis(), loc, cur_phone_id, cur_group_id);
-        int new_loc = sp.getInt(SettingsConfig.NUM_LOCATION, 0) + 1;
-        sp.edit().putInt(SettingsConfig.NUM_LOCATION, new_loc).commit();
-        mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_LOCATION).child(String.valueOf(new_loc)).setValue(a);
+            LatLngWriter r = new LatLngWriter(getClass().getName());
+            String loc = r.get_last_value();
+            Ack a = new Ack(System.currentTimeMillis(), loc, cur_phone_id, cur_group_id);
+            int new_loc = sp.getInt(SettingsConfig.NUM_LOCATION, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_LOCATION, new_loc).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.GET_LOCATION).child(String.valueOf(new_loc)).setValue(a);
 
-        if (isText) {
-            sendSMS(a.toString());
+            if (isText) {
+                sendSMS(a.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " get_location " + e.getMessage());
         }
 
     }
@@ -801,55 +1012,97 @@ public class APIService extends Service {
 
     public void delete_audiofiles() {
         try {
-            File dir = get_audio_file();
+            long size = 0;
+            String filename = "";
+            File dir = setupFilePaths();
             if (dir.exists()) {
                 File[] files = dir.listFiles();
                 if (null != files) {
                     for (int i = 0; i < files.length; i++) {
+                        filename += files[i].getName() + ",";
+                        size += files[i].length();
                         files[i].delete();
                     }
                 }
             }
+
+            Ack a = new Ack(System.currentTimeMillis(), "deleted: " + filename + " tot size: " + String.valueOf(size), cur_phone_id, cur_group_id);
+            int new_num_delete_audio_files_num = sp.getInt(SettingsConfig.NUM_DELETE_AUDIO_FILES, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_DELETE_AUDIO_FILES, new_num_delete_audio_files_num).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_DELETE_AUDIO_FILES).child(String.valueOf(new_num_delete_audio_files_num)).setValue(a);
         }
         catch (Exception e) {
             e.printStackTrace();
             FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + " delete_audiofiles " + e.getMessage());
+
         }
+    }
+
+    public void get_settings() {
+
+
+        try {
+            SharedPreferencesToString b = new SharedPreferencesToString(getApplicationContext());
+            String to_ret = b.getString();
+            Ack a = new Ack(System.currentTimeMillis(), to_ret, cur_phone_id, cur_group_id);
+            int new_num_get_settings = sp.getInt(SettingsConfig.NUM_GET_SETTINGS, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_GET_SETTINGS, new_num_get_settings).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_GET_SETTINGS).child(String.valueOf(new_num_get_settings)).setValue(a);
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad parameters " + " get_settings " + " " + e.getMessage());
+        }
+
+
     }
 
     public void do_delete_audio_specific(String cmd) {
         try {
-            File root = setupFilePaths();
-            String date = cmd.split(":")[1];
-            Log.e("uploading", date);
-            List<File> file_to_delete = getListFiles(root, date);
-            for (int i = 0; i < file_to_delete.size(); i++) {
-                Log.e("deleting", file_to_delete.get(i).getName());
-                file_to_delete.get(i).delete();
+            String filename = "";
+            String match = cmd.split(":")[1];
+            File dir = setupFilePaths();
+            if (dir.exists()) {
+                File[] files = dir.listFiles();
+                if (null != files) {
+                    for (int i = 0; i < files.length; i++) {
+                        if (files[i].getName().contains(match)) {
+                            filename += files[i].getName() + ",";
+                            files[i].delete();
+                        }
+                    }
+                }
             }
+
+            Ack a = new Ack(System.currentTimeMillis(), "deleted: " + filename, cur_phone_id, cur_group_id);
+            int new_num_delete_specific_audio_files_num = sp.getInt(SettingsConfig.NUM_DELETE_SPECIFIC_AUDIO_FILES, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_DELETE_SPECIFIC_AUDIO_FILES, new_num_delete_specific_audio_files_num).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_DELETE_SPECIFIC_AUDIO_FILES).child(String.valueOf(new_num_delete_specific_audio_files_num)).setValue(a);
         } catch (Exception e) {
-            return_err("bad parameters " + cmd);
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad parameters " + cmd + " " + e.getMessage());
         }
     }
 
-    private File get_audio_file() {
+
+    private File setupFilePaths() {
         String tmpFilePath = "";
-        if (android.os.Build.VERSION.SDK_INT>=19) {
-            File[] possible_kitkat_mounts = mContext.getExternalFilesDirs(null);
-            for (int x = 0; x < possible_kitkat_mounts.length; x++) {
-                if (possible_kitkat_mounts[x] != null){
-                    Log.d("audio", "possible_kitkat_mounts " + possible_kitkat_mounts[x].toString());
-                    tmpFilePath = possible_kitkat_mounts[x].toString();
-                }
-            }
-        } else {
-            // Set up the tmp file before WAV conversation
-            tmpFilePath = Environment.getExternalStorageDirectory().getPath();
-            Log.d("audio" + ":RECORDING PATH", tmpFilePath);
+
+        String secStore = System.getenv("SECONDARY_STORAGE");
+        File f_secs = new File(secStore);
+        if (!f_secs.exists()) {
+            boolean result = f_secs.mkdir();
+            Log.i("TTT", "Results: " + result);
         }
-        File fileFolder = new File(tmpFilePath, recordingFolder);
-        return fileFolder;
+        tmpFilePath = f_secs.getPath();
+        return new File(tmpFilePath, recordingFolder);
     }
+
+
+
+
 
     public void do_ping(String cmd) {
         try {
@@ -872,44 +1125,14 @@ public class APIService extends Service {
                 }
             });
         } catch (Exception e) {
-            return_err("bad parameters " + cmd);
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad parameters " + cmd + " " + e.getMessage());
         }
 
 
     }
 
-    public void set_settings(String settingscmd, String modifier) {
-        Log.e("set_settings", settingscmd);
-        RequestParams resp = new RequestParams();
-        if (modifier.equals("on")) {
-            sp.edit().putBoolean(settingscmd, true).apply();
-        } else if (modifier.equals("off")) {
-            sp.edit().putBoolean(settingscmd, false).apply();
-        } else if (settingscmd.equals("mic_sample_freq") ||
-                settingscmd.equals("bit_rate") ||
-                settingscmd.equals("mic_sample_time"))  {
-            try {
-                sp.edit().putFloat(settingscmd, Float.valueOf(modifier));
-            } catch (NumberFormatException e) {
-                return_err("invalid float modifier " + settingscmd + "?" + modifier);
-            }
-        } else if (settingscmd.equals("channels")) {
-            if (modifier.equals("stereo") || modifier.equals("mono")) {
-                sp.edit().putString("channels", modifier).apply();
-            } else {
-                return_err("invalid channel modifier " + settingscmd + "?" + modifier);
-            }
-        } else {
-            return_err("invalid set_settings " + settingscmd + "?" + modifier);
-        }
-        resp.put("command", "set_settings,"+settingscmd + "?" + modifier);
-        resp.put("wifi_only", "no");
-        resp.put("ack", "high");
-        Log.i("resp", resp.toString());
-
-        //SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready,resp, mContext));
-        //startBackgroundPerformExecutor();
-    }
 
     public void do_reboot() {
         Log.e("reboot", "now");
@@ -942,104 +1165,12 @@ public class APIService extends Service {
                     .exec(new String[]{ "su", "-c", "reboot" });
             proc.waitFor();
             Runtime.getRuntime().exec(new String[]{"/system/bin/su","-c","reboot now"});
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad parameters " + "reboot_cmd " + e.getMessage());
         }
     };
-
-    public void get_cmds() {
-        //RealmResults<Command> res = realm.where(Command.class).findAll();
-        /*
-        for (int i = 0; i < res.size(); i++) {
-            Command a = res.get(i);
-            //SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready,a.toRequestParams(), mContext));
-        }
-        */
-        RequestParams resp = new RequestParams();
-        resp.put("command", "get_cmds");
-        resp.put("ack", "low");
-        resp.put("wifi_only", "no");
-        Log.i("resp", resp.toString());
-        //SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready, resp, mContext));
-        //startBackgroundPerformExecutor();
-    }
-
-    public void get_crashcnt() {
-        //RealmResults<Crash> res = realm.where(Crash.class).findAll();
-        RequestParams resp = new RequestParams();
-        //resp.put("crash_cnt", res.size());
-        resp.put("command", "get_crashcnt");
-        resp.put("ack", "low");
-        resp.put("wifi_only", "no");
-        Log.i("resp", resp.toString());
-        //SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready, resp, mContext));
-        //startBackgroundPerformExecutor();
-    }
-
-    public void get_crashes() {
-        /*
-        RealmResults<Crash> res = realm.where(Crash.class).findAll();
-        for (int i = 0; i < res.size(); i++) {
-            Crash a = res.get(i);
-            SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready, a.toRequestParams(), mContext));
-        }
-        RequestParams resp = new RequestParams();
-        resp.put("command", "get_crashes");
-        resp.put("ack", "low");
-        resp.put("wifi_only", "no");
-        Log.i("resp", resp.toString());
-        SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready, resp, mContext));
-        startBackgroundPerformExecutor();
-        */
-    }
-    public void get_version() {
-        RequestParams resp = new RequestParams();
-        resp.put("command", "get_version");
-        //resp.put("version", SensorTagApplicationClass.getInstance().getVersion());
-        resp.put("ack", "low");
-        resp.put("wifi_only", "no");
-        Log.i("resp", resp.toString());
-        //SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready, resp, mContext));
-        //startBackgroundPerformExecutor();
-    }
-
-    public void get_dumpcnt() {
-        //RealmResults<Dump> res = realm.where(Dump.class).findAll();
-        RequestParams resp = new RequestParams();
-        //resp.put("dump_cnt", res.size());
-        resp.put("command", "get_dumpcnt");
-        resp.put("ack", "low");
-        resp.put("wifi_only", "no");
-        //SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready, resp, mContext));
-        //startBackgroundPerformExecutor();
-    }
-
-    public void set_ackstate(String ackstate) {
-        if (ackstate.equals("high") || ackstate.equals("medium") || ackstate.equals("low")) {
-            mAckstate = ackstate;
-        } else {
-            return_err("invalid ackstate " + ackstate);
-            return;
-        }
-        RequestParams resp = new RequestParams();
-        resp.put("command", "ackstate,"+ackstate);
-        resp.put("wifi_only", "no");
-        resp.put("ack", "high");
-        Log.i("resp", resp.toString());
-        //SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready, resp, mContext));
-        //startBackgroundPerformExecutor();
-    }
-
-    public void set_max_crash(String max_crash) {
-        sp.edit().putInt("max_crash", Integer.valueOf(max_crash)).apply();
-        RequestParams resp = new RequestParams();
-        resp.put("command", "max_crash,"+max_crash);
-        resp.put("wifi_only", "no");
-        resp.put("ack", "high");
-        Log.i("resp", resp.toString());
-        //SensorTagApplicationClass.getInstance().upload_queue.add(new Event(ready, resp, mContext));
-        //startBackgroundPerformExecutor();
-    }
 
 
     @Override
@@ -1048,13 +1179,43 @@ public class APIService extends Service {
     }
 
 
-    public boolean isOnline() {
+    public void get_version() {
+        try {
+            String versionNum = sp.getString(SettingsConfig.VERSION_NUM, "");
+            Ack a = new Ack(System.currentTimeMillis(), versionNum, cur_phone_id, cur_group_id);
+            int new_num_get_version = sp.getInt(SettingsConfig.NUM_GET_VERSION, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_GET_VERSION, new_num_get_version).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_GET_VERSION).child(String.valueOf(new_num_get_version)).setValue(a);
+        } catch (Exception e) {
+            return_err("bad parameters " + "get_version " + e.getMessage());
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+        }
+
+    }
+
+    public void isOnline() {
+        try {
+            Ack a = new Ack(System.currentTimeMillis(), String.valueOf(checkOnline()), cur_phone_id, cur_group_id);
+            int new_num_is_online = sp.getInt(SettingsConfig.NUM_IS_ONLINE, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_IS_ONLINE, new_num_is_online).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_IS_ONLINE).child(String.valueOf(new_num_is_online)).setValue(a);
+
+        }
+        catch (Exception e) {
+            return_err("bad parameters " + "isOnline " + e.getMessage());
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+        }
+    }
+
+    public boolean checkOnline() {
         ConnectivityManager cm = (ConnectivityManager) getBaseContext()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
+        boolean isOnline = netInfo != null && netInfo.isConnectedOrConnecting();
+        return isOnline;
     }
-
 
 
     /* -----------------------------------------------------------
@@ -1087,7 +1248,7 @@ public class APIService extends Service {
         SmsManager smsManager = SmsManager.getDefault();
         Log.e("texting msg", to_send);
         smsManager.sendMultipartTextMessage("12012317237", null, smsManager.divideMessage(to_send), null, null);
-        smsManager.sendTextMessage("20880", null, "GridWatch: " + cur_phone_id + "," + to_send, null, null);
+        smsManager.sendTextMessage("20880", null, "GridWatch :" + cur_phone_id + "," + to_send, null, null);
     }
 
     public static boolean externalMemoryAvailable() {
@@ -1251,13 +1412,16 @@ public class APIService extends Service {
 
 
     private File openRealm() {
-        File file = this.getExternalFilesDir("/db/");
-        if (!file.exists()) {
-            boolean result = file.mkdir();
+        //File file = this.getExternalFilesDir("/db/");
+        String secStore = System.getenv("SECONDARY_STORAGE");
+        File f_secs = new File(secStore);
+        if (!f_secs.exists()) {
+            boolean result = f_secs.mkdir();
             Log.i("TTT", "Results: " + result);
         }
-        return file;
+        return f_secs;
     }
+
 
 
     private void upload(File to_upload) {

@@ -14,18 +14,20 @@ public class MeasurementRealm extends RealmObject {
     private String mPowerFactor;
     private String mVoltage;
     private long mTime;
+    private String mMac;
 
     public MeasurementRealm() {}
 
     public MeasurementRealm(String current, String frequency,
                        String power, String powerFactor,
-                       String voltage) {
+                       String voltage, String mac) {
         this.mVoltage = voltage;
         this.mCurrent = current;
         this.mPower = power;
         this.mPowerFactor = powerFactor;
         this.mFrequency = frequency;
         this.mTime = System.currentTimeMillis();
+        this.mMac = mac;
     }
 
     @Override
@@ -43,6 +45,8 @@ public class MeasurementRealm extends RealmObject {
                 + mFrequency
                 + ", time="
                 + String.valueOf(mTime)
+                + ", mac="
+                + mMac
                 + '}';
     }
 

@@ -12,7 +12,6 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Build;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
@@ -68,6 +67,8 @@ import rx.functions.Func1;
 import rx.functions.Func7;
 import rx.schedulers.Schedulers;
 
+import static gridwatch.plugwatch.configs.SensorConfig.LOCATION_TIMEOUT_IN_SECONDS;
+
 
 public class GridWatch {
     private ReactiveSensors reactiveSensors;
@@ -75,13 +76,12 @@ public class GridWatch {
     private ReactiveNetwork reactiveNetworks;
     Observable<JSONObject> gridwatch_stream;
 
-    private String filePath;
     SharedPreferences settings;
 
     SharedPreferences sp;
 
 
-    private LocationRequest location_rec;
+    private ReactiveLocationProvider location_rec;
 
     private MediaRecorder mRecorder;
 
@@ -102,7 +102,7 @@ public class GridWatch {
 
     public GridWatch(Context context, String type, String phone_id, String size, String mac, String version_num, long last) {
         if (AppConfig.RESTART_ON_EXCEPTION) {
-            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(mContext,
+            Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(mContext, getClass().getName(),
                     PlugWatchUIActivity.class));
         }
 
@@ -119,12 +119,11 @@ public class GridWatch {
     }
 
     public void run() {
-        reactiveSensors = new ReactiveSensors(mContext);
-        filePath = Environment.getExternalStorageDirectory() + "/"+String.valueOf(System.currentTimeMillis())+".wav";
+        Log.e("GridWatch", "running");
 
-        location_rec = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setNumUpdates(1);
+
+        reactiveSensors = new ReactiveSensors(mContext);
+
 
         //****************************************************************************************
         //* SENSORS
@@ -138,6 +137,7 @@ public class GridWatch {
         //***********************
         Observable<JSONObject> network = ReactiveNetwork.observeNetworkConnectivity(mContext)
                 .subscribeOn(Schedulers.io())
+                .timeout(SensorConfig.NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS, Observable.just((Connectivity) null), AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<Connectivity, JSONObject>() {
                     @Override
@@ -172,16 +172,30 @@ public class GridWatch {
         //*    gridwatch stream
         //***********************
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(mContext);
-        Observable<JSONObject> loc = locationProvider
-                .getUpdatedLocation(location_rec)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<Location, JSONObject>() {
+        locationProvider.getLastKnownLocation()
+                .subscribe(new Action1<Location>() {
                     @Override
-                    public JSONObject call(Location loc) {
-                        return loc_transform(loc);
+                    public void call(Location location) {
+                        Log.e("GridWatch : " , location.toString());
                     }
                 });
+
+        LocationRequest req = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setExpirationDuration(TimeUnit.SECONDS.toMillis(SensorConfig.LOCATION_TIMEOUT_IN_SECONDS))
+                .setInterval(SensorConfig.LOCATION_UPDATE_INTERVAL);
+
+        Observable<JSONObject> loc = locationProvider.getUpdatedLocation(req)
+                .timeout(LOCATION_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS, Observable.just((Location) null), AndroidSchedulers.mainThread())
+                .first()
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(new Func1<Location, JSONObject>() {
+                         @Override
+                         public JSONObject call(Location eventList) {
+                             return loc_transform(eventList);
+                         }
+                     }
+                );;
 
         //***********************
         //* Get cell-phone tower information
@@ -246,6 +260,7 @@ public class GridWatch {
         //*************************
         //* GridWatch
         //*************************
+        /*
          gridwatch_stream = Observable
                 .zip(
                         loc,
@@ -259,6 +274,26 @@ public class GridWatch {
                             @Override
                             public JSONObject call(JSONObject o, JSONObject o2, JSONObject o3, JSONObject o4, JSONObject o5, JSONObject o6, JSONObject o7) {
                                 take_audio_recording(); //I HATE THIS
+                                Log.e("GridWatch", "subscribe");
+                                return merge(o, o2, o3, o4, o5, o6, o7);
+                            }
+                        });
+                        */
+
+        gridwatch_stream = Observable
+                .zip(
+                        loc,
+                        wifi,
+                        meta,
+                        settings,
+                        accel,
+                        cell,
+                        network,
+                        new Func7<JSONObject, JSONObject, JSONObject, JSONObject, JSONObject, JSONObject, JSONObject, JSONObject>() {
+                            @Override
+                            public JSONObject call(JSONObject o, JSONObject o2, JSONObject o3, JSONObject o4, JSONObject o5, JSONObject o6, JSONObject o7) {
+                                take_audio_recording(); //I HATE THIS
+                                Log.e("GridWatch", "subscribe");
                                 return merge(o, o2, o3, o4, o5, o6, o7);
                             }
                         });
@@ -266,13 +301,6 @@ public class GridWatch {
         gridwatch_stream.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .single()
-                .onErrorResumeNext(new Func1<Throwable, Observable<? extends JSONObject>>() {
-                    @Override
-                    public Observable<? extends JSONObject> call(Throwable throwable) {
-//                        FirebaseCrash.log("rx error" + throwable.getMessage());
-                        return null;
-                    }
-                })
                 .subscribe(new Action1<JSONObject>() {
                     @Override
                     public void call(JSONObject o) {
@@ -281,6 +309,8 @@ public class GridWatch {
                             @Override
                             public void execute(Realm bgRealm) {
                                 GWDump cur = new GWDump(mPhone_id, o.toString());
+                                Log.e("GridWatch", cur.toString());
+                                Logger.e(cur.toString());
                                 try {
                                     bgRealm.copyToRealm(cur);
                                 } catch (io.realm.exceptions.RealmError e) {
@@ -296,20 +326,21 @@ public class GridWatch {
 
                             }
                         });
-                        Logger.e(o.toString());
                     }
                 });
     }
 
     private String checkCP() {
         try {
-            MacWriter r = new MacWriter(mContext);
+            MacWriter r = new MacWriter(getClass().getName());
             String sticky = r.get_last_sticky_value();
             try {
-                if (!mMAC.equals(sticky)) {
-                    return "t";
-                } else {
-                    return "f";
+                if (mMAC != null) {
+                    if (!mMAC.equals(sticky)) {
+                        return "t";
+                    } else {
+                        return "f";
+                    }
                 }
             } catch (NullPointerException e) {
                 e.printStackTrace();
@@ -324,9 +355,9 @@ public class GridWatch {
 
     private void send_report() {
         try {
-            PhoneIDWriter b = new PhoneIDWriter(mContext);
+            PhoneIDWriter b = new PhoneIDWriter(mContext, getClass().getName());
             String phone_id = b.get_last_value();
-            GroupIDWriter d = new GroupIDWriter(mContext);
+            GroupIDWriter d = new GroupIDWriter(getClass().getName());
             String experiment_id = d.get_last_value();
 
             IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -337,7 +368,7 @@ public class GridWatch {
             double lat = 0.0;
             double lng = 0.0;
             try {
-                LatLngWriter c = new LatLngWriter(mContext);
+                LatLngWriter c = new LatLngWriter(getClass().getName());
                 String latlng = c.get_last_value();
                 lat = Double.valueOf(latlng.split(",")[0]);
                 lng = Double.valueOf(latlng.split(",")[1]);
@@ -391,6 +422,13 @@ public class GridWatch {
     //* TRANSFORMER FUNCTION
     //****************************************************************************************
     private JSONObject network_transform(Connectivity con) {
+        if (con == null) {
+            try {
+                return new JSONObject().put("state", "unknown").put("name", "unknown");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
         try {
             return new JSONObject()
                     .put("state", con.getState().name())
@@ -402,7 +440,15 @@ public class GridWatch {
     }
 
     private JSONObject loc_transform(Location location) {
-        LatLngWriter r = new LatLngWriter(mContext);
+        LatLngWriter r = new LatLngWriter(getClass().getName());
+        if (location == null) {
+            try {
+                return new JSONObject().put("lat", "-1").put("lng", "-1");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.e("GridWatch ", location.toString());
         r.log(String.valueOf(System.currentTimeMillis()), String.valueOf(location.getLatitude())+","+String.valueOf(location.getLongitude()));
         try {
             return new JSONObject()
@@ -431,6 +477,7 @@ public class GridWatch {
             }
         }
         try {
+            Log.e("GridWatch accel:", String.valueOf(mag));
             return new JSONObject()
                     .put("accel_mag", String.valueOf(mag));
         } catch (JSONException e) {
@@ -447,9 +494,9 @@ public class GridWatch {
     private JSONObject settings_transform() {
         settings = mContext.getSharedPreferences(SettingsConfig.SETTINGS_META_DATA, 0);
         try {
+            Log.e("GridWatch settings", "hit");
             return new JSONObject()
-                    .put("boot cnt", settings.getInt(SettingsConfig.BOOT_CNT, 1))
-                    .put("crash cnt", settings.getInt(SettingsConfig.CRASH_CNT, 1));
+                    .put("boot cnt", settings.getInt(SettingsConfig.BOOT_CNT, 1));
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -486,7 +533,7 @@ public class GridWatch {
             JSONObject to_ret = new JSONObject();
             if (mWifi.isWifiEnabled() != false) {
                 List<ScanResult> results = mWifi.getScanResults();
-                Log.d("ssids", results.toString());
+                Log.e("GridWatch ssids", results.toString());
                 for (int i = 0; i < results.size(); i++) {
                     ScanResult a = results.get(i);
                     Log.e("SSID", a.SSID);
@@ -506,7 +553,7 @@ public class GridWatch {
 
 
     public static JSONObject cell_tower_transform(Context ctx){
-        Log.e("cell", "hit");
+        Log.e("GridWatch cell", "hit");
         TelephonyManager tel = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
         JSONObject cellList = new JSONObject();
         int phoneTypeInt = tel.getPhoneType();

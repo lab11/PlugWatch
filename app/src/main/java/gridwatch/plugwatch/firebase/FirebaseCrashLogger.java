@@ -17,10 +17,11 @@ public class FirebaseCrashLogger {
     private String group_id;
 
     public FirebaseCrashLogger(Context context, String msg) {
-        PhoneIDWriter a = new PhoneIDWriter(context);
-        phone_id = a.get_last_value();
-        GroupIDWriter b = new GroupIDWriter(context);
-        group_id = b.get_last_value();
-        FirebaseCrash.log(phone_id+","+group_id+","+msg);
+            PhoneIDWriter a = new PhoneIDWriter(context, getClass().getName());
+            phone_id = a.get_last_value();
+            GroupIDWriter b = new GroupIDWriter(getClass().getName());
+            group_id = b.get_last_value();
+            FirebaseCrash.log(phone_id + "," + group_id + "," + msg);
+
     }
 }
