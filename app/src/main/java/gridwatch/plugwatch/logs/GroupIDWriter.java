@@ -1,7 +1,9 @@
 package gridwatch.plugwatch.logs;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -15,12 +17,13 @@ import java.util.concurrent.ExecutionException;
 
 public class GroupIDWriter {
 
-	private final static String LOG_NAME = "pw_group_ID.log";
+	private final static String LOG_NAME = "group_ID.log";
+	private static SharedPreferences prefs;
 
 	private static File mLogFile;
-	static SharedPreferences prefs = null;
+	private static Context mContext;
 
-	public GroupIDWriter(String calling_class) {
+	public GroupIDWriter(Context context, String calling_class) {
 		String secStore = System.getenv("SECONDARY_STORAGE");
 		File root = new File(secStore);
 		if (!root.exists()) {
@@ -28,6 +31,14 @@ public class GroupIDWriter {
 			Log.i("TTT", "Results: " + result);
 		}
 		mLogFile = new File(root, LOG_NAME);
+		mContext = context;
+		if (context != null) {
+			prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		} else {
+			Log.e("context group", "null");
+			Log.e("calling class", calling_class);
+
+		}
 	}
 
 	public static void log(String time, String event_type, String info) {
@@ -35,6 +46,9 @@ public class GroupIDWriter {
 		if (info != null) {
 			l += "|" + info;
 		}
+		prefs.edit().putString("group", l).apply();
+
+
 		try {
 			FileWriter logFW = null;
 			logFW = new FileWriter(mLogFile.getAbsolutePath(), true);
@@ -44,26 +58,13 @@ public class GroupIDWriter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		prefs.edit().putString("group", l).apply();
+
 	}
 
-
-	public ArrayList<String> read () {
-		FileWorkerAsyncTask task = new FileWorkerAsyncTask(mLogFile);
-		try {
-			task.execute();
-			return task.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 
 	public String get_last_value () {
-
+		//TODO make async
 		ArrayList<String> log = read();
 		if (log != null) {
 			if (!log.isEmpty()) {
@@ -76,9 +77,25 @@ public class GroupIDWriter {
 				}
 			}
 		}
-		return "-1";
+		return "-1"; 
+	}
+
+
+	public ArrayList<String> read() {
+
+		FileWorkerAsyncTask task = new FileWorkerAsyncTask(mLogFile);
+		try {
+			return task.execute().get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+		return null;
 
 	}
+
+
 
 
 	private static class FileWorkerAsyncTask extends AsyncTask<Void, Void, ArrayList<String> > {
@@ -105,23 +122,22 @@ public class GroupIDWriter {
 					}
 				}
 				logBR.close();
-			} catch (java.io.FileNotFoundException e) {
-
 			} catch (IOException e) {
 				if (e.getCause().toString().contains("No such file")) {
-					log(String.valueOf(System.currentTimeMillis()), "start", "");
-					Log.e("LOG CREATED", LOG_NAME);
-					ret.add("start");
+					log(String.valueOf(System.currentTimeMillis()), "-1", "");
+					ret.add("-1");
 					return ret;
 				} else {
 					// TODO Auto-generated catch block
 					Log.e("file writer", e.getCause().toString());
 					e.printStackTrace();
 				}
-				e.printStackTrace();
 			}
 			return ret;
 		}
 	}
 
+
+
+	
 }
