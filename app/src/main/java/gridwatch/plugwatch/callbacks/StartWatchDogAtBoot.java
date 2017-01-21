@@ -9,7 +9,6 @@ import android.util.Log;
 
 import java.util.Calendar;
 
-import gridwatch.plugwatch.logs.LastGoodWitWriter;
 import gridwatch.plugwatch.wit.WatchdogService;
 
 /**

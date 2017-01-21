@@ -1,5 +1,6 @@
 package gridwatch.plugwatch.wit;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,6 +14,7 @@ import android.graphics.BitmapFactory;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -32,6 +34,8 @@ import com.polidea.rxandroidble.RxBleScanResult;
 import com.polidea.rxandroidble.exceptions.BleScanException;
 import com.polidea.rxandroidble.internal.RxBleLog;
 import com.polidea.rxandroidble.utils.ConnectionSharingAdapter;
+
+import net.grandcentrix.tray.AppPreferences;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -59,6 +63,8 @@ import gridwatch.plugwatch.logs.GroupIDWriter;
 import gridwatch.plugwatch.logs.LastGoodWitWriter;
 import gridwatch.plugwatch.logs.LatLngWriter;
 import gridwatch.plugwatch.logs.MacWriter;
+import gridwatch.plugwatch.logs.NumWitTotalWriter;
+import gridwatch.plugwatch.logs.NumWitWriter;
 import gridwatch.plugwatch.logs.PhoneIDWriter;
 import gridwatch.plugwatch.network.NetworkJob;
 import gridwatch.plugwatch.network.NetworkJobCreator;
@@ -76,10 +82,15 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
+import static gridwatch.plugwatch.wit.App.getContext;
+
 public class PlugWatchService extends Service {
 
     private static int num_wit;
     private static int num_gw;
+
+
+    final AppPreferences appPreferences = new AppPreferences(getContext());
 
 
     //GW Variables
@@ -92,18 +103,18 @@ public class PlugWatchService extends Service {
 
     //BLE Variables
     private boolean isConnected;
-    private String macAddress;
+    private static String macAddress;
     long last_good_data = System.currentTimeMillis();
-    private Context mContext;
+    private static Context mContext;
     private RxBleClient rxBleClient;
     private Subscription scanSubscription;
     private RxBleDevice bleDevice;
     ArrayList<byte[]> to_write_slowly = new ArrayList<>();
-    private String mCurrent;
-    private String mFrequency;
-    private String mPower;
-    private String mPowerFactor;
-    private String mVoltage;
+    private static String mCurrent;
+    private static String mFrequency;
+    private static String mPower;
+    private static String mPowerFactor;
+    private static String mVoltage;
     private PublishSubject<Void> disconnectTriggerSubject = PublishSubject.create();
     private Observable<RxBleConnection> connectionObservable;
     private static final int COUNT_DOWN_TIMER = 1;
@@ -122,29 +133,33 @@ public class PlugWatchService extends Service {
     private static final int ID_OPT = 2;
     private boolean isClockUpdated = false;
 
-    private static LastGoodWitWriter witWriter;
+    private LastGoodWitWriter witWriter;
 
     private String realm_filename;
     private String full_realm_filename;
 
+    private String cur_ui_str;
 
     private String mac_whitelist;
     private boolean is_whitelisted;
 
     private LocationRequest location_rec;
 
-    private String cp;
+    private static String cp;
 
     private String phone_id;
     private String group_id;
-    private String build_str;
+    private static String build_str;
 
-    private String wifi_res;
+    private static String wifi_res;
 
     //Realm Variables
     private RealmConfiguration realmConfiguration;
     private Realm realm;
     RealmResults<GWDump> gw_db;
+
+    private NumWitTotalWriter num_wit_total_writer;
+    private NumWitWriter num_wit_writer;
 
     //////////////////////
     // Lifecycle and Interface
@@ -152,6 +167,11 @@ public class PlugWatchService extends Service {
 
     @Override
     public void onCreate() {
+        //Crasher c = new Crasher("PlugWatchService:onCreate");
+
+
+
+
         if (AppConfig.RESTART_ON_EXCEPTION) {
             Thread.setDefaultUncaughtExceptionHandler(new RestartOnExceptionHandler(getBaseContext(), getClass().getName(),
                     PlugWatchUIActivity.class));
@@ -160,6 +180,8 @@ public class PlugWatchService extends Service {
 
         JobManager.create(this).addJobCreator(new NetworkJobCreator());
 
+        num_wit_total_writer = new NumWitTotalWriter(getClass().getName());
+        num_wit_writer = new NumWitWriter(getClass().getName());
 
 
         AudioManager audiomanage = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
@@ -194,6 +216,8 @@ public class PlugWatchService extends Service {
             }
         });
 
+        setupAverageService();
+
     }
 
     private void crash() {
@@ -204,10 +228,12 @@ public class PlugWatchService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        //Crasher c = new Crasher("PlugWatchService:onStartCommand");
 
         if (intent.hasExtra(IntentConfig.FAIL_PACKET)) {
             Log.e("PlugWatchService:onStart", "FAIL_PACKET");
             send_fail_packet();
+
         } else if (intent.hasExtra(IntentConfig.TEST)) {
             Log.e("PlugWatchService:onStart", "TEST");
             do_gw(null);
@@ -247,9 +273,10 @@ public class PlugWatchService extends Service {
 
     private final IPlugWatchService.Stub mBinder = new IPlugWatchService.Stub() {
 
+
         @Override
-        public long get_num_data() throws RemoteException {
-            return -1;
+        public String get_ui_update() throws RemoteException {
+            return "";
         }
 
         @Override
@@ -266,6 +293,7 @@ public class PlugWatchService extends Service {
 
         @Override
         public int get_num_wit() throws RemoteException {
+            num_wit = realm.where(MeasurementRealm.class).findAll().size();
             return num_wit;
         }
 
@@ -326,6 +354,7 @@ public class PlugWatchService extends Service {
     }
 
     private void do_gw(Intent intent) {
+        //Crasher c = new Crasher("PlugWatchService:do_gw");
 
         Log.e("GridWatch", "hit");
         GridWatch g = null;
@@ -382,6 +411,8 @@ public class PlugWatchService extends Service {
     // REALM CONFIGS
     /////////////////////
     private void setup_realm() {
+        //Crasher c = new Crasher("PlugWatchService:setup_realm");
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         String currentDateandTime = sdf.format(new Date());
         try {
@@ -424,6 +455,8 @@ public class PlugWatchService extends Service {
     // BLE CONFIGS AND FUNCTIONALITY
     ////////////////////////////////
     private void setup_bluetooth() {
+        //Crasher c = new Crasher("PlugWatchService:setup_bluetooth");
+
         BluetoothAdapter.getDefaultAdapter().enable();
         rxBleClient = RxBleClient.create(this);
         RxBleClient.setLogLevel(RxBleLog.DEBUG);
@@ -470,7 +503,28 @@ public class PlugWatchService extends Service {
                 .subscribe(this::addScanResult, this::onScanFailure);
     }
 
+
+    private void setupAverageService() {
+        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        Calendar cal = Calendar.getInstance();
+        long interval = SensorConfig.AVERAGE_INTERVAL; // 30 seconds in milliseconds
+        Intent serviceIntent = new Intent(mContext, AverageService.class);
+        PendingIntent servicePendingIntent =
+                PendingIntent.getService(mContext,
+                        284372, //integer constant used to identify the service
+                        serviceIntent,
+                        PendingIntent.FLAG_CANCEL_CURRENT);
+        am.setRepeating(
+                AlarmManager.RTC_WAKEUP,
+                cal.getTimeInMillis(),
+                interval,
+                servicePendingIntent
+        );
+    }
+
     private void getWiTenergy() {
+        //Crasher c = new Crasher("PlugWatchService:getWiTenergy");
+
         Log.i("getWiTenergy", "hit");
         connectionObservable
                 .flatMap(rxBleConnection -> rxBleConnection.setupNotification(BluetoothConfig.UUID_WIT_FFE1))
@@ -533,24 +587,27 @@ public class PlugWatchService extends Service {
     }
 
     private void send_fail_packet() {
+        //Crasher c = new Crasher("PlugWatchService:send_fail_packet");
+
         checkCP();
         PhoneIDWriter b = new PhoneIDWriter(mContext,getClass().getName());
         String phone_id = b.get_last_value();
-        GroupIDWriter r = new GroupIDWriter(getClass().getName());
+        GroupIDWriter r = new GroupIDWriter(mContext, getClass().getName());
         String group_id = b.get_last_value();
         double lat = 0.0;
         double lng = 0.0;
         try {
-            LatLngWriter c = new LatLngWriter(getClass().getName());
-            String latlng = c.get_last_value();
+            LatLngWriter lat_lng_writer = new LatLngWriter(getClass().getName());
+            String latlng = lat_lng_writer.get_last_value();
             lat = Double.valueOf(latlng.split(",")[0]);
             lng = Double.valueOf(latlng.split(",")[1]);
         } catch (Exception e) {
+            FirebaseCrash.log(e.getMessage());
             e.printStackTrace();
         }
 
-        WitRetrofit a = new WitRetrofit("-1", "-1", "-1", "-1",
-                "-1", System.currentTimeMillis(), lat,
+        WitRetrofit a = new WitRetrofit("-2", "-2", "-2", "-2",
+                "-2", System.currentTimeMillis(), lat,
                 lng, phone_id, group_id, build_str, String.valueOf(num_wit + 1), macAddress, cp, wifi_res);
         Log.i("fail packet: network scheduling", a.toString());
         Log.i("fail packet: number of jobs: ", String.valueOf(JobManager.instance().getAllJobRequests().size()));
@@ -568,6 +625,12 @@ public class PlugWatchService extends Service {
                 .setPersisted(true)
                 .build()
                 .schedule();
+
+
+
+
+        num_wit_total_writer.increment("f");
+        num_wit_writer.increment();
     }
 
     private void addScanResult(RxBleScanResult bleScanResult) {
@@ -610,9 +673,9 @@ public class PlugWatchService extends Service {
         }
     }
 
-    private void checkCP() {
+    private static void checkCP() {
         try {
-                MacWriter r = new MacWriter(getClass().getName());
+                MacWriter r = new MacWriter(mContext.getClass().getName());
                 r.log(String.valueOf(System.currentTimeMillis()), macAddress, "n");
                 if (macAddress != null) {
                     String sticky = r.get_last_sticky_value();
@@ -639,7 +702,7 @@ public class PlugWatchService extends Service {
             case BleScanException.BLUETOOTH_DISABLED:
                 Toast.makeText(mContext, "Enable bluetooth and try again", Toast.LENGTH_SHORT).show();
                 FirebaseCrash.log("handleBleScanException: Enable bluetooth and try again");
-                Rebooter t = new Rebooter(this, getClass().getName(), new Throwable("bluetooth stack died"));
+                Rebooter t = new Rebooter(this, getClass().getName(), true, new Throwable("bluetooth stack died"));
                 break;
             case BleScanException.LOCATION_PERMISSION_MISSING:
                 Toast.makeText(mContext,
@@ -652,7 +715,7 @@ public class PlugWatchService extends Service {
             default:
                 FirebaseCrash.log("handleBleScanException: unable to start scanning");
                 Toast.makeText(mContext, "Unable to start scanning", Toast.LENGTH_SHORT).show();
-                Rebooter r = new Rebooter(mContext, getClass().getName(), new Throwable("unable to start scanning"));
+                Rebooter r = new Rebooter(mContext, getClass().getName(), true, new Throwable("unable to start scanning"));
                 break;
         }
     }
@@ -777,9 +840,53 @@ public class PlugWatchService extends Service {
     }
 
 
+    private static class ScheduleNetwork extends AsyncTask<Void, Void, Void > {
 
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            checkCP();
+            PhoneIDWriter b = new PhoneIDWriter(mContext,getClass().getName());
+            String phone_id = b.get_last_value();
+            GroupIDWriter r = new GroupIDWriter(mContext, getClass().getName());
+            String group_id = r.get_last_value();
+            double lat = 0.0;
+            double lng = 0.0;
+            try {
+                LatLngWriter c = new LatLngWriter(getClass().getName());
+                String latlng = c.get_last_value();
+                lat = Double.valueOf(latlng.split(",")[0]);
+                lng = Double.valueOf(latlng.split(",")[1]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            WitRetrofit a = new WitRetrofit(mCurrent, mFrequency, mPower, mPowerFactor,
+                    mVoltage, System.currentTimeMillis(), lat,
+                    lng, phone_id, group_id, build_str, String.valueOf(num_wit + 1), macAddress, cp, wifi_res);
+            Log.i("good_data: network scheduling", a.toString());
+            Log.i("good_data: number of jobs: ", String.valueOf(JobManager.instance().getAllJobRequests().size()));
+            if (JobManager.instance().getAllJobRequests().size() > SensorConfig.MAX_JOBS) {
+                Log.e("good_data: network", "canceling all jobs");
+                JobManager.instance().cancelAll();
+            }
+            int jobId = new JobRequest.Builder(NetworkJob.TAG)
+                    .setExecutionWindow(1_000L, 20_000L)
+                    .setBackoffCriteria(5_000L, JobRequest.BackoffPolicy.EXPONENTIAL)
+                    .setRequiresCharging(false)
+                    .setExtras(a.toBundle())
+                    .setRequiresDeviceIdle(false)
+                    .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
+                    .setPersisted(true)
+                    .build()
+                    .schedule();
+            return null;
+        }
+    }
 
     private void good_data(byte[] value) {
+
+
+
         isConnected = true;
         last_good_data = System.currentTimeMillis();
         witWriter.log(String.valueOf(last_good_data), "");
@@ -796,50 +903,19 @@ public class PlugWatchService extends Service {
         Log.d("MEASUREMENT: frequency", mFrequency);
         Log.d("MEASUREMENT: time", String.valueOf(time));
 
+        appPreferences.put("last", String.valueOf(last_good_data));
+
+
+        //ScheduleNetwork task = new ScheduleNetwork();
+        //task.doInBackground();
 
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm bgRealm) {
                 try {
-                    checkCP();
                     MeasurementRealm cur = new MeasurementRealm(mCurrent, mFrequency,
                             mPower, mPowerFactor, mVoltage, macAddress);
                     bgRealm.copyToRealm(cur);
-                    PhoneIDWriter b = new PhoneIDWriter(mContext,getClass().getName());
-                    String phone_id = b.get_last_value();
-                    GroupIDWriter r = new GroupIDWriter(getClass().getName());
-                    String group_id = r.get_last_value();
-                    double lat = 0.0;
-                    double lng = 0.0;
-                    try {
-                        LatLngWriter c = new LatLngWriter(getClass().getName());
-                        String latlng = c.get_last_value();
-                        lat = Double.valueOf(latlng.split(",")[0]);
-                        lng = Double.valueOf(latlng.split(",")[1]);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-
-                    WitRetrofit a = new WitRetrofit(mCurrent, mFrequency, mPower, mPowerFactor,
-                            mVoltage, System.currentTimeMillis(), lat,
-                            lng, phone_id, group_id, build_str, String.valueOf(num_wit + 1), macAddress, cp, wifi_res);
-                    Log.i("good_data: network scheduling", a.toString());
-                    Log.i("good_data: number of jobs: ", String.valueOf(JobManager.instance().getAllJobRequests().size()));
-                    if (JobManager.instance().getAllJobRequests().size() > SensorConfig.MAX_JOBS) {
-                        Log.e("good_data: network", "canceling all jobs");
-                        JobManager.instance().cancelAll();
-                    }
-                    int jobId = new JobRequest.Builder(NetworkJob.TAG)
-                            .setExecutionWindow(1_000L, 20_000L)
-                            .setBackoffCriteria(5_000L, JobRequest.BackoffPolicy.EXPONENTIAL)
-                            .setRequiresCharging(false)
-                            .setExtras(a.toBundle())
-                            .setRequiresDeviceIdle(false)
-                            .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
-                            .setPersisted(true)
-                            .build()
-                            .schedule();
                 } catch (java.lang.IllegalStateException e) {
                     JobManager.create(mContext).addJobCreator(new NetworkJobCreator());
                     //JobManager.instance().cancelAll();
@@ -852,10 +928,17 @@ public class PlugWatchService extends Service {
         }, new Realm.Transaction.OnSuccess() {
             @Override
             public void onSuccess() {
-                Log.e("good_data: REALM", "new size is: " + String.valueOf(realm.where(MeasurementRealm.class).findAll().size()));
+                //Log.e("good_data: REALM", "new size is: " + String.valueOf(realm.where(MeasurementRealm.class).findAll().size()));
                 num_wit = realm.where(MeasurementRealm.class).findAll().size();
+                Log.e("good data: REALM", "new size is" + String.valueOf(num_wit));
+                num_wit_total_writer.increment(null);
+                num_wit_writer.log(String.valueOf(num_wit));
             }
         });
+
+
+
+
 
 
 
@@ -863,13 +946,14 @@ public class PlugWatchService extends Service {
             Random rand = new Random();
             int randomNum = rand.nextInt((60*60*5 - 0) + 1) + 0;
             if (randomNum == 0) {
-                Intent a = new Intent();
-                a.putExtra(IntentConfig.FALSE_GW, IntentConfig.FALSE_GW);
-                do_gw(a);
+                Intent gw = new Intent();
+                gw.putExtra(IntentConfig.FALSE_GW, IntentConfig.FALSE_GW);
+                do_gw(gw);
             }
         } catch (Exception e) {
             Log.e("random gw", "failed");
         }
+
 
 
         //PlugWatchApp.getInstance().increment_last_time();

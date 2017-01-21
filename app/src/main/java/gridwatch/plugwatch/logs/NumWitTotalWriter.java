@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 
 public class NumWitTotalWriter {
 
-	private final static String LOG_NAME = "pw_num_wit.log";
+	private final static String LOG_NAME = "pw_num_wit_total.log";
 	private static SharedPreferences prefs;
 
 	private static File mLogFile;
@@ -31,15 +31,16 @@ public class NumWitTotalWriter {
 
 	}
 
-	public static void log(String time, String info) {
+	public static void log(String time, String num, String info) {
 		String l = time ;
-		if (!info.equals(""))  {
+		if (!num.equals(""))  {
+			l += "|" + num;
+		}
+		if (info != null) {
 			l += "|" + info;
 		}
 		try {
 			FileWriter logFW = null;
-			mLogFile.delete();
-			mLogFile.createNewFile();
 			logFW = new FileWriter(mLogFile.getAbsolutePath(), true);
 			logFW.write(l + "\n");
 			logFW.close();
@@ -50,6 +51,12 @@ public class NumWitTotalWriter {
 
 	}
 
+	public void increment(String is_tp) {
+		String last = get_last_value();
+		long num = Long.valueOf(last);
+		num = num + 1;
+		log(String.valueOf(System.currentTimeMillis()), String.valueOf(num), is_tp);
+	}
 
 
 	public String get_last_value () {
@@ -59,12 +66,12 @@ public class NumWitTotalWriter {
 				String last = log.get(log.size() - 1);
 				if (last != null) {
 					String[] last_fields = last.split("\\|");
-					return last_fields[0];
+					return last_fields[1];
 
 				}
 			}
 		}
-		return String.valueOf(System.currentTimeMillis());
+		return "0";
 	}
 
 
@@ -111,7 +118,7 @@ public class NumWitTotalWriter {
 				logBR.close();
 			} catch (IOException e) {
 				if (e.getCause().toString().contains("No such file")) {
-					log(String.valueOf(System.currentTimeMillis()), "-1");
+					log(String.valueOf(System.currentTimeMillis()), "0", "");
 					ret.add(String.valueOf(System.currentTimeMillis()));
 					return ret;
 				} else {

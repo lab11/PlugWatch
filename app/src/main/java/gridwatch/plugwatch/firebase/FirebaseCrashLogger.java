@@ -19,7 +19,7 @@ public class FirebaseCrashLogger {
     public FirebaseCrashLogger(Context context, String msg) {
             PhoneIDWriter a = new PhoneIDWriter(context, getClass().getName());
             phone_id = a.get_last_value();
-            GroupIDWriter b = new GroupIDWriter(getClass().getName());
+            GroupIDWriter b = new GroupIDWriter(context, getClass().getName());
             group_id = b.get_last_value();
             FirebaseCrash.log(phone_id + "," + group_id + "," + msg);
 

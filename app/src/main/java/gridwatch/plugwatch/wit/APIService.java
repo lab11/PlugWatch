@@ -130,7 +130,7 @@ public class APIService extends Service {
         Log.e("api", "start");
         PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(), getClass().getName());
         cur_phone_id = r.get_last_value();
-        GroupIDWriter p = new GroupIDWriter(getClass().getName());
+        GroupIDWriter p = new GroupIDWriter(getApplicationContext(), getClass().getName());
         cur_group_id = p.get_last_value();
 
 
@@ -201,10 +201,7 @@ public class APIService extends Service {
             do_realm_sizes();
         } else if (cmd.contains("deletedb_specific")) {
             do_delete_db_specific(cmd);
-        }
-
-
-        else if (cmd.contains("uploadaudio")) { //good
+        } else if (cmd.contains("uploadaudio")) { //good
             do_upload_audio();
         } else if (cmd.contains("deleteaudio_specific")) { //good
             do_delete_audio_specific(cmd);
@@ -277,7 +274,15 @@ public class APIService extends Service {
             topup_airtime(cmd);
         } else if (cmd.contains("topupinternet")) {
             topup_internet(cmd);
-        } else {
+        } else if (cmd.contains("logcat")) {
+            logcat();
+        }
+
+
+
+
+
+        else {
             return_err("invalid command! not understood... " + cmd);
         }
     }
@@ -828,7 +833,7 @@ public class APIService extends Service {
     //Status: needs testing
     public void set_group(String group) {
         try {
-            GroupIDWriter r = new GroupIDWriter(getClass().getName());
+            GroupIDWriter r = new GroupIDWriter(getApplicationContext(), getClass().getName());
             r.log(String.valueOf(System.currentTimeMillis()), group, "api");
 
             Ack a = new Ack(System.currentTimeMillis(), group, cur_phone_id, cur_group_id);
@@ -858,14 +863,14 @@ public class APIService extends Service {
 
             long time_since_last_wit_ms = time - sp.getLong(SettingsConfig.LAST_WIT, 1);
 
-            String measurementSize = String.valueOf(sp.getInt(SettingsConfig.WIT_SIZE, 1));
-            String gwSize = String.valueOf(sp.getInt(SettingsConfig.GW_SIZE, 1));
+            String measurementSize = String.valueOf(sp.getLong(SettingsConfig.WIT_SIZE, 1));
+            String gwSize = String.valueOf(sp.getLong(SettingsConfig.GW_SIZE, 1));
             String versionNum = sp.getString(SettingsConfig.VERSION_NUM, "");
             String externalFreespace = sp.getString(SettingsConfig.FREESPACE_EXTERNAL, "");
             String internalFreespace = sp.getString(SettingsConfig.FREESPACE_INTERNAL, "");
             PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(), getClass().getName());
             String phone_id = r.get_last_value();
-            GroupIDWriter w = new GroupIDWriter(getClass().getName());
+            GroupIDWriter w = new GroupIDWriter(getApplicationContext(), getClass().getName());
             String group_id = w.get_last_value();
             String num_realms = String.valueOf(sp.getInt(SettingsConfig.NUM_REALMS, -1));
             long network_size = sp.getLong(SettingsConfig.TOTAL_DATA, -1);
@@ -1172,6 +1177,16 @@ public class APIService extends Service {
         }
     };
 
+
+    public void logcat() {
+        try {
+
+        } catch (Exception e) {
+            return_err("bad parameters " + "logcat " + e.getMessage());
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+        }
+    }
 
     @Override
     public void onDestroy() {

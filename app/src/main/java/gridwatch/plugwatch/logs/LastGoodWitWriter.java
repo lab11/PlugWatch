@@ -20,6 +20,8 @@ public class LastGoodWitWriter {
 
 	private static File mLogFile;
 
+	private static String calling;
+
 	public LastGoodWitWriter(String calling_class) {
 		String secStore = System.getenv("SECONDARY_STORAGE");
 		File root = new File(secStore);
@@ -27,27 +29,31 @@ public class LastGoodWitWriter {
 			boolean result = root.mkdir();
 			Log.i("TTT", "Results: " + result);
 		}
+		calling = calling_class;
 		mLogFile = new File(root, LOG_NAME);
 
 	}
 
 	public static void log(String time, String info) {
-		String l = time ;
-		if (!info.equals(""))  {
-			l += "|" + info;
+		String l = time;
+		if (time.length() == String.valueOf(System.currentTimeMillis()).length()) {
+			if (!info.equals("")) {
+				l += "|" + info;
+			}
+			try {
+				FileWriter logFW = null;
+				mLogFile.delete();
+				mLogFile.createNewFile();
+				logFW = new FileWriter(mLogFile.getAbsolutePath(), true);
+				logFW.write(l + "\n");
+				logFW.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			Log.e("LastGodWitWriter", "failed with time " + time + ", info " + info + ", calling class: " + calling);
 		}
-		try {
-			FileWriter logFW = null;
-			mLogFile.delete();
-			mLogFile.createNewFile();
-			logFW = new FileWriter(mLogFile.getAbsolutePath(), true);
-			logFW.write(l + "\n");
-			logFW.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 	}
 
 

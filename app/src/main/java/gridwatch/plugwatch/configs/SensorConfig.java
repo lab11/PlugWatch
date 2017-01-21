@@ -58,6 +58,9 @@ public class SensorConfig {
     public static final long WATCHDOG2_INTERVAL = 1000 * 60; //1 minute
     public static final long SMS_WATCHDOG_INTERVAL = 1000 * 60 * 60 * 12;
 
+    public static final long LOGCAT_SAMPLE_TIME_MS = 1000 * 60 * 5;
+    public static final long AVERAGE_INTERVAL = 1000*30;
+
     public static int NUM_ANY_CRASH_BEFORE_REBOOT = 5;
     public static int MAX_NUM_REBOOT_BACKOFF = 30;
     public static int REBOOT_MIN_WAIT = 15000;

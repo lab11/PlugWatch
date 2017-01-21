@@ -85,7 +85,7 @@ public class CommandLineActivity extends Activity {
         });
 
         PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(),getClass().getName());
-        GroupIDWriter g = new GroupIDWriter(getClass().getName());
+        GroupIDWriter g = new GroupIDWriter(getApplicationContext(), getClass().getName());
 
 
         mExe.setOnClickListener(new View.OnClickListener() {

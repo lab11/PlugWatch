@@ -58,7 +58,7 @@ public class FailsafeTimerService extends Service {
     private Runnable runnable = new Runnable() {
         public void run() {
             if (!is_connected) {
-                Rebooter r = new Rebooter(getApplicationContext(), getClass().getName(), new Throwable("rebooting due to failsafe timer"));
+                Rebooter r = new Rebooter(getApplicationContext(), getClass().getName(), false, new Throwable("rebooting due to failsafe timer"));
             }
             handler.postDelayed(this, 1000*60*30);
         }

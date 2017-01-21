@@ -168,14 +168,22 @@
         <service
             android:name=".wit.WatchdogService2"
             android:enabled="true"
-            android:process=".Watchdog"
-            android:exported="true" />
-
+            android:exported="true"
+            android:process=".Watchdog" />
+        <service
+            android:name=".wit.PlugWatchService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=".PlugWatch" />
         <service
             android:name=".wit.Watchdog2IntentService"
             android:enabled="true"
-            android:process=".Watchdog"
-            android:exported="true" />
+            android:exported="true"
+            android:process=".Watchdog" />
+        <service
+            android:name=".wit.AverageService"
+            android:process=".PlugWatch"
+            android:exported="false"></service>
     </application>
 
 </manifest>

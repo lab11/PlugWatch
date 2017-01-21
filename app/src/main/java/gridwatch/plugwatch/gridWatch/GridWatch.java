@@ -357,7 +357,7 @@ public class GridWatch {
         try {
             PhoneIDWriter b = new PhoneIDWriter(mContext, getClass().getName());
             String phone_id = b.get_last_value();
-            GroupIDWriter d = new GroupIDWriter(getClass().getName());
+            GroupIDWriter d = new GroupIDWriter(mContext, getClass().getName());
             String experiment_id = d.get_last_value();
 
             IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);

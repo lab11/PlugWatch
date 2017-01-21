@@ -27,11 +27,16 @@ public class Rebooter {
     Throwable cause;
     String class_name;
 
+    boolean mImmediate;
 
 
-    public Rebooter(Context context, String calling_class_name, Throwable n) {
+
+    public Rebooter(Context context, String calling_class_name, boolean immediate, Throwable n) {
         mContext = context;
         numWriter = new RebootBackOffNumWriter(getClass().getName());
+
+        mImmediate = immediate;
+
         n.printStackTrace();
         cause = n;
         class_name = calling_class_name;
@@ -102,12 +107,18 @@ public class Rebooter {
             );
             */
 
-            RebootCauseWriter r = new RebootCauseWriter(mContext, getClass().getName());
-            r.log(String.valueOf(System.currentTimeMillis()), class_name + ":" + cause.getMessage(), "reboot");
+        RebootCauseWriter r = new RebootCauseWriter(mContext, getClass().getName());
+        r.log(String.valueOf(System.currentTimeMillis()), class_name + ":" + cause.getMessage(), "reboot");
 
-            Log.e("restart reboot", "scheduling reboot " + String.valueOf(interval) + " ms in the future");
-            //handler.postDelayed(rebooter, interval);
-            reboot(interval);
+
+        Log.e("restart reboot", "scheduling reboot " + String.valueOf(interval) + " ms in the future");
+        //handler.postDelayed(rebooter, interval);
+            if (mImmediate) {
+                reboot(0);
+            } else {
+                reboot(interval);
+
+            }
 
             send_dead_packet();
 

@@ -8,17 +8,23 @@ import android.util.Log;
 
 import com.jakewharton.processphoenix.ProcessPhoenix;
 
+import net.grandcentrix.tray.AppPreferences;
+import net.grandcentrix.tray.core.ItemNotFoundException;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 
 import gridwatch.plugwatch.configs.IntentConfig;
+import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.logs.LastGoodWitWriter;
 import gridwatch.plugwatch.logs.RebootCauseWriter;
+import gridwatch.plugwatch.logs.RunningTimeWriter;
 import gridwatch.plugwatch.wit.App;
 import gridwatch.plugwatch.wit.PlugWatchService;
 
 import static android.content.Context.ACTIVITY_SERVICE;
+import static gridwatch.plugwatch.wit.App.getContext;
 
 /**
  * Created by nklugman on 11/22/16.
@@ -26,6 +32,8 @@ import static android.content.Context.ACTIVITY_SERVICE;
 
 public class Restart {
 
+    private RunningTimeWriter runningTimeWriter;
+    AppPreferences appPreferences;
 
     int cnt = 0;
 
@@ -33,6 +41,7 @@ public class Restart {
     private String calling_class_name;
 
     public Restart() {
+        appPreferences = new AppPreferences(getContext());
 
     }
 
@@ -41,7 +50,13 @@ public class Restart {
 
     public void do_restart(Context context, Class<?> c, String guilty_class, Throwable exception, int pid) {
 
-
+        runningTimeWriter = new RunningTimeWriter(getClass().getName());
+        try {
+            runningTimeWriter.log(String.valueOf(System.currentTimeMillis()), appPreferences.getString(SettingsConfig.TIME_RUNNING));
+        } catch (ItemNotFoundException e) {
+            runningTimeWriter.log(String.valueOf(System.currentTimeMillis()), "0");
+            e.printStackTrace();
+        }
 
         //send_dead_packet();
         StringWriter stackTrace = new StringWriter();
@@ -109,7 +124,7 @@ public class Restart {
             */
 
         } else { //something went wrong
-            Rebooter r = new Rebooter(context, calling_class_name, new Throwable(this.getClass().getName() + ": something went wrong... rebooting from restart"));
+            Rebooter r = new Rebooter(context, calling_class_name, false, new Throwable(this.getClass().getName() + ": something went wrong... rebooting from restart"));
         }
     }
 

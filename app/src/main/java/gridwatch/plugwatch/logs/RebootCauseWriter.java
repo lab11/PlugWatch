@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
+import gridwatch.plugwatch.firebase.FirebaseCrashLogger;
+
 public class RebootCauseWriter {
 
 	private final static String LOG_NAME = "pw_reboot_cause.log";
@@ -46,6 +48,8 @@ public class RebootCauseWriter {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (Exception e) {
+			FirebaseCrashLogger crashLogger = new FirebaseCrashLogger(null, e.getMessage());
 		}
 
 	}

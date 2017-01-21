@@ -55,7 +55,7 @@ public class NotificationService extends AccessibilityService {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(), getClass().getName());
         cur_phone_id = r.get_last_value();
-        GroupIDWriter w = new GroupIDWriter(getClass().getName());
+        GroupIDWriter w = new GroupIDWriter(getApplicationContext(), getClass().getName());
         cur_group_id = w.get_last_value();
 
     }

@@ -3,6 +3,7 @@ package gridwatch.plugwatch.wit;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -24,12 +25,15 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class App extends Application {
+    public static final int DEPLOY_MODE_COLOR = Color.GRAY;
+    public static final int DEBUG_MODE_COLOR = Color.WHITE;
     private static App instance;
 
     //Network Variables
     private static JobManager jobManager;
     private static OkHttpClient.Builder httpClientBuilder;
     private static WitRetrofitService retrofitService;
+    public static String DEPLOY_MODE_TEXT = "Not Live";
     SharedPreferences sp;
 
 

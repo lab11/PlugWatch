@@ -66,14 +66,14 @@ public class WatchdogService extends IntentService {
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 long time = System.currentTimeMillis();
                 long time_since_last_wit_ms = time - sp.getLong(SettingsConfig.LAST_WIT, 1);
-                String measurementSize = String.valueOf(sp.getInt(SettingsConfig.WIT_SIZE, 1));
-                String gwSize = String.valueOf(sp.getInt(SettingsConfig.GW_SIZE, 1));
+                String measurementSize = String.valueOf(sp.getLong(SettingsConfig.WIT_SIZE, 1));
+                String gwSize = String.valueOf(sp.getLong(SettingsConfig.GW_SIZE, 1));
                 String versionNum = sp.getString(SettingsConfig.VERSION_NUM, "");
                 String externalFreespace = sp.getString(SettingsConfig.FREESPACE_EXTERNAL, "");
                 String internalFreespace = sp.getString(SettingsConfig.FREESPACE_INTERNAL, "");
                 PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(), getClass().getName());
                 String phone_id = r.get_last_value();
-                GroupIDWriter w = new GroupIDWriter(getClass().getName());
+                GroupIDWriter w = new GroupIDWriter(getApplicationContext(), getClass().getName());
                 String group_id = w.get_last_value();
                 String num_realms = String.valueOf(sp.getInt(SettingsConfig.NUM_REALMS, -1));
                 long network_size = sp.getLong(SettingsConfig.TOTAL_DATA, -1);

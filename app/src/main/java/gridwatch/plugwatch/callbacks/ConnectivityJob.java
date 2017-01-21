@@ -50,7 +50,7 @@ public class ConnectivityJob extends Job {
                     meta_data.edit().putLong(SettingsConfig.NUM_CONNECTION_TIMEOUTS, 0).apply();
                     int reboot_timeouts = meta_data.getInt(SettingsConfig.NUM_CONNECTION_REBOOTS, 0);
                     meta_data.edit().putLong(SettingsConfig.NUM_CONNECTION_REBOOTS, reboot_timeouts + 1).apply();
-                    Rebooter r = new Rebooter(getContext(), this.getClass().getName(), new Throwable(this.getClass().getName() + ":rebooting from connectivity job"));
+                    Rebooter r = new Rebooter(getContext(), this.getClass().getName(), false, new Throwable(this.getClass().getName() + ":rebooting from connectivity job"));
                 }
             }
         }

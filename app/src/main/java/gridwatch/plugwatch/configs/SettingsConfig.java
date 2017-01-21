@@ -78,6 +78,8 @@ public class SettingsConfig {
     public static final String NUM_IS_ONLINE = "NUM_IS_ONLINE";
     public static final String NUM_GET_SETTINGS = "NUM_GET_SETTINGS";
     public static final String NUM_AUDIO_SIZE = "NUM_AUDIO_SIZE";
+    public static final String TOTAL_WIT_SIZE = "TOTAL_WIT_SIZE";
+    public static final String TIME_RUNNING = "TIME_RUNNING";
 
 
     public class NUM_WD {

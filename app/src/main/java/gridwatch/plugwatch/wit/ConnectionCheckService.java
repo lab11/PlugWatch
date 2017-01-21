@@ -10,6 +10,9 @@ import android.util.Log;
 
 import com.google.firebase.crash.FirebaseCrash;
 
+import net.grandcentrix.tray.AppPreferences;
+import net.grandcentrix.tray.core.ItemNotFoundException;
+
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
@@ -30,6 +33,9 @@ public class ConnectionCheckService extends IntentService {
     Context mContext;
     LastGoodWitWriter witWriter;
 
+    private AppPreferences mTrayPreferences;
+
+
     @Override
     protected void onHandleIntent(Intent intent) {
         run();
@@ -48,6 +54,7 @@ public class ConnectionCheckService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
+        mTrayPreferences = new AppPreferences(this);
     }
 
 
@@ -63,13 +70,32 @@ public class ConnectionCheckService extends IntentService {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         int plugwatchservice_pid = sp.getInt(SettingsConfig.PID, -1);
 
-        long last = Long.valueOf(witWriter.get_last_value());
+        long last = 0;
+        try {
+            String last_str = mTrayPreferences.getString("last");
+            last = Long.valueOf(last_str);
+            Log.e("last:1", String.valueOf(last));
+        } catch (ItemNotFoundException e1) {
+            Log.e("ConnectionCheckService:e1", e1.getCause().toString());
+            Log.e("ConnectionCheckService:e1", e1.getStackTrace().toString());
+            Log.e("ConnectionCheckService:e1", e1.getMessage());
+            try {
+                last = Long.valueOf(witWriter.get_last_value());
+                Log.e("last:2", String.valueOf(last));
+            } catch (Exception e2) {
+                Log.e("ConnectionCheckService:e2", e2.getCause().toString());
+                Log.e("ConnectionCheckService:e2", e2.getStackTrace().toString());
+                Log.e("ConnectionCheckService:e2", e2.getMessage());
+            }
+        }
 
         long diffInMs = System.currentTimeMillis() - last;
 
 
         Log.e("ConnectionCheckService numWriter last val", numRebootWriter.get_last_value());
         Log.e("ConnectionCheckService witWriter last val", witWriter.get_last_value());
+
+
 
         int num_previous_reboots = Integer.parseInt(numRebootWriter.get_last_value());
         Log.i("ConnectionCheckService", "restart checking " + String.valueOf(last) + " num previous reboots: " + String.valueOf(num_previous_reboots));
@@ -91,11 +117,11 @@ public class ConnectionCheckService extends IntentService {
                     numRebootWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
                     Log.e("ConnectionCheckService", " setting to zero ");
                     FirebaseCrash.log("ConnectionCheckService: rebooting due to max timeout and reseting num_writer");
-                    Rebooter r = new Rebooter(getApplicationContext(), this.getClass().getName(), new Throwable("restart rebooting due to max timeout"));
+                    Rebooter r = new Rebooter(getApplicationContext(), this.getClass().getName(), false, new Throwable("restart rebooting due to max timeout"));
                     //Reboot r = new Reboot();
                     //r.do_reboot();
                 } else {
-                    Log.i("ConnectionCheckService", "restart not restarting " + String.valueOf(diffInMs));
+                    Log.i("ConnectionCheckService", "restart restarting " + String.valueOf(diffInMs));
                     numRebootWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(incremented_num_previous_reboots));
                     Log.e("ConnectionCheckService", " setting to " + String.valueOf(incremented_num_previous_reboots));
                     Restart r = new Restart();

@@ -5,7 +5,6 @@ package gridwatch.plugwatch;
 
 interface IPlugWatchService {
 
-    long get_num_data();
 
     long get_last_time();
     boolean get_is_connected();
@@ -24,6 +23,8 @@ interface IPlugWatchService {
     String get_realm_filename();
 
     void set_wifi(String wifi);
+
+    String get_ui_update();
 
 
 }

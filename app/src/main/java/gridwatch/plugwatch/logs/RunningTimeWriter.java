@@ -1,5 +1,6 @@
 package gridwatch.plugwatch.logs;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -11,16 +12,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 import java.util.concurrent.ExecutionException;
 
-public class NumWitWriter {
+public class RunningTimeWriter {
 
-	private final static String LOG_NAME = "pw_num_wit.log";
+	private final static String LOG_NAME = "pw_running_time.log";
 	private static SharedPreferences prefs;
 
 	private static File mLogFile;
+	private static Context mContext;
 
-	public NumWitWriter(String calling_class) {
+	public RunningTimeWriter(String calling_class) {
 		String secStore = System.getenv("SECONDARY_STORAGE");
 		File root = new File(secStore);
 		if (!root.exists()) {
@@ -28,15 +31,14 @@ public class NumWitWriter {
 			Log.i("TTT", "Results: " + result);
 		}
 		mLogFile = new File(root, LOG_NAME);
-
 	}
 
-	public static void log(String num) {
-		String l = num;
+	public static void log(String time, String run_time) {
+
+		String l = time + "|" + run_time;
+
 		try {
 			FileWriter logFW = null;
-			mLogFile.delete();
-			mLogFile.createNewFile();
 			logFW = new FileWriter(mLogFile.getAbsolutePath(), true);
 			logFW.write(l + "\n");
 			logFW.close();
@@ -48,26 +50,30 @@ public class NumWitWriter {
 	}
 
 
+	public String get_avg() {
 
-	public String get_last_value () {
 		ArrayList<String> log = read();
+		double all_time_ms = 0;
 		if (log != null) {
 			if (!log.isEmpty()) {
-				String last = log.get(log.size() - 1);
-				if (last != null) {
-					return last;
-
+				for (int i = 0; i < log.size(); i++) {
+					try {
+						StringTokenizer st = new StringTokenizer(log.get(i), "|");
+						String time = st.nextToken();
+						String time_str = st.nextToken();
+						double time_ms = Double.valueOf(time_str);
+						//Log.e("GET AVG", String.valueOf(time_str));
+						all_time_ms += time_ms;
+					} catch (java.lang.ArrayIndexOutOfBoundsException e) {
+						Log.e("RunningTimeWriter", "index out of bound with " + log.get(i));
+					}
 				}
 			}
 		}
-		return "0";
-	}
+		double avg = all_time_ms/Double.valueOf(log.size());
+		Log.e("avg running time", String.valueOf(avg));
 
-	public void increment() {
-		String last = get_last_value();
-		long num = Long.valueOf(last);
-		num = num + 1;
-		log(String.valueOf(num));
+		return String.valueOf(avg);
 	}
 
 	public ArrayList<String> read() {
@@ -113,8 +119,8 @@ public class NumWitWriter {
 				logBR.close();
 			} catch (IOException e) {
 				if (e.getCause().toString().contains("No such file")) {
-					log("0");
-					ret.add("0");
+					log(String.valueOf(System.currentTimeMillis()), "-1");
+					Log.e("LOG CREATED", LOG_NAME);
 					return ret;
 				} else {
 					// TODO Auto-generated catch block
@@ -122,7 +128,6 @@ public class NumWitWriter {
 					e.printStackTrace();
 				}
 			}
-
 			return ret;
 		}
 	}

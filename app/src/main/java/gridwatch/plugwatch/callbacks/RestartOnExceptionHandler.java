@@ -41,7 +41,7 @@ public class RestartOnExceptionHandler extends Throwable implements
             //CHECK FOR UPDATES... TODO
             //Rebooter reboot = new Rebooter(myContext, this.getClass().getName(), new Throwable(this.getClass().getName() + ": REBOOTING DUE TO RANDOM CRASHES"));
 
-            Rebooter reboot = new Rebooter(App.getInstance().getApplicationContext(), this.getClass().getName(), new Throwable(this.getClass().getName() + ": REBOOTING DUE TO TEST"));
+            Rebooter reboot = new Rebooter(App.getInstance().getApplicationContext(), this.getClass().getName(), false, new Throwable(this.getClass().getName() + ": REBOOTING DUE TO TEST"));
 
 
 

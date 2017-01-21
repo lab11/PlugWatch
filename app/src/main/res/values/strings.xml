@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">PlugWatch</string>
 
-    <string name="BASE_URL">http://141.212.11.206:8080/</string>
+    <string name="BASE_URL">http://plugwatch.grid.watch:8080/</string>
 
 
     <string name="title_activity_scan">ScanActivity</string>

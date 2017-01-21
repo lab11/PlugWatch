@@ -13,14 +13,14 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-public class NumWitWriter {
+public class AvgWitWriter {
 
-	private final static String LOG_NAME = "pw_num_wit.log";
+	private final static String LOG_NAME = "pw_avg_wit.log";
 	private static SharedPreferences prefs;
 
 	private static File mLogFile;
 
-	public NumWitWriter(String calling_class) {
+	public AvgWitWriter(String calling_class) {
 		String secStore = System.getenv("SECONDARY_STORAGE");
 		File root = new File(secStore);
 		if (!root.exists()) {
@@ -31,14 +31,13 @@ public class NumWitWriter {
 
 	}
 
-	public static void log(String num) {
-		String l = num;
+	public static void log(String time, String msg) {
 		try {
 			FileWriter logFW = null;
 			mLogFile.delete();
 			mLogFile.createNewFile();
 			logFW = new FileWriter(mLogFile.getAbsolutePath(), true);
-			logFW.write(l + "\n");
+			logFW.write(time + "," + msg + "\n");
 			logFW.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -55,7 +54,15 @@ public class NumWitWriter {
 			if (!log.isEmpty()) {
 				String last = log.get(log.size() - 1);
 				if (last != null) {
-					return last;
+					try {
+						String[] fields = last.split(",");
+						String data = "30 sec: " + fields[1] + " 10 min: " + fields[2] + " hr: " + fields[3];
+						return data;
+
+					}
+					catch (IndexOutOfBoundsException e) {
+						return "-1";
+					}
 
 				}
 			}
@@ -63,12 +70,6 @@ public class NumWitWriter {
 		return "0";
 	}
 
-	public void increment() {
-		String last = get_last_value();
-		long num = Long.valueOf(last);
-		num = num + 1;
-		log(String.valueOf(num));
-	}
 
 	public ArrayList<String> read() {
 
@@ -113,7 +114,7 @@ public class NumWitWriter {
 				logBR.close();
 			} catch (IOException e) {
 				if (e.getCause().toString().contains("No such file")) {
-					log("0");
+					log(String.valueOf(System.currentTimeMillis()),"0");
 					ret.add("0");
 					return ret;
 				} else {

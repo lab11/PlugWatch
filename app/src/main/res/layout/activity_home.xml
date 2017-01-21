@@ -17,8 +17,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+       >
 
         <LinearLayout
             android:orientation="horizontal"
@@ -26,27 +26,26 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="phone id:"
                 android:layout_height="match_parent"
                 android:id="@+id/textView3"
-                android:layout_width="43dp"
-                android:textSize="10sp" />
+                android:textSize="10sp"
+                android:layout_width="40dp"
+                android:text="phone id:" />
 
             <EditText
-                android:layout_width="168dp"
-                android:layout_height="28dp"
-                android:inputType="textPersonName"
-                android:ems="10"
+                android:layout_height="match_parent"
+                android:inputType="none"
                 android:id="@+id/phone_id_text"
                 android:layout_marginLeft="10dp"
-                android:textSize="10sp" />
+                android:textSize="10sp"
+                android:layout_width="80dp"
+                tools:inputType="none" />
 
             <TextView
                 android:text="-1"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/phone_id_cur"
-                android:layout_weight="0.39"
                 android:textSize="8sp" />
 
         </LinearLayout>
@@ -57,30 +56,27 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="group id:"
-                android:layout_width="30dp"
+                android:text="group id: "
                 android:layout_height="match_parent"
                 android:id="@+id/textView6"
-                android:gravity="top"
-                android:layout_weight="0.13"
-                android:textSize="10sp" />
+                android:textSize="10sp"
+                android:layout_width="40dp" />
 
             <EditText
-                android:layout_width="167dp"
-                android:layout_height="30dp"
-                android:inputType="textPersonName"
+                android:layout_height="match_parent"
+                android:inputType="none"
                 android:ems="10"
                 android:id="@+id/group_id_text"
                 android:layout_marginLeft="10dp"
-                android:textSize="10sp" />
+                android:textSize="10sp"
+                android:layout_width="80dp" />
 
             <TextView
                 android:text="-1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:id="@+id/group_id_cur"
-                android:layout_weight="1"
-                android:textSize="10sp"
+                android:textSize="8sp"
                 android:gravity="top" />
 
         </LinearLayout>
@@ -228,7 +224,7 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:weightSum="1">
 
             <LinearLayout
@@ -241,49 +237,109 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/google_account_text"
-                    android:textSize="10sp" />
+                    android:textSize="8sp"
+                    android:layout_marginTop="5dp" />
 
                 <TextView
                     android:text="is_sd_good"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/is_sd_card_text"
-                    android:textSize="10sp" />
+                    android:textSize="8sp" />
 
                 <TextView
                     android:text="is_gp_good"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/google_play_state"
-                    android:textSize="10sp" />
-
-                <TextView
-                    android:text="is_no_reboot"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/is_no_reboot_text"
-                    android:textSize="10sp" />
+                    android:textSize="8sp" />
 
                 <TextView
                     android:text="isSMSgood"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/is_SMS_good"
-                    android:textSize="10sp" />
+                    android:textSize="8sp" />
 
                 <TextView
                     android:text="is_cross_paired"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/is_cross_paired_text"
-                    android:textSize="10sp" />
+                    android:textSize="8sp" />
 
                 <TextView
                     android:text="is_lpm"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/is_lpm_text"
-                    android:textSize="10sp" />
+                    android:textSize="8sp" />
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:text="Time Running:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView11"
+                        android:textSize="8sp" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/time_since_restart"
+                        android:layout_weight="1"
+                        android:textSize="8sp"
+                        android:layout_marginLeft="10dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:text="Avg T Running:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView15"
+                        android:textSize="8sp" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/avg_time_running"
+                        android:layout_weight="1"
+                        android:textSize="8sp"
+                        android:layout_marginLeft="10dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:text="Avgs:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/re"
+                        android:textSize="8sp" />
+
+                    <TextView
+                        android:text="avg_str"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/avg_field"
+                        android:layout_weight="1"
+                        android:textSize="8sp"
+                        android:layout_marginLeft="10dp" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:orientation="horizontal"
@@ -295,7 +351,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/textView12"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
 
                     <TextView
                         android:text="-1"
@@ -303,7 +359,8 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/free_size_text"
                         android:layout_weight="1"
-                        android:textSize="10sp" />
+                        android:textSize="8sp"
+                        android:layout_marginLeft="10dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -316,16 +373,16 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/textView34"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
 
                     <TextView
                         android:text="-1"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/num_realm_display"
                         android:layout_weight="1"
                         android:layout_marginLeft="10dp"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -338,7 +395,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/textView32"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
 
                     <TextView
                         android:text="-1"
@@ -347,7 +404,7 @@
                         android:id="@+id/mac_address_display"
                         android:layout_weight="0.58"
                         android:layout_marginLeft="10dp"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -360,7 +417,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/textView30"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
 
                     <TextView
                         android:text="-1"
@@ -368,7 +425,8 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/total_data_text"
                         android:layout_marginLeft="10dp"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -381,7 +439,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/textView26"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
 
                     <TextView
                         android:text="-1"
@@ -390,20 +448,44 @@
                         android:id="@+id/num_packets_text"
                         android:layout_weight="1"
                         android:layout_marginLeft="10dp"
+                        android:textSize="8sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:text="Total Wit:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/total"
                         android:textSize="10sp" />
+
+                    <TextView
+                        android:text="-1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/total_wit"
+                        android:layout_weight="1"
+                        android:textSize="8sp"
+                        android:layout_marginLeft="10dp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:weightSum="1">
 
                     <TextView
                         android:text="Last RX:"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/textView28"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
 
                     <TextView
                         android:text="-1"
@@ -411,7 +493,8 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/seconds_since_last_text"
                         android:layout_marginLeft="10dp"
-                        android:textSize="10sp" />
+                        android:textSize="8sp"
+                        android:layout_weight="15.20" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -424,7 +507,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/textView41"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
 
                     <TextView
                         android:text="-1"
@@ -432,7 +515,8 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/num_gw_text"
                         android:layout_marginLeft="10dp"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
+
                 </LinearLayout>
 
             </LinearLayout>
@@ -472,6 +556,22 @@
                     android:id="@+id/status"
                     android:gravity="right"
                     android:text="status" />
+
+                <TextView
+                    android:text="deploy_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/deploy_mode_text"
+                    android:textSize="14sp"
+                    android:gravity="right" />
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/step_btn"
+                    android:text="Step"
+                    android:visibility="invisible"
+                    />
             </LinearLayout>
 
         </LinearLayout>
