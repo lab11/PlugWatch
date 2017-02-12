@@ -529,14 +529,6 @@
                 android:layout_marginTop="50dp">
 
                 <TextView
-                    android:text="build_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/build_name"
-                    android:textSize="14sp"
-                    android:gravity="right" />
-
-                <TextView
                     android:text="version_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

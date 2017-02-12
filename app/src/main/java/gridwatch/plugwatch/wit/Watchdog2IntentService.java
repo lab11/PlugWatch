@@ -7,7 +7,6 @@ import android.util.Log;
 
 import java.util.List;
 
-import gridwatch.plugwatch.firebase.FirebaseCrashLogger;
 import gridwatch.plugwatch.utilities.Restart;
 
 /**
@@ -33,15 +32,18 @@ public class Watchdog2IntentService extends IntentService {
                     cnt++;
                 }
             }
-            if (cnt != 2) {
+            Log.e("wd 2 reboot cnt:", String.valueOf(cnt));
+            if (cnt == 1) {
                 Restart r = new Restart();
                 r.do_restart(getApplicationContext(), PlugWatchUIActivity.class, getClass().getName(), new Throwable("watchdog2 rebooting due to dead process"), -1);
             } else {
                 Log.e("watchdog2", "all is well!");
             }
         } catch (java.lang.NullPointerException e) {
-            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            //FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
             e.printStackTrace();
+        } catch (Exception g) {
+            g.printStackTrace();
         }
     }
 }

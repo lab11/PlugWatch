@@ -36,6 +36,7 @@
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_config"
         android:icon="@mipmap/ic_launcher"
+        android:largeHeap="true"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
@@ -182,8 +183,13 @@
             android:process=".Watchdog" />
         <service
             android:name=".wit.AverageService"
+            android:exported="false"
+            android:process=".PlugWatch" />
+        <service
+            android:name=".wit.NetworkService"
             android:process=".PlugWatch"
-            android:exported="false"></service>
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

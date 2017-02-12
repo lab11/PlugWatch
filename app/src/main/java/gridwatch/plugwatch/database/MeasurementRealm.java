@@ -30,6 +30,34 @@ public class MeasurementRealm extends RealmObject {
         this.mMac = mac;
     }
 
+    public String getCurrent() {
+        return mCurrent;
+    }
+
+    public String getFrequency() {
+        return mFrequency;
+    }
+
+    public String getPower() {
+        return mPower;
+    }
+
+    public String getPowerFactor() {
+        return mPowerFactor;
+    }
+
+    public String getVoltage() {
+        return mVoltage;
+    }
+
+    public long getTime() {
+        return mTime;
+    }
+
+    public String getMac() {
+        return mMac;
+    }
+
     @Override
     public String toString() {
         return "Measurement {"

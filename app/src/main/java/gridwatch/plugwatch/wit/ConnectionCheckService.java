@@ -17,7 +17,6 @@ import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
-import gridwatch.plugwatch.logs.LastGoodWitWriter;
 import gridwatch.plugwatch.logs.RestartNumWriter;
 import gridwatch.plugwatch.utilities.Rebooter;
 import gridwatch.plugwatch.utilities.Restart;
@@ -31,7 +30,6 @@ public class ConnectionCheckService extends IntentService {
 
     RestartNumWriter numRebootWriter;
     Context mContext;
-    LastGoodWitWriter witWriter;
 
     private AppPreferences mTrayPreferences;
 
@@ -64,76 +62,85 @@ public class ConnectionCheckService extends IntentService {
             Log.e("ConnectionCheckService", "null context");
         }
 
-        numRebootWriter = new RestartNumWriter(getBaseContext(),getClass().getName());
-        witWriter = new LastGoodWitWriter(getClass().getName());
 
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        int plugwatchservice_pid = sp.getInt(SettingsConfig.PID, -1);
-
-        long last = 0;
         try {
-            String last_str = mTrayPreferences.getString("last");
-            last = Long.valueOf(last_str);
-            Log.e("last:1", String.valueOf(last));
-        } catch (ItemNotFoundException e1) {
-            Log.e("ConnectionCheckService:e1", e1.getCause().toString());
-            Log.e("ConnectionCheckService:e1", e1.getStackTrace().toString());
-            Log.e("ConnectionCheckService:e1", e1.getMessage());
+
+
+            numRebootWriter = new RestartNumWriter(getBaseContext(), getClass().getName());
+
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+            int plugwatchservice_pid = sp.getInt(SettingsConfig.PID, -1);
+
+            long last = 0;
             try {
-                last = Long.valueOf(witWriter.get_last_value());
-                Log.e("last:2", String.valueOf(last));
-            } catch (Exception e2) {
-                Log.e("ConnectionCheckService:e2", e2.getCause().toString());
-                Log.e("ConnectionCheckService:e2", e2.getStackTrace().toString());
-                Log.e("ConnectionCheckService:e2", e2.getMessage());
+                String last_str = mTrayPreferences.getString(SettingsConfig.LAST_WIT);
+                last = Long.valueOf(last_str);
+                Log.e("last:1", String.valueOf(last));
+            } catch (ItemNotFoundException e1) {
+                Log.e("ConnectionCheckService:e1", e1.getCause().toString());
+                Log.e("ConnectionCheckService:e1", e1.getStackTrace().toString());
+                Log.e("ConnectionCheckService:e1", e1.getMessage());
             }
-        }
 
-        long diffInMs = System.currentTimeMillis() - last;
-
-
-        Log.e("ConnectionCheckService numWriter last val", numRebootWriter.get_last_value());
-        Log.e("ConnectionCheckService witWriter last val", witWriter.get_last_value());
+            long diffInMs = System.currentTimeMillis() - last;
 
 
-
-        int num_previous_reboots = Integer.parseInt(numRebootWriter.get_last_value());
-        Log.i("ConnectionCheckService", "restart checking " + String.valueOf(last) + " num previous reboots: " + String.valueOf(num_previous_reboots));
-
-        if (num_previous_reboots + 1 > SensorConfig.REBOOT_THRESHOLD) { //Something went wrong...
-            num_previous_reboots = SensorConfig.REBOOT_THRESHOLD;
-            Log.i("ConnectionCheckService", "restart capping number of reboots to " + String.valueOf(SensorConfig.REBOOT_THRESHOLD));
-        }
-        int incremented_num_previous_reboots = num_previous_reboots + 1;
-        int new_connection_threshold = incremented_num_previous_reboots*SensorConfig.CONNECTION_THRESHOLD; //increase to allow for multiple timeouts
-        Log.i("ConnectionCheckService", "restart new connection threshold is: " + String.valueOf(new_connection_threshold));
-        Log.i("ConntectionCheckService", "last: " + String.valueOf(last) + " cur: " + String.valueOf(System.currentTimeMillis()) + " diff: " + String.valueOf(diffInMs) + " thresh: " + String.valueOf(new_connection_threshold) + " last: " + String.valueOf(last));
+            //TODO add in scanning at some threshold
 
 
+            Log.e("ConnectionCheckService numWriter last val", numRebootWriter.get_last_value());
 
-        try {
-            if (diffInMs > new_connection_threshold && last != -1) {
-                if (incremented_num_previous_reboots > SensorConfig.REBOOT_THRESHOLD) {
-                    numRebootWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
-                    Log.e("ConnectionCheckService", " setting to zero ");
-                    FirebaseCrash.log("ConnectionCheckService: rebooting due to max timeout and reseting num_writer");
-                    Rebooter r = new Rebooter(getApplicationContext(), this.getClass().getName(), false, new Throwable("restart rebooting due to max timeout"));
-                    //Reboot r = new Reboot();
-                    //r.do_reboot();
+
+            int num_previous_reboots = Integer.parseInt(numRebootWriter.get_last_value());
+            Log.i("ConnectionCheckService", "restart checking " + String.valueOf(last) + " num previous reboots: " + String.valueOf(num_previous_reboots));
+
+            if (num_previous_reboots + 1 > SensorConfig.REBOOT_THRESHOLD) { //Something went wrong...
+                num_previous_reboots = SensorConfig.REBOOT_THRESHOLD;
+                Log.i("ConnectionCheckService", "restart capping number of reboots to " + String.valueOf(SensorConfig.REBOOT_THRESHOLD));
+            }
+            int incremented_num_previous_reboots = num_previous_reboots + 1;
+            int new_connection_threshold = incremented_num_previous_reboots * SensorConfig.CONNECTION_THRESHOLD; //increase to allow for multiple timeouts
+            Log.i("ConnectionCheckService", "restart new connection threshold is: " + String.valueOf(new_connection_threshold));
+            Log.i("ConntectionCheckService", "last: " + String.valueOf(last) + " cur: " + String.valueOf(System.currentTimeMillis()) + " diff: " + String.valueOf(diffInMs) + " thresh: " + String.valueOf(new_connection_threshold) + " last: " + String.valueOf(last));
+
+
+            try {
+                if (diffInMs > new_connection_threshold && last != -1) {
+                    if (incremented_num_previous_reboots > SensorConfig.REBOOT_THRESHOLD) {
+                        numRebootWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(0));
+                        Log.e("ConnectionCheckService", " setting to zero ");
+                        FirebaseCrash.log("ConnectionCheckService: rebooting due to max timeout and reseting num_writer");
+                        Rebooter r = new Rebooter(getApplicationContext(), this.getClass().getName(), false, new Throwable("restart rebooting due to max timeout"));
+                        //Reboot r = new Reboot();
+                        //r.do_reboot();
+                    } else {
+                        Log.i("ConnectionCheckService", "restart restarting " + String.valueOf(diffInMs));
+                        numRebootWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(incremented_num_previous_reboots));
+                        Log.e("ConnectionCheckService", " setting to num_previous_reboots to " + String.valueOf(incremented_num_previous_reboots));
+                        Restart r = new Restart();
+                        r.do_restart(App.getInstance().getApplicationContext(), PlugWatchUIActivity.class, this.getClass().getName(), new Throwable("restarting due to timeout"), plugwatchservice_pid);
+                    }
+
                 } else {
-                    Log.i("ConnectionCheckService", "restart restarting " + String.valueOf(diffInMs));
-                    numRebootWriter.log(String.valueOf(System.currentTimeMillis()), String.valueOf(incremented_num_previous_reboots));
-                    Log.e("ConnectionCheckService", " setting to " + String.valueOf(incremented_num_previous_reboots));
-                    Restart r = new Restart();
-                    r.do_restart(App.getInstance().getApplicationContext(), PlugWatchUIActivity.class, this.getClass().getName(), new Throwable("restarting due to timeout"), plugwatchservice_pid);
+                    Log.i("ConnectionCheckService", "restart not restarting " + String.valueOf(diffInMs));
                 }
-
-            } else {
-                Log.i("ConnectionCheckService", "restart not restarting " + String.valueOf(diffInMs));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("Connection Check Error", e.toString());
         }
+
+
+        /*
+        Intent intent = new Intent(getBaseContext(), PlugWatchUIActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        intent.addFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getBaseContext().startActivity(intent);
+        */
+
     }
 
 

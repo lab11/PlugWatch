@@ -34,6 +34,7 @@ public class WatchdogService2 extends Service {
 
         //Log.e("crashing", null);
 
+
         Context ctx = getApplicationContext();
         AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
         Calendar cal = Calendar.getInstance();
@@ -50,6 +51,7 @@ public class WatchdogService2 extends Service {
                 interval,
                 servicePendingIntent
         );
+
     }
 
 

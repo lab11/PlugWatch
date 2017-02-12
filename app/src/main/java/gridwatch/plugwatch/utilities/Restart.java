@@ -17,7 +17,6 @@ import java.util.List;
 
 import gridwatch.plugwatch.configs.IntentConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
-import gridwatch.plugwatch.logs.LastGoodWitWriter;
 import gridwatch.plugwatch.logs.RebootCauseWriter;
 import gridwatch.plugwatch.logs.RunningTimeWriter;
 import gridwatch.plugwatch.wit.App;
@@ -58,7 +57,6 @@ public class Restart {
             e.printStackTrace();
         }
 
-        //send_dead_packet();
         StringWriter stackTrace = new StringWriter();
         exception.printStackTrace(new PrintWriter(stackTrace));
         System.err.println(stackTrace);// You can use LogCat too
@@ -70,6 +68,10 @@ public class Restart {
         }
         if (context != null && c != null) {
             mContext = context;
+            appPreferences = new AppPreferences(context);
+            appPreferences.put(SettingsConfig.LAST_WIT, String.valueOf(System.currentTimeMillis()+5000));
+
+
 
             send_dead_packet();
 
@@ -91,8 +93,10 @@ public class Restart {
                 }
             }
 
-            LastGoodWitWriter r = new LastGoodWitWriter(getClass().getName());
-            r.log(String.valueOf(System.currentTimeMillis()+5000), "restart");
+
+
+
+
 
             ProcessPhoenix.triggerRebirth(App.getInstance());
 

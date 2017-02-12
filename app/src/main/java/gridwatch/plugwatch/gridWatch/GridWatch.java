@@ -36,6 +36,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.orhanobut.logger.Logger;
 
+import net.grandcentrix.tray.AppPreferences;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,10 +53,8 @@ import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.database.Ack;
 import gridwatch.plugwatch.database.GWDump;
-import gridwatch.plugwatch.logs.GroupIDWriter;
 import gridwatch.plugwatch.logs.LatLngWriter;
 import gridwatch.plugwatch.logs.MacWriter;
-import gridwatch.plugwatch.logs.PhoneIDWriter;
 import gridwatch.plugwatch.network.GWJob;
 import gridwatch.plugwatch.network.GWRetrofit;
 import gridwatch.plugwatch.wit.PlugWatchUIActivity;
@@ -68,6 +68,7 @@ import rx.functions.Func7;
 import rx.schedulers.Schedulers;
 
 import static gridwatch.plugwatch.configs.SensorConfig.LOCATION_TIMEOUT_IN_SECONDS;
+import static gridwatch.plugwatch.wit.App.getContext;
 
 
 public class GridWatch {
@@ -80,6 +81,7 @@ public class GridWatch {
 
     SharedPreferences sp;
 
+    final AppPreferences appPreferences = new AppPreferences(getContext());
 
     private ReactiveLocationProvider location_rec;
 
@@ -115,6 +117,7 @@ public class GridWatch {
         mLast = last;
         mDatabase = FirebaseDatabase.getInstance().getReference();
         sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+        Realm.init(mContext);
 
     }
 
@@ -139,6 +142,13 @@ public class GridWatch {
                 .subscribeOn(Schedulers.io())
                 .timeout(SensorConfig.NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS, Observable.just((Connectivity) null), AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
+                .onBackpressureDrop()
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("network err", throwable.toString());
+                    }
+                })
                 .map(new Func1<Connectivity, JSONObject>() {
                     @Override
                     public JSONObject call(Connectivity connectivity) {
@@ -156,6 +166,21 @@ public class GridWatch {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .buffer(SensorConfig.ACCEL_TIME, TimeUnit.SECONDS)
+                .onBackpressureDrop()
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("Accel err", throwable.toString());
+                    }
+                })
+                .onBackpressureLatest()
+                .onErrorResumeNext(new Func1<Throwable, Observable<? extends List<ReactiveSensorEvent>>>() {
+                    @Override
+                    public Observable<? extends List<ReactiveSensorEvent>> call(Throwable throwable) {
+                        Log.e("Accel err resuming next", throwable.toString() );
+                        return null;
+                    }
+                })
                 .map(new Func1<List<ReactiveSensorEvent>, JSONObject>() {
                          @Override
                          public JSONObject call(List<ReactiveSensorEvent> eventList) {
@@ -189,6 +214,13 @@ public class GridWatch {
                 .timeout(LOCATION_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS, Observable.just((Location) null), AndroidSchedulers.mainThread())
                 .first()
                 .observeOn(AndroidSchedulers.mainThread())
+                .onBackpressureDrop()
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("Loc err", throwable.toString());
+                    }
+                })
                 .map(new Func1<Location, JSONObject>() {
                          @Override
                          public JSONObject call(Location eventList) {
@@ -208,7 +240,13 @@ public class GridWatch {
             public JSONObject call() throws Exception {
                 return cell_tower_transform(mContext);
             }
-        });
+        }).onBackpressureDrop()
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("cell err", throwable.toString());
+                    }
+                });
 
 
         //***********************
@@ -222,7 +260,13 @@ public class GridWatch {
             public JSONObject call() throws Exception {
                 return settings_transform();
             }
-        });
+        }).onBackpressureDrop()
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("settings err", throwable.toString());
+                    }
+                });
 
         //***********************
         //* Returns all meta-data
@@ -235,14 +279,26 @@ public class GridWatch {
             public JSONObject call() throws Exception {
                 return meta_transform();
             }
-        });
+        }).onBackpressureDrop()
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("meta err", throwable.toString());
+                    }
+                });
 
         Observable<JSONObject> wifi = Observable.fromCallable(new Callable<JSONObject>() {
             @Override
             public JSONObject call() throws Exception {
                 return wifi_transform(mContext);
             }
-        });
+        }).onBackpressureDrop()
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("wifi err", throwable.toString());
+                    }
+                });
 
 
         //****************************************************************************************
@@ -296,11 +352,32 @@ public class GridWatch {
                                 Log.e("GridWatch", "subscribe");
                                 return merge(o, o2, o3, o4, o5, o6, o7);
                             }
-                        });
+                        }).onBackpressureDrop().doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("GridWatch Stream err", throwable.toString());
+                    }
+                });
+
 
         gridwatch_stream.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .single()
+                .onBackpressureDrop()
+                .doOnError(new Action1<Throwable>() {
+
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("GridWatch Error 1", throwable.toString());
+                    }
+                })
+                .onErrorResumeNext(new Func1<Throwable, Observable<? extends JSONObject>>() {
+                    @Override
+                    public Observable<? extends JSONObject> call(Throwable throwable) {
+                        Log.e("GridWatch Error 2", throwable.toString());
+                        return null;
+                    }
+                })
                 .subscribe(new Action1<JSONObject>() {
                     @Override
                     public void call(JSONObject o) {
@@ -321,13 +398,19 @@ public class GridWatch {
                             @Override
                             public void onSuccess() {
                                 Log.e("GridWatch", "event saved in realm");
+                                realm.close();
                                 send_report();
-                                //PlugWatchApp.getInstance().set_num_gw(realm.where(GWDump.class).findAll().size());
+                            }
+                        }, new Realm.Transaction.OnError() {
 
+                            @Override
+                            public void onError(Throwable error) {
+                                Log.e("Realm", "error: " + error.getMessage());
                             }
                         });
                     }
                 });
+
     }
 
     private String checkCP() {
@@ -355,10 +438,16 @@ public class GridWatch {
 
     private void send_report() {
         try {
-            PhoneIDWriter b = new PhoneIDWriter(mContext, getClass().getName());
-            String phone_id = b.get_last_value();
-            GroupIDWriter d = new GroupIDWriter(mContext, getClass().getName());
-            String experiment_id = d.get_last_value();
+            String phone_id = "-1";
+            String experiment_id = "-1";
+            /*
+            try {
+                phone_id = appPreferences.getString(SettingsConfig.PHONE_ID);
+                experiment_id = appPreferences.getString(SettingsConfig.GROUP_ID);
+            } catch (ItemNotFoundException e) {
+                e.printStackTrace();
+            }
+            */
 
             IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
             Intent batteryStatus = mContext.registerReceiver(null, ifilter);

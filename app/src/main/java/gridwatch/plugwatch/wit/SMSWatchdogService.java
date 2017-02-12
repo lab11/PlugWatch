@@ -17,6 +17,8 @@ import android.util.Log;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import net.grandcentrix.tray.AppPreferences;
+
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
 import gridwatch.plugwatch.configs.DatabaseConfig;
@@ -24,12 +26,14 @@ import gridwatch.plugwatch.configs.SensorConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.database.WD;
 import gridwatch.plugwatch.firebase.FirebaseCrashLogger;
-import gridwatch.plugwatch.logs.GroupIDWriter;
 import gridwatch.plugwatch.logs.LatLngWriter;
-import gridwatch.plugwatch.logs.PhoneIDWriter;
+
+import static gridwatch.plugwatch.wit.App.getContext;
 
 public class SMSWatchdogService extends IntentService {
 
+
+    final AppPreferences appPreferences = new AppPreferences(getContext());
 
     public SMSWatchdogService() {
         super("WatchdogService");
@@ -68,10 +72,17 @@ public class SMSWatchdogService extends IntentService {
                 String versionNum = sp.getString(SettingsConfig.VERSION_NUM, "");
                 String externalFreespace = sp.getString(SettingsConfig.FREESPACE_EXTERNAL, "");
                 String internalFreespace = sp.getString(SettingsConfig.FREESPACE_INTERNAL, "");
-                PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(), getClass().getName());
-                String phone_id = r.get_last_value();
-                GroupIDWriter w = new GroupIDWriter(getApplicationContext(), getClass().getName());
-                String group_id = w.get_last_value();
+                String phone_id = "-1";
+                String group_id = "-1";
+
+                /*
+                try {
+                    phone_id = appPreferences.getString(SettingsConfig.PHONE_ID);
+                    group_id = appPreferences.getString(SettingsConfig.GROUP_ID);
+                } catch (ItemNotFoundException e) {
+                    e.printStackTrace();
+                }
+                */
                 String num_realms = String.valueOf(sp.getInt(SettingsConfig.NUM_REALMS, -1));
                 long network_size = sp.getLong(SettingsConfig.TOTAL_DATA, -1);
                 LatLngWriter l = new LatLngWriter(getClass().getName());

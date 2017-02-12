@@ -1,10 +1,10 @@
 package gridwatch.plugwatch.wit;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.evernote.android.job.JobManager;
@@ -12,6 +12,8 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
 
 import gridwatch.plugwatch.R;
 import gridwatch.plugwatch.configs.AppConfig;
@@ -24,7 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by nklugman on 12/3/16.
  */
 
-public class App extends Application {
+public class App extends MultiDexApplication {
     public static final int DEPLOY_MODE_COLOR = Color.GRAY;
     public static final int DEBUG_MODE_COLOR = Color.WHITE;
     private static App instance;
@@ -37,21 +39,35 @@ public class App extends Application {
     SharedPreferences sp;
 
 
+    private RefWatcher refWatcher;
+
+
     public WitRetrofitService getRetrofitService() {
         return retrofitService;
     }
 
+    public static RefWatcher getRefWatcher(Context context) {
+        App application = (App) context.getApplicationContext();
+        return application.refWatcher;
+    }
 
 
     @Override
     public void onCreate() {
         super.onCreate();
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            return;
+        }
+        refWatcher = LeakCanary.install(this);
         try {
             FirebaseApp.initializeApp(getApplicationContext());
             FirebaseDatabase.getInstance();
             mContext = getApplicationContext();
             instance = this;
             setup_retrofit();
+
+
+
         } catch (Exception e) {
             Log.e("critical", "need to fix google play");
         }

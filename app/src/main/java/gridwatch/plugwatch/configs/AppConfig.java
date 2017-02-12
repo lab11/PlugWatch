@@ -12,6 +12,7 @@ public class AppConfig {
 
 
     public final static boolean RESTART_ON_EXCEPTION = true;
+    public static final boolean DEPLOY_MODE_STARTING = false;
 
     public final static int UI_UPDATE_INTERVAL = 5000;
     public final static int ACTIVITY_GOOD = 1;

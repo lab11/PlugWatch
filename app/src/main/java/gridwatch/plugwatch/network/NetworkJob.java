@@ -55,6 +55,7 @@ public class NetworkJob extends Job {
                 }
             }
         });
+
         return Result.SUCCESS;
     }
 

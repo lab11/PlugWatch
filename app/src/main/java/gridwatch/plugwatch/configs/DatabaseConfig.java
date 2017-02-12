@@ -45,4 +45,7 @@ public class DatabaseConfig {
     public static final String NUM_IS_ONLINE = "IS_ONLINE";
     public static final String NUM_GET_SETTINGS = "GET_SETTINGS";
     public static final String NUM_AUDIO_SIZE = "AUDIO_SIZE";
+    public static final String NUM_TO_WRITE_TO_PREF = "NUM_TO_WRITE_TO_PREF";
+    public static final String NUM_SET_ID = "NUM_SET_ID";
+    public static final String NUM_GET_APP_PREF = "NUM_GET_APP_PREF";
 }

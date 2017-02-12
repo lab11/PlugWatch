@@ -4,8 +4,12 @@ import android.content.Context;
 
 import com.google.firebase.crash.FirebaseCrash;
 
-import gridwatch.plugwatch.logs.GroupIDWriter;
-import gridwatch.plugwatch.logs.PhoneIDWriter;
+import net.grandcentrix.tray.AppPreferences;
+import net.grandcentrix.tray.core.ItemNotFoundException;
+
+import gridwatch.plugwatch.configs.SettingsConfig;
+
+import static gridwatch.plugwatch.wit.App.getContext;
 
 /**
  * Created by nklugman on 11/27/16.
@@ -15,12 +19,16 @@ public class FirebaseCrashLogger {
 
     private String phone_id;
     private String group_id;
+    final AppPreferences appPreferences = new AppPreferences(getContext());
 
     public FirebaseCrashLogger(Context context, String msg) {
-            PhoneIDWriter a = new PhoneIDWriter(context, getClass().getName());
-            phone_id = a.get_last_value();
-            GroupIDWriter b = new GroupIDWriter(context, getClass().getName());
-            group_id = b.get_last_value();
+        try {
+            phone_id = appPreferences.getString(SettingsConfig.PHONE_ID);
+            group_id = appPreferences.getString(SettingsConfig.GROUP_ID);
+        } catch (ItemNotFoundException e) {
+            e.printStackTrace();
+        }
+
             FirebaseCrash.log(phone_id + "," + group_id + "," + msg);
 
     }

@@ -32,9 +32,9 @@ public class SensorConfig {
     public final static int WATCHDOG_INTERVAL =  1000 * 60 * 60 * 12; //interval to check connection ms
 
 
-    public final static int CONNECTION_INTERVAL =  15000; //interval to check connection ms
-    public final static int CONNECTION_THRESHOLD = 50000; //after this number time restart the app ms
-    public final static int REBOOT_THRESHOLD = 7; // after this threshold of restarts, reboot the phone
+    public final static int CONNECTION_INTERVAL =  25000; //interval to check connection ms
+    public final static int CONNECTION_THRESHOLD = 100000; //after this number time restart the app ms
+    public final static int REBOOT_THRESHOLD = 6; // after this threshold of restarts, reboot the phone
     public final static int NOTIFICATION_BUT_NO_DECODE_TIMEOUT = 1000 * 60 * 2; //state that exists when notifications are coming that can't be decoded
 
     public final static long RESTART_BUFFER = 5000; //when we restart we fake a new wit coming in to allow it to timeout naturally... plus a buffer
@@ -60,6 +60,7 @@ public class SensorConfig {
 
     public static final long LOGCAT_SAMPLE_TIME_MS = 1000 * 60 * 5;
     public static final long AVERAGE_INTERVAL = 1000*30;
+    public static final long NETWORK_INTERVAL = 1000*10;
 
     public static int NUM_ANY_CRASH_BEFORE_REBOOT = 5;
     public static int MAX_NUM_REBOOT_BACKOFF = 30;

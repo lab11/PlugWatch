@@ -12,22 +12,24 @@ import ch.hsr.geohash.GeoHash;
 
 public class WitRetrofit implements Serializable {
 
-    private String c; //current
-    private String f; //frequency
-    private String p; //power
-    private String r; //powerfactor
-    private String v; //voltage
-    private long t; //time
-    private double q; //lat
-    private double w; //lng
-    private String i; //phone_id
-    private String e; //group_id
+    private String a; //time runing
     private String b; //version number
-    private String z; //cur size
+    private String c; //current
+    private String e; //group_id
+    private String f; //frequency
+    private String g; //total size
     private String h; //geohash
+    private String i; //phone_id
     private String m; //mac
+    private String p; //power
+    private double q; //lat
+    private String r; //powerfactor
+    private long t;   //time
+    private String u; //wifi
+    private String v; //voltage
+    private double w; //lng
     private String y; //cross posted
-    private String u;
+    private String z; //cur size
 
 
     public WitRetrofit(String current, String frequency,
@@ -35,7 +37,8 @@ public class WitRetrofit implements Serializable {
                           String voltage, long now, double lat,
                        double lng, String phone_id, String experiment_id,
                        String version_num, String cur_size,
-                       String mac, String cp, String wifi) {
+                       String mac, String cp, String wifi, String total_size,
+                       String time_running) {
         this.c = current;
         this.f = frequency;
         this.p = power;
@@ -52,6 +55,8 @@ public class WitRetrofit implements Serializable {
         this.m = mac;
         this.y = cp;
         this.u = wifi;
+        this.g = total_size;
+        this.a = time_running;
     }
 
     public PersistableBundleCompat toBundle() {
@@ -72,6 +77,9 @@ public class WitRetrofit implements Serializable {
         measurement.putString("m", m);
         measurement.putString("y", y);
         measurement.putString("u", u);
+        measurement.putString("g", g);
+        measurement.putString("a", a);
+
         return measurement;
     }
 
@@ -82,7 +90,24 @@ public class WitRetrofit implements Serializable {
                 ",lat:" + String.valueOf(q) + ",lng:" + String.valueOf(w) + "\n" +
                 ",phone_id:" + i + ",group_id:" + e +
                 ",build_num:" + b + ",cur_size:" + z + ",geohash:" + h +
-                ",mac:" + m + ",cp:" + y + ",wifi:" + u;
+                ",mac:" + m + ",cp:" + y + ",wifi:" + u + ",total_size:" + g + ",time_running:" + a;
+    }
+
+
+    public String getA() {
+        return a;
+    }
+
+    public void setA(String a) {
+        this.a = a;
+    }
+
+    public String getG() {
+        return g;
+    }
+
+    public void setG(String g) {
+        this.g = g;
     }
 
     public String getC() {

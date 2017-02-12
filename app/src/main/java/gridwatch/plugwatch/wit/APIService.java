@@ -41,6 +41,7 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -52,6 +53,10 @@ import com.loopj.android.http.RequestParams;
 import com.stealthcopter.networktools.Ping;
 import com.stealthcopter.networktools.ping.PingResult;
 
+import net.grandcentrix.tray.AppPreferences;
+import net.grandcentrix.tray.core.ItemNotFoundException;
+import net.grandcentrix.tray.core.TrayItem;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -59,6 +64,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -76,15 +83,14 @@ import gridwatch.plugwatch.database.Ack;
 import gridwatch.plugwatch.database.Command;
 import gridwatch.plugwatch.database.WD;
 import gridwatch.plugwatch.firebase.FirebaseCrashLogger;
-import gridwatch.plugwatch.logs.GroupIDWriter;
 import gridwatch.plugwatch.logs.LatLngWriter;
-import gridwatch.plugwatch.logs.PhoneIDWriter;
 import gridwatch.plugwatch.utilities.SharedPreferencesToString;
 import io.realm.Realm;
 
 import static gridwatch.plugwatch.configs.SMSConfig.AIRTIME;
 import static gridwatch.plugwatch.configs.SMSConfig.INTERNET;
 import static gridwatch.plugwatch.configs.SensorConfig.recordingFolder;
+import static gridwatch.plugwatch.wit.App.getContext;
 
 
 public class APIService extends Service {
@@ -93,6 +99,7 @@ public class APIService extends Service {
     private final static boolean ready = true;
     private final static boolean not_ready = false;
 
+    final AppPreferences appPreferences = new AppPreferences(getContext());
 
     private SensorManager mSensorManager;
     private Sensor mSensor;
@@ -128,12 +135,16 @@ public class APIService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("api", "start");
-        PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(), getClass().getName());
-        cur_phone_id = r.get_last_value();
-        GroupIDWriter p = new GroupIDWriter(getApplicationContext(), getClass().getName());
-        cur_group_id = p.get_last_value();
 
 
+        cur_phone_id = "-1";
+        cur_group_id = "-1";
+        try {
+            cur_phone_id = appPreferences.getString(SettingsConfig.PHONE_ID);
+            cur_group_id = appPreferences.getString(SettingsConfig.GROUP_ID);
+        } catch (ItemNotFoundException e) {
+            e.printStackTrace();
+        }
 
         if (intent != null && intent.getExtras() != null) {
             String cmd = intent.getStringExtra(IntentConfig.INCOMING_API_COMMAND);
@@ -183,11 +194,19 @@ public class APIService extends Service {
 
     private void do_api(String phone_id, String group_id, String cmd, boolean isIndividual) {
         // and here we go...
-        Log.e("api ID MATCH", "action being taken: " + cmd);
+        Log.e("api ID MATCH", "action being taken: " + cmd + " by " + phone_id + " , " + group_id);
         Command cur_cmd = new Command(System.currentTimeMillis(), cmd, isText, phone_id, group_id);
         int new_cmd_num = sp.getInt(SettingsConfig.NUM_COMMANDS, 0) + 1;
         sp.edit().putInt(SettingsConfig.NUM_COMMANDS, new_cmd_num).commit();
-        mDatabase.child(cur_phone_id).child(DatabaseConfig.COMMAND).child(String.valueOf(new_cmd_num)).setValue(cur_cmd);
+
+        Log.e("new_cmd_num", String.valueOf(new_cmd_num));
+        Log.e("cur_cmd", String.valueOf(cur_cmd.toString()));
+
+        try {
+            mDatabase.child(phone_id).child(DatabaseConfig.COMMAND).child(String.valueOf(new_cmd_num)).setValue(cur_cmd);
+        } catch  (java.lang.RuntimeException e) {
+            FirebaseCrash.log(e.getMessage());
+        }
 
         if (isText) {
             sendSMS(cur_cmd.toString());
@@ -195,6 +214,8 @@ public class APIService extends Service {
 
         if (cmd.contains("uploadall")) { //good
             do_upload_all();
+        } else if (cmd.contains("write_to_pref")) {
+            do_write_to_pref(cmd);
         } else if (cmd.contains("upload_specific")) { //err
             do_upload_specific(cmd);
         } else if (cmd.contains("getrealmsizes")) { //good
@@ -218,9 +239,9 @@ public class APIService extends Service {
             }
             delete_audiofiles();
         }
-
-
-        else if (cmd.contains("uploadlogs")) { //good
+        else if (cmd.contains("get_app_pref_str")) {
+            get_app_pref_str();
+        } else if (cmd.contains("uploadlogs")) { //good
             do_upload_logs();
         } else if (cmd.contains("uploadlog_specific")) {
             do_upload_logs_specific(cmd);
@@ -249,7 +270,20 @@ public class APIService extends Service {
             get_free_space();
         } else if (cmd.contains("stats")) {
             get_stats();
-        } else if (cmd.equals("reboot")) {
+        } else if (cmd.equals("setphoneid")) {
+            if (!isIndividual) {
+                return_err("too large of an id for cmd " + cmd);
+                if (!isForced) {
+                    return;
+                } else {
+                    return_err("Forcing " + cmd);
+                }
+            }
+            String id = cmd.split(":")[1];
+            set_id(id);
+        }
+
+        else if (cmd.equals("reboot")) {
             if (!isIndividual) {
                 return_err("too large of an id for cmd " + cmd);
                 if (!isForced) {
@@ -688,6 +722,25 @@ public class APIService extends Service {
 
     }
 
+    public void do_write_to_pref(String cmd) {
+        try {
+            long size = 0;
+            String key = cmd.split(":")[1];
+            String value = cmd.split(":")[2];
+            appPreferences.put(key, value);
+            Ack a = new Ack(System.currentTimeMillis(), key + "," + value + ":" + " size: " + String.valueOf(size), cur_phone_id, cur_group_id);
+            int new_to_write_to_size = sp.getInt(SettingsConfig.NUM_TO_WRITE_TO_PREF, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_TO_WRITE_TO_PREF, new_to_write_to_size).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_TO_WRITE_TO_PREF).child(String.valueOf(new_to_write_to_size)).setValue(a);
+            if (isText) {
+                sendSMS(a.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + cmd + " " + e.getMessage());
+        }
+    }
 
 
     public void do_upload_logs() {
@@ -833,8 +886,7 @@ public class APIService extends Service {
     //Status: needs testing
     public void set_group(String group) {
         try {
-            GroupIDWriter r = new GroupIDWriter(getApplicationContext(), getClass().getName());
-            r.log(String.valueOf(System.currentTimeMillis()), group, "api");
+            appPreferences.put(SettingsConfig.GROUP_ID, group);
 
             Ack a = new Ack(System.currentTimeMillis(), group, cur_phone_id, cur_group_id);
             int new_set_group_num = sp.getInt(SettingsConfig.NUM_SET_GROUP, 0) + 1;
@@ -846,6 +898,22 @@ public class APIService extends Service {
             return_err("bad cmd " + group + " " + e.getMessage());
         }
     }
+
+    public void set_id(String id) {
+        try {
+            appPreferences.put(SettingsConfig.PHONE_ID, id);
+
+            Ack a = new Ack(System.currentTimeMillis(), id, cur_phone_id, cur_group_id);
+            int new_set_id_num = sp.getInt(SettingsConfig.NUM_SET_ID, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_SET_ID, new_set_id_num).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_SET_ID).child(String.valueOf(new_set_id_num)).setValue(a);
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+            return_err("bad cmd " + id + " " + e.getMessage());
+        }
+    }
+
     //Status: needs testing
     public void get_report() {
         try {
@@ -868,10 +936,14 @@ public class APIService extends Service {
             String versionNum = sp.getString(SettingsConfig.VERSION_NUM, "");
             String externalFreespace = sp.getString(SettingsConfig.FREESPACE_EXTERNAL, "");
             String internalFreespace = sp.getString(SettingsConfig.FREESPACE_INTERNAL, "");
-            PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(), getClass().getName());
-            String phone_id = r.get_last_value();
-            GroupIDWriter w = new GroupIDWriter(getApplicationContext(), getClass().getName());
-            String group_id = w.get_last_value();
+            String phone_id = "-1";
+            String group_id = "-1";
+            try {
+                phone_id = appPreferences.getString(SettingsConfig.PHONE_ID);
+                group_id = appPreferences.getString(SettingsConfig.GROUP_ID);
+            } catch (ItemNotFoundException e) {
+                e.printStackTrace();
+            }
             String num_realms = String.valueOf(sp.getInt(SettingsConfig.NUM_REALMS, -1));
             long network_size = sp.getLong(SettingsConfig.TOTAL_DATA, -1);
             LatLngWriter l = new LatLngWriter(getClass().getName());
@@ -1209,6 +1281,29 @@ public class APIService extends Service {
 
     }
 
+
+    public void get_app_pref_str() {
+        try {
+            String all_pref = "";
+            Collection<TrayItem> allEntries = appPreferences.getAll();
+            for (Iterator iterator = allEntries.iterator(); iterator.hasNext();) {
+                TrayItem cur = (TrayItem) iterator.next();
+                Log.d("map values", cur.key().toString() + ": " + cur.value().toString());
+                all_pref += cur.key().toString() + ": " + cur.value().toString() + " ";
+            }
+
+            Ack a = new Ack(System.currentTimeMillis(), all_pref, cur_phone_id, cur_group_id);
+            int new_num_get_apppref = sp.getInt(SettingsConfig.NUM_GET_APP_PREF, 0) + 1;
+            sp.edit().putInt(SettingsConfig.NUM_GET_APP_PREF, new_num_get_apppref).commit();
+            mDatabase.child(cur_phone_id).child(DatabaseConfig.ACK).child(DatabaseConfig.NUM_GET_APP_PREF).child(String.valueOf(new_num_get_apppref)).setValue(a);
+        } catch (Exception e) {
+            return_err("bad parameters " + "get_app_pref_str " + e.getMessage());
+            e.printStackTrace();
+            FirebaseCrashLogger a = new FirebaseCrashLogger(getApplicationContext(), e.getMessage());
+        }
+    }
+
+
     public void isOnline() {
         try {
             Ack a = new Ack(System.currentTimeMillis(), String.valueOf(checkOnline()), cur_phone_id, cur_group_id);
@@ -1348,6 +1443,7 @@ public class APIService extends Service {
         }
         return true;
     }
+
 
     public String getLastPathComponent(String filePath) {
         String[] segments = filePath.split("/");

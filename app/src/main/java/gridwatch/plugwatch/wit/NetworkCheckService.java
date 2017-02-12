@@ -12,7 +12,6 @@ import java.net.UnknownHostException;
 
 import gridwatch.plugwatch.callbacks.RestartOnExceptionHandler;
 import gridwatch.plugwatch.configs.AppConfig;
-import gridwatch.plugwatch.utilities.Rebooter;
 
 /**
  * Created by nklugman on 11/27/16.
@@ -42,7 +41,9 @@ public class NetworkCheckService extends IntentService {
                 @Override
                 public void onResult(PingResult pingResult) {
                     if (!pingResult.isReachable) {
-                        Rebooter r = new Rebooter(getApplicationContext(),getClass().getName(), false, new Throwable("rebooting due to network not reachable"));
+
+
+                        //Rebooter r = new Rebooter(getApplicationContext(),getClass().getName(), false, new Throwable("rebooting due to network not reachable"));
                     }
                 }
 

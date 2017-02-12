@@ -13,13 +13,16 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import net.grandcentrix.tray.AppPreferences;
+import net.grandcentrix.tray.core.ItemNotFoundException;
+
 import java.util.List;
 
 import gridwatch.plugwatch.configs.DatabaseConfig;
 import gridwatch.plugwatch.configs.SettingsConfig;
 import gridwatch.plugwatch.database.Ack;
-import gridwatch.plugwatch.logs.GroupIDWriter;
-import gridwatch.plugwatch.logs.PhoneIDWriter;
+
+import static gridwatch.plugwatch.wit.App.getContext;
 
 /**
  * Created by nklugman on 11/30/16.
@@ -37,6 +40,8 @@ public class NotificationService extends AccessibilityService {
 
     private DatabaseReference mDatabase;
 
+    final AppPreferences appPreferences = new AppPreferences(getContext());
+
 
     public static String pin;
 
@@ -53,11 +58,14 @@ public class NotificationService extends AccessibilityService {
         topup_airtime = false;
         topup_internet = false;
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        PhoneIDWriter r = new PhoneIDWriter(getApplicationContext(), getClass().getName());
-        cur_phone_id = r.get_last_value();
-        GroupIDWriter w = new GroupIDWriter(getApplicationContext(), getClass().getName());
-        cur_group_id = w.get_last_value();
-
+        String cur_phone_id = "-1";
+        String cur_group_id = "-1";
+        try {
+            cur_phone_id = appPreferences.getString(SettingsConfig.PHONE_ID);
+            cur_group_id = appPreferences.getString(SettingsConfig.GROUP_ID);
+        } catch (ItemNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

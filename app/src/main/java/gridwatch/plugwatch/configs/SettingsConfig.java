@@ -80,6 +80,14 @@ public class SettingsConfig {
     public static final String NUM_AUDIO_SIZE = "NUM_AUDIO_SIZE";
     public static final String TOTAL_WIT_SIZE = "TOTAL_WIT_SIZE";
     public static final String TIME_RUNNING = "TIME_RUNNING";
+    public static final String IS_FIRST_WD = "IS_FIRST_WD";
+    public static final String NUM_TO_WRITE_TO_PREF = "NUM_TO_WRITE_TO_PREF";
+    public static final String NUM_SET_ID = "NUM_SET_ID";
+    public static final String WIFI_UPLOAD = "WIFI_UPLOAD";
+    public static final String CHECK_CP = "CHECK_CP";
+    public static final String NUM_GET_APP_PREF = "NUM_GET_APP_PREF";
+    public static final String BUILD_STR = "BUILD_STR";
+    public static final String DEPLOY_MODE = "DEPLOY_MODE";
 
 
     public class NUM_WD {
