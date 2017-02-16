@@ -13,7 +13,7 @@ not due to a power outage).
 
 PlugWatch also runs the WitCollect (**?? Name**) service, which connects to a nearby
 [WiTenergy](http://www.wittech.net/WiTenergy.html) power meter to collect additional data. PlugWatch
-samples Wit data every **XXX** and generates a [WitData](#witdata) entry for every sample.
+samples Wit data every second (** DOUBLE CHECK **) and generates a [WitData](#witdata) entry for every sample (**and transmits every sample to the server in real time?? **).
 
 **XXX is this right?**
 GridWatch and Wit data are stored in a local database. PlugWatch creates a new database every 24
@@ -92,3 +92,8 @@ Wishlist
 --------
 
   - Nearby WiFi SSIDs
+  - Compression for database sends. 
+  - Periodic "Wit still not reachable" message transmissions - don't rely (solely) on watchdogs killing-and-restarting app to cause these to be generated only on re-start. As reliability increases may wish to have less aggressive watchdog that lets app running longer to increase chances of capturing exactly when power returns.
+  - Option for "near" real-time bulk upload of Wit readings - e.g. N minutes worth at a time. Maybe only do bulk/trigger bulk send if voltage within a "normal" range.
+  
+  
