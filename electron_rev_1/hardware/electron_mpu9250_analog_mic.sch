@@ -9761,7 +9761,7 @@ Pins 4-6 are on interrupts for the electron.</text>
 <instance part="GND3" gate="1" x="180.34" y="-20.32"/>
 <instance part="R1" gate="G$1" x="180.34" y="15.24" rot="R90"/>
 <instance part="R2" gate="G$1" x="187.96" y="15.24" rot="R90"/>
-<instance part="U$1" gate="G$1" x="74.93" y="159.766"/>
+<instance part="U$1" gate="G$1" x="82.296" y="159.766"/>
 <instance part="R6" gate="G$1" x="123.19" y="190.246" rot="R90"/>
 <instance part="C2" gate="G$1" x="138.43" y="144.526"/>
 <instance part="R8" gate="G$1" x="130.81" y="159.766" rot="R90"/>
@@ -9901,7 +9901,7 @@ Pins 4-6 are on interrupts for the electron.</text>
 <segment>
 <pinref part="U$1" gate="G$1" pin="V-"/>
 <pinref part="GND8" gate="1" pin="GND"/>
-<wire x1="90.17" y1="157.226" x2="100.33" y2="157.226" width="0.1524" layer="91"/>
+<wire x1="97.536" y1="157.226" x2="100.33" y2="157.226" width="0.1524" layer="91"/>
 <wire x1="100.33" y1="157.226" x2="100.33" y2="147.066" width="0.1524" layer="91"/>
 </segment>
 <segment>
@@ -10297,7 +10297,7 @@ Pins 4-6 are on interrupts for the electron.</text>
 <wire x1="123.19" y1="177.546" x2="130.81" y2="177.546" width="0.1524" layer="91"/>
 <pinref part="C7" gate="G$1" pin="1"/>
 <pinref part="U$1" gate="G$1" pin="V+"/>
-<wire x1="90.17" y1="162.306" x2="123.19" y2="162.306" width="0.1524" layer="91"/>
+<wire x1="97.536" y1="162.306" x2="123.19" y2="162.306" width="0.1524" layer="91"/>
 <wire x1="123.19" y1="162.306" x2="123.19" y2="177.546" width="0.1524" layer="91"/>
 <junction x="123.19" y="177.546"/>
 </segment>

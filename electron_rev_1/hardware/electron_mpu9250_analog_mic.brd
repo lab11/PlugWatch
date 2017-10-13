@@ -2219,8 +2219,8 @@ design rules under a new name.</description>
 <vertex x="23.18" y="-1"/>
 <vertex x="23.41" y="-1.23"/>
 <vertex x="-0.61" y="-1.23"/>
-<vertex x="-1.15" y="-0.69"/>
-<vertex x="-1.15" y="52.41"/>
+<vertex x="-3.26" y="-0.69"/>
+<vertex x="-3.26" y="52.41"/>
 <vertex x="-1.07" y="52.49"/>
 </polygon>
 <wire x1="4.59" y1="44.57" x2="8.39" y2="44.57" width="1.27" layer="16"/>
