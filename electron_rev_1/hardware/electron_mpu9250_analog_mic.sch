@@ -14455,19 +14455,19 @@ Spark Fun Electronics SKU : COM-00107</description>
 <part name="R1" library="SparkFun-Resistors" deviceset="10KOHM-1/10W-1%(0603)" device="0603" value="10K"/>
 <part name="R2" library="SparkFun-Resistors" deviceset="10KOHM-1/10W-1%(0603)" device="0603" value="10K"/>
 <part name="U$1" library="microphone" deviceset="CMB-6544PF" device=""/>
-<part name="R6" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1"/>
-<part name="C2" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="C0603" package3d_urn="urn:adsk.eagle:package:26138/1"/>
-<part name="R8" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1"/>
-<part name="R9" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1"/>
-<part name="R12" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1"/>
-<part name="R13" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1"/>
-<part name="R14" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1"/>
-<part name="C4" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="C0603" package3d_urn="urn:adsk.eagle:package:26138/1"/>
-<part name="C7" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="C0603" package3d_urn="urn:adsk.eagle:package:26138/1"/>
+<part name="R6" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="13.7K"/>
+<part name="C2" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="2.2uF"/>
+<part name="R8" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="100K"/>
+<part name="R9" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="100K"/>
+<part name="R12" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="100K"/>
+<part name="R13" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="49.9"/>
+<part name="R14" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="75K"/>
+<part name="C4" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="16pF"/>
+<part name="C7" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="25uF"/>
 <part name="GND4" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND5" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND6" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="C8" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="C0603" package3d_urn="urn:adsk.eagle:package:26138/1"/>
+<part name="C8" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="2.2uF"/>
 <part name="GND8" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="P+1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="P+2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
@@ -14478,10 +14478,10 @@ Spark Fun Electronics SKU : COM-00107</description>
 <part name="GND12" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="1" library="adafruit" library_urn="urn:adsk.eagle:library:420" deviceset="LED" device="CHIP-LED0603"/>
 <part name="GND13" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
-<part name="R7" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="68"/>
+<part name="R7" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1"/>
 <part name="2" library="adafruit" library_urn="urn:adsk.eagle:library:420" deviceset="LED" device="CHIP-LED0603"/>
 <part name="GND14" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
-<part name="R15" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="68"/>
+<part name="R15" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1"/>
 <part name="U4" library="SparkFun" deviceset="USD-SOCKET" device="SMD" value="microSD"/>
 <part name="U7" library="SparkFun" deviceset="GAS_SENSOR" device=""/>
 <part name="U10" library="SparkFun" deviceset="GAS_SENSOR" device=""/>
@@ -14491,8 +14491,8 @@ Spark Fun Electronics SKU : COM-00107</description>
 <part name="GND15" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND16" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="FRAME1" library="frames" library_urn="urn:adsk.eagle:library:229" deviceset="A3L-LOC" device=""/>
-<part name="U5" library="SparkFun-IC-Power" library_urn="urn:adsk.eagle:library:526" deviceset="V_REG_78XX" device="7812" package3d_urn="urn:adsk.eagle:package:39067/1" value="+12v"/>
-<part name="U6" library="SparkFun-IC-Power" library_urn="urn:adsk.eagle:library:526" deviceset="V_REG_78XX" device="7812" package3d_urn="urn:adsk.eagle:package:39067/1" value="+12v"/>
+<part name="U5" library="SparkFun-IC-Power" library_urn="urn:adsk.eagle:library:526" deviceset="V_REG_78XX" device="7812" package3d_urn="urn:adsk.eagle:package:39067/1" value="+5v"/>
+<part name="U6" library="SparkFun-IC-Power" library_urn="urn:adsk.eagle:library:526" deviceset="V_REG_78XX" device="7812" package3d_urn="urn:adsk.eagle:package:39067/1" value="+5v"/>
 <part name="GND17" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="GND18" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="L1" library="logos" deviceset="UCB_CAL" device="100MIL"/>
@@ -14513,11 +14513,17 @@ R3 and R4 set the wakeup rate.
 Pins 4-6 are on interrupts for the electron.</text>
 <text x="210.82" y="43.18" size="1.778" layer="91">Debug LEDS</text>
 <text x="33.02" y="45.72" size="1.778" layer="91">Memory. </text>
-<text x="126.238" y="103.632" size="1.778" layer="91">HEADER BREAKOUT</text>
 <text x="-81.026" y="87.63" size="1.778" layer="91">CO Sensor</text>
-<text x="-73.66" y="35.56" size="1.778" layer="91">SD CARD</text>
 <text x="-87.122" y="116.84" size="1.778" layer="94">H1 = Heater VCC @ 5V</text>
-<text x="-81.026" y="120.65" size="1.778" layer="91">Generic Gas Sensor</text>
+<text x="132.08" y="210.82" size="5.08" layer="91">ANALOG MIC</text>
+<text x="-43.18" y="210.82" size="5.08" layer="91">DIGITAL MIC</text>
+<text x="-48.26" y="124.46" size="5.08" layer="91">GAS</text>
+<text x="50.8" y="83.82" size="5.08" layer="91">MEM</text>
+<text x="-68.58" y="43.18" size="5.08" layer="91">SD CARD</text>
+<text x="22.86" y="15.24" size="5.08" layer="91">TIMER</text>
+<text x="139.7" y="20.32" size="5.08" layer="91">IMU</text>
+<text x="119.38" y="101.6" size="5.08" layer="91">ELECTRON</text>
+<text x="205.74" y="104.14" size="5.08" layer="91">DEBUG</text>
 </plain>
 <instances>
 <instance part="U$4" gate="G$1" x="116.84" y="71.12"/>
@@ -14960,15 +14966,6 @@ Pins 4-6 are on interrupts for the electron.</text>
 <label x="-25.4" y="119.38" size="1.27" layer="95" rot="R90" xref="yes"/>
 <pinref part="SJ1" gate="1" pin="2"/>
 </segment>
-<segment>
-<wire x1="-25.4" y1="96.52" x2="-25.4" y2="101.6" width="0.1524" layer="91"/>
-<pinref part="SJ2" gate="1" pin="2"/>
-<pinref part="U5" gate="G$1" pin="IN"/>
-<wire x1="-22.86" y1="101.6" x2="-25.4" y2="101.6" width="0.1524" layer="91"/>
-<pinref part="SJ1" gate="1" pin="1"/>
-<wire x1="-25.4" y1="101.6" x2="-25.4" y2="104.14" width="0.1524" layer="91"/>
-<junction x="-25.4" y="101.6"/>
-</segment>
 </net>
 <net name="D7" class="0">
 <segment>
@@ -15405,6 +15402,17 @@ Pins 4-6 are on interrupts for the electron.</text>
 <pinref part="SJ2" gate="1" pin="1"/>
 <wire x1="-22.86" y1="81.28" x2="-25.4" y2="81.28" width="0.1524" layer="91"/>
 <wire x1="-25.4" y1="81.28" x2="-25.4" y2="86.36" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$10" class="0">
+<segment>
+<pinref part="SJ2" gate="1" pin="2"/>
+<pinref part="SJ1" gate="1" pin="1"/>
+<wire x1="-25.4" y1="96.52" x2="-25.4" y2="101.6" width="0.1524" layer="91"/>
+<pinref part="U5" gate="G$1" pin="IN"/>
+<wire x1="-25.4" y1="101.6" x2="-25.4" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="-22.86" y1="101.6" x2="-25.4" y2="101.6" width="0.1524" layer="91"/>
+<junction x="-25.4" y="101.6"/>
 </segment>
 </net>
 </nets>
