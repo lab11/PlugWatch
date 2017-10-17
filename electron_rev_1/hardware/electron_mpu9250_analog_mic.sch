@@ -14497,6 +14497,7 @@ Spark Fun Electronics SKU : COM-00107</description>
 <part name="GND18" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="L1" library="logos" deviceset="UCB_CAL" device="100MIL"/>
 <part name="SJ1" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="SJ" device="" package3d_urn="urn:adsk.eagle:package:15471/1"/>
+<part name="SJ2" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="SJ" device="" package3d_urn="urn:adsk.eagle:package:15471/1"/>
 </parts>
 <sheets>
 <sheet>
@@ -14613,6 +14614,7 @@ Pins 4-6 are on interrupts for the electron.</text>
 <instance part="GND18" gate="1" x="-15.24" y="88.9"/>
 <instance part="L1" gate="G$1" x="269.24" y="0"/>
 <instance part="SJ1" gate="1" x="-25.4" y="109.22" rot="R90"/>
+<instance part="SJ2" gate="1" x="-33.02" y="88.9" rot="R90"/>
 </instances>
 <busses>
 </busses>
@@ -14961,6 +14963,15 @@ Pins 4-6 are on interrupts for the electron.</text>
 <wire x1="-25.4" y1="114.3" x2="-25.4" y2="119.38" width="0.1524" layer="91"/>
 <label x="-25.4" y="119.38" size="1.778" layer="95" rot="R90" xref="yes"/>
 <pinref part="SJ1" gate="1" pin="2"/>
+</segment>
+<segment>
+<wire x1="-33.02" y1="93.98" x2="-33.02" y2="101.6" width="0.1524" layer="91"/>
+<pinref part="SJ2" gate="1" pin="2"/>
+<pinref part="U5" gate="G$1" pin="IN"/>
+<wire x1="-22.86" y1="101.6" x2="-25.4" y2="101.6" width="0.1524" layer="91"/>
+<pinref part="SJ1" gate="1" pin="1"/>
+<wire x1="-25.4" y1="101.6" x2="-25.4" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="-33.02" y1="101.6" x2="-25.4" y2="101.6" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D7" class="0">
@@ -15405,16 +15416,12 @@ Pins 4-6 are on interrupts for the electron.</text>
 <wire x1="-40.64" y1="172.72" x2="-43.18" y2="172.72" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$10" class="0">
+<net name="N$11" class="0">
 <segment>
 <pinref part="U6" gate="G$1" pin="IN"/>
-<wire x1="-22.86" y1="81.28" x2="-25.4" y2="81.28" width="0.1524" layer="91"/>
-<wire x1="-25.4" y1="81.28" x2="-25.4" y2="101.6" width="0.1524" layer="91"/>
-<pinref part="U5" gate="G$1" pin="IN"/>
-<wire x1="-22.86" y1="101.6" x2="-25.4" y2="101.6" width="0.1524" layer="91"/>
-<pinref part="SJ1" gate="1" pin="1"/>
-<wire x1="-25.4" y1="101.6" x2="-25.4" y2="104.14" width="0.1524" layer="91"/>
-<junction x="-25.4" y="101.6"/>
+<pinref part="SJ2" gate="1" pin="1"/>
+<wire x1="-22.86" y1="81.28" x2="-33.02" y2="81.28" width="0.1524" layer="91"/>
+<wire x1="-33.02" y1="81.28" x2="-33.02" y2="83.82" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
