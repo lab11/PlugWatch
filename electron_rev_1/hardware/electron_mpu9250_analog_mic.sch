@@ -14455,11 +14455,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="U6" library="SparkFun-IC-Power" library_urn="urn:adsk.eagle:library:526" deviceset="V_REG_78XX" device="7812" package3d_urn="urn:adsk.eagle:package:39067/1" value="+12v"/>
 <part name="GND17" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="GND18" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
-<part name="P+7" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="SJ2" library="SparkFun-Passives" deviceset="JUMPER_PAD-3-1&amp;2_NC_BY_PASTE" device=""/>
 <part name="GND19" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="L1" library="logos" deviceset="UCB_CAL" device="100MIL"/>
-<part name="R18" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="10k"/>
 </parts>
 <sheets>
 <sheet>
@@ -14574,15 +14572,11 @@ Pins 4-6 are on interrupts for the electron.</text>
 <instance part="U6" gate="G$1" x="-15.24" y="81.28"/>
 <instance part="GND17" gate="1" x="-15.24" y="68.58"/>
 <instance part="GND18" gate="1" x="-15.24" y="88.9"/>
-<instance part="P+7" gate="VCC" x="-35.56" y="121.92" smashed="yes">
-<attribute name="VALUE" x="-35.814" y="122.682" size="1.778" layer="96"/>
-</instance>
 <instance part="SJ2" gate="G$1" x="-25.4" y="109.22" smashed="yes" rot="MR180">
 <attribute name="NAME" x="-22.86" y="108.839" size="1.778" layer="95" rot="MR180"/>
 </instance>
 <instance part="GND19" gate="1" x="-15.24" y="114.3"/>
-<instance part="L1" gate="G$1" x="17.78" y="96.52"/>
-<instance part="R18" gate="G$1" x="-81.28" y="60.96" rot="R180"/>
+<instance part="L1" gate="G$1" x="269.24" y="0"/>
 </instances>
 <busses>
 </busses>
@@ -14726,7 +14720,6 @@ Pins 4-6 are on interrupts for the electron.</text>
 <wire x1="-45.72" y1="109.22" x2="-43.18" y2="109.22" width="0.1524" layer="91"/>
 <wire x1="-43.18" y1="109.22" x2="-43.18" y2="106.68" width="0.1524" layer="91"/>
 <wire x1="-43.18" y1="106.68" x2="-43.18" y2="101.6" width="0.1524" layer="91"/>
-<label x="-63.5" y="106.68" size="1.778" layer="95"/>
 <pinref part="U10" gate="G$1" pin="H2"/>
 <wire x1="-60.96" y1="106.68" x2="-43.18" y2="106.68" width="0.1524" layer="91"/>
 <junction x="-43.18" y="106.68"/>
@@ -14737,7 +14730,6 @@ Pins 4-6 are on interrupts for the electron.</text>
 <wire x1="-45.72" y1="81.28" x2="-43.18" y2="81.28" width="0.1524" layer="91"/>
 <wire x1="-43.18" y1="81.28" x2="-43.18" y2="78.74" width="0.1524" layer="91"/>
 <wire x1="-43.18" y1="78.74" x2="-43.18" y2="73.66" width="0.1524" layer="91"/>
-<label x="-63.5" y="78.74" size="1.778" layer="95"/>
 <pinref part="U7" gate="G$1" pin="H2"/>
 <wire x1="-60.96" y1="78.74" x2="-43.18" y2="78.74" width="0.1524" layer="91"/>
 <junction x="-43.18" y="78.74"/>
@@ -14892,7 +14884,6 @@ Pins 4-6 are on interrupts for the electron.</text>
 <label x="129.032" y="58.42" size="1.778" layer="95"/>
 </segment>
 <segment>
-<label x="-63.5" y="81.28" size="1.778" layer="95"/>
 <pinref part="U7" gate="G$1" pin="B1"/>
 <pinref part="R17" gate="G$1" pin="2"/>
 <wire x1="-60.96" y1="81.28" x2="-55.88" y2="81.28" width="0.1524" layer="91"/>
@@ -14905,7 +14896,6 @@ Pins 4-6 are on interrupts for the electron.</text>
 <label x="129.032" y="55.88" size="1.778" layer="95"/>
 </segment>
 <segment>
-<label x="-63.5" y="109.22" size="1.778" layer="95"/>
 <pinref part="U10" gate="G$1" pin="B1"/>
 <pinref part="R16" gate="G$1" pin="2"/>
 <wire x1="-60.96" y1="109.22" x2="-55.88" y2="109.22" width="0.1524" layer="91"/>
@@ -14937,6 +14927,12 @@ Pins 4-6 are on interrupts for the electron.</text>
 <pinref part="U$5" gate="G$1" pin="3"/>
 <wire x1="177.8" y1="88.9" x2="167.64" y2="88.9" width="0.1524" layer="91"/>
 <label x="167.64" y="88.9" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="SJ2" gate="G$1" pin="2"/>
+<wire x1="-30.48" y1="109.22" x2="-35.56" y2="109.22" width="0.1524" layer="91"/>
+<wire x1="-35.56" y1="109.22" x2="-35.56" y2="119.38" width="0.1524" layer="91"/>
+<label x="-35.56" y="119.38" size="1.778" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 <net name="D7" class="0">
@@ -15092,12 +15088,6 @@ Pins 4-6 are on interrupts for the electron.</text>
 <pinref part="U4" gate="G$1" pin="VCC"/>
 <pinref part="P+6" gate="VCC" pin="VCC"/>
 <wire x1="-35.56" y1="20.32" x2="-35.56" y2="30.48" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="SJ2" gate="G$1" pin="2"/>
-<wire x1="-30.48" y1="109.22" x2="-35.56" y2="109.22" width="0.1524" layer="91"/>
-<pinref part="P+7" gate="VCC" pin="VCC"/>
-<wire x1="-35.56" y1="109.22" x2="-35.56" y2="119.38" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="SCL_1" class="0">
@@ -15344,11 +15334,11 @@ Pins 4-6 are on interrupts for the electron.</text>
 <wire x1="-88.9" y1="106.68" x2="-86.36" y2="106.68" width="0.1524" layer="91"/>
 <pinref part="U10" gate="G$1" pin="H1"/>
 <wire x1="-88.9" y1="109.22" x2="-86.36" y2="109.22" width="0.1524" layer="91"/>
-<label x="-91.44" y="109.22" size="1.778" layer="95"/>
 <pinref part="U10" gate="G$1" pin="A1"/>
 <wire x1="-88.9" y1="106.68" x2="-88.9" y2="109.22" width="0.1524" layer="91"/>
 <wire x1="-88.9" y1="109.22" x2="-91.44" y2="109.22" width="0.1524" layer="91"/>
 <junction x="-88.9" y="109.22"/>
+<label x="-91.44" y="109.22" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
 <pinref part="U5" gate="G$1" pin="OUT"/>
@@ -15361,11 +15351,11 @@ Pins 4-6 are on interrupts for the electron.</text>
 <wire x1="-88.9" y1="78.74" x2="-86.36" y2="78.74" width="0.1524" layer="91"/>
 <pinref part="U7" gate="G$1" pin="H1"/>
 <wire x1="-88.9" y1="81.28" x2="-86.36" y2="81.28" width="0.1524" layer="91"/>
-<label x="-91.44" y="81.28" size="1.778" layer="95"/>
 <pinref part="U7" gate="G$1" pin="A1"/>
 <wire x1="-88.9" y1="78.74" x2="-88.9" y2="81.28" width="0.1524" layer="91"/>
 <wire x1="-88.9" y1="81.28" x2="-91.44" y2="81.28" width="0.1524" layer="91"/>
 <junction x="-88.9" y="81.28"/>
+<label x="-91.44" y="81.28" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
 <pinref part="U6" gate="G$1" pin="OUT"/>
