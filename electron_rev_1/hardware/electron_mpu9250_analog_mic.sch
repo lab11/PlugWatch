@@ -15914,11 +15914,45 @@ Pins 4-6 are on interrupts for the electron.</text>
 <text x="-22.86" y="35.56" size="1.778" layer="91">Add power cycle circuit</text>
 <text x="-10.16" y="124.46" size="1.778" layer="91">pick values</text>
 <text x="-10.16" y="127" size="1.778" layer="91">check inductor footprint</text>
-<text x="167.64" y="68.58" size="1.778" layer="91">this is labeled strangly... </text>
-<text x="167.64" y="66.04" size="1.778" layer="91">expose unused pins</text>
 <text x="38.1" y="68.58" size="1.778" layer="91">add to electron</text>
-<text x="91.44" y="83.82" size="1.778" layer="91">add to electron</text>
+<text x="87.122" y="85.09" size="1.778" layer="91">add to electron</text>
 <text x="-43.18" y="0" size="1.778" layer="91">add to electron</text>
+<text x="165.862" y="50.546" size="1.7018" layer="91">3v3
+reset
+VBAT
+gnd
+d7
+d6
+d5
+d4
+d3
+d2
+d1
+d0
+c5
+c4
+c3
+c2
+c1
+c0</text>
+<text x="113.792" y="94.996" size="1.7018" layer="91" rot="R180">vin
+gnd
+tx
+rx
+a7
+a6
+a5
+a4
+a3
+a2
+a1
+a0
+b5
+b4
+b3
+b2
+b1
+b0</text>
 </plain>
 <instances>
 <instance part="U$4" gate="G$1" x="116.84" y="71.12"/>
@@ -15986,9 +16020,9 @@ Pins 4-6 are on interrupts for the electron.</text>
 <instance part="2" gate="G$1" x="223.52" y="83.82"/>
 <instance part="GND14" gate="1" x="223.52" y="50.8"/>
 <instance part="R15" gate="G$1" x="223.52" y="71.12" rot="R90"/>
-<instance part="U4" gate="G$1" x="-78.74" y="15.24" smashed="yes" rot="MR0">
-<attribute name="NAME" x="-84.074" y="31.242" size="1.778" layer="95"/>
-<attribute name="VALUE" x="-87.884" y="-7.874" size="1.778" layer="96"/>
+<instance part="U4" gate="G$1" x="-81.28" y="15.24" smashed="yes" rot="MR0">
+<attribute name="NAME" x="-86.614" y="31.242" size="1.778" layer="95"/>
+<attribute name="VALUE" x="-90.424" y="-7.874" size="1.778" layer="96"/>
 </instance>
 <instance part="U10" gate="G$1" x="-73.66" y="106.68"/>
 <instance part="P+6" gate="VCC" x="-25.4" y="45.72" smashed="yes">
@@ -16125,18 +16159,18 @@ Pins 4-6 are on interrupts for the electron.</text>
 <wire x1="223.52" y1="53.34" x2="223.52" y2="66.04" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<wire x1="-71.12" y1="15.24" x2="-63.5" y2="15.24" width="0.1524" layer="91"/>
-<wire x1="-71.12" y1="-2.54" x2="-63.5" y2="-2.54" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="15.24" x2="-63.5" y2="15.24" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="-2.54" x2="-63.5" y2="-2.54" width="0.1524" layer="91"/>
 <wire x1="-63.5" y1="-2.54" x2="-63.5" y2="0" width="0.1524" layer="91"/>
 <wire x1="-63.5" y1="0" x2="-63.5" y2="2.54" width="0.1524" layer="91"/>
 <wire x1="-63.5" y1="2.54" x2="-63.5" y2="15.24" width="0.1524" layer="91"/>
-<wire x1="-71.12" y1="0" x2="-63.5" y2="0" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="0" x2="-63.5" y2="0" width="0.1524" layer="91"/>
 <junction x="-63.5" y="0"/>
 <pinref part="U4" gate="G$1" pin="GND"/>
 <pinref part="U4" gate="G$1" pin="SHIELD1"/>
 <pinref part="U4" gate="G$1" pin="SHIELD2"/>
 <pinref part="U4" gate="G$1" pin="CD2"/>
-<wire x1="-71.12" y1="2.54" x2="-63.5" y2="2.54" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="2.54" x2="-63.5" y2="2.54" width="0.1524" layer="91"/>
 <junction x="-63.5" y="2.54"/>
 <pinref part="GND19" gate="1" pin="GND"/>
 <wire x1="-63.5" y1="-7.62" x2="-63.5" y2="-2.54" width="0.1524" layer="91"/>
@@ -16229,13 +16263,6 @@ Pins 4-6 are on interrupts for the electron.</text>
 <label x="127" y="83.82" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="DAC" class="0">
-<segment>
-<pinref part="U$4" gate="G$1" pin="13"/>
-<wire x1="124.46" y1="81.28" x2="127" y2="81.28" width="0.1524" layer="91"/>
-<label x="127" y="81.28" size="1.27" layer="95" xref="yes"/>
-</segment>
-</net>
 <net name="MOSI" class="0">
 <segment>
 <pinref part="U$4" gate="G$1" pin="12"/>
@@ -16243,7 +16270,7 @@ Pins 4-6 are on interrupts for the electron.</text>
 <label x="127" y="78.74" size="1.27" layer="95" xref="yes"/>
 </segment>
 <segment>
-<wire x1="-71.12" y1="12.7" x2="-58.42" y2="12.7" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="12.7" x2="-58.42" y2="12.7" width="0.1524" layer="91"/>
 <pinref part="U4" gate="G$1" pin="DO"/>
 <pinref part="R20" gate="G$1" pin="1"/>
 <wire x1="-50.8" y1="7.62" x2="-58.42" y2="7.62" width="0.1524" layer="91"/>
@@ -16260,7 +16287,7 @@ Pins 4-6 are on interrupts for the electron.</text>
 <label x="127" y="76.2" size="1.27" layer="95" xref="yes"/>
 </segment>
 <segment>
-<wire x1="-71.12" y1="22.86" x2="-58.42" y2="22.86" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="22.86" x2="-58.42" y2="22.86" width="0.1524" layer="91"/>
 <pinref part="U4" gate="G$1" pin="DI"/>
 <label x="-58.42" y="22.86" size="1.27" layer="95" xref="yes"/>
 </segment>
@@ -16272,7 +16299,7 @@ Pins 4-6 are on interrupts for the electron.</text>
 <label x="127" y="73.66" size="1.27" layer="95" xref="yes"/>
 </segment>
 <segment>
-<wire x1="-71.12" y1="17.78" x2="-58.42" y2="17.78" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="17.78" x2="-58.42" y2="17.78" width="0.1524" layer="91"/>
 <pinref part="U4" gate="G$1" pin="SCK"/>
 <label x="-58.42" y="17.78" size="1.27" layer="95" xref="yes"/>
 </segment>
@@ -16385,10 +16412,11 @@ Pins 4-6 are on interrupts for the electron.</text>
 <segment>
 <pinref part="U4" gate="G$1" pin="CS"/>
 <pinref part="R19" gate="G$1" pin="1"/>
-<wire x1="-71.12" y1="25.4" x2="-35.56" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="25.4" x2="-35.56" y2="25.4" width="0.1524" layer="91"/>
 <wire x1="-35.56" y1="25.4" x2="-35.56" y2="27.94" width="0.1524" layer="91"/>
 <wire x1="-35.56" y1="25.4" x2="-33.02" y2="25.4" width="0.1524" layer="91"/>
 <label x="-33.02" y="25.4" size="1.27" layer="95" xref="yes"/>
+<junction x="-35.56" y="25.4"/>
 </segment>
 </net>
 <net name="MISO_2" class="0">
@@ -16486,7 +16514,7 @@ Pins 4-6 are on interrupts for the electron.</text>
 <junction x="124.46" y="12.7"/>
 </segment>
 <segment>
-<wire x1="-71.12" y1="20.32" x2="-50.8" y2="20.32" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="20.32" x2="-50.8" y2="20.32" width="0.1524" layer="91"/>
 <pinref part="U4" gate="G$1" pin="VCC"/>
 <pinref part="P+6" gate="VCC" pin="VCC"/>
 <wire x1="-50.8" y1="20.32" x2="-38.1" y2="20.32" width="0.1524" layer="91"/>
@@ -16788,7 +16816,7 @@ Pins 4-6 are on interrupts for the electron.</text>
 <net name="C_DET" class="0">
 <segment>
 <pinref part="U4" gate="G$1" pin="CD1"/>
-<wire x1="-71.12" y1="5.08" x2="-38.1" y2="5.08" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="5.08" x2="-38.1" y2="5.08" width="0.1524" layer="91"/>
 <label x="-35.56" y="5.08" size="1.27" layer="95" xref="yes"/>
 <pinref part="R18" gate="G$1" pin="1"/>
 <wire x1="-38.1" y1="5.08" x2="-35.56" y2="5.08" width="0.1524" layer="91"/>
@@ -16837,6 +16865,7 @@ Pins 4-6 are on interrupts for the electron.</text>
 <wire x1="91.44" y1="88.9" x2="91.44" y2="93.98" width="0.1524" layer="91"/>
 <wire x1="91.44" y1="88.9" x2="96.52" y2="88.9" width="0.1524" layer="91"/>
 <label x="96.52" y="88.9" size="1.27" layer="95" xref="yes"/>
+<junction x="91.44" y="88.9"/>
 </segment>
 </net>
 <net name="N$10" class="0">
@@ -16858,10 +16887,10 @@ Pins 4-6 are on interrupts for the electron.</text>
 <wire x1="45.72" y1="73.66" x2="48.26" y2="73.66" width="0.1524" layer="91"/>
 <label x="48.26" y="73.66" size="1.27" layer="95" xref="yes"/>
 </segment>
-</net>
-<net name="N$13" class="0">
 <segment>
-<wire x1="0" y1="0" x2="0" y2="-2.54" width="0.1524" layer="91"/>
+<pinref part="U$4" gate="G$1" pin="13"/>
+<wire x1="124.46" y1="81.28" x2="127" y2="81.28" width="0.1524" layer="91"/>
+<label x="127" y="81.28" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
 </nets>
