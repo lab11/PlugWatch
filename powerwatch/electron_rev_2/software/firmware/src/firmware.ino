@@ -38,41 +38,59 @@
  SYSTEM_MODE(MANUAL);
 
 
+//***********************************
+//* Watchdogs
+//***********************************
+ApplicationWatchdog wd(60000, System.reset); //built in... we don't write this...
 
+
+//***********************************
+//* Heartbeat
+//***********************************
+const int HEARTBEAT_MIN_FREQ = 1000 * 5;
+const int HEARTBEAT_MAX_FREQ = 1000 * 60 * 60;
+retained int heartbeat_frequency = 1000 * 60 * 15;
+retained int heartbeat_count = 0;
+Timer heartbeat_timer(heartbeat_frequency, heartbeat_callback);
+
+
+//***********************************
+//* SD Card & Logging
+//***********************************
 SDCard SD;
 auto ChargeStateLog = FileLog(SD, "charge_state_log.txt");
 auto CloudFunctionTestLog = FileLog(SD, "cloud_function_log.txt");
 auto ErrorLog = FileLog(SD, "error_log.txt");
 auto EventLog = FileLog(SD, "event_log.txt");
 auto FunctionLog = FileLog(SD, "function_log.txt");
+auto HeartbeatLog = FileLog(SD, "heartbeat_log.txt");
 auto SampleLog = FileLog(SD, "sample_log.txt");
 auto SubscriptionLog = FileLog(SD, "subscription_log.txt");
-auto WatchdogLog = FileLog(SD, "watchdog_log.txt");
 
- //GoogleMapsDeviceLocator locator;
+//GoogleMapsDeviceLocator locator;
 
- //***********************************
- //* Application State
- //***********************************
- void take_a_sample();
+//***********************************
+//* Application State
+//***********************************
+void take_a_sample();
 
- //Timer cloud variables
- retained int wd_frequency = 1000 * 60 * 15;
- retained int cs_poll_frequency = 100;
- retained int sample_frequency = 10;
- retained int sample_buff_size = 1000;
- #define ONE_DAY_MILLIS (24 * 60 * 60 * 1000)
- //Timers
- Timer charge_state_poll_timer(cs_poll_frequency, check_charge_state_change);
- Timer watch_dog_timer(wd_frequency, watch_dog);
- //Timer sample_poll_timer(sample_frequency, take_a_sample);
- ApplicationWatchdog wd(60000, System.reset); //built in... we don't write this...
+//Timer cloud variables
+retained int cs_poll_frequency = 100;
+retained int sample_frequency = 10;
+retained int sample_buff_size = 1000;
+#define ONE_DAY_MILLIS (24 * 60 * 60 * 1000)
+
+//Timers
+Timer charge_state_poll_timer(cs_poll_frequency, check_charge_state_change);
+//Timer sample_poll_timer(sample_frequency, take_a_sample);
+
+
  //Loop switches
  volatile bool META_SAMPLE_FLAG = false;
  volatile bool RESET_FLAG = false;
  volatile bool SAMPLE_FLAG = false;
  volatile bool CHARGE_STATE_FLAG = false;
- volatile bool WD_FLAG = false;
+ volatile bool HEARBEAT_FLAG = false;
  volatile bool CLOUD_FUNCTION_TEST_FLAG = false;
  volatile bool SD_READ_FLAG = false;
  String SD_LOG_NAME = "";
@@ -99,7 +117,6 @@ auto WatchdogLog = FileLog(SD, "watchdog_log.txt");
  //publish wrapper types
  String SYSTEM_EVENT = "s";
  String SUBSCRIPTION_EVENT = "r";
- String WATCH_DOG_EVENT = "w";
  String CHARGE_STATE_EVENT = "c";
  String META_DATA_EVENT = "m";
  String TIME_SYNC_EVENT = "t";
@@ -126,7 +143,6 @@ auto WatchdogLog = FileLog(SD, "watchdog_log.txt");
  String imu_self_test_str;
  String imu_last_sample; //TODO
 
- retained int wd_cnt = 0;
  bool last_charge_state = false;
 
  String sample_buffer;
@@ -146,12 +162,23 @@ void init_sample_buffer() {
 }
 
 //TODO testing
-int set_wd_frequency(String frequency) { //cloudfunction
-    wd_frequency = frequency.toInt(); //TODO catch error
-    watch_dog_timer.changePeriod(wd_frequency);
-    watch_dog_timer.reset();
-    FunctionLog.append("set_wd_frequency");
-    return 0;
+int CLOUD_set_heartbeat_frequency(String frequency) { //cloudfunction
+  errno = 0;
+  heartbeat_frequency = strtol(frequency.c_str(), NULL, 10);
+  if (
+    (errno != 0) ||
+    (heartbeat_frequency < HEARTBEAT_MIN_FREQ) ||
+    (heartbeat_frequency > HEARTBEAT_MAX_FREQ)
+  ) {
+    FunctionLog.append("Error updating heartbeat frequency. Got: " + frequency);
+    return -1;
+  }
+
+  //heartbeat_timer.changePeriod(heartbeat_frequency);
+  //heartbeat_timer.reset();
+
+  FunctionLog.append("Set heartbeat frequency to " + String(heartbeat_frequency));
+  return 0;
 }
 
 //TODO testing
@@ -244,10 +271,10 @@ void check_charge_state_change() {
   }
 }
 //Watch dog
-void watch_dog() { //TODO write log
-  Serial.println("Watchdog! Count: " + String(wd_cnt));
-  wd_cnt = wd_cnt + 1;
-  WD_FLAG = true;
+void heartbeat_callback() {
+  Serial.println("Heartbeat! Count: " + String(heartbeat_count));
+  heartbeat_count++;
+  HEARBEAT_FLAG = true;
 }
 //Subscription
 void handle_particle_event(const char *event, const char *data)
@@ -434,17 +461,17 @@ void publish_wrapper(String tag, String message) {
   cloud_publish_cnt = cloud_publish_cnt + 1;
 }
 
-  void start_sample() {
-      Serial.println("starting sample");
-      sample_cnt = 0;
-      SAMPLE_FLAG = true;
-      //sample_poll_timer.start();
-  }
+void start_sample() {
+  Serial.println("starting sample");
+  sample_cnt = 0;
+  SAMPLE_FLAG = true;
+  //sample_poll_timer.start();
+}
 
-  void take_a_sample() {
-      Serial.println("sample");
-      imu_loop();
-  }
+void take_a_sample() {
+  Serial.println("sample");
+  imu_loop();
+}
 
 void volDmp() {
     /*
@@ -499,17 +526,17 @@ void volDmp() {
    Particle.variable("d", system_event_cnt);
    Particle.variable("e", last_system_event_time);
    Particle.variable("f", last_system_event_type);
-   Particle.variable("g", wd_frequency);
+   Particle.variable("g", heartbeat_frequency);
    Particle.variable("h", sample_frequency);
    Particle.variable("i", imu_self_test_str);
-   Particle.variable("j", wd_cnt);
+   Particle.variable("j", heartbeat_count);
    Particle.variable("k", cs_poll_frequency);
    Particle.variable("l", num_reboots);
    Particle.variable("v", String(System.version().c_str()));
 
    Particle.function("meta",get_meta_data);
    Particle.function("reboot",cloud_reboot);
-   Particle.function("wd_freq",set_wd_frequency);
+   Particle.function("hb_freq",CLOUD_set_heartbeat_frequency);
    Particle.function("cs_freq",set_cs_poll_frequency);
    Particle.function("samp_freq",set_sample_poll_frequency);
    Particle.function("samp_buff",set_sample_buff);
@@ -524,7 +551,7 @@ void volDmp() {
    Particle.subscribe("pm_e_bus", handle_particle_event, MY_DEVICES);
 
    imu_self_test_str = self_test_imu();
-   watch_dog_timer.start();
+   heartbeat_timer.start();
    charge_state_poll_timer.start();
 
    init_sample_buffer();
@@ -581,12 +608,13 @@ void loop() {
   }
 
 
-  if (WD_FLAG) {
-    Serial.println("wd flag");
-    WD_FLAG = false;
+  if (HEARBEAT_FLAG) {
+    Serial.println("heartbeat flag");
+    HEARBEAT_FLAG = false;
+
     String meta = do_meta_data();
-    publish_wrapper(WATCH_DOG_EVENT,String(wd_cnt)+String("|")+String(meta));
-    WatchdogLog.append(String(wd_cnt)+String("|")+String(meta));
+    HeartbeatLog.append(String(heartbeat_count)+String("|")+String(meta));
+    publish_wrapper(HEARTBEAT_EVENT,String(heartbeat_count)+String("|")+String(meta));
   }
 
   if (CLOUD_FUNCTION_TEST_FLAG) {
