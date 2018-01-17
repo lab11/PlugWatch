@@ -16,26 +16,32 @@
 #include "SDCard.h"
 
 
- //***********************************
- //* TODO's
- //***********************************
- //WD
- //Charge state interrupts
- //System state logging
- //Ack routine
- //IMU readings on charge state
- //SD interrupts
+//***********************************
+//* TODO's
+//***********************************
+//WD
+//Charge state interrupts
+//System state logging
+//Ack routine
+//IMU readings on charge state
+//SD interrupts
 
- //***********************************
- //* Critical System Config
- //***********************************
- PRODUCT_ID(4861);
- PRODUCT_VERSION(6);
- STARTUP(System.enableFeature(FEATURE_RESET_INFO));
- STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
- //ArduinoOutStream cout(Serial);
- STARTUP(cellular_credentials_set("http://mtnplay.com.gh", "", "", NULL));
- SYSTEM_MODE(MANUAL);
+//***********************************
+//* Critical System Config
+//***********************************
+PRODUCT_ID(4861);
+PRODUCT_VERSION(6);
+STARTUP(System.enableFeature(FEATURE_RESET_INFO));
+STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
+//ArduinoOutStream cout(Serial);
+STARTUP(cellular_credentials_set("http://mtnplay.com.gh", "", "", NULL));
+SYSTEM_MODE(MANUAL);
+
+//**********************************
+//* Pin Configuration
+//**********************************
+int debug_led_1 = C0;
+int debug_led_2 = B0;
 
 
 //***********************************
@@ -52,7 +58,13 @@ const int HEARTBEAT_MAX_FREQ = 1000 * 60 * 60;
 retained int heartbeat_frequency = 1000 * 60 * 15;
 retained int heartbeat_count = 0;
 Timer heartbeat_timer(heartbeat_frequency, heartbeat_callback);
+bool HEARTBEAT_FLAG = false;
 
+void heartbeat_callback() {
+  Serial.println("Heartbeat! Count: " + String(heartbeat_count));
+  heartbeat_count++;
+  HEARTBEAT_FLAG = true;
+}
 
 //***********************************
 //* SD Card & Logging
@@ -69,45 +81,69 @@ auto SubscriptionLog = FileLog(SD, "subscription_log.txt");
 
 //GoogleMapsDeviceLocator locator;
 
+
+//***********************************
+//* Charge state
+//***********************************
+const int CHARGE_STATE_MIN_FREQ = 10;
+const int CHARGE_STATE_MAX_FREQ = 1000 * 60 * 60;
+retained int charge_state_poll_frequency = 100;
+Timer charge_state_poll_timer(charge_state_poll_frequency, charge_state_timer_callback);
+
+PowerCheck powerCheck;
+bool CHARGE_STATE_FLAG = false;
+String CHARGE_STATE_MSG = "";
+const String CHARGE_STATE_BATTERY = "b";
+const String CHARGE_STATE_WALL = "w";
+
+void charge_state_timer_callback() {
+  static bool last_charge_state = false;
+  bool charge_state = powerCheck.getIsCharging();
+
+  if (charge_state == true) {
+    digitalWrite(debug_led_2, LOW);
+    CHARGE_STATE_MSG = CHARGE_STATE_WALL;
+  } else {
+    digitalWrite(debug_led_2, HIGH);
+    CHARGE_STATE_MSG = CHARGE_STATE_BATTERY;
+  }
+
+  if (charge_state != last_charge_state) {
+    ChargeStateLog.append("Charge state change to " + String(charge_state));
+    CHARGE_STATE_FLAG = true;
+    last_charge_state = charge_state;
+  }
+}
+
+
 //***********************************
 //* Application State
 //***********************************
 void take_a_sample();
 
 //Timer cloud variables
-retained int cs_poll_frequency = 100;
 retained int sample_frequency = 10;
 retained int sample_buff_size = 1000;
 #define ONE_DAY_MILLIS (24 * 60 * 60 * 1000)
 
 //Timers
-Timer charge_state_poll_timer(cs_poll_frequency, check_charge_state_change);
 //Timer sample_poll_timer(sample_frequency, take_a_sample);
 
 
- //Loop switches
- volatile bool META_SAMPLE_FLAG = false;
- volatile bool RESET_FLAG = false;
- volatile bool SAMPLE_FLAG = false;
- volatile bool CHARGE_STATE_FLAG = false;
- volatile bool HEARBEAT_FLAG = false;
- volatile bool CLOUD_FUNCTION_TEST_FLAG = false;
- volatile bool SD_READ_FLAG = false;
+//Loop switches
+bool META_SAMPLE_FLAG = false;
+bool RESET_FLAG = false;
+bool SAMPLE_FLAG = false;
+bool CLOUD_FUNCTION_TEST_FLAG = false;
+bool SD_READ_FLAG = false;
+
  String SD_LOG_NAME = "";
  //Soft timers
  unsigned long lastSync = millis();
- //GPIOS
- int debug_led_1 = C0;
- int debug_led_2 = B0;
- //DEFINES
- String BATTERY = "b";
- String WALL = "w";
- String CHARGE_STATE_MSG = "";
  //***********************************
  //* Peripherals
  //***********************************
  MPU9250 myIMU; //TODO add a constant sample buffer... save last 1000 samples plus next 1000 samples on charge state change
- PowerCheck powerCheck;
 
 
  //***********************************
@@ -142,8 +178,6 @@ Timer charge_state_poll_timer(cs_poll_frequency, check_charge_state_change);
  // imu
  String imu_self_test_str;
  String imu_last_sample; //TODO
-
- bool last_charge_state = false;
 
  String sample_buffer;
  retained int sample_cnt;
@@ -182,11 +216,11 @@ int CLOUD_set_heartbeat_frequency(String frequency) { //cloudfunction
 }
 
 //TODO testing
-int set_cs_poll_frequency(String frequency){ //cloudfunction
-    cs_poll_frequency = frequency.toInt(); //TODO catch error
-    charge_state_poll_timer.changePeriod(cs_poll_frequency);
+int set_charge_state_poll_frequency(String frequency){ //cloudfunction
+    charge_state_poll_frequency = frequency.toInt(); //TODO catch error
+    charge_state_poll_timer.changePeriod(charge_state_poll_frequency);
     charge_state_poll_timer.reset();
-    FunctionLog.append("set_cs_poll_frequency");
+    FunctionLog.append("set_charge_state_poll_frequency");
     return 0;
 }
 
@@ -251,31 +285,8 @@ int sample_test(String msg) //cloudfunction
 //***********************************
 //* Sensors
 //***********************************
-//Charge state
-void check_charge_state_change() {
-  bool charge_state = powerCheck.getIsCharging();
-  if (charge_state == true) {
-    digitalWrite(debug_led_2, LOW);
-  } else {
-    digitalWrite(debug_led_2, HIGH);
-  }
-  CHARGE_STATE_MSG = BATTERY;
-  if (charge_state != last_charge_state) {
-    if (charge_state) {
-      CHARGE_STATE_MSG = WALL;
-    }
-    start_sample();
-    CHARGE_STATE_FLAG = true;
-    last_charge_state = charge_state;
-    Serial.println("charge state change");
-  }
-}
-//Watch dog
-void heartbeat_callback() {
-  Serial.println("Heartbeat! Count: " + String(heartbeat_count));
-  heartbeat_count++;
-  HEARBEAT_FLAG = true;
-}
+
+
 //Subscription
 void handle_particle_event(const char *event, const char *data)
 {
@@ -530,14 +541,14 @@ void volDmp() {
    Particle.variable("h", sample_frequency);
    Particle.variable("i", imu_self_test_str);
    Particle.variable("j", heartbeat_count);
-   Particle.variable("k", cs_poll_frequency);
+   Particle.variable("k", charge_state_poll_frequency);
    Particle.variable("l", num_reboots);
    Particle.variable("v", String(System.version().c_str()));
 
    Particle.function("meta",get_meta_data);
    Particle.function("reboot",cloud_reboot);
    Particle.function("hb_freq",CLOUD_set_heartbeat_frequency);
-   Particle.function("cs_freq",set_cs_poll_frequency);
+   Particle.function("cs_freq",set_charge_state_poll_frequency);
    Particle.function("samp_freq",set_sample_poll_frequency);
    Particle.function("samp_buff",set_sample_buff);
    Particle.function("sd_reboot",cloud_function_sd_power_cycle);
@@ -608,9 +619,9 @@ void loop() {
   }
 
 
-  if (HEARBEAT_FLAG) {
+  if (HEARTBEAT_FLAG) {
     Serial.println("heartbeat flag");
-    HEARBEAT_FLAG = false;
+    HEARTBEAT_FLAG = false;
 
     String meta = do_meta_data();
     HeartbeatLog.append(String(heartbeat_count)+String("|")+String(meta));
