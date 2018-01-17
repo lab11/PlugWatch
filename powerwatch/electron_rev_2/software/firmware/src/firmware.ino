@@ -174,8 +174,8 @@ int CLOUD_set_heartbeat_frequency(String frequency) { //cloudfunction
     return -1;
   }
 
-  //heartbeat_timer.changePeriod(heartbeat_frequency);
-  //heartbeat_timer.reset();
+  heartbeat_timer.changePeriod(heartbeat_frequency);
+  heartbeat_timer.reset();
 
   FunctionLog.append("Set heartbeat frequency to " + String(heartbeat_frequency));
   return 0;
