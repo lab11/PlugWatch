@@ -1,18 +1,20 @@
-// This #include statement was automatically added by the Particle IDE.
-#include "CellularHelper.h"
-#include "google-maps-device-locator.h"
-#include <Particle.h>
-#include "MPU9250.h"
-#include "quaternionFilters.h"
-#include <SdFat.h>
-#include "PowerCheck.h"
-
 /*
- * Project sensor_board_v1
- * Description: Deployed in Ghana
- * Author: Noah Klugman
- * Date: Nov 12th, 2017
+ * Project sensor_board_v2
+ * Description: For Q2 2018 Deployment in Ghana
+ * Author: Noah Klugman; Pat Pannuto
  */
+
+#include <CellularHelper.h>
+#include <google-maps-device-locator.h>
+#include <Particle.h>
+#include <MPU9250.h>
+#include <quaternionFilters.h>
+
+#include "Cloud.h"
+#include "FileLog.h"
+#include "PowerCheck.h"
+#include "SDCard.h"
+
 
  //***********************************
  //* TODO's
@@ -36,9 +38,18 @@
  SYSTEM_MODE(MANUAL);
 
 
- //TODO write more SD logging stuffs
- 
- //GoogleMapsDeviceLocator locator; 
+
+SDCard SD;
+auto ChargeStateLog = FileLog(SD, "charge_state_log.txt");
+auto CloudFunctionTestLog = FileLog(SD, "cloud_function_log.txt");
+auto ErrorLog = FileLog(SD, "error_log.txt");
+auto EventLog = FileLog(SD, "event_log.txt");
+auto FunctionLog = FileLog(SD, "function_log.txt");
+auto SampleLog = FileLog(SD, "sample_log.txt");
+auto SubscriptionLog = FileLog(SD, "subscription_log.txt");
+auto WatchdogLog = FileLog(SD, "watchdog_log.txt");
+
+ //GoogleMapsDeviceLocator locator;
 
  //***********************************
  //* Application State
@@ -68,8 +79,6 @@
  //Soft timers
  unsigned long lastSync = millis();
  //GPIOS
- int sd_int_pin = D6;
- int sd_enable_pin = A6;
  int debug_led_1 = C0;
  int debug_led_2 = B0;
  //DEFINES
@@ -81,12 +90,12 @@
  //***********************************
  MPU9250 myIMU; //TODO add a constant sample buffer... save last 1000 samples plus next 1000 samples on charge state change
  PowerCheck powerCheck;
- SdFatSoftSpi<A5, A4, A3> sd; //TODO handle errors
- const uint8_t chipSelect = A2;
+
 
  //***********************************
  //* Cloud Publish
  //***********************************
+
  //publish wrapper types
  String SYSTEM_EVENT = "s";
  String SUBSCRIPTION_EVENT = "r";
@@ -95,43 +104,10 @@
  String META_DATA_EVENT = "m";
  String TIME_SYNC_EVENT = "t";
  String ERROR_EVENT = "e";
- String SD_ERROR_EVENT = "f";
  String CLOUD_FUNCTION_TEST_EVENT = "g";
- String SD_READ_EVENT = "l";
 
- void publish_wrapper(String tag, String message);
 
- //***********************************
- //* SD Log Instance Variables / Functions
- //***********************************
- File event_log; //all system events and interrupt catches
- String event_log_filename = "event_log.txt";
- File error_log; //all program created errors
- String error_log_filename = "error_log.txt";
- File subscription_log; //all events rx by a subscription
- String charge_state_log_filename = "charge_state_log.txt";
- File charge_state_log; //all events rx by a subscription
- String subscription_log_filename = "subscription_log.txt";
- File publish_log; //all publish attempts, their data, and their results
- String publish_log_filename = "publish_log.txt";
- File wd_log; //all wd wakeup times
- String wd_log_filename = "wd_log.txt";
- File function_log; //all cloud function accesses, the passed parameters
- String function_log_filename = "function_log.txt";
- File cloud_function_test_log; // testing function
- String cloud_function_test_log_filename = "cloud_function_log.txt";
- File sample_log; // testing function
- String sample_log_filename = "sample_log.txt";
- void touch_function_log(String func_name);
- void touch_wd_log(String cnt);
- void touch_event_log(String event_str);
- void touch_publish_log(String publish_str);
- void touch_subscription_log(String subscription_str);
- void touch_error_log(String error_str);
- void touch_sample_log(String error_str);
- void touch_cloud_function_test_log(String error_str);
- void sd_write(File file_to_write, String filename, String to_write); //main helper function //TODO handle erros
- void start_sample();
+
  //***********************************
  //* Cloud Variables
  //***********************************
@@ -174,7 +150,7 @@ int set_wd_frequency(String frequency) { //cloudfunction
     wd_frequency = frequency.toInt(); //TODO catch error
     watch_dog_timer.changePeriod(wd_frequency);
     watch_dog_timer.reset();
-    touch_function_log("set_wd_frequency");
+    FunctionLog.append("set_wd_frequency");
     return 0;
 }
 
@@ -183,7 +159,7 @@ int set_cs_poll_frequency(String frequency){ //cloudfunction
     cs_poll_frequency = frequency.toInt(); //TODO catch error
     charge_state_poll_timer.changePeriod(cs_poll_frequency);
     charge_state_poll_timer.reset();
-    touch_function_log("set_cs_poll_frequency");
+    FunctionLog.append("set_cs_poll_frequency");
     return 0;
 }
 
@@ -192,7 +168,7 @@ int set_sample_poll_frequency(String frequency) { //cloudfunction
     sample_frequency = frequency.toInt(); //TODO catch error
     //sample_poll_timer.changePeriod(sample_frequency);
     //sample_poll_timer.reset();
-    touch_function_log("set_sample_poll_frequency");
+    FunctionLog.append("set_sample_poll_frequency");
     //TODO restart timer
     return 0;
 }
@@ -201,31 +177,27 @@ int set_sample_poll_frequency(String frequency) { //cloudfunction
 int set_sample_buff(String frequency) { //cloudfunction
     sample_buff_size = frequency.toInt(); //TODO catch error
     init_sample_buffer();
-    touch_function_log("set_sample_buff");
+    FunctionLog.append("set_sample_buff");
     return 0;
 }
 
 //TODO testing
 int cloud_reboot(String ack) { //cloudfunction
   RESET_FLAG = true;
-  touch_function_log("cloud_reboot");
+  FunctionLog.append("cloud_reboot");
   return ack.toInt();
 }
 
 int get_meta_data(String msg) { //cloudfunction
   META_SAMPLE_FLAG = true;
-  touch_function_log("get_meta_data");
+  FunctionLog.append("get_meta_data");
   return 0;
 }
 
-int sd_power_cycle(String msg) //cloudfunction
- {
-   digitalWrite(sd_enable_pin, HIGH);
-   delay(1000);
-   digitalWrite(sd_enable_pin, LOW);
-   delay(1000);
-   return 1;
- }
+int cloud_function_sd_power_cycle(String _unused_msg) {
+  SD.PowerCycle();
+  return 0;
+}
 
  int get_soc(String c) { //cloudfunction
      return (int)(FuelGauge().getSoC());
@@ -238,63 +210,15 @@ int sd_power_cycle(String msg) //cloudfunction
  int cloud_function_test(String msg) //cloudfunction
  {
    CLOUD_FUNCTION_TEST_FLAG = true;
-   touch_cloud_function_test_log(msg);
+   CloudFunctionTestLog.append(msg);
    return 1;
  }
- 
- int sample_test(String msg) //cloudfunction
- {
-     start_sample();
-     return 1;
- }
 
-//***********************************
-//* SD LOG HELPERS
-//***********************************
-//TODO testing
-void touch_function_log(String func_name) {
-  sd_write(function_log, function_log_filename, func_name);
-}
-
-//TODO testing
-void touch_wd_log(String cnt) {
-  sd_write(wd_log, wd_log_filename, cnt);
-}
-
-//TODO testing
-void touch_event_log(String sys_event) {
-  sd_write(event_log, event_log_filename, sys_event);
-}
-
-//TODO testing
-void touch_publish_log(String publish_str) {
-  sd_write(publish_log, publish_log_filename, publish_str);
-}
-
-//TODO testing
-void touch_subscription_log(String subscription_str) {
-  sd_write(subscription_log, subscription_log_filename, subscription_str);
-}
-
-//TODO testing
-void touch_error_log(String error_str) {
-  sd_write(error_log, error_log_filename, error_str);
-}
-
-//TODO testing
-void touch_charge_state_log(String msg) {
-  sd_write(charge_state_log, charge_state_log_filename, msg);
-}
-
-
-void touch_cloud_function_test_log(String msg) {
-  sd_write(cloud_function_test_log, cloud_function_test_log_filename, msg);
-}
-
-void touch_sample_log(String msg) {
-  sd_write(sample_log, sample_log_filename, msg);
-  sample_buffer = "";
-
+void start_sample();
+int sample_test(String msg) //cloudfunction
+{
+  start_sample();
+  return 1;
 }
 
 //***********************************
@@ -321,7 +245,7 @@ void check_charge_state_change() {
 }
 //Watch dog
 void watch_dog() { //TODO write log
-  Serial.println(String(wd_cnt));
+  Serial.println("Watchdog! Count: " + String(wd_cnt));
   wd_cnt = wd_cnt + 1;
   WD_FLAG = true;
 }
@@ -332,7 +256,7 @@ void handle_particle_event(const char *event, const char *data)
   msg = msg + String("|") + String(event) + String("|") + String(data);
   subscribe_cnt = subscribe_cnt + 1;
   String log_str = String(subscribe_cnt) + String("|");
-  touch_subscription_log(log_str);
+  SubscriptionLog.append(log_str);
   publish_wrapper(SUBSCRIPTION_EVENT, msg);
 }
 //System Events
@@ -344,7 +268,7 @@ void handle_all_system_events(system_event_t event, int param) {
   last_system_event_time = time_str;
   last_system_event_type = param;
   publish_wrapper(SYSTEM_EVENT, system_event_str);
-  touch_event_log(system_event_str);
+  EventLog.append(system_event_str);
 }
 //Meta Data
 String do_meta_data() {
@@ -403,7 +327,7 @@ String self_test_imu() {
    else {
      Serial.print("Could not connect to MPU9250: 0x");
      Serial.println(c, HEX);
-     touch_error_log("Could not connect to MPU9250");
+     ErrorLog.append("Could not connect to MPU9250");
      publish_wrapper(ERROR_EVENT, "Could not connect to MPU9250");
      //TODO send an error message out
    }
@@ -509,54 +433,6 @@ void publish_wrapper(String tag, String message) {
   //TODO write to publish log
   cloud_publish_cnt = cloud_publish_cnt + 1;
 }
-//SD Card
-void sd_write(File file_to_write_2, String filename, String to_write) {
-    if (!sd.begin(chipSelect, SPI_HALF_SPEED)) {
-      Serial.println("CAN'T OPEN SD");
-      publish_wrapper(SD_ERROR_EVENT, "init");
-    }
-    File file_to_write;
-    String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
-    String final_to_write = time_str + String("|") + to_write;
-    if (!file_to_write.open(filename, O_RDWR | O_CREAT | O_APPEND)) {
-       //sd.errorHalt("opening for write failed");
-       Serial.println(String("opening ") + String(filename) + String(" for write failed"));
-       publish_wrapper(SD_ERROR_EVENT, String(filename) + String(" write"));
-       return;
-    }
-    file_to_write.println(final_to_write);
-    file_to_write.close();
-    Serial.println(String("wrote : ") + String(filename) + String(":") + to_write);
-  }
-
-  String sd_read(String filename) {
-    File myFile;
-    if (!myFile.open(filename, O_READ)) {
-      //sd.errorHalt(String("opening ") + String(filename) + String(" for read failed"));
-      Serial.println(String("opening ") + String(filename) + String(" for read failed"));
-      publish_wrapper(SD_ERROR_EVENT, String(filename) + String(" read"));
-      return "string err";
-    }
-    Serial.println(String(filename) + String(" content:"));
-    String res = "";
-    res += String(myFile.fileSize());
-    res += "\n";
-    while (myFile.available()) {
-      char cur = myFile.read();
-      res += String(cur);
-      Serial.write(cur);
-    }
-    /*
-    int data;
-    while ((data = myFile.read()) >= 0) {
-      Serial.write(data);
-      res += String(data);
-    }
-    Serial.println(res);
-    */
-    myFile.close();
-    return res;
-  }
 
   void start_sample() {
       Serial.println("starting sample");
@@ -594,13 +470,15 @@ void volDmp() {
   //***********************************
  void setup() {
    Serial.begin(9600);
+   Serial.println("Initial Setup.");
+
    Wire.begin();
    System.on(all_events, handle_all_system_events);
 
    num_reboots = num_reboots + 1;
    powerCheck.setup();
    FuelGauge().quickStart();
-   
+
    //cout << uppercase << showbase << endl;
 
 
@@ -610,7 +488,8 @@ void volDmp() {
    }
    */
 
-   pinMode(sd_enable_pin, OUTPUT);
+   SD.setup();
+
    pinMode(debug_led_1, OUTPUT);
    pinMode(debug_led_2, OUTPUT);
 
@@ -634,7 +513,7 @@ void volDmp() {
    Particle.function("cs_freq",set_cs_poll_frequency);
    Particle.function("samp_freq",set_sample_poll_frequency);
    Particle.function("samp_buff",set_sample_buff);
-   Particle.function("sd_reboot",sd_power_cycle);
+   Particle.function("sd_reboot",cloud_function_sd_power_cycle);
    Particle.function("soc",get_soc);
    Particle.function("battv",get_battv);
    Particle.function("debug_sd", debug_sd);
@@ -653,18 +532,15 @@ void volDmp() {
    LEDStatus status;
    status.off();
    Particle.connect();
-   
-   //volDmp();
- }
 
-bool state = false;
-bool state2 = false;
+   //volDmp();
+   Serial.println("Setup complete.");
+ }
 
 unsigned long lastCheck = 0;
 char lastStatus[256];
 
 void loop() {
-
 
   //Reboot the system
   if (RESET_FLAG) {
@@ -686,7 +562,7 @@ void loop() {
     CHARGE_STATE_FLAG = false;
     String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell()) + String("|") + String(powerCheck.getIsCharging());
     publish_wrapper(CHARGE_STATE_EVENT, CHARGE_STATE_MSG + String("|") + power_stats);
-    touch_charge_state_log(power_stats);
+    ChargeStateLog.append(power_stats);
   }
 
   if (SAMPLE_FLAG) {
@@ -695,7 +571,8 @@ void loop() {
         SAMPLE_FLAG = false;
         Serial.println("ending sample");
         Serial.println(sample_buffer);
-        touch_sample_log(sample_buffer);
+        SampleLog.append(sample_buffer);
+        sample_buffer = "";
     } else {
         sample_cnt += 1;
         String res = imu_loop();
@@ -705,26 +582,24 @@ void loop() {
 
 
   if (WD_FLAG) {
-    //Serial.println("wd");
-    state = !state;
+    Serial.println("wd flag");
     WD_FLAG = false;
     String meta = do_meta_data();
     publish_wrapper(WATCH_DOG_EVENT,String(wd_cnt)+String("|")+String(meta));
-    touch_wd_log(String(wd_cnt)+String("|")+String(meta));
+    WatchdogLog.append(String(wd_cnt)+String("|")+String(meta));
   }
-  
+
   if (CLOUD_FUNCTION_TEST_FLAG) {
-      Serial.println("cloud function test");
-      state2 = !state2;
-      CLOUD_FUNCTION_TEST_FLAG = false;
-      String meta = do_meta_data();
-      publish_wrapper(CLOUD_FUNCTION_TEST_EVENT,String(meta));
+    Serial.println("cloud function test");
+    CLOUD_FUNCTION_TEST_FLAG = false;
+    String meta = do_meta_data();
+    publish_wrapper(CLOUD_FUNCTION_TEST_EVENT,String(meta));
   }
-  
+
   if (SD_READ_FLAG) {
     Serial.println("sd read flag");
     SD_READ_FLAG = false;
-    String sd_res = sd_read(SD_LOG_NAME);
+    String sd_res = SD.Read(SD_LOG_NAME);
     publish_wrapper(SD_READ_EVENT,sd_res);
   }
 
@@ -734,7 +609,7 @@ void loop() {
     Particle.syncTime();
     lastSync = millis();
     publish_wrapper(TIME_SYNC_EVENT, "");
-    touch_event_log("time_sync");
+    EventLog.append("time_sync");
   }
 
 
