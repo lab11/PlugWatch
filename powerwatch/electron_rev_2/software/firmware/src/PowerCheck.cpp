@@ -1,13 +1,6 @@
 #include "PowerCheck.h"
 #include "Particle.h"
 
-
-PowerCheck::PowerCheck() {
-}
-
-PowerCheck::~PowerCheck() {
-}
-
 void PowerCheck::setup() {
 	// This can't be part of the constructor because it's initialized too early.
 	// Call this from setup() instead.
