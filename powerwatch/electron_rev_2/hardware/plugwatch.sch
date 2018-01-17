@@ -3415,50 +3415,80 @@ https://www.digikey.com/en/ptm/c/cui-inc/electret-condenser-microphones?pn_sku=1
 <part name="FRAME3" library="lab11-frames" deviceset="LETTER_L_BLANK" device=""/>
 <part name="FRAME4" library="lab11-frames" deviceset="LETTER_L_BLANK" device=""/>
 <part name="A1" library="electron" deviceset="ELECTRON" device=""/>
-<part name="T1" library="zetex" library_urn="urn:adsk.eagle:library:418" deviceset="PMOSSOT23" device="" package3d_urn="urn:adsk.eagle:package:30981/1" value="DMG3415"/>
-<part name="R1" library="passives" deviceset="RESISTOR" device="0402_RES" value="1K"/>
-<part name="C4" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.1uF"/>
-<part name="C9" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10uF"/>
+<part name="T1" library="zetex" library_urn="urn:adsk.eagle:library:418" deviceset="PMOSSOT23" device="" package3d_urn="urn:adsk.eagle:package:30981/1" value="DMG3415">
+<attribute name="DIGIKEY" value="DMG3415UDICT-ND"/>
+</part>
+<part name="R1" library="passives" deviceset="RESISTOR" device="0402_RES" value="1K">
+<attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND"/>
+</part>
+<part name="C4" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="100nF">
+<attribute name="DIGIKEY" value="490-10777-1-ND"/>
+</part>
+<part name="C9" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10uF">
+<attribute name="DIGIKEY" value="490-8316-1-ND"/>
+</part>
 <part name="U1" library="u-blox" library_urn="urn:adsk.eagle:library:406" deviceset="MAX-M8" device=""/>
 <part name="U$1" library="microbuilder" deviceset="GND" device=""/>
 <part name="U$2" library="microbuilder" deviceset="GND" device=""/>
 <part name="U$9" library="microbuilder" deviceset="GND" device=""/>
 <part name="A2" library="antenna" deviceset="GPS-ANTENNA" device=""/>
-<part name="R3" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K"/>
+<part name="R3" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K">
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
+</part>
 <part name="U$27" library="microbuilder" deviceset="GND" device=""/>
 <part name="U$28" library="microbuilder" deviceset="GND" device=""/>
 <part name="Q1" library="SparkFun-DiscreteSemi" deviceset="TRANSISTOR_NPN" device="MPSA42" value="MPSA42"/>
-<part name="R2" library="passives" deviceset="RESISTOR" device="0402_RES" value="1K"/>
+<part name="R2" library="passives" deviceset="RESISTOR" device="0402_RES" value="1K">
+<attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND"/>
+</part>
 <part name="U5" library="Particle" deviceset="FILTERS" device="" value="SAFFB1G56KB0F0A"/>
-<part name="U6" library="Particle" deviceset="BGA725L6" device="-ALT"/>
+<part name="U6" library="Particle" deviceset="BGA725L6" device="-ALT">
+<attribute name="DIGIKEY" value="BGA725L6E6327FTSA1CT-ND"/>
+</part>
 <part name="U$4" library="microbuilder" deviceset="GND" device=""/>
 <part name="U$29" library="microbuilder" deviceset="GND" device=""/>
 <part name="L1" library="passives" deviceset="INDUCTOR" device="0402" value="5.6nH"/>
-<part name="C5" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10nF"/>
+<part name="C5" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10nF">
+<attribute name="DIGIKEY" value="490-7763-1-ND"/>
+</part>
 <part name="U$34" library="microbuilder" deviceset="GND" device=""/>
-<part name="C11" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10nF"/>
+<part name="C11" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10nF">
+<attribute name="DIGIKEY" value="490-7763-1-ND"/>
+</part>
 <part name="D1" library="leds" deviceset="LED" device="0603"/>
 <part name="L2" library="passives" deviceset="FERRITE_BEAD" device="0402"/>
 <part name="L3" library="passives" deviceset="FERRITE_BEAD" device="0402"/>
 <part name="U$3" library="chips" deviceset="SIP32510" device=""/>
-<part name="R4" library="passives" deviceset="RESISTOR" device="0402_RES" value="1M"/>
+<part name="R4" library="passives" deviceset="RESISTOR" device="0402_RES" value="1M">
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
+</part>
 <part name="U2" library="SparkFun" deviceset="USD-SOCKET" device="SMD" value="microSD"/>
 <part name="GND1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="R5" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K"/>
-<part name="R6" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K"/>
-<part name="R7" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K"/>
-<part name="C2" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="4.7uF"/>
-<part name="R8" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K"/>
+<part name="R5" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K">
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
+</part>
+<part name="R6" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K">
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
+</part>
+<part name="R7" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K">
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
+</part>
+<part name="C2" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="4.7uF">
+<attribute name="DIGIKEY" value="445-5947-1-ND"/>
+</part>
+<part name="R8" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K">
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
+</part>
 <part name="P+2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="P+1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="FRAME2" library="lab11-frames" deviceset="LETTER_L_BLANK" device=""/>
-<part name="C18" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.1uF">
-<attribute name="DIGIKEY" value="445-4952-1-ND"/>
+<part name="C18" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="100nF">
+<attribute name="DIGIKEY" value="490-10777-1-ND"/>
 </part>
 <part name="P+5" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="GND3" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="C19" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="1nF">
-<attribute name="DIGIKEY" value="490-1303-1-ND"/>
+<attribute name="DIGIKEY" value="490-6366-1-ND"/>
 </part>
 <part name="C20" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="4.7uF">
 <attribute name="DIGIKEY" value="445-5947-1-ND"/>
@@ -3472,7 +3502,7 @@ https://www.digikey.com/en/ptm/c/cui-inc/electret-condenser-microphones?pn_sku=1
 <attribute name="DIGIKEY" value="587-1521-1-ND"/>
 </part>
 <part name="C21" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="1uF">
-<attribute name="DIGIKEY" value="1276-1513-1-ND"/>
+<attribute name="DIGIKEY" value="490-14457-1-ND"/>
 </part>
 <part name="X3" library="crystals" deviceset="TXC-8Y" device="" value="16MHz">
 <attribute name="DIGIKEY" value="887-2003-1-ND"/>
@@ -3485,10 +3515,10 @@ https://www.digikey.com/en/ptm/c/cui-inc/electret-condenser-microphones?pn_sku=1
 </part>
 <part name="GND16" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="C24" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="1nF">
-<attribute name="DIGIKEY" value="490-1303-1-ND"/>
+<attribute name="DIGIKEY" value="490-6366-1-ND"/>
 </part>
 <part name="C25" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="47nF">
-<attribute name="DIGIKEY" value="445-1264-1-ND"/>
+<attribute name="DIGIKEY" value="490-11420-1-ND"/>
 </part>
 <part name="GND17" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND22" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
@@ -3498,12 +3528,12 @@ https://www.digikey.com/en/ptm/c/cui-inc/electret-condenser-microphones?pn_sku=1
 </part>
 <part name="GND24" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="R12" library="passives" deviceset="RESISTOR" device="0402_RES" value="12k">
-<attribute name="DIGIKEY" value="RHM12.0KCDCT-ND"/>
+<attribute name="DIGIKEY" value="RMCF0402FT12K0CT-ND"/>
 </part>
 <part name="GND25" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="D3" library="SparkFun-LED" deviceset="LED" device="0603" value="BLUE"/>
 <part name="R13" library="passives" deviceset="RESISTOR" device="0402_RES" value="1k">
-<attribute name="DIGIKEY" value="RHM1.0KCECT-ND"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND"/>
 </part>
 <part name="L7" library="passives" deviceset="INDUCTOR" device="0603" value="10uH">
 <attribute name="DIGIKEY" value="490-4025-1-ND"/>
@@ -3525,7 +3555,7 @@ https://www.digikey.com/en/ptm/c/cui-inc/electret-condenser-microphones?pn_sku=1
 <part name="GND28" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="S2" library="switches" deviceset="B3U" device="-1000P" value="B3U-1000P"/>
 <part name="R14" library="passives" deviceset="RESISTOR" device="0402_RES" value="150">
-<attribute name="DIGIKEY" value="RHM150CDCT-ND"/>
+<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
 </part>
 <part name="GND29" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="P+8" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
@@ -3540,28 +3570,36 @@ https://www.digikey.com/en/ptm/c/cui-inc/electret-condenser-microphones?pn_sku=1
 <part name="P+3" library="supply1" deviceset="VCC" device=""/>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
 <part name="R9" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DIGIKEY" value="1276-3431-1-ND"/>
-<attribute name="MPN" value="MF-RES-0402-10K"/>
-<attribute name="MPN1" value="RC1005F103CS"/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
 </part>
 <part name="P+11" library="supply1" deviceset="VCC" device=""/>
-<part name="U37" library="Testing" deviceset="MPU-9250" device=""/>
+<part name="U37" library="Testing" deviceset="MPU-9250" device="">
+<attribute name="DIGIKEY" value="1428-1019-1-ND"/>
+</part>
 <part name="GND7" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
-<part name="C1" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="100nF"/>
-<part name="C732" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="100nF"/>
+<part name="C1" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="100nF">
+<attribute name="DIGIKEY" value="490-10777-1-ND"/>
+</part>
+<part name="C732" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="100nF">
+<attribute name="DIGIKEY" value="490-10777-1-ND"/>
+</part>
 <part name="GND8" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="GND10" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
-<part name="R10" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K"/>
-<part name="R11" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K"/>
+<part name="R10" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K">
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
+</part>
+<part name="R11" library="passives" deviceset="RESISTOR" device="0402_RES" value="10K">
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
+</part>
 <part name="GND12" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="P+6" library="supply1" deviceset="VCC" device=""/>
 <part name="P+4" library="supply1" deviceset="VCC" device=""/>
 <part name="R15" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DIGIKEY" value="1276-3431-1-ND"/>
-<attribute name="MPN" value="MF-RES-0402-10K"/>
-<attribute name="MPN1" value="RC1005F103CS"/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
 </part>
-<part name="C3" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10nF"/>
+<part name="C3" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10nF">
+<attribute name="DIGIKEY" value="490-7763-1-ND"/>
+</part>
 <part name="U$5" library="microphone" deviceset="CMB-6544PF" device=""/>
 <part name="R16" library="passives" deviceset="RESISTOR" device="0402_RES" value="13.7K"/>
 <part name="C6" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="2.2uF"/>
@@ -3586,23 +3624,37 @@ https://www.digikey.com/en/ptm/c/cui-inc/electret-condenser-microphones?pn_sku=1
 <text x="248.92" y="185.42" size="5.08" layer="98" align="top-right">Headers</text>
 <text x="93.98" y="160.02" size="3.048" layer="98" align="top-right">Electron headers</text>
 <text x="91.44" y="68.58" size="3.048" layer="98" align="top-right">SD Card</text>
+<text x="99.06" y="127" size="1.778" layer="104">XXX: Add headers to this part number</text>
+<text x="129.54" y="45.72" size="1.778" layer="104">XXX:  Determine SD part number</text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="0" y="0"/>
 <instance part="FRAME1" gate="G$2" x="152.4" y="0"/>
 <instance part="A1" gate="A1" x="73.66" y="127"/>
 <instance part="U$3" gate="G$1" x="40.64" y="30.48"/>
-<instance part="R4" gate="G$1" x="27.94" y="37.338" rot="R90"/>
+<instance part="R4" gate="G$1" x="27.94" y="37.338" rot="R90">
+<attribute name="DIGIKEY" x="27.94" y="37.338" size="1.778" layer="96" rot="R90" display="off"/>
+</instance>
 <instance part="U2" gate="G$1" x="114.3" y="35.56" smashed="yes">
 <attribute name="NAME" x="119.634" y="51.562" size="1.778" layer="95" rot="MR0"/>
 <attribute name="VALUE" x="123.444" y="12.446" size="1.778" layer="96" rot="MR0"/>
 </instance>
 <instance part="GND1" gate="1" x="101.6" y="12.7" rot="MR0"/>
-<instance part="R5" gate="G$1" x="104.14" y="53.34" rot="MR90"/>
-<instance part="R6" gate="G$1" x="96.52" y="53.34" rot="MR90"/>
-<instance part="R7" gate="G$1" x="88.9" y="53.34" rot="MR90"/>
-<instance part="C2" gate="G$1" x="68.58" y="53.34"/>
-<instance part="R8" gate="G$1" x="81.28" y="53.34" rot="MR90"/>
+<instance part="R5" gate="G$1" x="104.14" y="53.34" rot="MR90">
+<attribute name="DIGIKEY" x="104.14" y="53.34" size="1.778" layer="96" rot="MR90" display="off"/>
+</instance>
+<instance part="R6" gate="G$1" x="96.52" y="53.34" rot="MR90">
+<attribute name="DIGIKEY" x="96.52" y="53.34" size="1.778" layer="96" rot="MR90" display="off"/>
+</instance>
+<instance part="R7" gate="G$1" x="88.9" y="53.34" rot="MR90">
+<attribute name="DIGIKEY" x="88.9" y="53.34" size="1.778" layer="96" rot="MR90" display="off"/>
+</instance>
+<instance part="C2" gate="G$1" x="68.58" y="53.34">
+<attribute name="DIGIKEY" x="68.58" y="53.34" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="R8" gate="G$1" x="81.28" y="53.34" rot="MR90">
+<attribute name="DIGIKEY" x="81.28" y="53.34" size="1.778" layer="96" rot="MR90" display="off"/>
+</instance>
 <instance part="P+2" gate="VCC" x="27.94" y="45.72"/>
 </instances>
 <busses>
@@ -3755,32 +3807,54 @@ https://www.digikey.com/en/ptm/c/cui-inc/electret-condenser-microphones?pn_sku=1
 <text x="38.1" y="97.79" size="5.08" layer="94" align="bottom-center">LNA</text>
 <text x="82.55" y="110.49" size="5.08" layer="94" align="bottom-center">SAW</text>
 <text x="140.97" y="92.71" size="5.08" layer="94" align="bottom-center">GPS</text>
+<text x="170.18" y="144.78" size="1.778" layer="104">XXX: Figure out which FB &amp; GPS to buy</text>
+<text x="71.12" y="147.32" size="1.778" layer="104" rot="R90">XXX: Need to pick a purchaseable transistor</text>
+<text x="68.58" y="104.14" size="1.778" layer="104">XXX: Need to pick a purchaseable SAW</text>
+<text x="7.62" y="160.02" size="1.778" layer="104">XXX: Find part number for GPS antenna &amp; Inductor</text>
 </plain>
 <instances>
 <instance part="FRAME3" gate="G$1" x="0" y="0"/>
 <instance part="FRAME3" gate="G$2" x="152.4" y="0"/>
-<instance part="T1" gate="A" x="135.89" y="165.1" rot="R180"/>
-<instance part="R1" gate="G$1" x="85.09" y="173.99" rot="R90"/>
-<instance part="C4" gate="G$1" x="112.776" y="154.94" rot="R90"/>
-<instance part="C9" gate="G$1" x="113.03" y="170.18" rot="R90"/>
+<instance part="T1" gate="A" x="135.89" y="165.1" rot="R180">
+<attribute name="DIGIKEY" x="135.89" y="165.1" size="1.778" layer="96" rot="R180" display="off"/>
+</instance>
+<instance part="R1" gate="G$1" x="85.09" y="173.99" rot="R90">
+<attribute name="DIGIKEY" x="85.09" y="173.99" size="1.778" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="C4" gate="G$1" x="112.776" y="154.94" rot="R90">
+<attribute name="DIGIKEY" x="112.776" y="154.94" size="1.778" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="C9" gate="G$1" x="113.03" y="170.18" rot="R90">
+<attribute name="DIGIKEY" x="113.03" y="170.18" size="1.778" layer="96" rot="R90" display="off"/>
+</instance>
 <instance part="U1" gate="MAX-M8" x="139.7" y="128.27"/>
 <instance part="U$1" gate="G$1" x="139.7" y="105.41"/>
 <instance part="U$2" gate="G$1" x="107.95" y="148.59"/>
 <instance part="U$9" gate="G$1" x="85.09" y="146.05"/>
 <instance part="A2" gate="ANT" x="15.24" y="152.4"/>
-<instance part="R3" gate="G$1" x="142.24" y="172.72" rot="R90"/>
+<instance part="R3" gate="G$1" x="142.24" y="172.72" rot="R90">
+<attribute name="DIGIKEY" x="142.24" y="172.72" size="1.778" layer="96" rot="R90" display="off"/>
+</instance>
 <instance part="U$27" gate="G$1" x="83.82" y="120.65"/>
 <instance part="U$28" gate="G$1" x="10.16" y="144.78"/>
 <instance part="Q1" gate="G$1" x="87.63" y="156.21" rot="MR0"/>
-<instance part="R2" gate="G$1" x="97.79" y="156.21" rot="R180"/>
+<instance part="R2" gate="G$1" x="97.79" y="156.21" rot="R180">
+<attribute name="DIGIKEY" x="97.79" y="156.21" size="1.778" layer="96" rot="R180" display="off"/>
+</instance>
 <instance part="U5" gate="U" x="83.82" y="133.35"/>
-<instance part="U6" gate="G$1" x="38.1" y="130.81"/>
+<instance part="U6" gate="G$1" x="38.1" y="130.81">
+<attribute name="DIGIKEY" x="38.1" y="130.81" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="U$4" gate="G$1" x="21.59" y="119.38"/>
 <instance part="U$29" gate="G$1" x="50.8" y="121.92"/>
 <instance part="L1" gate="G$1" x="15.24" y="139.7" rot="MR180"/>
-<instance part="C5" gate="G$1" x="53.34" y="115.57" rot="MR180"/>
+<instance part="C5" gate="G$1" x="53.34" y="115.57" rot="MR180">
+<attribute name="DIGIKEY" x="53.34" y="115.57" size="1.778" layer="96" rot="MR180" display="off"/>
+</instance>
 <instance part="U$34" gate="G$1" x="53.34" y="109.22"/>
-<instance part="C11" gate="G$1" x="113.03" y="162.56" rot="R90"/>
+<instance part="C11" gate="G$1" x="113.03" y="162.56" rot="R90">
+<attribute name="DIGIKEY" x="113.03" y="162.56" size="1.778" layer="96" rot="R90" display="off"/>
+</instance>
 <instance part="D1" gate="G$1" x="85.09" y="164.592" rot="R270"/>
 <instance part="L2" gate="G$1" x="168.91" y="138.43"/>
 <instance part="L3" gate="G$1" x="168.91" y="130.81"/>
@@ -4470,6 +4544,7 @@ Switch</text>
 <text x="40.64" y="15.24" size="3.048" layer="98" align="top-right">Light Sensor</text>
 <text x="20.32" y="33.02" size="1.778" layer="98">I2C Address: 0x44</text>
 <text x="109.22" y="167.64" size="1.778" layer="104">XXX: ADD LOW PASS FILTER</text>
+<text x="109.22" y="162.56" size="1.778" layer="104">XXX:  Pick all of these parts</text>
 </plain>
 <instances>
 <instance part="FRAME4" gate="G$1" x="0" y="0"/>
@@ -4484,27 +4559,35 @@ Switch</text>
 <instance part="GND6" gate="1" x="10.16" y="25.4"/>
 <instance part="R9" gate="G$1" x="48.26" y="48.26" rot="R90">
 <attribute name="DIGIKEY" x="48.26" y="48.26" size="1.778" layer="96" rot="R90" display="off"/>
-<attribute name="MPN1" x="48.26" y="48.26" size="1.778" layer="96" rot="R90" display="off"/>
-<attribute name="MPN" x="48.26" y="48.26" size="1.778" layer="96" rot="R90" display="off"/>
 </instance>
 <instance part="P+11" gate="VCC" x="48.26" y="60.96"/>
-<instance part="U37" gate="G$1" x="124.46" y="45.72"/>
+<instance part="U37" gate="G$1" x="124.46" y="45.72">
+<attribute name="DIGIKEY" x="124.46" y="45.72" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="GND7" gate="1" x="99.06" y="25.4"/>
-<instance part="C1" gate="G$1" x="99.06" y="38.1" rot="MR0"/>
-<instance part="C732" gate="G$1" x="76.2" y="48.26" rot="MR0"/>
+<instance part="C1" gate="G$1" x="99.06" y="38.1" rot="MR0">
+<attribute name="DIGIKEY" x="99.06" y="38.1" size="1.778" layer="96" rot="MR0" display="off"/>
+</instance>
+<instance part="C732" gate="G$1" x="76.2" y="48.26" rot="MR0">
+<attribute name="DIGIKEY" x="76.2" y="48.26" size="1.778" layer="96" rot="MR0" display="off"/>
+</instance>
 <instance part="GND8" gate="1" x="68.58" y="25.4"/>
 <instance part="GND10" gate="1" x="147.32" y="25.4"/>
-<instance part="R10" gate="G$1" x="154.94" y="76.2" rot="R90"/>
-<instance part="R11" gate="G$1" x="165.1" y="76.2" rot="R90"/>
+<instance part="R10" gate="G$1" x="154.94" y="76.2" rot="R90">
+<attribute name="DIGIKEY" x="154.94" y="76.2" size="1.778" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="R11" gate="G$1" x="165.1" y="76.2" rot="R90">
+<attribute name="DIGIKEY" x="165.1" y="76.2" size="1.778" layer="96" rot="R90" display="off"/>
+</instance>
 <instance part="GND12" gate="1" x="91.44" y="25.4"/>
 <instance part="P+6" gate="VCC" x="68.58" y="60.96"/>
 <instance part="P+4" gate="VCC" x="154.94" y="86.36"/>
 <instance part="R15" gate="G$1" x="83.82" y="48.26" rot="R90">
 <attribute name="DIGIKEY" x="83.82" y="48.26" size="1.778" layer="96" rot="R90" display="off"/>
-<attribute name="MPN1" x="83.82" y="48.26" size="1.778" layer="96" rot="R90" display="off"/>
-<attribute name="MPN" x="83.82" y="48.26" size="1.778" layer="96" rot="R90" display="off"/>
 </instance>
-<instance part="C3" gate="G$1" x="68.58" y="48.26" rot="MR0"/>
+<instance part="C3" gate="G$1" x="68.58" y="48.26" rot="MR0">
+<attribute name="DIGIKEY" x="68.58" y="48.26" size="1.778" layer="96" rot="MR0" display="off"/>
+</instance>
 <instance part="U$5" gate="G$1" x="17.78" y="132.08"/>
 <instance part="R16" gate="G$1" x="58.42" y="162.56" rot="R90"/>
 <instance part="C6" gate="G$1" x="73.66" y="114.3"/>
