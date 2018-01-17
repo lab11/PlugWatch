@@ -8,3 +8,6 @@
 /captures
 .externalNativeBuild
 /src/utilities/Private.*
+*.b#*
+*.s#*
+*.l#*
