@@ -51,6 +51,22 @@ ApplicationWatchdog wd(60000, System.reset); //built in... we don't write this..
 
 
 //***********************************
+//* SD Card & Logging
+//***********************************
+SDCard SD;
+auto ChargeStateLog = FileLog(SD, "charge_state_log.txt");
+auto CloudFunctionTestLog = FileLog(SD, "cloud_function_log.txt");
+auto ErrorLog = FileLog(SD, "error_log.txt");
+auto EventLog = FileLog(SD, "event_log.txt");
+auto FunctionLog = FileLog(SD, "function_log.txt");
+auto HeartbeatLog = FileLog(SD, "heartbeat_log.txt");
+auto SampleLog = FileLog(SD, "sample_log.txt");
+auto SubscriptionLog = FileLog(SD, "subscription_log.txt");
+
+//GoogleMapsDeviceLocator locator;
+
+
+//***********************************
 //* Heartbeat
 //***********************************
 const int HEARTBEAT_MIN_FREQ = 1000 * 5;
@@ -66,20 +82,24 @@ void heartbeat_callback() {
   HEARTBEAT_FLAG = true;
 }
 
-//***********************************
-//* SD Card & Logging
-//***********************************
-SDCard SD;
-auto ChargeStateLog = FileLog(SD, "charge_state_log.txt");
-auto CloudFunctionTestLog = FileLog(SD, "cloud_function_log.txt");
-auto ErrorLog = FileLog(SD, "error_log.txt");
-auto EventLog = FileLog(SD, "event_log.txt");
-auto FunctionLog = FileLog(SD, "function_log.txt");
-auto HeartbeatLog = FileLog(SD, "heartbeat_log.txt");
-auto SampleLog = FileLog(SD, "sample_log.txt");
-auto SubscriptionLog = FileLog(SD, "subscription_log.txt");
+int CLOUD_set_heartbeat_frequency(String frequency) {
+  errno = 0;
+  heartbeat_frequency = strtol(frequency.c_str(), NULL, 10);
+  if (
+    (errno != 0) ||
+    (heartbeat_frequency < HEARTBEAT_MIN_FREQ) ||
+    (heartbeat_frequency > HEARTBEAT_MAX_FREQ)
+  ) {
+    FunctionLog.append("Error updating heartbeat frequency. Got: " + frequency);
+    return -1;
+  }
 
-//GoogleMapsDeviceLocator locator;
+  heartbeat_timer.changePeriodFromISR(heartbeat_frequency);
+  heartbeat_timer.resetFromISR();
+
+  FunctionLog.append("Set heartbeat frequency to " + String(heartbeat_frequency));
+  return 0;
+}
 
 
 //***********************************
@@ -193,26 +213,6 @@ int debug_sd(String file) {
 
 void init_sample_buffer() {
     //sample_buffer = new int[sample_buff_size]
-}
-
-//TODO testing
-int CLOUD_set_heartbeat_frequency(String frequency) { //cloudfunction
-  errno = 0;
-  heartbeat_frequency = strtol(frequency.c_str(), NULL, 10);
-  if (
-    (errno != 0) ||
-    (heartbeat_frequency < HEARTBEAT_MIN_FREQ) ||
-    (heartbeat_frequency > HEARTBEAT_MAX_FREQ)
-  ) {
-    FunctionLog.append("Error updating heartbeat frequency. Got: " + frequency);
-    return -1;
-  }
-
-  heartbeat_timer.changePeriod(heartbeat_frequency);
-  heartbeat_timer.reset();
-
-  FunctionLog.append("Set heartbeat frequency to " + String(heartbeat_frequency));
-  return 0;
 }
 
 //TODO testing
