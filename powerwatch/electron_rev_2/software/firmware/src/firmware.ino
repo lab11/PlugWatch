@@ -579,12 +579,27 @@ unsigned long lastCheck = 0;
 char lastStatus[256];
 
 void loop() {
-
-  //Reboot the system
+  // Reboot the system
   if (RESET_FLAG) {
     Serial.println("reset");
     RESET_FLAG = false;
     System.reset();
+  }
+
+  // Allow particle to do any processing
+  // https://docs.particle.io/reference/firmware/photon/#manual-mode
+  if (Particle.connected()) {
+    Particle.process();
+  } else {
+    // Don't attempt to connect too frequently as connection attempts hang MY_DEVICES
+    static int last_connect_time = 0;
+    const int connect_interval_sec = 60;
+    int now = Time.now(); // unix time
+
+    if ((last_connect_time == 0) || (now-last_connect_time > connect_interval_sec)) {
+      last_connect_time = now;
+      Particle.connect();
+    }
   }
 
   //Take a meta sample reading
