@@ -13,5 +13,6 @@ class FileLog {
 public:
 	FileLog(SDCard &sd, String filename) : sd{sd}, filename{filename} {}
 
+  void appendFromISR(String str);
   void append(String str);
 };

@@ -12,6 +12,7 @@
 
 #include "Cloud.h"
 #include "FileLog.h"
+#include "Heartbeat.h"
 #include "PowerCheck.h"
 #include "SDCard.h"
 
@@ -56,11 +57,9 @@ ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, System.reset);
 //***********************************
 SDCard SD;
 auto ChargeStateLog = FileLog(SD, "charge_state_log.txt");
-auto CloudFunctionTestLog = FileLog(SD, "cloud_function_log.txt");
 auto ErrorLog = FileLog(SD, "error_log.txt");
 auto EventLog = FileLog(SD, "event_log.txt");
 auto FunctionLog = FileLog(SD, "function_log.txt");
-auto HeartbeatLog = FileLog(SD, "heartbeat_log.txt");
 auto SampleLog = FileLog(SD, "sample_log.txt");
 auto SubscriptionLog = FileLog(SD, "subscription_log.txt");
 
@@ -70,38 +69,7 @@ auto SubscriptionLog = FileLog(SD, "subscription_log.txt");
 //***********************************
 //* Heartbeat
 //***********************************
-const int HEARTBEAT_MIN_FREQ = 1000 * 5;
-const int HEARTBEAT_MAX_FREQ = 1000 * 60 * 60;
-retained int heartbeat_frequency = 1000 * 60 * 15;
-retained int heartbeat_count = 0;
-Timer heartbeat_timer(heartbeat_frequency, heartbeat_callback);
-bool HEARTBEAT_FLAG = false;
-
-void heartbeat_callback() {
-  Serial.println("Heartbeat! Count: " + String(heartbeat_count));
-  heartbeat_count++;
-  HEARTBEAT_FLAG = true;
-}
-
-int CLOUD_set_heartbeat_frequency(String frequency) {
-  errno = 0;
-  heartbeat_frequency = strtol(frequency.c_str(), NULL, 10);
-  if (
-    (errno != 0) ||
-    (heartbeat_frequency < HEARTBEAT_MIN_FREQ) ||
-    (heartbeat_frequency > HEARTBEAT_MAX_FREQ)
-  ) {
-    FunctionLog.append("Error updating heartbeat frequency. Got: " + frequency);
-    return -1;
-  }
-
-  heartbeat_timer.changePeriodFromISR(heartbeat_frequency);
-  heartbeat_timer.resetFromISR();
-
-  FunctionLog.append("Set heartbeat frequency to " + String(heartbeat_frequency));
-  return 0;
-}
-
+auto heartbeat = Heartbeat(SD);
 
 //***********************************
 //* Charge state
@@ -152,10 +120,8 @@ retained int sample_buff_size = 1000;
 
 
 //Loop switches
-bool META_SAMPLE_FLAG = false;
 bool RESET_FLAG = false;
 bool SAMPLE_FLAG = false;
-bool CLOUD_FUNCTION_TEST_FLAG = false;
 bool SD_READ_FLAG = false;
 
  String SD_LOG_NAME = "";
@@ -175,7 +141,6 @@ bool SD_READ_FLAG = false;
  String SYSTEM_EVENT = "s";
  String SUBSCRIPTION_EVENT = "r";
  String CHARGE_STATE_EVENT = "c";
- String META_DATA_EVENT = "m";
  String TIME_SYNC_EVENT = "t";
  String ERROR_EVENT = "e";
  String CLOUD_FUNCTION_TEST_EVENT = "g";
@@ -250,12 +215,6 @@ int cloud_reboot(String ack) { //cloudfunction
   return ack.toInt();
 }
 
-int get_meta_data(String msg) { //cloudfunction
-  META_SAMPLE_FLAG = true;
-  FunctionLog.append("get_meta_data");
-  return 0;
-}
-
 int cloud_function_sd_power_cycle(String _unused_msg) {
   SD.PowerCycle();
   return 0;
@@ -267,13 +226,6 @@ int cloud_function_sd_power_cycle(String _unused_msg) {
 
  int get_battv(String c) { //cloudfunction
      return (int)(100 * FuelGauge().getVCell());
- }
-
- int cloud_function_test(String msg) //cloudfunction
- {
-   CLOUD_FUNCTION_TEST_FLAG = true;
-   CloudFunctionTestLog.append(msg);
-   return 1;
  }
 
 void start_sample();
@@ -308,27 +260,6 @@ void handle_all_system_events(system_event_t event, int param) {
   last_system_event_type = param;
   publish_wrapper(SYSTEM_EVENT, system_event_str);
   EventLog.append(system_event_str);
-}
-//Meta Data
-String do_meta_data() {
-  String res;
-  uint32_t freemem = System.freeMemory();
-  CellularSignal sig = Cellular.RSSI();
-  CellularBand band_avail;
-  String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell()) + String("|") + String(powerCheck.getIsCharging());
-
-  res = String(System.version().c_str());
-  res = res + String("|") + power_stats;
-  res = res + String("|") + String(freemem);
-  res = res + String("|") + String(sig.rssi) + String("|") + String(sig.qual);
-
-  if (Cellular.getBandSelect(band_avail)) {
-    res  = res + String("|") + String(band_avail);
-  }
-  else {
-    res = res + String("|No Bands Avail");
-  }
-  return res;
 }
 //IMU
 String self_test_imu() {
@@ -527,10 +458,11 @@ void volDmp() {
    }
    */
 
-   SD.setup();
-
    pinMode(debug_led_1, OUTPUT);
    pinMode(debug_led_2, OUTPUT);
+
+   SD.setup();
+   heartbeat.setup();
 
    Particle.variable("a", cloud_publish_cnt);
    Particle.variable("b", subscribe_cnt);
@@ -538,17 +470,13 @@ void volDmp() {
    Particle.variable("d", system_event_cnt);
    Particle.variable("e", last_system_event_time);
    Particle.variable("f", last_system_event_type);
-   Particle.variable("g", heartbeat_frequency);
    Particle.variable("h", sample_frequency);
    Particle.variable("i", imu_self_test_str);
-   Particle.variable("j", heartbeat_count);
    Particle.variable("k", charge_state_poll_frequency);
    Particle.variable("l", num_reboots);
    Particle.variable("v", String(System.version().c_str()));
 
-   Particle.function("meta",get_meta_data);
    Particle.function("reboot",cloud_reboot);
-   Particle.function("hb_freq",CLOUD_set_heartbeat_frequency);
    Particle.function("cs_freq",set_charge_state_poll_frequency);
    Particle.function("samp_freq",set_sample_poll_frequency);
    Particle.function("samp_buff",set_sample_buff);
@@ -556,14 +484,12 @@ void volDmp() {
    Particle.function("soc",get_soc);
    Particle.function("battv",get_battv);
    Particle.function("debug_sd", debug_sd);
-   Particle.function("cf", cloud_function_test);
    Particle.function("sample_test", sample_test);
 
 
    Particle.subscribe("pm_e_bus", handle_particle_event, MY_DEVICES);
 
    imu_self_test_str = self_test_imu();
-   heartbeat_timer.start();
    charge_state_poll_timer.start();
 
    init_sample_buffer();
@@ -603,14 +529,6 @@ void loop() {
     }
   }
 
-  //Take a meta sample reading
-  if (META_SAMPLE_FLAG) {
-    Serial.println("meta_sample");
-    META_SAMPLE_FLAG = false;
-    String meta = do_meta_data();
-    publish_wrapper(META_DATA_EVENT, meta);
-  }
-
   if (CHARGE_STATE_FLAG) {
     Serial.println("charge_state");
     CHARGE_STATE_FLAG = false;
@@ -634,22 +552,7 @@ void loop() {
     }
   }
 
-
-  if (HEARTBEAT_FLAG) {
-    Serial.println("heartbeat flag");
-    HEARTBEAT_FLAG = false;
-
-    String meta = do_meta_data();
-    HeartbeatLog.append(String(heartbeat_count)+String("|")+String(meta));
-    publish_wrapper(HEARTBEAT_EVENT,String(heartbeat_count)+String("|")+String(meta));
-  }
-
-  if (CLOUD_FUNCTION_TEST_FLAG) {
-    Serial.println("cloud function test");
-    CLOUD_FUNCTION_TEST_FLAG = false;
-    String meta = do_meta_data();
-    publish_wrapper(CLOUD_FUNCTION_TEST_EVENT,String(meta));
-  }
+  heartbeat.loop();
 
   if (SD_READ_FLAG) {
     Serial.println("sd read flag");
