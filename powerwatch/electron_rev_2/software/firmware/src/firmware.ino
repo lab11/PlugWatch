@@ -151,7 +151,6 @@ bool SD_READ_FLAG = false;
  //* Cloud Variables
  //***********************************
  // publish
- retained int cloud_publish_cnt = 0; //TODO
  retained int subscribe_cnt = 0; //TODO
  retained String last_publish_time = ""; //TODO
 
@@ -248,7 +247,7 @@ void handle_particle_event(const char *event, const char *data)
   subscribe_cnt = subscribe_cnt + 1;
   String log_str = String(subscribe_cnt) + String("|");
   SubscriptionLog.append(log_str);
-  publish_wrapper(SUBSCRIPTION_EVENT, msg);
+  Cloud::Publish(SUBSCRIPTION_EVENT, msg);
 }
 //System Events
 void handle_all_system_events(system_event_t event, int param) {
@@ -258,7 +257,7 @@ void handle_all_system_events(system_event_t event, int param) {
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
   last_system_event_time = time_str;
   last_system_event_type = param;
-  publish_wrapper(SYSTEM_EVENT, system_event_str);
+  Cloud::Publish(SYSTEM_EVENT, system_event_str);
   EventLog.append(system_event_str);
 }
 //IMU
@@ -298,7 +297,7 @@ String self_test_imu() {
      Serial.print("Could not connect to MPU9250: 0x");
      Serial.println(c, HEX);
      ErrorLog.append("Could not connect to MPU9250");
-     publish_wrapper(ERROR_EVENT, "Could not connect to MPU9250");
+     Cloud::Publish(ERROR_EVENT, "Could not connect to MPU9250");
      //TODO send an error message out
    }
    return imu_st + "\n" + ak_st;
@@ -394,16 +393,6 @@ String imu_loop() {
  //***********************************
  //* Wrappers
  //***********************************
- //Particle.publish
-void publish_wrapper(String tag, String message) {
-  bool success;
-  String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
-  String to_publish = time_str + String("|") + message;
-  success = Particle.publish(tag, to_publish);
-  //TODO write to publish log
-  cloud_publish_cnt = cloud_publish_cnt + 1;
-}
-
 void start_sample() {
   Serial.println("starting sample");
   sample_cnt = 0;
@@ -464,7 +453,6 @@ void volDmp() {
    SD.setup();
    heartbeat.setup();
 
-   Particle.variable("a", cloud_publish_cnt);
    Particle.variable("b", subscribe_cnt);
    Particle.variable("c", last_publish_time);
    Particle.variable("d", system_event_cnt);
@@ -533,7 +521,7 @@ void loop() {
     Serial.println("charge_state");
     CHARGE_STATE_FLAG = false;
     String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell()) + String("|") + String(powerCheck.getIsCharging());
-    publish_wrapper(CHARGE_STATE_EVENT, CHARGE_STATE_MSG + String("|") + power_stats);
+    Cloud::Publish(CHARGE_STATE_EVENT, CHARGE_STATE_MSG + String("|") + power_stats);
     ChargeStateLog.append(power_stats);
   }
 
@@ -558,7 +546,7 @@ void loop() {
     Serial.println("sd read flag");
     SD_READ_FLAG = false;
     String sd_res = SD.Read(SD_LOG_NAME);
-    publish_wrapper(SD_READ_EVENT,sd_res);
+    Cloud::Publish(SD_READ_EVENT,sd_res);
   }
 
   //Sync Time
@@ -566,7 +554,7 @@ void loop() {
     Serial.println("time_sync");
     Particle.syncTime();
     lastSync = millis();
-    publish_wrapper(TIME_SYNC_EVENT, "");
+    Cloud::Publish(TIME_SYNC_EVENT, "");
     EventLog.append("time_sync");
   }
 

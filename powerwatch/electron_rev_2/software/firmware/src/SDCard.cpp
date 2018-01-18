@@ -24,7 +24,7 @@ void SDCard::PowerCycle() {
 void SDCard::Write(String filename, String to_write) {
 	if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
 		Serial.println("CAN'T OPEN SD");
-		publish_wrapper(SD_ERROR_EVENT, "init");
+		Cloud::Publish(SD_ERROR_EVENT, "init");
 	}
 	File file_to_write;
 	String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
@@ -32,7 +32,7 @@ void SDCard::Write(String filename, String to_write) {
 	if (!file_to_write.open(filename, O_RDWR | O_CREAT | O_APPEND)) {
 		//sd.errorHalt("opening for write failed");
 		Serial.println(String("opening ") + String(filename) + String(" for write failed"));
-		publish_wrapper(SD_ERROR_EVENT, String(filename) + String(" write"));
+		Cloud::Publish(SD_ERROR_EVENT, String(filename) + String(" write"));
 		return;
 	}
 	file_to_write.println(final_to_write);
@@ -45,7 +45,7 @@ String SDCard::Read(String filename) {
 	if (!myFile.open(filename, O_READ)) {
 		//sd.errorHalt(String("opening ") + String(filename) + String(" for read failed"));
 		Serial.println(String("opening ") + String(filename) + String(" for read failed"));
-		publish_wrapper(SD_ERROR_EVENT, String(filename) + String(" read"));
+		Cloud::Publish(SD_ERROR_EVENT, String(filename) + String(" read"));
 		return "string err";
 	}
 	Serial.println(String(filename) + String(" content:"));

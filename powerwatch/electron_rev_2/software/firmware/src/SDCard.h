@@ -2,7 +2,7 @@
  * SD Card related operations.
  */
 
- #pragma once
+#pragma once
 
 #include <Particle.h>
 #include <SdFat.h>

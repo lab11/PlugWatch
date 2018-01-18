@@ -51,7 +51,7 @@ void Heartbeat::sendHeartbeat(bool force=false) {
       message = "FORCE|" + message;
     }
     log.append(message);
-    publish_wrapper(HEARTBEAT_EVENT, message);
+    Cloud::Publish(HEARTBEAT_EVENT, message);
 }
 
 void Heartbeat::loop() {
