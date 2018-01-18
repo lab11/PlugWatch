@@ -47,7 +47,8 @@ int debug_led_2 = B0;
 //***********************************
 //* Watchdogs
 //***********************************
-ApplicationWatchdog wd(60000, System.reset); //built in... we don't write this...
+const int HARDWARE_WATCHDOG_TIMEOUT_MS = 1000 * 60;
+ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, System.reset);
 
 
 //***********************************
