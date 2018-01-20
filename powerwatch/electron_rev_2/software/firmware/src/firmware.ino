@@ -405,25 +405,6 @@ void take_a_sample() {
   imu_loop();
 }
 
-void volDmp() {
-    /*
-  cout << F("\nVolume is FAT") << int(sd.vol()->fatType()) << endl;
-  cout << F("blocksPerCluster: ") << int(sd.vol()->blocksPerCluster()) << endl;
-  cout << F("clusterCount: ") << sd.vol()->clusterCount() << endl;
-  cout << F("freeClusters: ");
-  uint32_t volFree = sd.vol()->freeClusterCount();
-  cout <<  volFree << endl;
-  float fs = 0.000512*volFree*sd.vol()->blocksPerCluster();
-  cout << F("freeSpace: ") << fs << F(" MB (MB = 1,000,000 bytes)\n");
-  cout << F("fatStartBlock: ") << sd.vol()->fatStartBlock() << endl;
-  cout << F("fatCount: ") << int(sd.vol()->fatCount()) << endl;
-  cout << F("blocksPerFat: ") << sd.vol()->blocksPerFat() << endl;
-  cout << F("rootDirStart: ") << sd.vol()->rootDirStart() << endl;
-  cout << F("dataStartBlock: ") << sd.vol()->dataStartBlock() << endl;
-  */
-
-}
-
   //***********************************
   //* ye-old Arduino
   //***********************************
@@ -486,7 +467,6 @@ void volDmp() {
    status.off();
    Particle.connect();
 
-   //volDmp();
    Serial.println("Setup complete.");
  }
 
