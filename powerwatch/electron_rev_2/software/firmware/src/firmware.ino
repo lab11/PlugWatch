@@ -10,11 +10,12 @@
 #include <MPU9250.h>
 #include <quaternionFilters.h>
 
+#include "ChargeState.h"
 #include "Cloud.h"
 #include "FileLog.h"
 #include "Heartbeat.h"
-#include "PowerCheck.h"
 #include "SDCard.h"
+#include "firmware.h"
 
 
 //***********************************
@@ -56,7 +57,6 @@ ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, System.reset);
 //* SD Card & Logging
 //***********************************
 SDCard SD;
-auto ChargeStateLog = FileLog(SD, "charge_state_log.txt");
 auto ErrorLog = FileLog(SD, "error_log.txt");
 auto EventLog = FileLog(SD, "event_log.txt");
 auto FunctionLog = FileLog(SD, "function_log.txt");
@@ -74,36 +74,7 @@ auto heartbeat = Heartbeat(SD);
 //***********************************
 //* Charge state
 //***********************************
-const int CHARGE_STATE_MIN_FREQ = 10;
-const int CHARGE_STATE_MAX_FREQ = 1000 * 60 * 60;
-retained int charge_state_poll_frequency = 100;
-Timer charge_state_poll_timer(charge_state_poll_frequency, charge_state_timer_callback);
-
-PowerCheck powerCheck;
-bool CHARGE_STATE_FLAG = false;
-String CHARGE_STATE_MSG = "";
-const String CHARGE_STATE_BATTERY = "b";
-const String CHARGE_STATE_WALL = "w";
-
-void charge_state_timer_callback() {
-  static bool last_charge_state = false;
-  bool charge_state = powerCheck.getIsCharging();
-
-  if (charge_state == true) {
-    digitalWrite(debug_led_2, LOW);
-    CHARGE_STATE_MSG = CHARGE_STATE_WALL;
-  } else {
-    digitalWrite(debug_led_2, HIGH);
-    CHARGE_STATE_MSG = CHARGE_STATE_BATTERY;
-  }
-
-  if (charge_state != last_charge_state) {
-    ChargeStateLog.append("Charge state change to " + String(charge_state));
-    CHARGE_STATE_FLAG = true;
-    last_charge_state = charge_state;
-  }
-}
-
+auto charge_state = ChargeState(SD);
 
 //***********************************
 //* Application State
@@ -140,7 +111,6 @@ bool SD_READ_FLAG = false;
  //publish wrapper types
  String SYSTEM_EVENT = "s";
  String SUBSCRIPTION_EVENT = "r";
- String CHARGE_STATE_EVENT = "c";
  String TIME_SYNC_EVENT = "t";
  String ERROR_EVENT = "e";
  String CLOUD_FUNCTION_TEST_EVENT = "g";
@@ -178,15 +148,6 @@ int debug_sd(String file) {
 
 void init_sample_buffer() {
     //sample_buffer = new int[sample_buff_size]
-}
-
-//TODO testing
-int set_charge_state_poll_frequency(String frequency){ //cloudfunction
-    charge_state_poll_frequency = frequency.toInt(); //TODO catch error
-    charge_state_poll_timer.changePeriod(charge_state_poll_frequency);
-    charge_state_poll_timer.reset();
-    FunctionLog.append("set_charge_state_poll_frequency");
-    return 0;
 }
 
 //TODO testing
@@ -416,7 +377,6 @@ void take_a_sample() {
    System.on(all_events, handle_all_system_events);
 
    num_reboots = num_reboots + 1;
-   powerCheck.setup();
    FuelGauge().quickStart();
 
    //cout << uppercase << showbase << endl;
@@ -441,12 +401,10 @@ void take_a_sample() {
    Particle.variable("f", last_system_event_type);
    Particle.variable("h", sample_frequency);
    Particle.variable("i", imu_self_test_str);
-   Particle.variable("k", charge_state_poll_frequency);
    Particle.variable("l", num_reboots);
    Particle.variable("v", String(System.version().c_str()));
 
    Particle.function("reboot",cloud_reboot);
-   Particle.function("cs_freq",set_charge_state_poll_frequency);
    Particle.function("samp_freq",set_sample_poll_frequency);
    Particle.function("samp_buff",set_sample_buff);
    Particle.function("sd_reboot",cloud_function_sd_power_cycle);
@@ -459,7 +417,6 @@ void take_a_sample() {
    Particle.subscribe("pm_e_bus", handle_particle_event, MY_DEVICES);
 
    imu_self_test_str = self_test_imu();
-   charge_state_poll_timer.start();
 
    init_sample_buffer();
 
@@ -497,14 +454,6 @@ void loop() {
     }
   }
 
-  if (CHARGE_STATE_FLAG) {
-    Serial.println("charge_state");
-    CHARGE_STATE_FLAG = false;
-    String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell()) + String("|") + String(powerCheck.getIsCharging());
-    Cloud::Publish(CHARGE_STATE_EVENT, CHARGE_STATE_MSG + String("|") + power_stats);
-    ChargeStateLog.append(power_stats);
-  }
-
   if (SAMPLE_FLAG) {
     if (sample_cnt >= sample_buff_size) {
         //sample_poll_timer.stop();
@@ -521,6 +470,7 @@ void loop() {
   }
 
   heartbeat.loop();
+  charge_state.loop();
 
   if (SD_READ_FLAG) {
     Serial.println("sd read flag");
