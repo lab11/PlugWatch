@@ -153,7 +153,6 @@ bool SD_READ_FLAG = false;
  //* Cloud Variables
  //***********************************
  // publish
- retained int subscribe_cnt = 0; //TODO
  retained String last_publish_time = ""; //TODO
 
  // system events
@@ -225,16 +224,6 @@ int sample_test(String msg) //cloudfunction
 //***********************************
 
 
-//Subscription
-void handle_particle_event(const char *event, const char *data)
-{
-  String msg = String(subscribe_cnt);
-  msg = msg + String("|") + String(event) + String("|") + String(data);
-  subscribe_cnt = subscribe_cnt + 1;
-  String log_str = String(subscribe_cnt) + String("|");
-  SubscriptionLog.append(log_str);
-  Cloud::Publish(SUBSCRIPTION_EVENT, msg);
-}
 //System Events
 void handle_all_system_events(system_event_t event, int param) {
   system_event_cnt = system_event_cnt + 1;
@@ -421,7 +410,6 @@ void take_a_sample() {
    heartbeat.setup();
    charge_state.setup();
 
-   Particle.variable("b", subscribe_cnt);
    Particle.variable("c", last_publish_time);
    Particle.variable("d", system_event_cnt);
    Particle.variable("e", last_system_event_time);
