@@ -74,7 +74,8 @@ auto heartbeat = Heartbeat(SD);
 //***********************************
 //* Charge state
 //***********************************
-auto charge_state = ChargeState(SD);
+retained int RETAINED_FREQUENCY = ChargeState::DEFAULT_FREQ;
+auto charge_state = ChargeState(SD, &RETAINED_FREQUENCY);
 
 //***********************************
 //* Application State
@@ -393,6 +394,7 @@ void take_a_sample() {
 
    SD.setup();
    heartbeat.setup();
+   charge_state.setup();
 
    Particle.variable("b", subscribe_cnt);
    Particle.variable("c", last_publish_time);
