@@ -14,15 +14,15 @@ Getting Started
 
 Install the `particle-cli`, ideally just:
 
-    `npm install -g particle-cli`
+    npm install -g particle-cli
 
 But I had to then also:
 
-    `npm i -g node-gyp`
-    `ls ~/.particle` # note node version, mine was v5.4.1
-    `nvm use 5.4.1`
-    `cd ~/.particle/node_modules/serialport`
-    `node-gyp rebuild`
+    npm i -g node-gyp
+    ls ~/.particle     # note node version, mine was v5.4.1
+    nvm use 5.4.1
+    cd ~/.particle/node_modules/serialport
+    node-gyp rebuild
 
 Then blow out that terminal becase you don't really want that `nvm use` to persist.
 If everything's hunky dory, you can now run `particle --version` or some such.
@@ -30,18 +30,26 @@ If everything's hunky dory, you can now run `particle --version` or some such.
 
 ### Compiling
 
-    `particle compile electron`
+    particle compile electron
+    
+#### Compiling Locally
+
+The paricle CLI will use the cloud still, which is annoyingly slow IMHO.
+While there's theoretically a path to _actual_ local compilation, down that road
+lies madness. Your best bet is their [Atom plugin](https://atom.io/packages/particle-dev-local-compiler).
+You'll need to install Docker first. Compiles are still slower than I'd like,
+but only a few seconds at least.
 
 ### Claim the particle (must do once)
 
-    0. Plug in particle via USB
-    1. Enter 'listening mode': Hold `MODE` button for three seconds, until the
-       LED starts blinking blue.
-    2. `particle identify`
-    3. `particle device add <device id from last step>`
+  0. Plug in particle via USB
+  1. Enter 'listening mode': Hold `MODE` button for three seconds, until the
+     LED starts blinking blue.
+  2. `particle identify`
+  3. `particle device add <device id from last step>`
 
 ### Flashing
 
-    1. Enter 'dfu mode': Reset and then hold `MODE` button for three seconds,
-       until the LED starts blinking yellow.
-    2. `particle flash --usb <filename>.bin
+  1. Enter 'dfu mode': Reset and then hold `MODE` button for three seconds,
+     until the LED starts blinking yellow.
+  2. `particle flash --usb <filename>.bin`
