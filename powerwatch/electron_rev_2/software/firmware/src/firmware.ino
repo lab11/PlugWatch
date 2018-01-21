@@ -152,8 +152,6 @@ bool SD_READ_FLAG = false;
  //***********************************
  //* Cloud Variables
  //***********************************
- // publish
- retained String last_publish_time = ""; //TODO
 
  // system events
  retained int system_event_cnt = 0;
@@ -410,7 +408,6 @@ void take_a_sample() {
    heartbeat.setup();
    charge_state.setup();
 
-   Particle.variable("c", last_publish_time);
    Particle.variable("d", system_event_cnt);
    Particle.variable("e", last_system_event_time);
    Particle.variable("f", last_system_event_type);
