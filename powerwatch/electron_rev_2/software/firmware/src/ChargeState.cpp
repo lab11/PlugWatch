@@ -13,7 +13,6 @@ void ChargeState::setup() {
   super::setup();
 
   powerCheck.setup();
-  log.append("ChargeState setup complete. Initial frequency " + String(*frequency));
 }
 
 void ChargeState::send() {
@@ -23,10 +22,6 @@ void ChargeState::send() {
 }
 
 void ChargeState::periodic() {
-  send();
-}
-
-void ChargeState::timerCallback() {
   static bool last_charge_state = false;
   bool charge_state = powerCheck.getIsCharging();
 
@@ -40,7 +35,7 @@ void ChargeState::timerCallback() {
 
   if (charge_state != last_charge_state) {
     log.appendFromISR("Charge state change to " + String(charge_state));
-    timer_flag = true;
     last_charge_state = charge_state;
+    send();
   }
 }

@@ -124,7 +124,6 @@ retained int sample_buff_size = 1000;
 
 
 //Loop switches
-bool RESET_FLAG = false;
 bool SAMPLE_FLAG = false;
 bool SD_READ_FLAG = false;
 

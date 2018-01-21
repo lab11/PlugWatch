@@ -12,6 +12,14 @@ void FileLog::appendFromISR(String str) {
 }
 
 void FileLog::append(String str) {
-  Serial.println(this->filename + ": " + str);
-  this->sd.Write(this->filename, str);
+  Serial.println(filename + ": " + str);
+  //sd.Write(filename, str);
+}
+
+void FileLog::debugFromISR(String str) {
+  Serial.println("DEBUG\t" + filename + ": " + str);
+}
+
+void FileLog::debug(String str) {
+  Serial.println("DEBUG\t" + filename + ": " + str);
 }

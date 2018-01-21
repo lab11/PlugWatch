@@ -24,6 +24,7 @@ void PeriodicSubsystem::loop() {
 void PeriodicSubsystem::setup() {
   super::setup();
   timer.start();
+  log.append("Periodic setup complete. Initial frequency " + String(*frequency));
 }
 
 void PeriodicSubsystem::timerCallback() {
@@ -45,6 +46,7 @@ int PeriodicSubsystem::setFrequencyFromISR(int new_frequency) {
 }
 
 int PeriodicSubsystem::cloudCommand(String command) {
+  log.debugFromISR("PeriodicSubsystem::cloudCommand\t" + command);
   errno = 0;
   int new_frequency = strtol(command.c_str(), NULL, 10);
   if (errno != 0) {

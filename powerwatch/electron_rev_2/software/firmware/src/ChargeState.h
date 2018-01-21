@@ -6,6 +6,7 @@
 #include "SDCard.h"
 #include "Subsystem.h"
 
+/* Checks charging state at `frequency`. Publishes every change. */
 class ChargeState: public PeriodicSubsystem {
   typedef PeriodicSubsystem super;
 
@@ -15,7 +16,7 @@ public:
   ChargeState(SDCard &sd, int* frequency) :
     PeriodicSubsystem(sd, "charge_state_log", frequency) {}
 
-  static const int DEFAULT_FREQ = 1000 * 60 * 15;  // 15 min
+  static const int DEFAULT_FREQ = 1000 * 5;  // 5 seconds
 
   const String CHARGE_STATE_BATTERY = "b";
   const String CHARGE_STATE_WALL = "w";
@@ -25,6 +26,5 @@ public:
 private:
   void send();
   void periodic();
-  void timerCallback();
   String cloudFunctionName() { return "cs"; }
 };

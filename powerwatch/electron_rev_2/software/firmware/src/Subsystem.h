@@ -31,7 +31,7 @@ class PeriodicSubsystem: public Subsystem {
 protected:
   virtual int cloudCommand(String command);
 
-  const int MIN_FREQ = 1000 * 5;
+  const int MIN_FREQ = 1000 * 1;
   const int MAX_FREQ = 1000 * 60 * 60;
 
   int* frequency; // should point to retained memory for this instance
