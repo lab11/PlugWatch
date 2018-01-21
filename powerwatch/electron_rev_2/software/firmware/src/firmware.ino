@@ -94,6 +94,46 @@ public:
 auto resetSubsystem = Reset(SD, "reset_log.txt");
 
 //***********************************
+//* Time Sync
+//*
+//* Particle synchronizes its clock when it first connects. Over time, it will
+//* drift away from real time. This routine will re-sync local time.
+//***********************************
+const int TWELVE_HOURS = 1000 * 60 * 60 * 12;
+
+class TimeSync: public Subsystem {
+  typedef Subsystem super;
+  using Subsystem::Subsystem;
+
+  String cloudFunctionName() { return "timeSync"; }
+  int cloudCommand(String command) {
+    if (command == "now") {
+      sync();
+    }
+    return 0;
+  }
+
+  void sync() {
+    if (! Particle.syncTimePending()) { // if not currently syncing
+      unsigned long now = millis();
+      unsigned long last = Particle.timeSyncedLast();
+
+      if ((now - last) > TWELVE_HOURS) { // been a while
+        log.append("now " + String(now) + ", last sync " + String(last));
+        Particle.syncTime(); // kick off a sync
+      }
+    }
+  }
+
+public:
+  void loop() {
+    sync();
+  }
+};
+
+auto timeSyncSubsystem = TimeSync(SD, "time_sync.txt");
+
+//***********************************
 //* Heartbeat
 //***********************************
 retained int HEARTBEAT_FREQUENCY = Heartbeat::DEFAULT_FREQ;
@@ -217,6 +257,7 @@ void handle_all_system_events(system_event_t event, int param) {
 
    SD.setup();
    resetSubsystem.setup();
+   timeSyncSubsystem.setup();
    heartbeat.setup();
    charge_state.setup();
    imu.setup();
@@ -260,6 +301,7 @@ void loop() {
   }
 
   resetSubsystem.loop();
+  timeSyncSubsystem.loop();
   heartbeat.loop();
   charge_state.loop();
   imu.loop();
@@ -269,17 +311,6 @@ void loop() {
     SD_READ_FLAG = false;
     String sd_res = SD.Read(SD_LOG_NAME);
     Cloud::Publish(SD_READ_EVENT,sd_res);
-  }
-
-  //Sync Time
-#define ONE_DAY_MILLIS (24 * 60 * 60 * 1000)
-unsigned long lastSync = millis();
-  if (millis() - lastSync > ONE_DAY_MILLIS) {
-    Serial.println("time_sync");
-    Particle.syncTime();
-    lastSync = millis();
-    Cloud::Publish(TIME_SYNC_EVENT, "");
-    EventLog.append("time_sync");
   }
 
 
