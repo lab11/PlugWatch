@@ -8,7 +8,9 @@
 
 #define CHARGE_STATE_EVENT "c"
 #define HEARTBEAT_EVENT "h"
-#define SD_ERROR_EVENT "f"
+#define IMU_EVENT "i"
+#define IMU_ERROR_EVENT "!i"
+#define SD_ERROR_EVENT "!s"
 #define SD_READ_EVENT "l"
 
 class Cloud {
