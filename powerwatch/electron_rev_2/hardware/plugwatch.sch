@@ -3486,6 +3486,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </part>
 <part name="P+13" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="D2" library="leds" deviceset="LED" device="0603"/>
+<part name="R23" library="passives" deviceset="RESISTOR" device="0402_RES" value="1k">
+<attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND"/>
+</part>
+<part name="P+14" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
+<part name="D3" library="leds" deviceset="LED" device="0603"/>
 </parts>
 <sheets>
 <sheet>
@@ -3533,6 +3538,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <instance part="P+12" gate="VCC" x="93.98" y="152.4"/>
 <instance part="GND32" gate="1" x="121.92" y="127"/>
 <instance part="GND33" gate="1" x="38.1" y="132.08"/>
+<instance part="R23" gate="G$1" x="17.78" y="121.92" rot="R270">
+<attribute name="DIGIKEY" x="17.78" y="121.92" size="1.27" layer="96" rot="R270" display="off"/>
+</instance>
+<instance part="P+14" gate="VCC" x="17.78" y="132.08"/>
+<instance part="D3" gate="G$1" x="17.78" y="111.76" rot="R270"/>
 </instances>
 <busses>
 </busses>
@@ -3706,6 +3716,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="P+12" gate="VCC" pin="VCC"/>
 <wire x1="93.98" y1="147.32" x2="93.98" y2="149.86" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<pinref part="R23" gate="G$1" pin="1"/>
+<pinref part="P+14" gate="VCC" pin="VCC"/>
+<wire x1="17.78" y1="127" x2="17.78" y2="129.54" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="!SAFEMODE" class="0">
 <segment>
@@ -3833,6 +3848,25 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="A1" gate="A1" pin="B0"/>
 <wire x1="63.5" y1="104.14" x2="60.96" y2="104.14" width="0.1524" layer="91"/>
 <label x="60.96" y="104.14" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="N$3" class="0">
+<segment>
+<pinref part="R23" gate="G$1" pin="2"/>
+<pinref part="D3" gate="G$1" pin="ANODE"/>
+<wire x1="17.78" y1="114.3" x2="17.78" y2="119.38" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="LED" class="0">
+<segment>
+<pinref part="A1" gate="A1" pin="A1"/>
+<wire x1="63.5" y1="121.92" x2="60.96" y2="121.92" width="0.1524" layer="91"/>
+<label x="60.96" y="121.92" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<label x="17.78" y="104.14" size="1.016" layer="95" xref="yes"/>
+<pinref part="D3" gate="G$1" pin="CATHODE"/>
+<wire x1="17.78" y1="109.22" x2="17.78" y2="104.14" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
