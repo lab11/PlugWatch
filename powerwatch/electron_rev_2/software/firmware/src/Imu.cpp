@@ -14,7 +14,8 @@ void Imu::setup() {
 }
 
 void Imu::periodic() {
-  start_sampling();
+  // TODO: Make this work. Will crash if you try to sample now.
+  //start_sampling();
 }
 
 void Imu::start_sampling() {
