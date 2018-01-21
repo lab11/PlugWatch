@@ -4,22 +4,6 @@
 #include "Heartbeat.h"
 #include "FileLog.h"
 
-retained int Heartbeat::frequency = 1000 * 60 * 15;
-retained int Heartbeat::count = 0;
-
-
-void Heartbeat::timerCallback() {
-  count++;
-  timer_flag = true;
-}
-
-void Heartbeat::setup() {
-  timer.start();
-  Particle.function("hb", &Heartbeat::cloudCommand, this);
-
-  log.append("Heartbeat setup complete. Initial frequency " + String(frequency));
-}
-
 //Meta Data
 String do_meta_data() {
   String res;
@@ -44,9 +28,9 @@ String do_meta_data() {
   return res;
 }
 
-void Heartbeat::sendHeartbeat(bool force=false) {
+void Heartbeat::send(bool force) {
     String meta = do_meta_data();
-    String message = String(count)+String("|")+String(meta);
+    String message = String(*count)+String("|")+String(meta);
     if (force) {
       message = "FORCE|" + message;
     }
@@ -55,32 +39,20 @@ void Heartbeat::sendHeartbeat(bool force=false) {
 }
 
 void Heartbeat::loop() {
-  if (timer_flag) {
-    timer_flag = false;
+  super::loop();
 
-    log.append("Heartbeat! Count: " + String(count));
-    sendHeartbeat();
-  }
   if (force_flag) {
     force_flag = false;
 
     log.append("FORCE Set flag");
-    sendHeartbeat(true);
+    send(true);
   }
 }
 
-int Heartbeat::setFrequencyFromISR(int new_frequency) {
-  if ((new_frequency < MIN_FREQ) || (new_frequency > MAX_FREQ)) {
-    log.appendFromISR("Error updating heartbeat frequency. Got: " + new_frequency);
-    return -1;
-  }
-
-  frequency = new_frequency;
-  timer.changePeriodFromISR(frequency);
-  timer.resetFromISR();
-
-  log.appendFromISR("Set heartbeat frequency to " + String(frequency));
-  return 0;
+void Heartbeat::periodic() {
+  (*count)++;
+  log.append("Heartbeat! Count: " + String(*count));
+  send();
 }
 
 int Heartbeat::cloudCommand(String command) {
@@ -97,17 +69,11 @@ int Heartbeat::cloudCommand(String command) {
     return 0;
   }
   if ((command == "gc") || (command == "get count")) {
-    return count;
+    return *count;
   }
   if ((command == "gf") || (command == "get frequency")) {
-    return frequency;
+    return *frequency;
   }
 
-  errno = 0;
-  int new_frequency = strtol(command.c_str(), NULL, 10);
-  if (errno != 0) {
-    log.appendFromISR("Error updating heartbeat frequency. Got: " + frequency);
-    return -1;
-  }
-  return setFrequencyFromISR(new_frequency);
+  return super::cloudCommand(command);
 }

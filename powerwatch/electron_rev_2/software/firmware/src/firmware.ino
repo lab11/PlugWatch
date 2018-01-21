@@ -69,7 +69,9 @@ auto SubscriptionLog = FileLog(SD, "subscription_log.txt");
 //***********************************
 //* Heartbeat
 //***********************************
-auto heartbeat = Heartbeat(SD);
+retained int HEARTBEAT_FREQUENCY = Heartbeat::DEFAULT_FREQ;
+retained int HEARTBEAT_COUNT = 0;
+auto heartbeat = Heartbeat(SD, &HEARTBEAT_FREQUENCY, &HEARTBEAT_COUNT);
 
 //***********************************
 //* Charge state

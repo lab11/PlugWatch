@@ -22,6 +22,10 @@ void ChargeState::send() {
     log.append(power_stats);
 }
 
+void ChargeState::periodic() {
+  send();
+}
+
 void ChargeState::timerCallback() {
   static bool last_charge_state = false;
   bool charge_state = powerCheck.getIsCharging();

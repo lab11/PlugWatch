@@ -40,6 +40,7 @@ protected:
   Timer timer;
   bool timer_flag = false;
 
+  virtual void periodic() = 0;
   virtual void timerCallback();
   int setFrequencyFromISR(int frequency);
 

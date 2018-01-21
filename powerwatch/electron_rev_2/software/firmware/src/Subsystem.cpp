@@ -12,11 +12,12 @@ void Subsystem::loop() {
 
 
 void PeriodicSubsystem::loop() {
+  super::loop();
   if (timer_flag) {
     timer_flag = false;
 
     log.append("Timer event.");
-    send();
+    periodic();
   }
 }
 
@@ -26,7 +27,6 @@ void PeriodicSubsystem::setup() {
 }
 
 void PeriodicSubsystem::timerCallback() {
-  super::loop();
   timer_flag = true;
 }
 

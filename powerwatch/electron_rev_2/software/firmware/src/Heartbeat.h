@@ -4,37 +4,31 @@
 
 #include "FileLog.h"
 #include "SDCard.h"
+#include "Subsystem.h"
 
-class Heartbeat {
-  FileLog log;
-  Timer timer;
+class Heartbeat: public PeriodicSubsystem {
+  typedef PeriodicSubsystem super;
 
-  bool timer_flag = false;
   bool force_flag = false;
+  int* count;
 
 public:
-  const int MIN_FREQ = 1000 * 5;
-  const int MAX_FREQ = 1000 * 60 * 60;
+  Heartbeat(SDCard &sd, int* frequency, int* count) :
+    PeriodicSubsystem(sd, "heartbeat_log", frequency),
+    count { count } {}
 
-  Heartbeat(SDCard &sd) :
-    log { FileLog(sd, "heartbeat_log.txt") },
-    timer { Timer(frequency, &Heartbeat::timerCallback, *this) } {}
-
-  // Call during initial setup
-  void setup();
+  static const int DEFAULT_FREQ = 1000 * 60 * 15;  // 15 min
 
   // Called every main loop
   void loop();
 
 private:
-  void sendHeartbeat(bool force);
-  void timerCallback();
-  int setFrequencyFromISR(int frequency);
+  void periodic();
+  void send() { send(false); }
+  void send(bool force);
+  String cloudFunctionName() { return "hb"; }
 
   // "enable", "disable", "get frequency"/"gf" "get count"/"gc", "now", or send
   // a numeric frequency (auto-enables)
   int cloudCommand(String command);
-
-  static int frequency;
-  static int count;
 };
