@@ -10,10 +10,6 @@
  */
 class PowerCheck {
 public:
-
-	PowerCheck();
-	virtual ~PowerCheck();
-
 	/**
 	 * You must call this out of setup() to initialize the interrupt handler!
 	 */
