@@ -21,8 +21,6 @@
 //***********************************
 //* TODO's
 //***********************************
-//WD
-//Charge state interrupts
 //System state logging
 //Ack routine
 //IMU readings on charge state
@@ -106,8 +104,9 @@ auto heartbeat = Heartbeat(SD, &HEARTBEAT_FREQUENCY, &HEARTBEAT_COUNT);
 //***********************************
 //* Charge state
 //***********************************
-retained int RETAINED_FREQUENCY = ChargeState::DEFAULT_FREQ;
-auto charge_state = ChargeState(SD, &RETAINED_FREQUENCY);
+retained int CHARGE_STATE_FREQUENCY = ChargeState::DEFAULT_FREQ;
+auto charge_state = ChargeState(SD, &CHARGE_STATE_FREQUENCY);
+
 
 //***********************************
 //* Application State
