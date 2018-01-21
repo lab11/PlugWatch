@@ -10,8 +10,6 @@ class Subsystem {
 protected:
   FileLog log;
 
-  virtual void send() = 0;
-
   virtual String cloudFunctionName() = 0;
   virtual int cloudCommand(String command) = 0;
 

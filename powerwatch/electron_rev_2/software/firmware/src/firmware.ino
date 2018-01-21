@@ -65,6 +65,36 @@ auto SubscriptionLog = FileLog(SD, "subscription_log.txt");
 
 //GoogleMapsDeviceLocator locator;
 
+//***********************************
+//* Reset Monitor
+//***********************************
+class Reset: public Subsystem {
+  typedef Subsystem super;
+  using Subsystem::Subsystem;
+
+  // Defer this to the `loop` method so the cloud will get the ACK
+  bool reset_flag = false;
+
+  String cloudFunctionName() { return "reset"; }
+  int cloudCommand(String command) {
+    // Escape hatch if things are really borked
+    if (command == "hard") {
+      System.reset();
+    }
+    reset_flag = true;
+    return 0;
+  }
+
+public:
+  void loop() {
+    super::loop();
+    if (reset_flag) {
+      System.reset();
+    }
+  }
+};
+
+auto resetSubsystem = Reset(SD, "reset_log.txt");
 
 //***********************************
 //* Heartbeat
@@ -169,13 +199,6 @@ int set_sample_buff(String frequency) { //cloudfunction
     init_sample_buffer();
     FunctionLog.append("set_sample_buff");
     return 0;
-}
-
-//TODO testing
-int cloud_reboot(String ack) { //cloudfunction
-  RESET_FLAG = true;
-  FunctionLog.append("cloud_reboot");
-  return ack.toInt();
 }
 
 int cloud_function_sd_power_cycle(String _unused_msg) {
@@ -395,6 +418,7 @@ void take_a_sample() {
    pinMode(debug_led_2, OUTPUT);
 
    SD.setup();
+   resetSubsystem.setup();
    heartbeat.setup();
    charge_state.setup();
 
@@ -408,7 +432,6 @@ void take_a_sample() {
    Particle.variable("l", num_reboots);
    Particle.variable("v", String(System.version().c_str()));
 
-   Particle.function("reboot",cloud_reboot);
    Particle.function("samp_freq",set_sample_poll_frequency);
    Particle.function("samp_buff",set_sample_buff);
    Particle.function("sd_reboot",cloud_function_sd_power_cycle);
@@ -435,13 +458,6 @@ unsigned long lastCheck = 0;
 char lastStatus[256];
 
 void loop() {
-  // Reboot the system
-  if (RESET_FLAG) {
-    Serial.println("reset");
-    RESET_FLAG = false;
-    System.reset();
-  }
-
   // Allow particle to do any processing
   // https://docs.particle.io/reference/firmware/photon/#manual-mode
   if (Particle.connected()) {
@@ -473,6 +489,7 @@ void loop() {
     }
   }
 
+  resetSubsystem.loop();
   heartbeat.loop();
   charge_state.loop();
 
