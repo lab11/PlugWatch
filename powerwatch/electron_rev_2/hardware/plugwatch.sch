@@ -3652,37 +3652,37 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="162.56" y="119.38" size="1.27" layer="95" xref="yes"/>
 </segment>
 <segment>
-<wire x1="86.36" y1="137.16" x2="88.9" y2="137.16" width="0.1524" layer="91"/>
-<label x="88.9" y="137.16" size="1.27" layer="95" xref="yes"/>
-<pinref part="A1" gate="A1" pin="D7"/>
+<wire x1="63.5" y1="119.38" x2="60.96" y2="119.38" width="0.1524" layer="91"/>
+<label x="60.96" y="119.38" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="A1" gate="A1" pin="A0"/>
 </segment>
 </net>
 <net name="BLE_TXD" class="0">
 <segment>
-<pinref part="A1" gate="A1" pin="C0"/>
-<wire x1="86.36" y1="104.14" x2="88.9" y2="104.14" width="0.1524" layer="91"/>
-<label x="88.9" y="104.14" size="1.27" layer="95" xref="yes"/>
+<label x="88.9" y="109.22" size="1.27" layer="95" xref="yes"/>
+<pinref part="A1" gate="A1" pin="C2"/>
+<wire x1="88.9" y1="109.22" x2="86.36" y2="109.22" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="BLE_RXD" class="0">
 <segment>
-<pinref part="A1" gate="A1" pin="C1"/>
-<wire x1="86.36" y1="106.68" x2="88.9" y2="106.68" width="0.1524" layer="91"/>
-<label x="88.9" y="106.68" size="1.27" layer="95" xref="yes"/>
+<wire x1="86.36" y1="111.76" x2="88.9" y2="111.76" width="0.1524" layer="91"/>
+<label x="88.9" y="111.76" size="1.27" layer="95" xref="yes"/>
+<pinref part="A1" gate="A1" pin="C3"/>
 </segment>
 </net>
 <net name="WIFI_TXD" class="0">
 <segment>
-<pinref part="A1" gate="A1" pin="C2"/>
-<wire x1="86.36" y1="109.22" x2="88.9" y2="109.22" width="0.1524" layer="91"/>
-<label x="88.9" y="109.22" size="1.27" layer="95" xref="yes"/>
+<wire x1="86.36" y1="104.14" x2="88.9" y2="104.14" width="0.1524" layer="91"/>
+<label x="88.9" y="104.14" size="1.27" layer="95" xref="yes"/>
+<pinref part="A1" gate="A1" pin="C0"/>
 </segment>
 </net>
 <net name="WIFI_RXD" class="0">
 <segment>
-<pinref part="A1" gate="A1" pin="C3"/>
-<wire x1="86.36" y1="111.76" x2="88.9" y2="111.76" width="0.1524" layer="91"/>
-<label x="88.9" y="111.76" size="1.27" layer="95" xref="yes"/>
+<label x="88.9" y="106.68" size="1.27" layer="95" xref="yes"/>
+<pinref part="A1" gate="A1" pin="C1"/>
+<wire x1="86.36" y1="106.68" x2="88.9" y2="106.68" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="GPS_RXD" class="0">
@@ -3701,23 +3701,23 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="SENSORS_SDA" class="0">
 <segment>
-<pinref part="A1" gate="A1" pin="C4"/>
-<wire x1="86.36" y1="114.3" x2="88.9" y2="114.3" width="0.1524" layer="91"/>
-<label x="88.9" y="114.3" size="1.27" layer="95" xref="yes"/>
+<label x="88.9" y="119.38" size="1.27" layer="95" xref="yes"/>
+<pinref part="A1" gate="A1" pin="D0"/>
+<wire x1="88.9" y1="119.38" x2="86.36" y2="119.38" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="SENSORS_SCL" class="0">
 <segment>
-<pinref part="A1" gate="A1" pin="C5"/>
-<wire x1="86.36" y1="116.84" x2="88.9" y2="116.84" width="0.1524" layer="91"/>
-<label x="88.9" y="116.84" size="1.27" layer="95" xref="yes"/>
+<label x="88.9" y="121.92" size="1.27" layer="95" xref="yes"/>
+<pinref part="A1" gate="A1" pin="D1"/>
+<wire x1="88.9" y1="121.92" x2="86.36" y2="121.92" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="!WIFI_RESET" class="0">
 <segment>
-<wire x1="86.36" y1="132.08" x2="88.9" y2="132.08" width="0.1524" layer="91"/>
-<label x="88.9" y="132.08" size="1.27" layer="95" xref="yes"/>
-<pinref part="A1" gate="A1" pin="D5"/>
+<label x="88.9" y="114.3" size="1.27" layer="95" xref="yes"/>
+<pinref part="A1" gate="A1" pin="C4"/>
+<wire x1="88.9" y1="114.3" x2="86.36" y2="114.3" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="!GPS_RESET" class="0">
@@ -3736,23 +3736,23 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="NRF_SWDIO/!RESET" class="0">
 <segment>
-<wire x1="86.36" y1="124.46" x2="88.9" y2="124.46" width="0.1524" layer="91"/>
-<label x="88.9" y="124.46" size="1.27" layer="95" xref="yes"/>
-<pinref part="A1" gate="A1" pin="D2"/>
+<wire x1="86.36" y1="137.16" x2="88.9" y2="137.16" width="0.1524" layer="91"/>
+<label x="88.9" y="137.16" size="1.27" layer="95" xref="yes"/>
+<pinref part="A1" gate="A1" pin="D7"/>
 </segment>
 </net>
 <net name="!LIGHT_INT" class="0">
 <segment>
-<wire x1="86.36" y1="121.92" x2="88.9" y2="121.92" width="0.1524" layer="91"/>
-<label x="88.9" y="121.92" size="1.27" layer="95" xref="yes"/>
-<pinref part="A1" gate="A1" pin="D1"/>
+<label x="60.96" y="121.92" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="A1" gate="A1" pin="A1"/>
+<wire x1="63.5" y1="121.92" x2="60.96" y2="121.92" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="!IMU_INT" class="0">
 <segment>
-<wire x1="86.36" y1="119.38" x2="88.9" y2="119.38" width="0.1524" layer="91"/>
-<label x="88.9" y="119.38" size="1.27" layer="95" xref="yes"/>
-<pinref part="A1" gate="A1" pin="D0"/>
+<wire x1="86.36" y1="124.46" x2="88.9" y2="124.46" width="0.1524" layer="91"/>
+<label x="88.9" y="124.46" size="1.27" layer="95" xref="yes"/>
+<pinref part="A1" gate="A1" pin="D2"/>
 </segment>
 </net>
 <net name="AUDIO_OUT" class="0">
@@ -3764,9 +3764,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="AUDIO_PWR_EN" class="0">
 <segment>
-<pinref part="A1" gate="A1" pin="B0"/>
-<wire x1="63.5" y1="104.14" x2="60.96" y2="104.14" width="0.1524" layer="91"/>
-<label x="60.96" y="104.14" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="60.96" y="114.3" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="A1" gate="A1" pin="B4"/>
+<wire x1="60.96" y1="114.3" x2="63.5" y2="114.3" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$3" class="0">
@@ -3778,9 +3778,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="LED" class="0">
 <segment>
-<pinref part="A1" gate="A1" pin="A1"/>
-<wire x1="63.5" y1="121.92" x2="60.96" y2="121.92" width="0.1524" layer="91"/>
-<label x="60.96" y="121.92" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="88.9" y="116.84" size="1.27" layer="95" xref="yes"/>
+<pinref part="A1" gate="A1" pin="C5"/>
+<wire x1="86.36" y1="116.84" x2="88.9" y2="116.84" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <label x="17.78" y="104.14" size="1.016" layer="95" xref="yes"/>
@@ -3790,9 +3790,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="WIFI_PWR_EN" class="0">
 <segment>
-<pinref part="A1" gate="A1" pin="A0"/>
-<wire x1="63.5" y1="119.38" x2="60.96" y2="119.38" width="0.1524" layer="91"/>
-<label x="60.96" y="119.38" size="1.27" layer="95" rot="R180" xref="yes"/>
+<wire x1="63.5" y1="106.68" x2="60.96" y2="106.68" width="0.1524" layer="91"/>
+<label x="60.96" y="106.68" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="A1" gate="A1" pin="B1"/>
 </segment>
 </net>
 <net name="BLE_PWR_EN" class="0">
@@ -4037,6 +4037,10 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="137.16" y1="148.59" x2="137.16" y2="154.94" width="0.1524" layer="91"/>
 <wire x1="137.16" y1="154.94" x2="134.62" y2="154.94" width="0.1524" layer="91"/>
 <junction x="134.62" y="154.94"/>
+<pinref part="U1" gate="MAX-M8" pin="V_BCKP"/>
+<wire x1="139.7" y1="148.59" x2="139.7" y2="154.94" width="0.1524" layer="91"/>
+<wire x1="139.7" y1="154.94" x2="137.16" y2="154.94" width="0.1524" layer="91"/>
+<junction x="137.16" y="154.94"/>
 </segment>
 <segment>
 <pinref part="R1" gate="G$1" pin="2"/>
