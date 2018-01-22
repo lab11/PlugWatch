@@ -17,8 +17,9 @@ public:
   void setup();
 
 private:
-  // Called from Arduino loop, but only at `frequency` rate rather than every loop
-  void periodic();
+  // Called from Arduino loop, but only at `frequency` rate rather than every loop.
+  // The cloud can also `force` a call of this function.
+  void periodic(bool force);
 
   String cloudFunctionName() { return "gps"; }
 };

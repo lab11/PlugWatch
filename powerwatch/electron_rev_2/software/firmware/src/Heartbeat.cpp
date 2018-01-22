@@ -38,41 +38,15 @@ void Heartbeat::send(bool force) {
     Cloud::Publish(HEARTBEAT_EVENT, message);
 }
 
-void Heartbeat::loop() {
-  super::loop();
-
-  if (force_flag) {
-    force_flag = false;
-
-    log.append("FORCE Set flag");
-    send(true);
-  }
-}
-
-void Heartbeat::periodic() {
+void Heartbeat::periodic(bool force) {
   (*count)++;
   log.append("Heartbeat! Count: " + String(*count));
-  send();
+  send(force);
 }
 
 int Heartbeat::cloudCommand(String command) {
-  if (command == "enable") {
-    timer.startFromISR();
-    return 0;
-  }
-  if (command == "disable") {
-    timer.stopFromISR();
-    return 0;
-  }
-  if ((command == "now") || (command == "force")) {
-    force_flag = true;
-    return 0;
-  }
   if ((command == "gc") || (command == "get count")) {
     return *count;
-  }
-  if ((command == "gf") || (command == "get frequency")) {
-    return *frequency;
   }
 
   return super::cloudCommand(command);

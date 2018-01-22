@@ -9,6 +9,6 @@ void Gps::setup() {
   // GPS setup here
 }
 
-void Gps::periodic() {
+void Gps::periodic(bool force) {
   // GPS periodic operation here
 }

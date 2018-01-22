@@ -13,7 +13,7 @@ void Imu::setup() {
   self_test_str = self_test();
 }
 
-void Imu::periodic() {
+void Imu::periodic(bool force) {
   // TODO: Make this work. Will crash if you try to sample now.
   //start_sampling();
 }

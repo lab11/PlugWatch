@@ -21,7 +21,7 @@ void ChargeState::send() {
     log.append(power_stats);
 }
 
-void ChargeState::periodic() {
+void ChargeState::periodic(bool force) {
   static bool last_charge_state = false;
   bool charge_state = powerCheck.getIsCharging();
 
@@ -36,6 +36,9 @@ void ChargeState::periodic() {
   if (charge_state != last_charge_state) {
     log.appendFromISR("Charge state change to " + String(charge_state));
     last_charge_state = charge_state;
+    send();
+  }
+  if (force) {
     send();
   }
 }

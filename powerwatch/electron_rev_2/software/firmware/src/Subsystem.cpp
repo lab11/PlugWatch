@@ -13,11 +13,18 @@ void Subsystem::loop() {
 
 void PeriodicSubsystem::loop() {
   super::loop();
+
   if (timer_flag) {
     timer_flag = false;
 
     log.append("Timer event.");
-    periodic();
+    periodic(false);
+  }
+  if (force_flag) {
+    force_flag = false;
+
+    log.append("Force event.");
+    periodic(true);
   }
 }
 
@@ -47,6 +54,24 @@ int PeriodicSubsystem::setFrequencyFromISR(int new_frequency) {
 
 int PeriodicSubsystem::cloudCommand(String command) {
   log.debugFromISR("PeriodicSubsystem::cloudCommand\t" + command);
+
+  if (command == "enable") {
+    timer.startFromISR();
+    return 0;
+  }
+  if (command == "disable") {
+    timer.stopFromISR();
+    return 0;
+  }
+  if ((command == "now") || (command == "force")) {
+    force_flag = true;
+    return 0;
+  }
+  if ((command == "gf") || (command == "get frequency")) {
+    return *frequency;
+  }
+
+  // This might not be the best to just blindly set all numbers, eh..
   errno = 0;
   int new_frequency = strtol(command.c_str(), NULL, 10);
   if (errno != 0) {

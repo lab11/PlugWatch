@@ -25,6 +25,6 @@ public:
 
 private:
   void send();
-  void periodic();
+  void periodic(bool force);
   String cloudFunctionName() { return "cs"; }
 };

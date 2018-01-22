@@ -36,7 +36,7 @@ public:
   String self_test();
 
 private:
-  void periodic();
+  void periodic(bool force);
   String cloudFunctionName() { return "imu"; }
 
   void sampleTimerCallback();
