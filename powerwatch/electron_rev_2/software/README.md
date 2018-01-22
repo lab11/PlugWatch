@@ -61,3 +61,11 @@ especially across open/closing.
   1. Enter 'dfu mode': Reset and then hold `MODE` button for three seconds,
      until the LED starts blinking yellow.
   2. `particle flash --usb <filename>.bin`
+  
+### Listening to Serial
+
+I recommend `particle serial monitor --follow`
+
+Annoyingly, every time the particle resets, the modem disappears and reappears.
+The `--follow` flag will automatically reconnect, but there's a bit of a delay,
+so you're gonna lose the first few messages. I've never solved this puzzle.
