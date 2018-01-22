@@ -3,17 +3,11 @@
 #include "Cloud.h"
 #include "SDCard.h"
 
-const uint8_t SD_INT_PIN = D6;
-const uint8_t SD_ENABLE_PIN = A6;
-const uint8_t SD_CHIP_SELECT = A2;
-
-//SdFatSoftSpi<A5, A4, A3> sd; // rev2 HW
-SdFatSoftSpi<A4, A5, A3> sd; // rev1 HW
-
 void SDCard::setup() {
   super::setup();
 
-   pinMode(SD_ENABLE_PIN, OUTPUT);
+  pinMode(SD_ENABLE_PIN, OUTPUT);
+  digitalWrite(SD_ENABLE_PIN, LOW);
 }
 
 void SDCard::loop() {
@@ -58,9 +52,11 @@ void SDCard::PowerCycle() {
 }
 
 void SDCard::Write(String filename, String to_write) {
+  log.debug("write begin: " + filename);
 	if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
-		Serial.println("CAN'T OPEN SD");
+		log.debug("CAN'T OPEN SD");
 		Cloud::Publish(SD_ERROR_EVENT, "init");
+    return;
 	}
 	File file_to_write;
 	String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
@@ -73,10 +69,11 @@ void SDCard::Write(String filename, String to_write) {
 	}
 	file_to_write.println(final_to_write);
 	file_to_write.close();
-	Serial.println(String("wrote : ") + String(filename) + String(":") + to_write);
+	log.debug(String("wrote : ") + String(filename) + String(":") + to_write);
 }
 
 String SDCard::Read(String filename) {
+  log.debug("read begin: " + filename);
 	File myFile;
 	if (!myFile.open(filename, O_READ)) {
 		//sd.errorHalt(String("opening ") + String(filename) + String(" for read failed"));
