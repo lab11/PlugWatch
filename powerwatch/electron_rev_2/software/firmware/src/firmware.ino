@@ -11,6 +11,7 @@
 #include "ChargeState.h"
 #include "Cloud.h"
 #include "FileLog.h"
+#include "Gps.h"
 #include "Heartbeat.h"
 #include "Imu.h"
 #include "SDCard.h"
@@ -154,6 +155,12 @@ retained int IMU_SAMPLE_COUNT = Imu::DEFAULT_SAMPLE_COUNT;
 retained int IMU_SAMPLE_RATE = Imu::DEFAULT_SAMPLE_RATE_MS;
 auto imu = Imu(SD, &IMU_FREQUENCY, &IMU_SAMPLE_COUNT, &IMU_SAMPLE_RATE);
 
+//***********************************
+//* GPS
+//***********************************
+retained int GPS_FREQUENCY = Gps::DEFAULT_FREQ;
+auto gpsSubsystem = Gps(SD, &GPS_FREQUENCY);
+
 
 //***********************************
 //* Application State
@@ -261,6 +268,7 @@ void handle_all_system_events(system_event_t event, int param) {
    heartbeat.setup();
    charge_state.setup();
    imu.setup();
+   gpsSubsystem.setup();
 
    Particle.variable("d", system_event_cnt);
    Particle.variable("e", last_system_event_time);
@@ -305,6 +313,7 @@ void loop() {
   heartbeat.loop();
   charge_state.loop();
   imu.loop();
+  gpsSubsystem.loop();
 
   if (SD_READ_FLAG) {
     Serial.println("sd read flag");
