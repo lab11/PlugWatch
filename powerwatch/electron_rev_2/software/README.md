@@ -40,6 +40,14 @@ lies madness. Your best bet is their [Atom plugin](https://atom.io/packages/part
 You'll need to install Docker first. Compiles are still slower than I'd like,
 but only a few seconds at least.
 
+#### Cryptic error / error you didn't have before?
+
+For example `error: 'LOW_BAT_UC' was not declared in this scope`
+
+Make sure that you're building for the right device (an `electron`).
+The IDE in particular tends to like to forget what you're building for,
+especially across open/closing.
+
 ### Claim the particle (must do once)
 
   0. Plug in particle via USB
