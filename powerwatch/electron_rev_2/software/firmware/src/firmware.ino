@@ -57,12 +57,10 @@ ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, System.reset);
 
 
 //***********************************
-//* SD Card & Logging
+//* SD Card
 //***********************************
 SDCard SD;
-auto EventLog = FileLog(SD, "event_log.txt");
 
-//GoogleMapsDeviceLocator locator;
 
 //***********************************
 //* Reset Monitor
@@ -162,40 +160,9 @@ auto imuSubsystem = Imu(SD, &IMU_FREQUENCY, &IMU_SAMPLE_COUNT, &IMU_SAMPLE_RATE)
 retained int GPS_FREQUENCY = Gps::DEFAULT_FREQ;
 auto gpsSubsystem = Gps(SD, &GPS_FREQUENCY);
 
+// TODO: Look into this library
+//GoogleMapsDeviceLocator locator;
 
-//***********************************
-//* Application State
-//***********************************
-
-//Loop switches
-bool SAMPLE_FLAG = false;
-
-String SD_LOG_NAME = "";
-
- //***********************************
- //* Cloud Publish
- //***********************************
-
- //publish wrapper types
- String SYSTEM_EVENT = "s";
- String SUBSCRIPTION_EVENT = "r";
- String TIME_SYNC_EVENT = "t";
- String CLOUD_FUNCTION_TEST_EVENT = "g";
-
-
-
- //***********************************
- //* Cloud Variables
- //***********************************
-
- // system events
- retained int system_event_cnt = 0;
- retained String last_system_event_time = "";
- retained int last_system_event_type = -999;
- retained int num_reboots = 0; //TODO
-
- String sample_buffer;
- retained int sample_cnt;
 
  //***********************************
  //* CLOUD FUNCTIONS
@@ -209,10 +176,27 @@ String SD_LOG_NAME = "";
  }
 
 
+//***********************************
+//* System Events
+//***********************************
+// Not sure if we want to do anything with these in the long run, but for now
+// just keep track of everything that happens
+auto EventLog = FileLog(SD, "event_log.txt");
 
-//System Events
+String SYSTEM_EVENT = "s";
+retained int system_event_count = 0;
+retained String last_system_event_time = "";
+retained int last_system_event_type = -999;
+retained int num_reboots = 0;
+
+void system_events_setup() {
+  Particle.variable("d", system_event_count);
+  Particle.variable("e", last_system_event_time);
+  Particle.variable("f", last_system_event_type);
+}
+
 void handle_all_system_events(system_event_t event, int param) {
-  system_event_cnt = system_event_cnt + 1;
+  system_event_count++;
   Serial.printlnf("got event %d with value %d", event, param);
   String system_event_str = String((int)event) + "|" + String(param);
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
@@ -223,56 +207,56 @@ void handle_all_system_events(system_event_t event, int param) {
 }
 
 
-  //***********************************
-  //* ye-old Arduino
-  //***********************************
- void setup() {
-   Serial.begin(9600);
-   Serial.println("Initial Setup.");
+//***********************************
+//* ye-old Arduino
+//***********************************
+void setup() {
+  // if (System.resetReason() == RESET_REASON_PANIC) {
+  //   System.enterSafeMode();
+  // }
+  num_reboots++;
 
-   Wire.begin();
-   System.on(all_events, handle_all_system_events);
+  // Set up debugging UART
+  Serial.begin(9600);
+  Serial.println("Initial Setup.");
 
-   num_reboots = num_reboots + 1;
-   FuelGauge().quickStart();
+  // Set up I2C
+  Wire.begin();
 
-   /*
-   if (System.resetReason() == RESET_REASON_PANIC) {
-       System.enterSafeMode();
-   }
-   */
+  // For now, just grab everything that happens and log about it
+  // https://docs.particle.io/reference/firmware/photon/#system-events
+  System.on(all_events, handle_all_system_events);
 
-   pinMode(debug_led_1, OUTPUT);
-   pinMode(debug_led_2, OUTPUT);
+  FuelGauge().quickStart();
 
-   // Setup SD card first so that other setups can log
-   SD.setup();
 
-   resetSubsystem.setup();
-   timeSyncSubsystem.setup();
-   heartbeatSubsystem.setup();
-   chargeStateSubsystem.setup();
-   imuSubsystem.setup();
-   gpsSubsystem.setup();
+  pinMode(debug_led_1, OUTPUT);
+  pinMode(debug_led_2, OUTPUT);
 
-   Particle.variable("d", system_event_cnt);
-   Particle.variable("e", last_system_event_time);
-   Particle.variable("f", last_system_event_type);
-   Particle.variable("l", num_reboots);
-   Particle.variable("v", String(System.version().c_str()));
+  // Setup SD card first so that other setups can log
+  SD.setup();
 
-   Particle.function("soc",get_soc);
-   Particle.function("battv",get_battv);
+  system_events_setup();
 
-   LEDStatus status;
-   status.off();
-   Particle.connect();
+  resetSubsystem.setup();
+  timeSyncSubsystem.setup();
+  heartbeatSubsystem.setup();
+  chargeStateSubsystem.setup();
+  imuSubsystem.setup();
+  gpsSubsystem.setup();
 
-   Serial.println("Setup complete.");
- }
+  Particle.variable("l", num_reboots);
+  Particle.variable("v", String(System.version().c_str()));
 
-unsigned long lastCheck = 0;
-char lastStatus[256];
+  Particle.function("soc",get_soc);
+  Particle.function("battv",get_battv);
+
+  LEDStatus status;
+  status.off();
+  Particle.connect();
+
+  Serial.println("Setup complete.");
+}
 
 void loop() {
   // Allow particle to do any processing
