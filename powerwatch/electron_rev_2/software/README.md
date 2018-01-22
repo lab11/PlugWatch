@@ -62,6 +62,13 @@ especially across open/closing.
      until the LED starts blinking yellow.
   2. `particle flash --usb <filename>.bin`
   
+#### Flashing made easier
+
+`stty -f /dev/tty.usbmodem14321 14400 && particle flash --usb $(ls -t | grep firmware | head -1)`
+
+The first part puts the particle into DFU mode. The last part chooses the most
+recent file based on filesystem timestamp.
+  
 ### Listening to Serial
 
 I recommend `particle serial monitor --follow`
