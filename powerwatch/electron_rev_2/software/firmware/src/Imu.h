@@ -2,6 +2,8 @@
 
 #include <Particle.h>
 
+#include <MPU9250.h>
+
 #include "FileLog.h"
 #include "SDCard.h"
 #include "Subsystem.h"
@@ -9,6 +11,7 @@
 class Imu: public PeriodicSubsystem {
   typedef PeriodicSubsystem super;
 
+  MPU9250 myIMU;
   String self_test_str;
 
   int* sample_count;

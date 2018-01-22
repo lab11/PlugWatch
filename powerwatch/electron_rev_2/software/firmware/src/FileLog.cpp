@@ -4,6 +4,7 @@
 
 #include <Particle.h>
 
+#include "Cloud.h"
 #include "FileLog.h"
 
 void FileLog::appendFromISR(String str) {
@@ -22,6 +23,7 @@ void FileLog::errorFromISR(String str) {
 
 void FileLog::error(String str) {
   Serial.println("ERROR|" + filename + ": " + str);
+  Cloud::Publish(ERROR_EVENT, str);
 }
 
 void FileLog::debugFromISR(String str) {

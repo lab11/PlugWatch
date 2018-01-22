@@ -6,6 +6,8 @@
 
 #include <Particle.h>
 
+#define ERROR_EVENT "!"
+
 #define CHARGE_STATE_EVENT "c"
 #define HEARTBEAT_EVENT "h"
 #define IMU_EVENT "i"

@@ -1,15 +1,15 @@
-#include <MPU9250.h>
 #include <Particle.h>
+
+// https://build.particle.io/libs/SparkFun_MPU-9250/1.0.0/tab/example/MPU9250BasicAHRS.ino
+#include <MPU9250.h>
 #include <quaternionFilters.h>
 
 #include "Imu.h"
 
-//TODO add a constant sample buffer... save last 1000 samples plus next 1000 samples on charge state change
-MPU9250 myIMU;
-
 void Imu::setup() {
   super::setup();
 
+  // TODO: Report error if this fails and don't try to use IMU in this session
   self_test_str = self_test();
 }
 
