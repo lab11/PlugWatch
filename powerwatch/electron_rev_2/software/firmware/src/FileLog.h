@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "SDCard.h"
+class SDCard;
 
 class FileLog {
   SDCard &sd;

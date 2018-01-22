@@ -3,8 +3,8 @@
 #include <Particle.h>
 
 #include "FileLog.h"
-#include "SDCard.h"
 
+class SDCard;
 class Subsystem {
 
 protected:

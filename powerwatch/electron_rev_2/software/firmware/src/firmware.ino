@@ -4,10 +4,14 @@
  * Author: Noah Klugman; Pat Pannuto
  */
 
-#include <CellularHelper.h>
-#include <google-maps-device-locator.h>
+// Native
 #include <Particle.h>
 
+// Third party libraries
+#include <CellularHelper.h>
+#include <google-maps-device-locator.h>
+
+// Our code
 #include "ChargeState.h"
 #include "Cloud.h"
 #include "FileLog.h"
@@ -15,6 +19,7 @@
 #include "Heartbeat.h"
 #include "Imu.h"
 #include "SDCard.h"
+#include "Subsystem.h"
 #include "firmware.h"
 
 
@@ -55,11 +60,7 @@ ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, System.reset);
 //* SD Card & Logging
 //***********************************
 SDCard SD;
-auto ErrorLog = FileLog(SD, "error_log.txt");
 auto EventLog = FileLog(SD, "event_log.txt");
-auto FunctionLog = FileLog(SD, "function_log.txt");
-auto SampleLog = FileLog(SD, "sample_log.txt");
-auto SubscriptionLog = FileLog(SD, "subscription_log.txt");
 
 //GoogleMapsDeviceLocator locator;
 
@@ -168,7 +169,6 @@ auto gpsSubsystem = Gps(SD, &GPS_FREQUENCY);
 
 //Loop switches
 bool SAMPLE_FLAG = false;
-bool SD_READ_FLAG = false;
 
 String SD_LOG_NAME = "";
 
@@ -200,17 +200,6 @@ String SD_LOG_NAME = "";
  //***********************************
  //* CLOUD FUNCTIONS
  //***********************************
-int debug_sd(String file) {
-  SD_READ_FLAG = true;
-  SD_LOG_NAME = file;
-  return 0;
-}
-
-int cloud_function_sd_power_cycle(String _unused_msg) {
-  SD.PowerCycle();
-  return 0;
-}
-
  int get_soc(String c) { //cloudfunction
      return (int)(FuelGauge().getSoC());
  }
@@ -247,9 +236,6 @@ void handle_all_system_events(system_event_t event, int param) {
    num_reboots = num_reboots + 1;
    FuelGauge().quickStart();
 
-   //cout << uppercase << showbase << endl;
-
-
    /*
    if (System.resetReason() == RESET_REASON_PANIC) {
        System.enterSafeMode();
@@ -259,7 +245,9 @@ void handle_all_system_events(system_event_t event, int param) {
    pinMode(debug_led_1, OUTPUT);
    pinMode(debug_led_2, OUTPUT);
 
+   // Setup SD card first so that other setups can log
    SD.setup();
+
    resetSubsystem.setup();
    timeSyncSubsystem.setup();
    heartbeatSubsystem.setup();
@@ -273,10 +261,8 @@ void handle_all_system_events(system_event_t event, int param) {
    Particle.variable("l", num_reboots);
    Particle.variable("v", String(System.version().c_str()));
 
-   Particle.function("sd_reboot",cloud_function_sd_power_cycle);
    Particle.function("soc",get_soc);
    Particle.function("battv",get_battv);
-   Particle.function("debug_sd", debug_sd);
 
    LEDStatus status;
    status.off();
@@ -305,19 +291,13 @@ void loop() {
     }
   }
 
+  SD.loop();
   resetSubsystem.loop();
   timeSyncSubsystem.loop();
   heartbeatSubsystem.loop();
   chargeStateSubsystem.loop();
   imuSubsystem.loop();
   gpsSubsystem.loop();
-
-  if (SD_READ_FLAG) {
-    Serial.println("sd read flag");
-    SD_READ_FLAG = false;
-    String sd_res = SD.Read(SD_LOG_NAME);
-    Cloud::Publish(SD_READ_EVENT,sd_res);
-  }
 
 
   //Call the automatic watchdog

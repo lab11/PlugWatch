@@ -11,7 +11,43 @@ const uint8_t SD_CHIP_SELECT = A2;
 SdFatSoftSpi<A4, A5, A3> sd; // rev1 HW
 
 void SDCard::setup() {
+  super::setup();
+
    pinMode(SD_ENABLE_PIN, OUTPUT);
+}
+
+void SDCard::loop() {
+  super::loop();
+
+  if (power_cycle_flag) {
+    power_cycle_flag = false;
+    PowerCycle();
+
+    // Power cycling is slow, so don't do anything else this loop, let others go
+    return;
+  }
+
+  if (read_filename != "") {
+    log.append("Read " + read_filename);
+
+    String sd_res = Read(read_filename);
+    read_filename = "";
+
+    Cloud::Publish(SD_READ_EVENT,sd_res);
+  }
+}
+
+int SDCard::cloudCommand(String command) {
+  if ((command == "cycle") || (command == "reboot")) {
+    power_cycle_flag = true;
+    return 0;
+  }
+  if (command.startsWith("read ")) {
+    read_filename = command.substring(5);
+    return 0;
+  }
+
+  return -1;
 }
 
 void SDCard::PowerCycle() {
