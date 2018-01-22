@@ -139,13 +139,13 @@ auto timeSyncSubsystem = TimeSync(SD, "time_sync.txt");
 //***********************************
 retained int HEARTBEAT_FREQUENCY = Heartbeat::DEFAULT_FREQ;
 retained int HEARTBEAT_COUNT = 0;
-auto heartbeat = Heartbeat(SD, &HEARTBEAT_FREQUENCY, &HEARTBEAT_COUNT);
+auto heartbeatSubsystem = Heartbeat(SD, &HEARTBEAT_FREQUENCY, &HEARTBEAT_COUNT);
 
 //***********************************
 //* Charge state
 //***********************************
 retained int CHARGE_STATE_FREQUENCY = ChargeState::DEFAULT_FREQ;
-auto charge_state = ChargeState(SD, &CHARGE_STATE_FREQUENCY);
+auto chargeStateSubsystem = ChargeState(SD, &CHARGE_STATE_FREQUENCY);
 
 //***********************************
 //* IMU
@@ -153,7 +153,7 @@ auto charge_state = ChargeState(SD, &CHARGE_STATE_FREQUENCY);
 retained int IMU_FREQUENCY = Imu::DEFAULT_FREQ;
 retained int IMU_SAMPLE_COUNT = Imu::DEFAULT_SAMPLE_COUNT;
 retained int IMU_SAMPLE_RATE = Imu::DEFAULT_SAMPLE_RATE_MS;
-auto imu = Imu(SD, &IMU_FREQUENCY, &IMU_SAMPLE_COUNT, &IMU_SAMPLE_RATE);
+auto imuSubsystem = Imu(SD, &IMU_FREQUENCY, &IMU_SAMPLE_COUNT, &IMU_SAMPLE_RATE);
 
 //***********************************
 //* GPS
@@ -193,9 +193,6 @@ String SD_LOG_NAME = "";
  retained String last_system_event_time = "";
  retained int last_system_event_type = -999;
  retained int num_reboots = 0; //TODO
-
- // imu
- String imu_last_sample; //TODO
 
  String sample_buffer;
  retained int sample_cnt;
@@ -265,9 +262,9 @@ void handle_all_system_events(system_event_t event, int param) {
    SD.setup();
    resetSubsystem.setup();
    timeSyncSubsystem.setup();
-   heartbeat.setup();
-   charge_state.setup();
-   imu.setup();
+   heartbeatSubsystem.setup();
+   chargeStateSubsystem.setup();
+   imuSubsystem.setup();
    gpsSubsystem.setup();
 
    Particle.variable("d", system_event_cnt);
@@ -310,9 +307,9 @@ void loop() {
 
   resetSubsystem.loop();
   timeSyncSubsystem.loop();
-  heartbeat.loop();
-  charge_state.loop();
-  imu.loop();
+  heartbeatSubsystem.loop();
+  chargeStateSubsystem.loop();
+  imuSubsystem.loop();
   gpsSubsystem.loop();
 
   if (SD_READ_FLAG) {
