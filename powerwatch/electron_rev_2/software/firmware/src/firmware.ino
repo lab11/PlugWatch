@@ -167,6 +167,7 @@ auto gpsSubsystem = Gps(SD, &GPS_FREQUENCY);
  //***********************************
  //* CLOUD FUNCTIONS
  //***********************************
+ // Legacy functions
  int get_soc(String c) { //cloudfunction
      return (int)(FuelGauge().getSoC());
  }
@@ -214,7 +215,13 @@ void setup() {
   // if (System.resetReason() == RESET_REASON_PANIC) {
   //   System.enterSafeMode();
   // }
+
+  // Some legacy bits that I'm not sure what we want to do with
   num_reboots++;
+  Particle.variable("r", num_reboots);
+  Particle.variable("v", String(System.version().c_str()));
+  Particle.function("soc",get_soc);
+  Particle.function("battv",get_battv);
 
   // Set up debugging UART
   Serial.begin(9600);
@@ -244,12 +251,6 @@ void setup() {
   chargeStateSubsystem.setup();
   imuSubsystem.setup();
   gpsSubsystem.setup();
-
-  Particle.variable("l", num_reboots);
-  Particle.variable("v", String(System.version().c_str()));
-
-  Particle.function("soc",get_soc);
-  Particle.function("battv",get_battv);
 
   LEDStatus status;
   status.off();
