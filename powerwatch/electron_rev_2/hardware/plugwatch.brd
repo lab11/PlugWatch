@@ -200,7 +200,7 @@
 Branden Ghena
 Neal Jackson
 01/18</text>
-<text x="52.832" y="81.534" size="1.778" layer="25" font="vector" ratio="12">B</text>
+<text x="52.832" y="81.534" size="1.778" layer="25" font="vector" ratio="12">&gt;REV</text>
 <wire x1="52.578" y1="81.28" x2="54.356" y2="81.28" width="0.254" layer="25"/>
 <wire x1="54.356" y1="81.28" x2="54.356" y2="83.566" width="0.254" layer="25"/>
 <wire x1="54.356" y1="83.566" x2="52.578" y2="83.566" width="0.254" layer="25"/>
@@ -1768,6 +1768,7 @@ Neal Jackson
 </library>
 </libraries>
 <attributes>
+<attribute name="REV" value="B"/>
 </attributes>
 <variantdefs>
 </variantdefs>
@@ -2137,8 +2138,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 </element>
 <element name="C17" library="passives" package="0402_CAP" value="100nF" x="54.102" y="35.052" smashed="yes" rot="MR270">
 <attribute name="DIGIKEY" value="490-10777-1-ND" x="50.4444" y="34.1122" size="1.778" layer="28" rot="MR270" display="off"/>
-<attribute name="MPN" value="MF-CAP-0402-0.1uF" x="50.4444" y="34.1122" size="1.778" layer="28" rot="MR270" display="off"/>
-<attribute name="MPN1" value="GRM155R71A104JA01D" x="50.4444" y="34.1122" size="1.778" layer="28" rot="MR270" display="off"/>
 <attribute name="NAME" x="54.737" y="35.052" size="1.016" layer="26" font="vector" ratio="12" rot="MR90" align="bottom-center"/>
 </element>
 <element name="R8" library="passives" package="0402_RES" value="10k" x="42.418" y="39.116" smashed="yes" rot="MR0">
@@ -2236,14 +2235,10 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 </element>
 <element name="C20" library="passives" package="0402_CAP" value="100nF" x="42.926" y="30.988" smashed="yes" rot="R180">
 <attribute name="DIGIKEY" value="490-10777-1-ND" x="42.926" y="30.988" size="1.778" layer="27" rot="R180" display="off"/>
-<attribute name="MPN" value="MF-CAP-0402-0.1uF" x="42.926" y="30.988" size="1.778" layer="27" rot="R180" display="off"/>
-<attribute name="MPN1" value="GRM155R71A104JA01D" x="42.926" y="30.988" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="45.466" y="30.607" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center"/>
 </element>
 <element name="C21" library="passives" package="0402_CAP" value="100nF" x="42.164" y="36.576" smashed="yes" rot="R90">
 <attribute name="DIGIKEY" value="490-10777-1-ND" x="42.164" y="36.576" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="MPN" value="MF-CAP-0402-0.1uF" x="42.164" y="36.576" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="MPN1" value="GRM155R71A104JA01D" x="42.164" y="36.576" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="NAME" x="41.783" y="36.576" size="1.016" layer="25" font="vector" ratio="12" rot="R90" align="bottom-center"/>
 </element>
 <element name="C7" library="passives" package="0402_CAP" value="330pF" x="49.784" y="38.1" smashed="yes" rot="R270">
@@ -2303,6 +2298,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="NAME" x="49.276" y="16.2" size="1.016" layer="26" font="vector" ratio="12" rot="MR0" align="bottom-center"/>
 </element>
 <element name="D2" library="leds" package="LED-0603" value="LED0603" x="17.7038" y="17.399" smashed="yes" rot="MR0">
+<attribute name="DIGIKEY" value="160-1837-6-ND" x="17.7038" y="17.399" size="1.778" layer="28" rot="MR0" display="off"/>
 <attribute name="NAME" x="18.4023" y="17.399" size="1.016" layer="26" font="vector" ratio="12" rot="MR90" align="bottom-center"/>
 <attribute name="VALUE" x="16.8783" y="17.399" size="1.016" layer="28" font="vector" ratio="12" rot="MR90" align="top-center"/>
 </element>
@@ -2312,6 +2308,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="VALUE" x="14.986" y="52.705" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
 <element name="D3" library="leds" package="LED-0603" value="LED0603" x="14.8844" y="56.134" locked="yes" smashed="yes" rot="R90">
+<attribute name="DIGIKEY" value="160-1837-6-ND" x="14.8844" y="56.134" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="NAME" x="13.462" y="56.134" size="1.016" layer="25" font="vector" ratio="12" rot="R90" align="bottom-center"/>
 <attribute name="VALUE" x="14.8844" y="56.9595" size="1.016" layer="27" font="vector" ratio="12" rot="R180" align="top-center"/>
 </element>

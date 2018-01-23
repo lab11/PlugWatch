@@ -3298,8 +3298,6 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="U3" library="chips" deviceset="ISL29035" device=""/>
 <part name="C17" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="100nF">
 <attribute name="DIGIKEY" value="490-10777-1-ND"/>
-<attribute name="MPN" value="MF-CAP-0402-0.1uF"/>
-<attribute name="MPN1" value="GRM155R71A104JA01D"/>
 </part>
 <part name="P+3" library="supply1" deviceset="VCC" device=""/>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
@@ -3374,13 +3372,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="GND18" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="C20" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="100nF">
 <attribute name="DIGIKEY" value="490-10777-1-ND"/>
-<attribute name="MPN" value="MF-CAP-0402-0.1uF"/>
-<attribute name="MPN1" value="GRM155R71A104JA01D"/>
 </part>
 <part name="C21" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="100nF">
 <attribute name="DIGIKEY" value="490-10777-1-ND"/>
-<attribute name="MPN" value="MF-CAP-0402-0.1uF"/>
-<attribute name="MPN1" value="GRM155R71A104JA01D"/>
 </part>
 <part name="GND19" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND20" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
@@ -3422,12 +3416,16 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="GND32" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND33" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="P+13" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="D2" library="leds" deviceset="LED" device="0603"/>
+<part name="D2" library="leds" deviceset="LED" device="0603">
+<attribute name="DIGIKEY" value="160-1837-6-ND"/>
+</part>
 <part name="R6" library="passives" deviceset="RESISTOR" device="0402_RES" value="1k">
 <attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND"/>
 </part>
 <part name="P+14" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="D3" library="leds" deviceset="LED" device="0603"/>
+<part name="D3" library="leds" deviceset="LED" device="0603">
+<attribute name="DIGIKEY" value="160-1837-6-ND"/>
+</part>
 <part name="SW2" library="signpost" deviceset="SIP3240X" device=""/>
 <part name="SW3" library="signpost" deviceset="SIP3240X" device=""/>
 <part name="R18" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
@@ -3524,7 +3522,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <attribute name="DIGIKEY" x="17.78" y="121.92" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
 <instance part="P+14" gate="VCC" x="17.78" y="132.08"/>
-<instance part="D3" gate="G$1" x="17.78" y="111.76" rot="R270"/>
+<instance part="D3" gate="G$1" x="17.78" y="111.76" rot="R270">
+<attribute name="DIGIKEY" x="17.78" y="111.76" size="1.778" layer="96" rot="R270" display="off"/>
+</instance>
 <instance part="TP1" gate="G$1" x="215.9" y="129.54" rot="R180"/>
 <instance part="TP2" gate="G$1" x="215.9" y="127" rot="R180"/>
 <instance part="TP3" gate="G$1" x="215.9" y="124.46" rot="R180"/>
@@ -4469,7 +4469,9 @@ Switch</text>
 <instance part="GND29" gate="1" x="40.64" y="40.64"/>
 <instance part="A1" gate="G$1" x="180.34" y="86.36"/>
 <instance part="GND2" gate="1" x="185.42" y="40.64"/>
-<instance part="D2" gate="G$1" x="33.02" y="99.06" rot="R270"/>
+<instance part="D2" gate="G$1" x="33.02" y="99.06" rot="R270">
+<attribute name="DIGIKEY" x="33.02" y="99.06" size="1.778" layer="96" rot="R270" display="off"/>
+</instance>
 <instance part="P+16" gate="VCC" x="187.96" y="185.42"/>
 <instance part="SW5" gate="G$1" x="160.02" y="172.72" rot="R180"/>
 <instance part="R20" gate="G$1" x="182.88" y="177.8">
@@ -4866,8 +4868,6 @@ Switch</text>
 <instance part="U3" gate="G$1" x="27.94" y="43.18"/>
 <instance part="C17" gate="G$1" x="10.16" y="45.72">
 <attribute name="DIGIKEY" x="10.16" y="45.72" size="1.778" layer="96" display="off"/>
-<attribute name="MPN1" x="10.16" y="45.72" size="1.778" layer="96" display="off"/>
-<attribute name="MPN" x="10.16" y="45.72" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="P+3" gate="VCC" x="10.16" y="60.96"/>
 <instance part="GND6" gate="1" x="10.16" y="25.4"/>
@@ -4942,13 +4942,9 @@ Switch</text>
 <instance part="GND18" gate="1" x="142.24" y="109.22"/>
 <instance part="C20" gate="G$1" x="167.64" y="149.86">
 <attribute name="DIGIKEY" x="167.64" y="149.86" size="1.778" layer="96" display="off"/>
-<attribute name="MPN1" x="167.64" y="149.86" size="1.778" layer="96" display="off"/>
-<attribute name="MPN" x="167.64" y="149.86" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="C21" gate="G$1" x="162.56" y="119.38">
 <attribute name="DIGIKEY" x="162.56" y="119.38" size="1.778" layer="96" display="off"/>
-<attribute name="MPN1" x="162.56" y="119.38" size="1.778" layer="96" display="off"/>
-<attribute name="MPN" x="162.56" y="119.38" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="GND19" gate="1" x="162.56" y="109.22"/>
 <instance part="GND20" gate="1" x="167.64" y="139.7"/>
