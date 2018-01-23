@@ -3114,6 +3114,45 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </deviceset>
 </devicesets>
 </library>
+<library name="headers">
+<description>&lt;b&gt;LAB11&lt;/b&gt; - Headers for pins and wires.</description>
+<packages>
+<package name="TESTPOINT_0.040IN">
+<pad name="TESTPOINT" x="0" y="0" drill="1.016"/>
+<text x="0" y="1.524" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
+<text x="0" y="-2.54" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center">&gt;VALUE</text>
+<circle x="0" y="0" radius="1.27" width="0.127" layer="21"/>
+</package>
+</packages>
+<symbols>
+<symbol name="TEST_POINT">
+<description>Test point.</description>
+<pin name="TESTPOINT" x="2.54" y="0" visible="off" length="short" rot="R180"/>
+<circle x="-1.27" y="0" radius="1.27" width="0.254" layer="94"/>
+<text x="-3.175" y="0" size="1.016" layer="95" ratio="12" align="center-right">&gt;NAME</text>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="TEST_POINT_0.040IN" prefix="TP">
+<description>0.040in Test Point</description>
+<gates>
+<gate name="G$1" symbol="TEST_POINT" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="TESTPOINT_0.040IN">
+<connects>
+<connect gate="G$1" pin="TESTPOINT" pad="TESTPOINT"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="DIGIKEY" value="5001K-ND"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 <attribute name="AUTHOR" value="Noah Klugman"/>
@@ -3410,6 +3449,30 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <attribute name="DIGIKEY" value="1276-3432-1-ND"/>
 </part>
 <part name="GND36" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
+<part name="TP1" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP2" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP3" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP4" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP5" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP6" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP7" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP8" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP9" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP10" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP11" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP12" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP13" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP14" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP15" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP16" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP17" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP19" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP20" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP21" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP22" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP23" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP24" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP25" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -3462,6 +3525,30 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </instance>
 <instance part="P+14" gate="VCC" x="17.78" y="132.08"/>
 <instance part="D3" gate="G$1" x="17.78" y="111.76" rot="R270"/>
+<instance part="TP1" gate="G$1" x="215.9" y="129.54" rot="R180"/>
+<instance part="TP2" gate="G$1" x="215.9" y="127" rot="R180"/>
+<instance part="TP3" gate="G$1" x="215.9" y="124.46" rot="R180"/>
+<instance part="TP4" gate="G$1" x="215.9" y="121.92" rot="R180"/>
+<instance part="TP5" gate="G$1" x="215.9" y="119.38" rot="R180"/>
+<instance part="TP6" gate="G$1" x="215.9" y="116.84" rot="R180"/>
+<instance part="TP7" gate="G$1" x="215.9" y="114.3" rot="R180"/>
+<instance part="TP8" gate="G$1" x="215.9" y="111.76" rot="R180"/>
+<instance part="TP9" gate="G$1" x="215.9" y="109.22" rot="R180"/>
+<instance part="TP10" gate="G$1" x="215.9" y="106.68" rot="R180"/>
+<instance part="TP11" gate="G$1" x="215.9" y="104.14" rot="R180"/>
+<instance part="TP12" gate="G$1" x="215.9" y="101.6" rot="R180"/>
+<instance part="TP13" gate="G$1" x="215.9" y="99.06" rot="R180"/>
+<instance part="TP14" gate="G$1" x="215.9" y="96.52" rot="R180"/>
+<instance part="TP15" gate="G$1" x="215.9" y="93.98" rot="R180"/>
+<instance part="TP16" gate="G$1" x="215.9" y="91.44" rot="R180"/>
+<instance part="TP17" gate="G$1" x="215.9" y="88.9" rot="R180"/>
+<instance part="TP19" gate="G$1" x="215.9" y="83.82" rot="R180"/>
+<instance part="TP20" gate="G$1" x="215.9" y="81.28" rot="R180"/>
+<instance part="TP21" gate="G$1" x="215.9" y="78.74" rot="R180"/>
+<instance part="TP22" gate="G$1" x="215.9" y="76.2" rot="R180"/>
+<instance part="TP23" gate="G$1" x="215.9" y="73.66" rot="R180"/>
+<instance part="TP24" gate="G$1" x="215.9" y="71.12" rot="R180"/>
+<instance part="TP25" gate="G$1" x="215.9" y="68.58" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -3516,6 +3603,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="63.5" y1="129.54" x2="60.96" y2="129.54" width="0.1524" layer="91"/>
 <label x="60.96" y="129.54" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
+<segment>
+<wire x1="213.36" y1="121.92" x2="210.82" y2="121.92" width="0.1524" layer="91"/>
+<label x="210.82" y="121.92" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP4" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="!SD_CS" class="0">
 <segment>
@@ -3530,6 +3622,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="63.5" y1="124.46" x2="60.96" y2="124.46" width="0.1524" layer="91"/>
 <label x="60.96" y="124.46" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
+<segment>
+<wire x1="213.36" y1="116.84" x2="210.82" y2="116.84" width="0.1524" layer="91"/>
+<label x="210.82" y="116.84" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP6" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="SD_SCLK" class="0">
 <segment>
@@ -3541,6 +3638,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="A1" gate="A1" pin="A3"/>
 <wire x1="63.5" y1="127" x2="60.96" y2="127" width="0.1524" layer="91"/>
 <label x="60.96" y="127" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<wire x1="213.36" y1="119.38" x2="210.82" y2="119.38" width="0.1524" layer="91"/>
+<label x="210.82" y="119.38" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP5" gate="G$1" pin="TESTPOINT"/>
 </segment>
 </net>
 <net name="!SD_DETECT" class="0">
@@ -3556,6 +3658,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="88.9" y="134.62" size="1.27" layer="95" xref="yes"/>
 <pinref part="A1" gate="A1" pin="D6"/>
 </segment>
+<segment>
+<wire x1="213.36" y1="71.12" x2="210.82" y2="71.12" width="0.1524" layer="91"/>
+<label x="210.82" y="71.12" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP24" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="SD_MOSI" class="0">
 <segment>
@@ -3569,6 +3676,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="A1" gate="A1" pin="A5"/>
 <wire x1="63.5" y1="132.08" x2="60.96" y2="132.08" width="0.1524" layer="91"/>
 <label x="60.96" y="132.08" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<wire x1="213.36" y1="124.46" x2="210.82" y2="124.46" width="0.1524" layer="91"/>
+<label x="210.82" y="124.46" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP3" gate="G$1" pin="TESTPOINT"/>
 </segment>
 </net>
 <net name="SD_ENABLE_POWER" class="0">
@@ -3656,12 +3768,22 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="60.96" y="119.38" size="1.27" layer="95" rot="R180" xref="yes"/>
 <pinref part="A1" gate="A1" pin="A0"/>
 </segment>
+<segment>
+<wire x1="213.36" y1="111.76" x2="210.82" y2="111.76" width="0.1524" layer="91"/>
+<label x="210.82" y="111.76" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP8" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="BLE_TXD" class="0">
 <segment>
 <label x="88.9" y="109.22" size="1.27" layer="95" xref="yes"/>
 <pinref part="A1" gate="A1" pin="C2"/>
 <wire x1="88.9" y1="109.22" x2="86.36" y2="109.22" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<label x="210.82" y="93.98" size="1.27" layer="95" rot="R180" xref="yes"/>
+<wire x1="210.82" y1="93.98" x2="213.36" y2="93.98" width="0.1524" layer="91"/>
+<pinref part="TP15" gate="G$1" pin="TESTPOINT"/>
 </segment>
 </net>
 <net name="BLE_RXD" class="0">
@@ -3670,12 +3792,22 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="88.9" y="111.76" size="1.27" layer="95" xref="yes"/>
 <pinref part="A1" gate="A1" pin="C3"/>
 </segment>
+<segment>
+<wire x1="213.36" y1="91.44" x2="210.82" y2="91.44" width="0.1524" layer="91"/>
+<label x="210.82" y="91.44" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP16" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="WIFI_TXD" class="0">
 <segment>
 <wire x1="86.36" y1="104.14" x2="88.9" y2="104.14" width="0.1524" layer="91"/>
 <label x="88.9" y="104.14" size="1.27" layer="95" xref="yes"/>
 <pinref part="A1" gate="A1" pin="C0"/>
+</segment>
+<segment>
+<wire x1="213.36" y1="99.06" x2="210.82" y2="99.06" width="0.1524" layer="91"/>
+<label x="210.82" y="99.06" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP13" gate="G$1" pin="TESTPOINT"/>
 </segment>
 </net>
 <net name="WIFI_RXD" class="0">
@@ -3684,12 +3816,22 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="A1" gate="A1" pin="C1"/>
 <wire x1="86.36" y1="106.68" x2="88.9" y2="106.68" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<label x="210.82" y="96.52" size="1.27" layer="95" rot="R180" xref="yes"/>
+<wire x1="213.36" y1="96.52" x2="210.82" y2="96.52" width="0.1524" layer="91"/>
+<pinref part="TP14" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="GPS_RXD" class="0">
 <segment>
 <pinref part="A1" gate="A1" pin="TX"/>
 <wire x1="63.5" y1="142.24" x2="60.96" y2="142.24" width="0.1524" layer="91"/>
 <label x="60.96" y="142.24" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<wire x1="213.36" y1="129.54" x2="210.82" y2="129.54" width="0.1524" layer="91"/>
+<label x="210.82" y="129.54" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP1" gate="G$1" pin="TESTPOINT"/>
 </segment>
 </net>
 <net name="GPS_TXD" class="0">
@@ -3698,12 +3840,22 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="63.5" y1="139.7" x2="60.96" y2="139.7" width="0.1524" layer="91"/>
 <label x="60.96" y="139.7" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
+<segment>
+<wire x1="213.36" y1="127" x2="210.82" y2="127" width="0.1524" layer="91"/>
+<label x="210.82" y="127" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP2" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="SENSORS_SDA" class="0">
 <segment>
 <label x="88.9" y="119.38" size="1.27" layer="95" xref="yes"/>
 <pinref part="A1" gate="A1" pin="D0"/>
 <wire x1="88.9" y1="119.38" x2="86.36" y2="119.38" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<label x="210.82" y="83.82" size="1.27" layer="95" rot="R180" xref="yes"/>
+<wire x1="210.82" y1="83.82" x2="213.36" y2="83.82" width="0.1524" layer="91"/>
+<pinref part="TP19" gate="G$1" pin="TESTPOINT"/>
 </segment>
 </net>
 <net name="SENSORS_SCL" class="0">
@@ -3712,12 +3864,22 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="A1" gate="A1" pin="D1"/>
 <wire x1="88.9" y1="121.92" x2="86.36" y2="121.92" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<label x="210.82" y="81.28" size="1.27" layer="95" rot="R180" xref="yes"/>
+<wire x1="210.82" y1="81.28" x2="213.36" y2="81.28" width="0.1524" layer="91"/>
+<pinref part="TP20" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="!WIFI_RESET" class="0">
 <segment>
 <label x="88.9" y="114.3" size="1.27" layer="95" xref="yes"/>
 <pinref part="A1" gate="A1" pin="C4"/>
 <wire x1="88.9" y1="114.3" x2="86.36" y2="114.3" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<label x="210.82" y="88.9" size="1.27" layer="95" rot="R180" xref="yes"/>
+<wire x1="210.82" y1="88.9" x2="213.36" y2="88.9" width="0.1524" layer="91"/>
+<pinref part="TP17" gate="G$1" pin="TESTPOINT"/>
 </segment>
 </net>
 <net name="!GPS_RESET" class="0">
@@ -3726,12 +3888,22 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="88.9" y="129.54" size="1.27" layer="95" xref="yes"/>
 <pinref part="A1" gate="A1" pin="D4"/>
 </segment>
+<segment>
+<wire x1="213.36" y1="73.66" x2="210.82" y2="73.66" width="0.1524" layer="91"/>
+<label x="210.82" y="73.66" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP23" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="GPS_PWR_EN" class="0">
 <segment>
 <wire x1="86.36" y1="127" x2="88.9" y2="127" width="0.1524" layer="91"/>
 <label x="88.9" y="127" size="1.27" layer="95" xref="yes"/>
 <pinref part="A1" gate="A1" pin="D3"/>
+</segment>
+<segment>
+<wire x1="213.36" y1="76.2" x2="210.82" y2="76.2" width="0.1524" layer="91"/>
+<label x="210.82" y="76.2" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP22" gate="G$1" pin="TESTPOINT"/>
 </segment>
 </net>
 <net name="NRF_SWDIO/!RESET" class="0">
@@ -3740,12 +3912,22 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="88.9" y="137.16" size="1.27" layer="95" xref="yes"/>
 <pinref part="A1" gate="A1" pin="D7"/>
 </segment>
+<segment>
+<wire x1="213.36" y1="68.58" x2="210.82" y2="68.58" width="0.1524" layer="91"/>
+<label x="210.82" y="68.58" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP25" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="!LIGHT_INT" class="0">
 <segment>
 <label x="60.96" y="121.92" size="1.27" layer="95" rot="R180" xref="yes"/>
 <pinref part="A1" gate="A1" pin="A1"/>
 <wire x1="63.5" y1="121.92" x2="60.96" y2="121.92" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<label x="210.82" y="114.3" size="1.27" layer="95" rot="R180" xref="yes"/>
+<wire x1="213.36" y1="114.3" x2="210.82" y2="114.3" width="0.1524" layer="91"/>
+<pinref part="TP7" gate="G$1" pin="TESTPOINT"/>
 </segment>
 </net>
 <net name="!IMU_INT" class="0">
@@ -3754,6 +3936,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="88.9" y="124.46" size="1.27" layer="95" xref="yes"/>
 <pinref part="A1" gate="A1" pin="D2"/>
 </segment>
+<segment>
+<wire x1="213.36" y1="78.74" x2="210.82" y2="78.74" width="0.1524" layer="91"/>
+<label x="210.82" y="78.74" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP21" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="AUDIO_OUT" class="0">
 <segment>
@@ -3761,12 +3948,22 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="63.5" y1="109.22" x2="60.96" y2="109.22" width="0.1524" layer="91"/>
 <label x="60.96" y="109.22" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
+<segment>
+<wire x1="213.36" y1="104.14" x2="210.82" y2="104.14" width="0.1524" layer="91"/>
+<label x="210.82" y="104.14" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP11" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="AUDIO_PWR_EN" class="0">
 <segment>
 <label x="60.96" y="114.3" size="1.27" layer="95" rot="R180" xref="yes"/>
 <pinref part="A1" gate="A1" pin="B4"/>
 <wire x1="60.96" y1="114.3" x2="63.5" y2="114.3" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<label x="210.82" y="106.68" size="1.27" layer="95" rot="R180" xref="yes"/>
+<wire x1="210.82" y1="106.68" x2="213.36" y2="106.68" width="0.1524" layer="91"/>
+<pinref part="TP10" gate="G$1" pin="TESTPOINT"/>
 </segment>
 </net>
 <net name="N$3" class="0">
@@ -3794,12 +3991,22 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="60.96" y="106.68" size="1.27" layer="95" rot="R180" xref="yes"/>
 <pinref part="A1" gate="A1" pin="B1"/>
 </segment>
+<segment>
+<wire x1="213.36" y1="101.6" x2="210.82" y2="101.6" width="0.1524" layer="91"/>
+<label x="210.82" y="101.6" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP12" gate="G$1" pin="TESTPOINT"/>
+</segment>
 </net>
 <net name="BLE_PWR_EN" class="0">
 <segment>
 <pinref part="A1" gate="A1" pin="B5"/>
 <wire x1="63.5" y1="116.84" x2="60.96" y2="116.84" width="0.1524" layer="91"/>
 <label x="60.96" y="116.84" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<wire x1="213.36" y1="109.22" x2="210.82" y2="109.22" width="0.1524" layer="91"/>
+<label x="210.82" y="109.22" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="TP9" gate="G$1" pin="TESTPOINT"/>
 </segment>
 </net>
 </nets>
