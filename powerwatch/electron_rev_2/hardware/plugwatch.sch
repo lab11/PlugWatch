@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="8.5.2">
+<eagle version="8.4.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
 <setting keepoldvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.05" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -1772,6 +1772,23 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <wire x1="7.25" y1="2.7686" x2="7.25" y2="-22.03" width="0.127" layer="21"/>
 <wire x1="7.25" y1="-22.03" x2="-7.25" y2="-22.03" width="0.127" layer="21"/>
 </package>
+<package name="TSOT23-6">
+<description>Vishay TSOT-23 6 Lead
+https://www.vishay.com/docs/72821/72821.pdf</description>
+<wire x1="1.475" y1="0.825" x2="1.475" y2="-0.825" width="0.1524" layer="21"/>
+<wire x1="-1.475" y1="-0.825" x2="-1.475" y2="0.825" width="0.1524" layer="21"/>
+<circle x="-1.762" y="-1.085" radius="0.1" width="0.1524" layer="21"/>
+<smd name="1" x="-0.95" y="-1.12625" dx="0.6" dy="0.9275" layer="1"/>
+<smd name="2" x="0" y="-1.12625" dx="0.6" dy="0.9275" layer="1"/>
+<smd name="3" x="0.95" y="-1.12625" dx="0.6" dy="0.9275" layer="1"/>
+<smd name="4" x="0.95" y="1.12625" dx="0.6" dy="0.9275" layer="1"/>
+<smd name="5" x="0" y="1.12625" dx="0.6" dy="0.9275" layer="1"/>
+<smd name="6" x="-0.95" y="1.12625" dx="0.6" dy="0.9275" layer="1"/>
+<text x="-1.905" y="2.54" size="1.27" layer="25" font="vector">&gt;NAME</text>
+<text x="-1.905" y="-3.81" size="1.27" layer="27" font="vector">&gt;VALUE</text>
+<wire x1="-1.475" y1="0.825" x2="1.475" y2="0.825" width="0.1524" layer="21"/>
+<wire x1="-1.475" y1="-0.825" x2="1.475" y2="-0.825" width="0.1524" layer="21"/>
+</package>
 </packages>
 <symbols>
 <symbol name="NRF51822">
@@ -1898,6 +1915,44 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <pin name="RXI" x="10.16" y="-5.08" length="short" rot="R180"/>
 <pin name="IO0" x="-12.7" y="-2.54" length="short"/>
 <pin name="IO2" x="-12.7" y="-5.08" length="short"/>
+</symbol>
+<symbol name="SWITCH_HIGH_SIDE">
+<pin name="VSUPP" x="-5.08" y="7.62" length="middle"/>
+<pin name="EN" x="-5.08" y="5.08" length="middle"/>
+<pin name="VLOAD" x="20.32" y="10.16" length="middle" rot="R180"/>
+<pin name="GND" x="20.32" y="5.08" length="middle" rot="R180"/>
+<wire x1="0" y1="12.7" x2="15.24" y2="12.7" width="0.254" layer="94"/>
+<wire x1="15.24" y1="12.7" x2="15.24" y2="10.16" width="0.254" layer="94"/>
+<wire x1="15.24" y1="10.16" x2="15.24" y2="5.08" width="0.254" layer="94"/>
+<wire x1="15.24" y1="5.08" x2="15.24" y2="2.54" width="0.254" layer="94"/>
+<wire x1="15.24" y1="2.54" x2="0" y2="2.54" width="0.254" layer="94"/>
+<circle x="13.97" y="6.35" radius="0.254" width="0" layer="94"/>
+<circle x="13.97" y="8.89" radius="0.254" width="0" layer="94"/>
+<circle x="11.938" y="7.62" radius="0.254" width="0.127" layer="94"/>
+<wire x1="0" y1="2.54" x2="0" y2="5.08" width="0.254" layer="94"/>
+<text x="0" y="13.208" size="1.778" layer="95">&gt;NAME</text>
+<text x="0" y="0.254" size="1.778" layer="96">&gt;VALUE</text>
+<wire x1="0" y1="5.08" x2="0" y2="7.62" width="0.254" layer="94"/>
+<wire x1="0" y1="7.62" x2="0" y2="12.7" width="0.254" layer="94"/>
+<wire x1="13.97" y1="8.89" x2="13.97" y2="6.604" width="0.127" layer="94"/>
+<wire x1="13.97" y1="8.89" x2="12.192" y2="7.874" width="0.127" layer="94" style="shortdash"/>
+<wire x1="13.97" y1="8.89" x2="13.97" y2="10.16" width="0.127" layer="94"/>
+<wire x1="13.97" y1="10.16" x2="15.24" y2="10.16" width="0.127" layer="94"/>
+<wire x1="13.97" y1="6.096" x2="13.97" y2="5.08" width="0.127" layer="94"/>
+<wire x1="13.97" y1="5.08" x2="15.24" y2="5.08" width="0.127" layer="94"/>
+<wire x1="0" y1="7.62" x2="1.524" y2="7.62" width="0.127" layer="94"/>
+<wire x1="1.524" y1="7.62" x2="1.524" y2="8.636" width="0.127" layer="94"/>
+<wire x1="1.524" y1="8.636" x2="10.922" y2="8.636" width="0.127" layer="94"/>
+<wire x1="10.922" y1="8.636" x2="11.684" y2="7.874" width="0.127" layer="94"/>
+<wire x1="13.716" y1="7.112" x2="12.7" y2="7.874" width="0.127" layer="94" curve="-32.680555"/>
+<wire x1="12.7" y1="7.874" x2="12.7" y2="7.366" width="0.127" layer="94"/>
+<wire x1="12.7" y1="7.874" x2="13.208" y2="7.874" width="0.127" layer="94"/>
+<wire x1="0" y1="5.08" x2="1.524" y2="5.08" width="0.127" layer="94"/>
+<wire x1="1.524" y1="5.08" x2="1.524" y2="6.096" width="0.127" layer="94"/>
+<wire x1="1.524" y1="6.096" x2="11.938" y2="6.096" width="0.127" layer="94"/>
+<wire x1="11.938" y1="6.096" x2="12.7" y2="6.858" width="0.127" layer="94"/>
+<wire x1="12.7" y1="6.858" x2="12.192" y2="6.858" width="0.127" layer="94"/>
+<wire x1="12.7" y1="6.858" x2="12.7" y2="6.35" width="0.127" layer="94"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -2082,6 +2137,29 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 <technologies>
 <technology name="">
 <attribute name="DIGIKEY" value="1568-1235-ND" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="SIP32510" prefix="U">
+<description>Load switch, slew rate controlled. By Vishay</description>
+<gates>
+<gate name="G$1" symbol="SWITCH_HIGH_SIDE" x="-7.62" y="-7.62"/>
+</gates>
+<devices>
+<device name="" package="TSOT23-6">
+<connects>
+<connect gate="G$1" pin="EN" pad="3"/>
+<connect gate="G$1" pin="GND" pad="4"/>
+<connect gate="G$1" pin="VLOAD" pad="1 2"/>
+<connect gate="G$1" pin="VSUPP" pad="5 6"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="DIGIKEY" value=" SIP32510DT-T1-GE3CT-ND" constant="no"/>
+<attribute name="MANUFACTURER" value="Vishay" constant="no"/>
+<attribute name="MPN" value="SIP32510DT-T1-GE3" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -3006,88 +3084,6 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </deviceset>
 </devicesets>
 </library>
-<library name="signpost">
-<packages>
-<package name="TDFN4">
-<text x="0" y="1.27" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
-<text x="0" y="-2.54" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center">&gt;VALUE</text>
-<smd name="1" x="-0.25" y="-0.725" dx="0.3" dy="0.55" layer="1"/>
-<smd name="2" x="0.25" y="-0.725" dx="0.3" dy="0.55" layer="1"/>
-<smd name="3" x="0.25" y="0.725" dx="0.3" dy="0.55" layer="1"/>
-<smd name="4" x="-0.25" y="0.725" dx="0.3" dy="0.55" layer="1"/>
-<smd name="PAD" x="0" y="0" dx="0.86" dy="0.5" layer="1"/>
-<wire x1="-0.6" y1="0.8" x2="0.6" y2="0.8" width="0.127" layer="21"/>
-<wire x1="0.6" y1="0.8" x2="0.6" y2="-0.8" width="0.127" layer="21"/>
-<wire x1="0.6" y1="-0.8" x2="-0.6" y2="-0.8" width="0.127" layer="21"/>
-<wire x1="-0.6" y1="-0.8" x2="-0.6" y2="0.8" width="0.127" layer="21"/>
-<circle x="-0.8" y="-1" radius="0.1" width="0.127" layer="21"/>
-<text x="0.635" y="-1.27" size="0.3048" layer="47" font="vector" ratio="11">.02 / .55 high</text>
-</package>
-</packages>
-<symbols>
-<symbol name="SWITCH_HIGH_SIDE">
-<pin name="VSUPP" x="-12.7" y="2.54" length="middle"/>
-<pin name="EN" x="-12.7" y="0" length="middle"/>
-<pin name="VLOAD" x="12.7" y="5.08" length="middle" rot="R180"/>
-<pin name="GND" x="12.7" y="0" length="middle" rot="R180"/>
-<wire x1="-7.62" y1="7.62" x2="7.62" y2="7.62" width="0.254" layer="94"/>
-<wire x1="7.62" y1="7.62" x2="7.62" y2="5.08" width="0.254" layer="94"/>
-<wire x1="7.62" y1="5.08" x2="7.62" y2="0" width="0.254" layer="94"/>
-<wire x1="7.62" y1="0" x2="7.62" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="7.62" y1="-2.54" x2="-7.62" y2="-2.54" width="0.254" layer="94"/>
-<circle x="6.35" y="1.27" radius="0.254" width="0" layer="94"/>
-<circle x="6.35" y="3.81" radius="0.254" width="0" layer="94"/>
-<circle x="4.318" y="2.54" radius="0.254" width="0.127" layer="94"/>
-<wire x1="-7.62" y1="-2.54" x2="-7.62" y2="0" width="0.254" layer="94"/>
-<text x="-7.62" y="8.128" size="1.778" layer="95">&gt;NAME</text>
-<text x="-7.62" y="-4.826" size="1.778" layer="96">&gt;VALUE</text>
-<wire x1="-7.62" y1="0" x2="-7.62" y2="2.54" width="0.254" layer="94"/>
-<wire x1="-7.62" y1="2.54" x2="-7.62" y2="7.62" width="0.254" layer="94"/>
-<wire x1="6.35" y1="3.81" x2="6.35" y2="1.524" width="0.127" layer="94"/>
-<wire x1="6.35" y1="3.81" x2="4.572" y2="2.794" width="0.127" layer="94" style="shortdash"/>
-<wire x1="6.35" y1="3.81" x2="6.35" y2="5.08" width="0.127" layer="94"/>
-<wire x1="6.35" y1="5.08" x2="7.62" y2="5.08" width="0.127" layer="94"/>
-<wire x1="6.35" y1="1.016" x2="6.35" y2="0" width="0.127" layer="94"/>
-<wire x1="6.35" y1="0" x2="7.62" y2="0" width="0.127" layer="94"/>
-<wire x1="-7.62" y1="2.54" x2="-6.096" y2="2.54" width="0.127" layer="94"/>
-<wire x1="-6.096" y1="2.54" x2="-6.096" y2="3.556" width="0.127" layer="94"/>
-<wire x1="-6.096" y1="3.556" x2="3.302" y2="3.556" width="0.127" layer="94"/>
-<wire x1="3.302" y1="3.556" x2="4.064" y2="2.794" width="0.127" layer="94"/>
-<wire x1="6.096" y1="2.032" x2="5.08" y2="2.794" width="0.127" layer="94" curve="-32.680555"/>
-<wire x1="5.08" y1="2.794" x2="5.08" y2="2.286" width="0.127" layer="94"/>
-<wire x1="5.08" y1="2.794" x2="5.588" y2="2.794" width="0.127" layer="94"/>
-<wire x1="-7.62" y1="0" x2="-6.096" y2="0" width="0.127" layer="94"/>
-<wire x1="-6.096" y1="0" x2="-6.096" y2="1.016" width="0.127" layer="94"/>
-<wire x1="-6.096" y1="1.016" x2="4.318" y2="1.016" width="0.127" layer="94"/>
-<wire x1="4.318" y1="1.016" x2="5.08" y2="1.778" width="0.127" layer="94"/>
-<wire x1="5.08" y1="1.778" x2="4.572" y2="1.778" width="0.127" layer="94"/>
-<wire x1="5.08" y1="1.778" x2="5.08" y2="1.27" width="0.127" layer="94"/>
-</symbol>
-</symbols>
-<devicesets>
-<deviceset name="SIP3240X" prefix="S">
-<description>High power (2.4 A) high-side switch</description>
-<gates>
-<gate name="G$1" symbol="SWITCH_HIGH_SIDE" x="0" y="-2.54"/>
-</gates>
-<devices>
-<device name="" package="TDFN4">
-<connects>
-<connect gate="G$1" pin="EN" pad="4"/>
-<connect gate="G$1" pin="GND" pad="2 PAD"/>
-<connect gate="G$1" pin="VLOAD" pad="1"/>
-<connect gate="G$1" pin="VSUPP" pad="3"/>
-</connects>
-<technologies>
-<technology name="">
-<attribute name="DIGIKEY" value="SIP32402ADNP-T1GE4CT-ND" constant="no"/>
-</technology>
-</technologies>
-</device>
-</devices>
-</deviceset>
-</devicesets>
-</library>
 <library name="umich">
 <packages>
 </packages>
@@ -3399,7 +3395,6 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="C26" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="4.7uF">
 <attribute name="DIGIKEY" value="445-5947-1-ND"/>
 </part>
-<part name="SW1" library="signpost" deviceset="SIP3240X" device=""/>
 <part name="P+2" library="supply1" deviceset="VCC" device=""/>
 <part name="R17" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
 <attribute name="DIGIKEY" value="1276-3432-1-ND"/>
@@ -3426,16 +3421,13 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="D3" library="leds" deviceset="LED" device="0603">
 <attribute name="DIGIKEY" value="160-1837-6-ND"/>
 </part>
-<part name="SW2" library="signpost" deviceset="SIP3240X" device=""/>
-<part name="SW3" library="signpost" deviceset="SIP3240X" device=""/>
 <part name="R18" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
 <attribute name="DIGIKEY" value="1276-3432-1-ND"/>
 </part>
 <part name="GND34" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="P+15" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="SW4" library="signpost" deviceset="SIP3240X" device=""/>
+<part name="SW4" library="chips" deviceset="SIP32510" device=""/>
 <part name="P+16" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="SW5" library="signpost" deviceset="SIP3240X" device=""/>
 <part name="GND35" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="R19" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
 <attribute name="DIGIKEY" value="1276-3432-1-ND"/>
@@ -3471,6 +3463,10 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="TP23" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP24" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP25" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="U$5" library="chips" deviceset="SIP32510" device=""/>
+<part name="U9" library="chips" deviceset="SIP32510" device=""/>
+<part name="U10" library="chips" deviceset="SIP32510" device=""/>
+<part name="U11" library="chips" deviceset="SIP32510" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -3504,7 +3500,6 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <instance part="C26" gate="G$1" x="71.12" y="63.5">
 <attribute name="DIGIKEY" x="71.12" y="63.5" size="1.27" layer="96" align="bottom-center" display="off"/>
 </instance>
-<instance part="SW1" gate="G$1" x="53.34" y="48.26"/>
 <instance part="P+2" gate="VCC" x="35.56" y="60.96"/>
 <instance part="R17" gate="G$1" x="35.56" y="50.8" rot="R90">
 <attribute name="DIGIKEY" x="35.56" y="50.8" size="1.27" layer="96" font="vector" rot="R90" display="off"/>
@@ -3549,6 +3544,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <instance part="TP23" gate="G$1" x="215.9" y="73.66" rot="R180"/>
 <instance part="TP24" gate="G$1" x="215.9" y="71.12" rot="R180"/>
 <instance part="TP25" gate="G$1" x="215.9" y="68.58" rot="R180"/>
+<instance part="U10" gate="G$1" x="45.72" y="48.26"/>
 </instances>
 <busses>
 </busses>
@@ -3568,9 +3564,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="C26" gate="G$1" pin="2"/>
 <wire x1="71.12" y1="58.42" x2="71.12" y2="33.02" width="0.1524" layer="91"/>
 <junction x="71.12" y="33.02"/>
-<pinref part="SW1" gate="G$1" pin="GND"/>
-<wire x1="66.04" y1="48.26" x2="66.04" y2="33.02" width="0.1524" layer="91"/>
+<wire x1="66.04" y1="53.34" x2="66.04" y2="33.02" width="0.1524" layer="91"/>
 <junction x="66.04" y="33.02"/>
+<pinref part="U10" gate="G$1" pin="GND"/>
 </segment>
 <segment>
 <pinref part="GND31" gate="1" pin="GND"/>
@@ -3688,16 +3684,15 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="35.56" y1="45.72" x2="35.56" y2="43.18" width="0.1524" layer="91"/>
 <wire x1="35.56" y1="43.18" x2="33.02" y2="43.18" width="0.1524" layer="91"/>
 <label x="33.02" y="43.18" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
-<pinref part="SW1" gate="G$1" pin="EN"/>
-<wire x1="40.64" y1="48.26" x2="40.64" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="40.64" y1="53.34" x2="40.64" y2="43.18" width="0.1524" layer="91"/>
 <wire x1="40.64" y1="43.18" x2="35.56" y2="43.18" width="0.1524" layer="91"/>
 <junction x="35.56" y="43.18"/>
 <pinref part="R17" gate="G$1" pin="1"/>
+<pinref part="U10" gate="G$1" pin="EN"/>
 </segment>
 </net>
 <net name="N$18" class="0">
 <segment>
-<pinref part="SW1" gate="G$1" pin="VLOAD"/>
 <pinref part="J1" gate="G$1" pin="VCC"/>
 <wire x1="127" y1="68.58" x2="127" y2="58.42" width="0.1524" layer="91"/>
 <wire x1="127" y1="58.42" x2="129.54" y2="58.42" width="0.1524" layer="91"/>
@@ -3722,19 +3717,19 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="71.12" y1="66.04" x2="71.12" y2="68.58" width="0.1524" layer="91"/>
 <junction x="71.12" y="68.58"/>
 <wire x1="66.04" y1="68.58" x2="71.12" y2="68.58" width="0.1524" layer="91"/>
-<wire x1="66.04" y1="53.34" x2="66.04" y2="68.58" width="0.1524" layer="91"/>
+<wire x1="66.04" y1="58.42" x2="66.04" y2="68.58" width="0.1524" layer="91"/>
+<pinref part="U10" gate="G$1" pin="VLOAD"/>
 </segment>
 </net>
 <net name="VCC" class="0">
 <segment>
 <wire x1="35.56" y1="53.34" x2="35.56" y2="55.88" width="0.1524" layer="91"/>
-<pinref part="SW1" gate="G$1" pin="VSUPP"/>
-<wire x1="40.64" y1="50.8" x2="40.64" y2="55.88" width="0.1524" layer="91"/>
 <wire x1="40.64" y1="55.88" x2="35.56" y2="55.88" width="0.1524" layer="91"/>
 <wire x1="35.56" y1="58.42" x2="35.56" y2="55.88" width="0.1524" layer="91"/>
 <junction x="35.56" y="55.88"/>
 <pinref part="P+2" gate="VCC" pin="VCC"/>
 <pinref part="R17" gate="G$1" pin="2"/>
+<pinref part="U10" gate="G$1" pin="VSUPP"/>
 </segment>
 <segment>
 <pinref part="R3" gate="G$1" pin="1"/>
@@ -4075,16 +4070,16 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <instance part="P+1" gate="VCC" x="175.26" y="177.8"/>
 <instance part="ASSY2" gate="A1" x="76.2" y="40.64"/>
 <instance part="GND30" gate="1" x="73.66" y="22.86"/>
-<instance part="SW2" gate="G$1" x="147.32" y="167.64" rot="R180"/>
 <instance part="R18" gate="G$1" x="170.18" y="172.72">
 <attribute name="DIGIKEY" x="170.18" y="172.72" size="1.27" layer="96" font="vector" display="off"/>
 </instance>
 <instance part="P+15" gate="VCC" x="119.38" y="78.74"/>
-<instance part="SW4" gate="G$1" x="91.44" y="66.04" rot="R180"/>
+<instance part="SW4" gate="G$1" x="99.06" y="71.12" rot="R180"/>
 <instance part="GND35" gate="1" x="53.34" y="50.8"/>
 <instance part="R19" gate="G$1" x="114.3" y="71.12">
 <attribute name="DIGIKEY" x="114.3" y="71.12" size="1.27" layer="96" font="vector" display="off"/>
 </instance>
+<instance part="U$5" gate="G$1" x="154.94" y="172.72" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -4141,12 +4136,12 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="C12" gate="G$1" pin="1"/>
 <wire x1="111.76" y1="162.56" x2="109.22" y2="162.56" width="0.1524" layer="91"/>
 <junction x="109.22" y="162.56"/>
-<pinref part="SW2" gate="G$1" pin="GND"/>
 <wire x1="134.62" y1="167.64" x2="129.54" y2="167.64" width="0.1524" layer="91"/>
 <wire x1="129.54" y1="167.64" x2="129.54" y2="175.26" width="0.1524" layer="91"/>
 <wire x1="129.54" y1="175.26" x2="109.22" y2="175.26" width="0.1524" layer="91"/>
 <wire x1="109.22" y1="175.26" x2="109.22" y2="170.18" width="0.1524" layer="91"/>
 <junction x="109.22" y="170.18"/>
+<pinref part="U$5" gate="G$1" pin="GND"/>
 </segment>
 <segment>
 <pinref part="GND30" gate="1" pin="GND"/>
@@ -4168,9 +4163,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="162.56" y1="172.72" x2="162.56" y2="177.8" width="0.1524" layer="91"/>
 <wire x1="162.56" y1="177.8" x2="160.02" y2="177.8" width="0.1524" layer="91"/>
 <wire x1="162.56" y1="167.64" x2="162.56" y2="172.72" width="0.1524" layer="91"/>
-<pinref part="SW2" gate="G$1" pin="EN"/>
 <wire x1="160.02" y1="167.64" x2="162.56" y2="167.64" width="0.1524" layer="91"/>
 <junction x="162.56" y="172.72"/>
+<pinref part="U$5" gate="G$1" pin="EN"/>
 </segment>
 </net>
 <net name="VCC_RF" class="0">
@@ -4234,12 +4229,10 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="121.92" y1="162.56" x2="121.92" y2="170.18" width="0.1524" layer="91"/>
 <wire x1="121.92" y1="162.56" x2="121.92" y2="154.94" width="0.1524" layer="91"/>
 <junction x="121.92" y="162.56"/>
-<pinref part="SW2" gate="G$1" pin="VLOAD"/>
 <pinref part="U4" gate="MAX-M8" pin="VCC"/>
 <wire x1="134.62" y1="162.56" x2="134.62" y2="154.94" width="0.1524" layer="91"/>
 <wire x1="134.62" y1="154.94" x2="134.62" y2="148.59" width="0.1524" layer="91"/>
 <wire x1="134.62" y1="162.56" x2="121.92" y2="162.56" width="0.1524" layer="91"/>
-<junction x="134.62" y="162.56"/>
 <pinref part="U4" gate="MAX-M8" pin="VCC_IO"/>
 <wire x1="137.16" y1="148.59" x2="137.16" y2="154.94" width="0.1524" layer="91"/>
 <wire x1="137.16" y1="154.94" x2="134.62" y2="154.94" width="0.1524" layer="91"/>
@@ -4248,6 +4241,8 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="139.7" y1="148.59" x2="139.7" y2="154.94" width="0.1524" layer="91"/>
 <wire x1="139.7" y1="154.94" x2="137.16" y2="154.94" width="0.1524" layer="91"/>
 <junction x="137.16" y="154.94"/>
+<pinref part="U$5" gate="G$1" pin="VLOAD"/>
+<junction x="134.62" y="162.56"/>
 </segment>
 <segment>
 <pinref part="R4" gate="G$1" pin="2"/>
@@ -4305,12 +4300,12 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <segment>
 <pinref part="P+1" gate="VCC" pin="VCC"/>
 <wire x1="175.26" y1="165.1" x2="175.26" y2="172.72" width="0.1524" layer="91"/>
-<pinref part="SW2" gate="G$1" pin="VSUPP"/>
 <wire x1="175.26" y1="172.72" x2="175.26" y2="175.26" width="0.1524" layer="91"/>
 <wire x1="175.26" y1="165.1" x2="160.02" y2="165.1" width="0.1524" layer="91"/>
 <pinref part="R18" gate="G$1" pin="2"/>
 <wire x1="172.72" y1="172.72" x2="175.26" y2="172.72" width="0.1524" layer="91"/>
 <junction x="175.26" y="172.72"/>
+<pinref part="U$5" gate="G$1" pin="VSUPP"/>
 </segment>
 <segment>
 <pinref part="P+15" gate="VCC" pin="VCC"/>
@@ -4473,11 +4468,11 @@ Switch</text>
 <attribute name="DIGIKEY" x="33.02" y="99.06" size="1.778" layer="96" rot="R270" display="off"/>
 </instance>
 <instance part="P+16" gate="VCC" x="187.96" y="185.42"/>
-<instance part="SW5" gate="G$1" x="160.02" y="172.72" rot="R180"/>
 <instance part="R20" gate="G$1" x="182.88" y="177.8">
 <attribute name="DIGIKEY" x="182.88" y="177.8" size="1.27" layer="96" font="vector" display="off"/>
 </instance>
 <instance part="GND36" gate="1" x="101.6" y="154.94"/>
+<instance part="U9" gate="G$1" x="162.56" y="177.8" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -4579,10 +4574,10 @@ Switch</text>
 <pinref part="GND2" gate="1" pin="GND"/>
 </segment>
 <segment>
-<pinref part="SW5" gate="G$1" pin="GND"/>
-<wire x1="147.32" y1="172.72" x2="101.6" y2="172.72" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="172.72" x2="101.6" y2="172.72" width="0.1524" layer="91"/>
 <wire x1="101.6" y1="172.72" x2="101.6" y2="157.48" width="0.1524" layer="91"/>
 <pinref part="GND36" gate="1" pin="GND"/>
+<pinref part="U9" gate="G$1" pin="GND"/>
 </segment>
 </net>
 <net name="N$10" class="0">
@@ -4802,17 +4797,16 @@ Switch</text>
 <wire x1="187.96" y1="177.8" x2="187.96" y2="170.18" width="0.1524" layer="91"/>
 <wire x1="185.42" y1="177.8" x2="187.96" y2="177.8" width="0.1524" layer="91"/>
 <junction x="187.96" y="177.8"/>
-<pinref part="SW5" gate="G$1" pin="VSUPP"/>
-<wire x1="187.96" y1="170.18" x2="172.72" y2="170.18" width="0.1524" layer="91"/>
+<wire x1="187.96" y1="170.18" x2="167.64" y2="170.18" width="0.1524" layer="91"/>
 <pinref part="R20" gate="G$1" pin="2"/>
+<pinref part="U9" gate="G$1" pin="VSUPP"/>
 </segment>
 </net>
 <net name="VCC_BLE" class="0">
 <segment>
-<pinref part="SW5" gate="G$1" pin="VLOAD"/>
 <pinref part="J2" gate="G$1" pin="VCC"/>
 <wire x1="116.84" y1="154.94" x2="114.3" y2="154.94" width="0.1524" layer="91"/>
-<wire x1="147.32" y1="167.64" x2="114.3" y2="167.64" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="167.64" x2="114.3" y2="167.64" width="0.1524" layer="91"/>
 <wire x1="114.3" y1="167.64" x2="114.3" y2="154.94" width="0.1524" layer="91"/>
 <pinref part="C16" gate="G$1" pin="1"/>
 <wire x1="73.66" y1="160.02" x2="66.04" y2="160.02" width="0.1524" layer="91"/>
@@ -4827,6 +4821,7 @@ Switch</text>
 <wire x1="114.3" y1="167.64" x2="73.66" y2="167.64" width="0.1524" layer="91"/>
 <wire x1="73.66" y1="167.64" x2="73.66" y2="160.02" width="0.1524" layer="91"/>
 <junction x="114.3" y="167.64"/>
+<pinref part="U9" gate="G$1" pin="VLOAD"/>
 </segment>
 <segment>
 <pinref part="R5" gate="G$1" pin="1"/>
@@ -4837,8 +4832,7 @@ Switch</text>
 </net>
 <net name="BLE_PWR_EN" class="0">
 <segment>
-<pinref part="SW5" gate="G$1" pin="EN"/>
-<wire x1="175.26" y1="172.72" x2="172.72" y2="172.72" width="0.1524" layer="91"/>
+<wire x1="175.26" y1="172.72" x2="167.64" y2="172.72" width="0.1524" layer="91"/>
 <wire x1="175.26" y1="172.72" x2="175.26" y2="177.8" width="0.1524" layer="91"/>
 <wire x1="175.26" y1="177.8" x2="177.8" y2="177.8" width="0.1524" layer="91"/>
 <wire x1="175.26" y1="182.88" x2="172.72" y2="182.88" width="0.1524" layer="91"/>
@@ -4846,6 +4840,7 @@ Switch</text>
 <wire x1="175.26" y1="177.8" x2="175.26" y2="182.88" width="0.1524" layer="91"/>
 <junction x="175.26" y="177.8"/>
 <pinref part="R20" gate="G$1" pin="1"/>
+<pinref part="U9" gate="G$1" pin="EN"/>
 </segment>
 </net>
 </nets>
@@ -4953,11 +4948,11 @@ Switch</text>
 </instance>
 <instance part="GND21" gate="1" x="127" y="109.22"/>
 <instance part="P+13" gate="VCC" x="185.42" y="182.88"/>
-<instance part="SW3" gate="G$1" x="157.48" y="170.18" rot="R180"/>
 <instance part="GND34" gate="1" x="121.92" y="157.48"/>
 <instance part="R21" gate="G$1" x="180.34" y="175.26">
 <attribute name="DIGIKEY" x="180.34" y="175.26" size="1.27" layer="96" font="vector" display="off"/>
 </instance>
+<instance part="U11" gate="G$1" x="162.56" y="175.26" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -5054,10 +5049,10 @@ Switch</text>
 <wire x1="127" y1="111.76" x2="127" y2="116.84" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="SW3" gate="G$1" pin="GND"/>
-<wire x1="144.78" y1="170.18" x2="121.92" y2="170.18" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="170.18" x2="121.92" y2="170.18" width="0.1524" layer="91"/>
 <wire x1="121.92" y1="170.18" x2="121.92" y2="160.02" width="0.1524" layer="91"/>
 <pinref part="GND34" gate="1" pin="GND"/>
+<pinref part="U11" gate="G$1" pin="GND"/>
 </segment>
 </net>
 <net name="VCC" class="0">
@@ -5122,9 +5117,9 @@ Switch</text>
 <wire x1="185.42" y1="175.26" x2="185.42" y2="167.64" width="0.1524" layer="91"/>
 <wire x1="182.88" y1="175.26" x2="185.42" y2="175.26" width="0.1524" layer="91"/>
 <junction x="185.42" y="175.26"/>
-<pinref part="SW3" gate="G$1" pin="VSUPP"/>
-<wire x1="185.42" y1="167.64" x2="170.18" y2="167.64" width="0.1524" layer="91"/>
+<wire x1="185.42" y1="167.64" x2="167.64" y2="167.64" width="0.1524" layer="91"/>
 <pinref part="R21" gate="G$1" pin="2"/>
+<pinref part="U11" gate="G$1" pin="VSUPP"/>
 </segment>
 </net>
 <net name="!LIGHT_INT" class="0">
@@ -5298,9 +5293,8 @@ Switch</text>
 <junction x="157.48" y="154.94"/>
 <label x="142.24" y="154.94" size="1.27" layer="95" rot="R180" xref="yes"/>
 <junction x="142.24" y="154.94"/>
-<pinref part="SW3" gate="G$1" pin="VLOAD"/>
-<wire x1="144.78" y1="165.1" x2="142.24" y2="165.1" width="0.1524" layer="91"/>
 <wire x1="142.24" y1="165.1" x2="142.24" y2="154.94" width="0.1524" layer="91"/>
+<pinref part="U11" gate="G$1" pin="VLOAD"/>
 </segment>
 </net>
 <net name="AUDIO_OUT" class="0">
@@ -5333,8 +5327,7 @@ Switch</text>
 </net>
 <net name="AUDIO_PWR_EN" class="0">
 <segment>
-<pinref part="SW3" gate="G$1" pin="EN"/>
-<wire x1="172.72" y1="170.18" x2="170.18" y2="170.18" width="0.1524" layer="91"/>
+<wire x1="172.72" y1="170.18" x2="167.64" y2="170.18" width="0.1524" layer="91"/>
 <wire x1="172.72" y1="170.18" x2="172.72" y2="175.26" width="0.1524" layer="91"/>
 <wire x1="172.72" y1="175.26" x2="175.26" y2="175.26" width="0.1524" layer="91"/>
 <wire x1="172.72" y1="180.34" x2="170.18" y2="180.34" width="0.1524" layer="91"/>
@@ -5342,6 +5335,7 @@ Switch</text>
 <wire x1="172.72" y1="175.26" x2="172.72" y2="180.34" width="0.1524" layer="91"/>
 <junction x="172.72" y="175.26"/>
 <pinref part="R21" gate="G$1" pin="1"/>
+<pinref part="U11" gate="G$1" pin="EN"/>
 </segment>
 </net>
 </nets>
