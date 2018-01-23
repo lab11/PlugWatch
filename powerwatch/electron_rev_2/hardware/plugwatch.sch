@@ -3463,7 +3463,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="TP23" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP24" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP25" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
-<part name="U$5" library="chips" deviceset="SIP32510" device=""/>
+<part name="U12" library="chips" deviceset="SIP32510" device=""/>
 <part name="U9" library="chips" deviceset="SIP32510" device=""/>
 <part name="U10" library="chips" deviceset="SIP32510" device=""/>
 <part name="U11" library="chips" deviceset="SIP32510" device=""/>
@@ -4079,7 +4079,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <instance part="R19" gate="G$1" x="114.3" y="71.12">
 <attribute name="DIGIKEY" x="114.3" y="71.12" size="1.27" layer="96" font="vector" display="off"/>
 </instance>
-<instance part="U$5" gate="G$1" x="154.94" y="172.72" rot="R180"/>
+<instance part="U12" gate="G$1" x="154.94" y="172.72" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -4141,7 +4141,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="129.54" y1="175.26" x2="109.22" y2="175.26" width="0.1524" layer="91"/>
 <wire x1="109.22" y1="175.26" x2="109.22" y2="170.18" width="0.1524" layer="91"/>
 <junction x="109.22" y="170.18"/>
-<pinref part="U$5" gate="G$1" pin="GND"/>
+<pinref part="U12" gate="G$1" pin="GND"/>
 </segment>
 <segment>
 <pinref part="GND30" gate="1" pin="GND"/>
@@ -4165,7 +4165,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="162.56" y1="167.64" x2="162.56" y2="172.72" width="0.1524" layer="91"/>
 <wire x1="160.02" y1="167.64" x2="162.56" y2="167.64" width="0.1524" layer="91"/>
 <junction x="162.56" y="172.72"/>
-<pinref part="U$5" gate="G$1" pin="EN"/>
+<pinref part="U12" gate="G$1" pin="EN"/>
 </segment>
 </net>
 <net name="VCC_RF" class="0">
@@ -4241,7 +4241,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="139.7" y1="148.59" x2="139.7" y2="154.94" width="0.1524" layer="91"/>
 <wire x1="139.7" y1="154.94" x2="137.16" y2="154.94" width="0.1524" layer="91"/>
 <junction x="137.16" y="154.94"/>
-<pinref part="U$5" gate="G$1" pin="VLOAD"/>
+<pinref part="U12" gate="G$1" pin="VLOAD"/>
 <junction x="134.62" y="162.56"/>
 </segment>
 <segment>
@@ -4305,7 +4305,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="R18" gate="G$1" pin="2"/>
 <wire x1="172.72" y1="172.72" x2="175.26" y2="172.72" width="0.1524" layer="91"/>
 <junction x="175.26" y="172.72"/>
-<pinref part="U$5" gate="G$1" pin="VSUPP"/>
+<pinref part="U12" gate="G$1" pin="VSUPP"/>
 </segment>
 <segment>
 <pinref part="P+15" gate="VCC" pin="VCC"/>
