@@ -3794,6 +3794,8 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="11.7348" y1="2.4892" x2="11.7348" y2="2.54" width="0.4064" layer="16"/>
 <wire x1="18.038" y1="9.361" x2="16.727" y2="9.361" width="0.4064" layer="16"/>
 <wire x1="16.727" y1="9.361" x2="16.51" y2="9.144" width="0.4064" layer="16"/>
+<contactref element="R13" pad="1"/>
+<wire x1="16.51" y1="13.716" x2="16.28013125" y2="15.0876" width="0" layer="19" extent="16-16"/>
 </signal>
 <signal name="N$14">
 <contactref element="A4" pad="8"/>
@@ -3845,9 +3847,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="TP9" pad="TESTPOINT"/>
 <wire x1="23.622" y1="36.576" x2="25.4" y2="36.576" width="0.254" layer="1"/>
 <wire x1="25.4" y1="36.576" x2="28.575" y2="33.401" width="0.254" layer="1"/>
-</signal>
-<signal name="BLE_VCC">
-<contactref element="R13" pad="1"/>
 </signal>
 <signal name="GND2">
 <via x="52.07" y="1.27" extent="1-16" drill="0.3048"/>

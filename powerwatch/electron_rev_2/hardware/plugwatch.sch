@@ -4826,6 +4826,12 @@ Switch</text>
 <wire x1="73.66" y1="167.64" x2="73.66" y2="160.02" width="0.1524" layer="91"/>
 <junction x="114.3" y="167.64"/>
 </segment>
+<segment>
+<pinref part="R13" gate="G$1" pin="1"/>
+<wire x1="33.02" y1="114.3" x2="33.02" y2="116.84" width="0.1524" layer="91"/>
+<label x="30.48" y="116.84" size="1.27" layer="95" rot="R180" xref="yes"/>
+<wire x1="33.02" y1="116.84" x2="30.48" y2="116.84" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="BLE_PWR_EN" class="0">
 <segment>
@@ -4838,14 +4844,6 @@ Switch</text>
 <wire x1="175.26" y1="177.8" x2="175.26" y2="182.88" width="0.1524" layer="91"/>
 <junction x="175.26" y="177.8"/>
 <pinref part="R24" gate="G$1" pin="1"/>
-</segment>
-</net>
-<net name="BLE_VCC" class="0">
-<segment>
-<pinref part="R13" gate="G$1" pin="1"/>
-<wire x1="33.02" y1="114.3" x2="33.02" y2="116.84" width="0.1524" layer="91"/>
-<label x="30.48" y="116.84" size="1.27" layer="95" rot="R180" xref="yes"/>
-<wire x1="33.02" y1="116.84" x2="30.48" y2="116.84" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
