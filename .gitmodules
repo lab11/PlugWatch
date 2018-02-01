@@ -1,0 +1,3 @@
+[submodule "powerwatch/electron_rev_2/software/nrf/nrf5x-base"]
+	path = powerwatch/electron_rev_2/software/nrf/nrf5x-base
+	url = https://github.com/lab11/nrf5x-base
