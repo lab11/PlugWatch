@@ -57,10 +57,10 @@ class ISL29035 {
 
   public:
     ISL29035(ISL29035_int_persist_cycles int_persist_cycles, ISL29035_op_mode op_mode, ISL29035_range range, ISL29035_adc_resolution adc_res) :
-      int_persist_cycles { int_persist_cycles },
-      op_mode { op_mode },
-      range { range },
-      adc_res { adc_res } {}
+      int_persist_cycles { (uint8_t) int_persist_cycles },
+      op_mode { (uint8_t) op_mode },
+      range   { (uint8_t) range },
+      adc_res { (uint8_t) adc_res } {}
 
     ISL29035() {};
     int8_t init();

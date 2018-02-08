@@ -16,6 +16,7 @@
 #include "Cloud.h"
 #include "FileLog.h"
 #include "Gps.h"
+#include "ESP8266.h"
 #include "Heartbeat.h"
 #include "Imu.h"
 #include "Light.h"
@@ -62,6 +63,12 @@ ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, System.reset);
 //***********************************
 SDCard SD;
 
+//***********************************
+//* ESP8266 WIFI Module
+//***********************************
+String serial5_response;
+bool serial5_recv_done;
+auto esp8266 = ESP8266(&serial5_response, &serial5_recv_done);
 
 //***********************************
 //* Reset Monitor
@@ -163,6 +170,11 @@ retained float LIGHT_LUX = 0;
 auto lightSubsystem = Light(SD, &LIGHT_FREQUENCY, &LIGHT_LUX);
 
 //***********************************
+//* WIFI
+//***********************************
+
+
+//***********************************
 //* GPS
 //***********************************
 retained int GPS_FREQUENCY = Gps::DEFAULT_FREQ;
@@ -215,6 +227,14 @@ void handle_all_system_events(system_event_t event, int param) {
   EventLog.append(system_event_str);
 }
 
+// Catch Serial5 events and pass them on to the ESP8266 driver
+void serialEvent5() {
+  String recv = "";
+  while (Serial5.available()) {
+    recv.concat(Serial5.readString());
+  }
+  esp8266.updateResponse(recv);
+}
 
 //***********************************
 //* ye-old Arduino
@@ -293,7 +313,7 @@ void loop() {
   imuSubsystem.loop();
   lightSubsystem.loop();
   gpsSubsystem.loop();
-
+  esp8266.loop();
 
   //Call the automatic watchdog
   wd.checkin();

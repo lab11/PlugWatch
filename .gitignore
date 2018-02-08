@@ -1,13 +1,41 @@
-*.iml
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
+target
+build/*
+*.rlib
+*.sdb
+*.bin
+*.elf
+*.o
+*.ll
+.gdbinit
+
+## OS X
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-/src/utilities/Private.*
-*.b#*
-*.s#*
-*.l#*
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+## Log Files
+*.log
+
+# Backup and swap files
+*~
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-v][a-z]
+[._]sw[a-p]
