@@ -31,10 +31,8 @@ float ISL29035::getLux() {
   Wire.requestFrom(ISL29035_ADDR, 2, true);
   data = Wire.read();
   lux_int = data;
-  data = Wire.read();
-  lux_int |= data << 8;
-
-  return (float) lux_int * (float) range_to_lux() / (float) res_to_adc_bits();
+  lux_int |= Wire.read() << 8;
+  return ((lux_int * range_to_lux()) / (float) res_to_adc_bits());
 }
 
 int ISL29035::range_to_lux() {

@@ -18,6 +18,7 @@
 #include "Gps.h"
 #include "Heartbeat.h"
 #include "Imu.h"
+#include "Light.h"
 #include "SDCard.h"
 #include "Subsystem.h"
 #include "firmware.h"
@@ -155,6 +156,13 @@ retained int IMU_SAMPLE_RATE = Imu::DEFAULT_SAMPLE_RATE_MS;
 auto imuSubsystem = Imu(SD, &IMU_FREQUENCY, &IMU_SAMPLE_COUNT, &IMU_SAMPLE_RATE);
 
 //***********************************
+//* LIGHT
+//***********************************
+retained int LIGHT_FREQUENCY = Light::DEFAULT_FREQ;
+retained float LIGHT_LUX = 0;
+auto lightSubsystem = Light(SD, &LIGHT_FREQUENCY, &LIGHT_LUX);
+
+//***********************************
 //* GPS
 //***********************************
 retained int GPS_FREQUENCY = Gps::DEFAULT_FREQ;
@@ -250,6 +258,7 @@ void setup() {
   heartbeatSubsystem.setup();
   chargeStateSubsystem.setup();
   imuSubsystem.setup();
+  lightSubsystem.setup();
   gpsSubsystem.setup();
 
   LEDStatus status;
@@ -282,6 +291,7 @@ void loop() {
   heartbeatSubsystem.loop();
   chargeStateSubsystem.loop();
   imuSubsystem.loop();
+  lightSubsystem.loop();
   gpsSubsystem.loop();
 
 

@@ -2,7 +2,7 @@
 
 #include <Particle.h>
 
-#define ISL29035_ADDR 0x88
+#define ISL29035_ADDR 0x44
 #define COMMAND_1     0
 #define COMMAND_2     1
 #define DATA_LSB      2
@@ -53,7 +53,7 @@ class ISL29035 {
     uint8_t int_persist_cycles = CYCLES_1;
     uint8_t op_mode = ALS_CONTINUOUS;
     uint8_t range = LUX_4000;
-    uint8_t adc_res = BIT_8;
+    uint8_t adc_res = BIT_12;
 
   public:
     ISL29035(ISL29035_int_persist_cycles int_persist_cycles, ISL29035_op_mode op_mode, ISL29035_range range, ISL29035_adc_resolution adc_res) :

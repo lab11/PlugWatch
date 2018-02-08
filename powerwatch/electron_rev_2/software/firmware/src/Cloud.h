@@ -12,8 +12,9 @@
 #define HEARTBEAT_EVENT "h"
 #define IMU_EVENT "i"
 #define IMU_ERROR_EVENT "!i"
+#define LIGHT_EVENT "l"
 #define SD_ERROR_EVENT "!s"
-#define SD_READ_EVENT "l"
+#define SD_READ_EVENT "r"
 
 class Cloud {
 public:
