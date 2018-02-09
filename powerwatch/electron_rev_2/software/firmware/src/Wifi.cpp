@@ -6,16 +6,22 @@
 
 void Wifi::construct_ssid_list() {
   size_t place = 0;
-  while (place >= 0) {
-    size_t first = response->indexOf('"');
+  Serial.println();
+  while (place < response->length() and place >= 0) {
+    size_t first = response->indexOf('"', place);
     size_t second = response->indexOf('"', first+1);
     String ssid = response->substring(first+1, second);
-    //Serial.println(ssid);
+    ssid_set.insert(ssid);
+    place = response->indexOf("CWLAP", second);
   }
 }
 
 void Wifi::send(bool force) {
-    String message = "WIFI";//String(*count)+String("|")+String(meta);
+    String message = String(ssid_set.size());
+    for (auto i = ssid_set.begin(); i != ssid_set.end(); ++i) {
+      message += "|";
+      message += *i;
+    }
     if (force) {
       message = "FORCE|" + message;
     }
@@ -24,36 +30,31 @@ void Wifi::send(bool force) {
 }
 
 void Wifi::periodic(bool force) {
+  force = force;
   Serial.println("Wifi periodic!");
   ssid_set.clear();
+  Serial.println("Began scan!");
+  scan_start_time = millis();
   esp8266.beginScan();
-  unsigned long time = millis();
-  // block until response;
-  while (!done) {
-    unsigned long now = millis();
-    // time out if > 5 seconds waiting
-    if (now - time > 5000) {
-      Serial.println(now - time);
-      break;
-    }
-  }
-  if (done) {
+}
+
+int Wifi::cloudCommand(String command) {
+  return super::cloudCommand(command);
+}
+
+void Wifi::loop() {
+  if (*done) {
+    *done = false;
     // construct list, send/log success
     construct_ssid_list();
     log.append("Wifi Scan! Count: " + String(ssid_set.size()));
     send(force);
   }
-  else {
-    // log/send failure
-    log.append("Wifi Scan Error! Timeout");
-    Cloud::Publish(WIFI_ERROR_EVENT, String("Timeout"));
-  }
-}
-
-int Wifi::cloudCommand(String command) {
-//  if ((command == "gc") || (command == "get count")) {
-//    return *count;
+//  else if (millis() - scan_start_time > 5000) {
+//    // log/send failure
+//    log.append("Wifi Scan Error! Timeout");
+//    Cloud::Publish(WIFI_ERROR_EVENT, String("Timeout"));
 //  }
-
-  return super::cloudCommand(command);
+//
+  super::loop();
 }

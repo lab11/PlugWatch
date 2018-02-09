@@ -307,7 +307,6 @@ void loop() {
   }
 
   SD.loop();
-  esp8266.loop();
   resetSubsystem.loop();
   timeSyncSubsystem.loop();
   heartbeatSubsystem.loop();

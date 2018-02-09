@@ -11,5 +11,4 @@ class ESP8266 {
     ESP8266(String* response, bool* done);
     void beginScan();
     void updateResponse(String recv);
-    void loop();
 };
