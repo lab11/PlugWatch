@@ -3,7 +3,7 @@
 String response;
 const String endstring = "OK\r\n";
 char lastthree[3];
-bool done;
+bool done = true;
 
 void setup() {
   Serial.begin();
@@ -20,10 +20,8 @@ void setup() {
   Serial5.println("AT");
   Serial5.println("AT+CWMODE=1");
   delay(1000);
-  while(Serial5.available()) {
-    Serial5.read();
-  }
-  Serial5.println("AT+CWLAP");
+  //response = "";
+  //done = false;
 }
 
 void serialEvent5() {
