@@ -16,7 +16,7 @@ public:
   ChargeState(SDCard &sd, int* frequency) :
     PeriodicSubsystem(sd, "charge_state_log", frequency) {}
 
-  static const int DEFAULT_FREQ = 1000 * 5;  // 5 seconds
+  static const int DEFAULT_FREQ = 1000 * 60 * 1;  // 1 minute
 
   const String CHARGE_STATE_BATTERY = "b";
   const String CHARGE_STATE_WALL = "w";

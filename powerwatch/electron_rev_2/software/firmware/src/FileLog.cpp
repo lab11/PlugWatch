@@ -16,7 +16,7 @@ void FileLog::processIsrQueue() {
   }
   if (to_write != "") {
     Serial.println("Writing enqueued log messages to SD");
-    sd.Write(filename, to_write);
+    //sd.Write(filename, to_write);
   }
 }
 
@@ -29,7 +29,7 @@ void FileLog::append(String str) {
   processIsrQueue();
 
   Serial.println(filename + ": " + str);
-  sd.Write(filename, str + "\n");
+  //sd.Write(filename, str + "\n");
 }
 
 void FileLog::errorFromISR(String str) {
@@ -42,7 +42,7 @@ void FileLog::error(String str) {
 
   Serial.println("ERROR|" + filename + ": " + str);
   Cloud::Publish(ERROR_EVENT, str);
-  sd.Write(filename, "ERROR|" + str + "\n");
+  //sd.Write(filename, "ERROR|" + str + "\n");
 }
 
 void FileLog::debugFromISR(String str) {
