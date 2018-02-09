@@ -17,6 +17,7 @@
 #include "FileLog.h"
 #include "Gps.h"
 #include "ESP8266.h"
+#include "Wifi.h"
 #include "Heartbeat.h"
 #include "Imu.h"
 #include "Light.h"
@@ -172,7 +173,8 @@ auto lightSubsystem = Light(SD, &LIGHT_FREQUENCY, &LIGHT_LUX);
 //***********************************
 //* WIFI
 //***********************************
-
+retained int WIFI_FREQUENCY = Wifi::DEFAULT_FREQ;
+auto wifiSubsystem = Wifi(SD, esp8266, &WIFI_FREQUENCY, &serial5_response, &serial5_recv_done);
 
 //***********************************
 //* GPS
@@ -280,6 +282,7 @@ void setup() {
   imuSubsystem.setup();
   lightSubsystem.setup();
   gpsSubsystem.setup();
+  wifiSubsystem.setup();
 
   LEDStatus status;
   status.off();
@@ -306,6 +309,7 @@ void loop() {
   }
 
   SD.loop();
+  esp8266.loop();
   resetSubsystem.loop();
   timeSyncSubsystem.loop();
   heartbeatSubsystem.loop();
@@ -313,7 +317,7 @@ void loop() {
   imuSubsystem.loop();
   lightSubsystem.loop();
   gpsSubsystem.loop();
-  esp8266.loop();
+  wifiSubsystem.loop();
 
   //Call the automatic watchdog
   wd.checkin();

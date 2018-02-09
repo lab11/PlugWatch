@@ -15,6 +15,8 @@
 #define LIGHT_EVENT "l"
 #define SD_ERROR_EVENT "!s"
 #define SD_READ_EVENT "r"
+#define WIFI_SCAN_EVENT "w"
+#define WIFI_ERROR_EVENT "!w"
 
 class Cloud {
 public:
