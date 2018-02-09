@@ -48,8 +48,7 @@ SYSTEM_MODE(MANUAL);
 //**********************************
 //* Pin Configuration
 //**********************************
-int debug_led_1 = C0;
-int debug_led_2 = B0;
+int debug_led_1 = C5;
 
 
 //***********************************
@@ -268,7 +267,6 @@ void setup() {
 
 
   pinMode(debug_led_1, OUTPUT);
-  pinMode(debug_led_2, OUTPUT);
 
   // Setup SD card first so that other setups can log
   SD.setup();
