@@ -68,7 +68,6 @@ void ESP8266::loop() {
       response->concat(recv);
       if (recv.endsWith(endstring)) {
         *done = true;
-        Serial.print(*response);
         break;
       }
     }

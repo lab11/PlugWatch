@@ -31,9 +31,8 @@ void Wifi::send(bool force) {
 
 void Wifi::periodic(bool force) {
   force = force;
-  Serial.println("Wifi periodic!");
   ssid_set.clear();
-  Serial.println("Began scan!");
+  log.append("WIFI| Began scan!");
   scan_start_time = millis();
   esp8266.beginScan();
 }
@@ -50,11 +49,5 @@ void Wifi::loop() {
     log.append("Wifi Scan! Count: " + String(ssid_set.size()));
     send(force);
   }
-//  else if (millis() - scan_start_time > 5000) {
-//    // log/send failure
-//    log.append("Wifi Scan Error! Timeout");
-//    Cloud::Publish(WIFI_ERROR_EVENT, String("Timeout"));
-//  }
-//
   super::loop();
 }
