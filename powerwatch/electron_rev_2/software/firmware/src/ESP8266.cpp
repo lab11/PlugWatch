@@ -60,14 +60,17 @@ void ESP8266::beginScan() {
   Serial5.println("AT+CWLAP");
 }
 
-void ESP8266::updateResponse(String recv) {
-  //Serial.print(recv);
-  if (!*done) {
-    response->concat(recv);
-  }
-  if (response->endsWith(endstring)) {
-    *done = true;
-    Serial.print(*response);
+void ESP8266::loop() {
+  unsigned long start_time = millis();
+  if (!*done && Serial5.available()) {
+    while(millis() - start_time < 10000) {
+      String recv = Serial5.readString();
+      response->concat(recv);
+      if (recv.endsWith(endstring)) {
+        *done = true;
+        Serial.print(*response);
+        break;
+      }
+    }
   }
 }
-

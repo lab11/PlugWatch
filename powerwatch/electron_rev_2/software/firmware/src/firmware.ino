@@ -229,13 +229,13 @@ void handle_all_system_events(system_event_t event, int param) {
 }
 
 // Catch Serial5 events and pass them on to the ESP8266 driver
-void serialEvent5() {
-  String recv = "";
-  while (Serial5.available()) {
-    recv.concat(Serial5.readString());
-  }
-  esp8266.updateResponse(recv);
-}
+//void serialEvent5() {
+//  String recv = "";
+//  while (Serial5.available()) {
+//    recv.concat(Serial5.readString());
+//  }
+//  esp8266.updateResponse(recv);
+//}
 
 //***********************************
 //* ye-old Arduino
@@ -315,6 +315,7 @@ void loop() {
   lightSubsystem.loop();
   gpsSubsystem.loop();
   wifiSubsystem.loop();
+  esp8266.loop();
 
   //Call the automatic watchdog
   wd.checkin();
