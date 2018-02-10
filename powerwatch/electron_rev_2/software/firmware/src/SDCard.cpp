@@ -15,7 +15,7 @@ void SDCard::loop() {
 
   if (power_cycle_flag) {
     power_cycle_flag = false;
-    //PowerCycle();
+    PowerCycle();
 
     // Power cycling is slow, so don't do anything else this loop, let others go
     return;
@@ -46,9 +46,9 @@ int SDCard::cloudCommand(String command) {
 
 void SDCard::PowerCycle() {
 	digitalWrite(SD_ENABLE_PIN, HIGH);
-	delay(100);
+	delay(1000);
 	digitalWrite(SD_ENABLE_PIN, LOW);
-	delay(100);
+	delay(1000);
 }
 
 void SDCard::Write(String filename, String to_write) {
