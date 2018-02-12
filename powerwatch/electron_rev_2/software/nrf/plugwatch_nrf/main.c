@@ -36,8 +36,8 @@
 #define UART_TX_BUF_SIZE          256                                      /**< Size of the UART TX buffer, in bytes. Must be a power of two. */
 #define UART_RX_BUF_SIZE          1                                        /**< Size of the UART RX buffer, in bytes. Must be a power of two. */
 
-//#define CENTRAL_SCANNING_LED      13                                       /**< Scanning LED will be on when the device is scanning. */
-#define CENTRAL_CONNECTED_LED     13                                       /**< Connected LED will be on when the device is connected. */
+#define CENTRAL_SCANNING_LED      13                                       /**< Scanning LED will be on when the device is scanning. */
+//#define CENTRAL_CONNECTED_LED     13                                       /**< Connected LED will be on when the device is connected. */
 #define APP_TIMER_PRESCALER       0                                        /**< Value of the RTC1 PRESCALER register. */
 #define APP_TIMER_MAX_TIMERS      (2+BSP_APP_TIMERS_NUMBER)                /**< Maximum number of timers used by the application. */
 #define APP_TIMER_OP_QUEUE_SIZE   2                                        /**< Size of timer operation queues. */
@@ -51,7 +51,7 @@
 
 #define SCAN_INTERVAL             0x00A0                                   /**< Determines scan interval in units of 0.625 millisecond. */
 #define SCAN_WINDOW               0x0050                                   /**< Determines scan window in units of 0.625 millisecond. */
-#define SCAN_TIMEOUT              0x0000                                   /**< Timout when scanning. 0x0000 disables timeout. */
+#define SCAN_TIMEOUT              0x0010                                   /**< Timout when scanning. 0x0000 disables timeout. */
 #define SCAN_REQUEST              0                                        /**< Active scanning is not set. */
 #define SCAN_WHITELIST_ONLY       0                                        /**< We will not ignore unknown devices. */
 
@@ -62,13 +62,33 @@
 
 #define UUID16_SIZE               2                                        /**< Size of a UUID, in bytes. */
 
-#define LEDBUTTON_LED             BSP_LED_2_MASK                           /**< LED to indicate a change of state of the the Button characteristic on the peer. */
-#define LEDBUTTON_BUTTON_PIN      BSP_BUTTON_0                             /**< Button that will write to the LED characteristic of the peer */
-#define BUTTON_DETECTION_DELAY    APP_TIMER_TICKS(50, APP_TIMER_PRESCALER) /**< Delay from a GPIOTE event until a button is reported as pushed (in number of timer ticks). */
+#define MAX_TEST_DATA_BYTES     (15U)                /**< max number of test bytes to be used for tx and rx. */
+#define UART_TX_BUF_SIZE 256                         /**< UART TX buffer size. */
+#define UART_RX_BUF_SIZE 1                           /**< UART RX buffer size. */
 
-static const uint8_t plugwatch_service_uuid[] = {0x00, 0x00, 0x48, 0x43,   /**< Name of the device we try to connect to. This name is searched in the scan report data*/
+#define SCAN_LIST_MAX_LEN 20
+
+static const char m_target_periph_name[] = "WIT";                         /**< Name of the device we try to connect to. This name is searched in the scan report data*/
+
+static const uint8_t plugwatch_service_uuid[] = {0x00, 0x00, 0x48, 0x43,
+  0x45, 0x54, 0x43, 0x49, 0x47, 0x4f, 0x4c, 0x49, 0xe0, 0xfe, 0x00, 0x00};
+
+static const uint8_t plugwatch_wit_ffe1_uuid[] = {0x00, 0x00, 0x48, 0x43,
   0x45, 0x54, 0x43, 0x49, 0x47, 0x4f, 0x4c, 0x49, 0xe1, 0xfe, 0x00, 0x00};
 
+static const uint8_t plugwatch_wit_ffe3_uuid[] = {0x00, 0x00, 0x48, 0x43,
+  0x45, 0x54, 0x43, 0x49, 0x47, 0x4f, 0x4c, 0x49, 0xe3, 0xfe, 0x00, 0x00};
+
+static size_t scan_name_list_len = 0;
+static char* scan_name_list[SCAN_LIST_MAX_LEN];
+
+typedef enum {
+  UART_WAIT=0,
+  SCAN_START,
+  SCAN_TIME,
+} state_t;
+
+static state_t state = UART_WAIT;
 
 /**@brief Variable length data encapsulation in terms of length and pointer to data. */
 typedef struct
@@ -99,7 +119,6 @@ static const ble_gap_conn_params_t m_connection_param =
 
 static ble_db_discovery_t m_ble_db_discovery; /**< DB structure used by the database discovery module. */
 
-
 /**@brief Function to handle asserts in the SoftDevice.
  *
  * @details This function will be called in case of an assert in the SoftDevice.
@@ -123,8 +142,8 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
  */
 static void leds_init(void)
 {
-    led_init(CENTRAL_CONNECTED_LED);
-    led_off(CENTRAL_CONNECTED_LED);
+    led_init(CENTRAL_SCANNING_LED);
+    led_off(CENTRAL_SCANNING_LED);
 }
 
 
@@ -163,10 +182,9 @@ static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_ty
     return NRF_ERROR_NOT_FOUND;
 }
 
-
-/**@brief Function to start scanning.
+/**@brief Function to stop scanning.
  */
-static void scan_start(void)
+static inline void scan_stop(void)
 {
     ret_code_t err_code;
 
@@ -176,12 +194,21 @@ static void scan_start(void)
     {
         APP_ERROR_CHECK(err_code);
     }
+}
+
+/**@brief Function to start scanning.
+ */
+static void scan_start(void)
+{
+    ret_code_t err_code;
+
+    scan_stop();
 
     err_code = sd_ble_gap_scan_start(&m_scan_param);
     APP_ERROR_CHECK(err_code);
 
-    led_off(CENTRAL_CONNECTED_LED);
-    //led_on(CENTRAL_SCANNING_LED);
+    //led_off(CENTRAL_CONNECTED_LED);
+    led_on(CENTRAL_SCANNING_LED);
 }
 
 
@@ -236,7 +263,7 @@ static void on_adv_report(const ble_evt_t * const p_ble_evt)
     uint32_t err_code;
     data_t   adv_data;
     bool     do_connect = false;
-    data_t   service_uuid;
+    data_t   dev_name;
 
     // For readibility.
     const ble_gap_evt_t * const  p_gap_evt  = &p_ble_evt->evt.gap_evt;
@@ -248,16 +275,16 @@ static void on_adv_report(const ble_evt_t * const p_ble_evt)
 
 
         //search for advertising names
-        bool found_device = false;
-        err_code = adv_report_parse(BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_COMPLETE,
+        bool found_name = false;
+        err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
                                     &adv_data,
-                                    &service_uuid);
+                                    &dev_name);
         if (err_code != NRF_SUCCESS)
         {
             // Look for the short local name if it was not found as complete
             err_code = adv_report_parse(BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME,
                                         &adv_data,
-                                        &service_uuid);
+                                        &dev_name);
             if (err_code != NRF_SUCCESS)
             {
                 // If we can't parse the data, then exit
@@ -265,31 +292,75 @@ static void on_adv_report(const ble_evt_t * const p_ble_evt)
             }
             else
             {
-                found_device = true;
+                found_name = true;
             }
         }
         else
         {
-            found_device = true;
+            found_name = true;
         }
-        if (found_device)
+        if (found_name)
         {
-            if (strlen(plugwatch_service_uuid) != 0)
+            if (strlen(m_target_periph_name) != 0)
             {
-                if(memcmp(plugwatch_service_uuid, service_uuid.p_data, service_uuid.data_len )== 0)
-                {
-                    do_connect = true;
+                //if(memcmp(m_target_periph_name, dev_name.p_data, dev_name.data_len )== 0)
+                //{
+                //    do_connect = true;
+                //}
+                if (scan_name_list_len < SCAN_LIST_MAX_LEN) {
+                  scan_name_list[scan_name_list_len] = malloc(dev_name.data_len);
+                  memcpy(dev_name.p_data, scan_name_list[scan_name_list_len++], dev_name.data_len);
                 }
             }
         }
     }
 
-    if (do_connect)
-    {
-        // Initiate connection.
-        err_code = sd_ble_gap_connect(peer_addr, &m_scan_param, &m_connection_param);
+    //if (do_connect)
+    //{
+    //    // Initiate connection.
+    //    err_code = sd_ble_gap_connect(peer_addr, &m_scan_param, &m_connection_param);
+    //    APP_ERROR_CHECK(err_code);
+    //}
+}
+
+/**@brief   Function for handling UART interrupts.
+ *
+ * @details
+ *
+ *
+ */
+
+static void uart_evt_callback(app_uart_evt_t * uart_evt) {
+  uint32_t err_code;
+  static uint8_t index;
+  static uint8_t data[64];
+
+  switch(uart_evt->evt_type) {
+    case (APP_UART_COMMUNICATION_ERROR):
+      APP_ERROR_HANDLER(uart_evt->data.error_communication);
+      break;
+    case (APP_UART_FIFO_ERROR):
+      APP_ERROR_HANDLER(uart_evt->data.error_code);
+      break;
+    case (APP_UART_DATA_READY):
+      err_code = app_uart_get(&data[index++]);
+      if (err_code != NRF_ERROR_INVALID_STATE) {
         APP_ERROR_CHECK(err_code);
-    }
+      }
+      if (data[index-1] == '\r' || index <= 64) {
+        if (memcmp(data, "SCAN", 4) == 0) {
+          scan_start();
+        }
+      }
+
+
+      break;
+    case (APP_UART_TX_EMPTY):
+      // change state to uart waiting
+      break;
+    default: break;
+  }
+
 }
 
 /**@brief Function for handling BLE Stack events concerning central applications.
@@ -325,8 +396,8 @@ static void on_ble_evt(const ble_evt_t * const p_ble_evt)
 
             // Update LEDs status, and check if we should be looking for more
             // peripherals to connect to.
-            led_on(CENTRAL_CONNECTED_LED);
-            //led_off(CENTRAL_SCANNING_LED);
+            //led_on(CENTRAL_CONNECTED_LED);
+            led_off(CENTRAL_SCANNING_LED);
         } break; // BLE_GAP_EVT_CONNECTED
 
         // Upon disconnection, reset the connection handle of the peer which disconnected, update
@@ -343,10 +414,24 @@ static void on_ble_evt(const ble_evt_t * const p_ble_evt)
         case BLE_GAP_EVT_TIMEOUT:
         {
             // We have not specified a timeout for scanning, so only connection attemps can timeout.
-            if (p_gap_evt->params.timeout.src == BLE_GAP_TIMEOUT_SRC_CONN)
+            //if (p_gap_evt->params.timeout.src == BLE_GAP_TIMEOUT_SRC_CONN)
+            //{
+            //    //NRF_LOG_PRINTF("[APP]: Connection Request timed out.\r\n");
+            //}
+            if (p_gap_evt->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
             {
-                NRF_LOG_PRINTF("[APP]: Connection Request timed out.\r\n");
+              // stop scan, send list of found device names
+              scan_stop();
+              printf("%u", scan_name_list_len);
+              for (size_t i = 0; i < scan_name_list_len; i++) {
+                printf("|%s", scan_name_list[i]);
+                free(scan_name_list[i]);
+                scan_name_list[i] = 0;
+              }
+              printf("\r\n");
+              scan_name_list_len = 0;
             }
+
         } break; // BLE_GAP_EVT_TIMEOUT
 
         case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST:
@@ -522,6 +607,28 @@ int main(void)
     err_code = NRF_LOG_INIT();
     APP_ERROR_CHECK(err_code);
     leds_init();
+
+    // UART
+    const app_uart_comm_params_t comm_params =
+      {
+          17,
+          16,
+          0,
+          0,
+          APP_UART_FLOW_CONTROL_DISABLED,
+          false,
+          UART_BAUDRATE_BAUDRATE_Baud9600
+      };
+
+    APP_UART_FIFO_INIT(&comm_params,
+                         UART_RX_BUF_SIZE,
+                         UART_TX_BUF_SIZE,
+                         uart_evt_callback,
+                         APP_IRQ_PRIORITY_LOW,
+                         err_code);
+
+    APP_ERROR_CHECK(err_code);
+
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, NULL);
     ble_stack_init();
 
@@ -529,12 +636,12 @@ int main(void)
 
     // Start scanning for peripherals and initiate connection to devices which
     // advertise.
-    scan_start();
+    //scan_start();
 
-    NRF_LOG_PRINTF("\r\nBlinky Start!\r\n");
+    //NRF_LOG_PRINTF("\r\nBlinky Start!\r\n");
 
     // Turn on the LED to signal scanning.
-    //led_on(CENTRAL_SCANNING_LED);
+    led_on(CENTRAL_SCANNING_LED);
 
     for (;;)
     {
