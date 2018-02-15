@@ -11,7 +11,7 @@ int led2 = C0;
 int chip_in = A0;
 int val = 0;     // variable to store the read value
 
-SdFatSoftSpi<A5, A4, A3> sd;
+SdFatSoftSpi<A4, A5, A3> sd; //soft_miso, soft_mosi, soft_sck
 const uint8_t chipSelect = A2;
 File myFile;
 
@@ -27,18 +27,12 @@ void setup() {
   //pinMode(enable, OUTPUT);
 
 
-  while (!Serial) {
-    SysCall::yield();
-  }
-
-  Serial.println("Type any character to start");
-  while (Serial.read() <= 0) {
-    SysCall::yield();
-  }
   if (!sd.begin(chipSelect, SPI_HALF_SPEED)) {
+    Serial.println("initErrorHalt");
     sd.initErrorHalt();
   }
    if (!myFile.open("test2.txt", O_RDWR | O_CREAT | O_AT_END)) {
+     Serial.println("openErrorHalt");
     sd.errorHalt("opening test.txt for write failed");
   }
   // if the file opened okay, write to it:
@@ -50,19 +44,6 @@ void setup() {
   myFile.close();
   Serial.println("done.");
 
-  // re-open the file for reading:
-  if (!myFile.open("test.txt", O_READ)) {
-    sd.errorHalt("opening test.txt for read failed");
-  }
-  Serial.println("test.txt content:");
-
-  // read from the file until there's nothing else in it:
-  int data;
-  while ((data = myFile.read()) >= 0) {
-    Serial.write(data);
-  }
-  // close the file:
-  myFile.close();
 
 }
 
