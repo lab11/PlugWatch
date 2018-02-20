@@ -10,7 +10,7 @@ void Audio::send(bool force) {
     message = "FORCE|" + message;
   }
   log.append(message);
-  Cloud::Publish(LIGHT_EVENT, message);
+  Cloud::Publish(AUDIO_EVENT, message);
 }
 
 void Audio::periodic(bool force) {
