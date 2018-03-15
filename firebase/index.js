@@ -49,7 +49,7 @@ exports.stimulusInvite = functions.firestore
         console.log(`The onCreate event document is: ${util.inspect(data)}`);
         console.log(`The docId of the creation was: ${util.inspect(docId)}`);
 
-        return db.collection('invite_transaction').where('user_id','==', data.user_id).get() //We need to sum over non-failed transaction. we need another where clause here.
+        return db.collection('invite_transaction').where('user_id','==', data.user_id).get() //We need to sum over non-failed transaction.
                 .then(snapshot => {
                         //Calculating the total num of invites that the specific user has sent.
                         return snapshot.forEach(doc => {
@@ -58,7 +58,7 @@ exports.stimulusInvite = functions.firestore
                     
                 }).then(() => {
                     //Calculating the total number of invites in status "failed"
-                    return db.collection('invite_transaction').where('user_id','==', data.user_id).where('status','==','failed').get() //We need to sum over non-failed transaction. we need another where clause here.
+                    return db.collection('invite_transaction').where('user_id','==', data.user_id).where('status','==','failed').get() // Calculating the num. of failed transactions.
                             .then(snapshot => {
                                 return snapshot.forEach(doc => {
                                 totalNumFailedInv += doc.data().num_invites;
@@ -77,7 +77,7 @@ exports.stimulusInvite = functions.firestore
                         return db.collection('invite_transaction')
                             .doc(docId).update({valid_num_invites: data.num_invites, status:'enqueued'})
                             .then(() => {
-                                //Calculating the amunt to pay and write on tx_core_payment collection
+                                //Calculating the amount to pay and write on tx_core_payment collection
                                 var toPay = data.num_invites * costInvite;
                                 return db.collection('tx_core_payment').add({
                                     user_id: data.user_id,
@@ -86,7 +86,9 @@ exports.stimulusInvite = functions.firestore
                                     num_attempts: 0,
                                     time: FieldValue.serverTimestamp(),
                                     type: 'invite',
-                                    stimulus_doc_id: docId
+                                    stimulus_doc_id: docId,
+                                    status: 'pending',
+                                    reattempt: false
                                     
                                 });
 
@@ -107,6 +109,7 @@ exports.stimulusInvite = functions.firestore
                             .doc(docId).update({valid_num_invites: 0, status:'restricted'})
                             .then(() => {
                                 return console.log(`User ${data.user_id} exceeded the quota of Invites.`);
+                                //we can also think of triggering an alarm here.
 
                             }).catch(err => {
                                 console.log('Error getting docs in invites for exceeded quota', err);
@@ -126,7 +129,9 @@ exports.stimulusInvite = functions.firestore
                                     num_attempts: 0,
                                     time: FieldValue.serverTimestamp(),
                                     type: 'invite',
-                                    stimulus_doc_id: docId
+                                    stimulus_doc_id: docId,
+                                    status: 'pending',
+                                    reattempt: false
                                     
                                 });
 
@@ -173,7 +178,8 @@ exports.stimulusCron = functions.firestore
                 time: FieldValue.serverTimestamp(),
                 type: 'cron',
                 stimulus_doc_id: docId,
-                status:'pending'
+                status:'pending',
+                reattempt: false
             }
             
             ).then(ref => {
@@ -186,18 +192,97 @@ exports.stimulusCron = functions.firestore
 // - Triggers on creation of tx_core_payment events. Checks the user information for payment in the user_list collection. 
 //   If so, start to structuring the body for the payment request and update invite_transaction,tx_core_payment status and 
 //   set the payment service of the user based on user_list information.
-// - Send oayment request to the scific payment service module. In this case core1 triggers a https function (korba).
+// - Send payment request to the scific payment service module. In this case core1 triggers a https function (korba).
 //   id transaction is successful, log information into rx_core_payment.
 
 // - Parameters:
 //    * There are not specific parameters for this function.
 
 exports.core1 = functions.firestore
-    .document('tx_core_payment/{docId}').onCreate((event) =>{
+    .document('tx_core_payment/{docId}').onWrite((event) =>{
         //Getting the data that was modified and initializing all the parameters for payment.
         const data = event.data.data();
+        const previousData = event.data.previous.data();
         const docId = event.params.docId;
         var userPaymentInfo = {}
+
+        if (event.data.previous.exists()){
+            if (data.status != 'failed' || data.num_attempts >= 5 || data.reattempt){
+                return null;
+
+            // } else if (data.status == 'failed' && data.msgs[data.msgs.length - 1].startsWith('attempt')){
+            //     return null;
+
+            } else {
+                //TODO: Implement re-attempt of payment n times.
+                db.collection('tx_core_payment').doc(docId).update({reattempt: true, num_attempts: data.num_attempts + 1, msgs: data.msgs.push('attempt '+ (data.num_attempts + 1))});
+                return db.collection('user_list').doc(data.user_id).get()
+                    .then(doc => {
+                        if (!doc.exists){
+                            //TODO: Maybe trigger an alarm here.
+                            console.log('The user does not exist in the user_list collection!')
+                        } else {
+                            var userPaymentData = doc.data()
+                            //send all the common data among all APIs and trigger an HTTP function based on the user payment service.
+                            userPaymentInfo['customer_number'] = userPaymentData.customer_number;
+                            userPaymentInfo['network_code'] = userPaymentData.network_code;
+                            userPaymentInfo['payment_service'] = userPaymentData.payment_service;
+                            
+                        }
+                    })//.then(() => { // this might be redundant
+                        //return db.collection('tx_core_payment').doc(docId).update({payment_service: userPaymentInfo.payment_service});
+                    //})
+                    .then(() => {
+                        userPaymentInfo['amount'] = data.amount;
+                        userPaymentInfo['type'] = data.type;
+                        userPaymentInfo['user_id'] = data.user_id;
+                        userPaymentInfo['transaction_id'] = new Date().getUTCMilliseconds();
+                        userPaymentInfo['description'] = 'payment of '+ userPaymentInfo.type +' to user : '+ userPaymentInfo.user_id;
+                        console.log(`user payment info is: ${util.inspect(userPaymentInfo)}`);
+        
+                        return request({
+                            uri: 'https://us-central1-paymenttoy.cloudfunctions.net/'+userPaymentInfo.payment_service,
+                            method: 'POST',
+                            headers:{
+                                'Content-Type':'application/json',
+                            },
+                            json: true,
+                            body: userPaymentInfo,
+                            resolveWithFullResponse: true,
+                        }).then((response) => {
+                                    if (response.statusCode >= 400) {
+                                        console.log(`HTTP Error: ${response.statusCode}`);
+                                        return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: data.msgs.push('HTTP Error')});
+                                    }
+                                    
+                                    console.log('Posted with payment service response: ', response.body);
+                                    console.log('Payment service status: ', response.statusCode);
+                                    var checkErrorFromBody = response.body;
+        
+                                    if (checkErrorFromBody.success === 'false' || checkErrorFromBody.error_code != null){
+                                        log.console('Error in transaction:', checkErrorFromBody);
+                                        return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: data.msgs.push('Transaction Error')});
+                                    }
+                                    else {
+                                        var logDb = {}
+                                        return db.collection('rx_core_payment').add({
+                                            amount:data.amount,
+                                            type: data.type,
+                                            user_id: data.user_id,
+                                            transaction: userPaymentInfo.transaction_id
+                                            //TODO: Add the docId of the stimuli or the tx_core_payment.
+                                        }).then(() =>{
+                                            return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'completed', msgs: data.msgs.push('Payment completed')});
+                                        });
+                                    }
+                        });
+        
+                    });
+                
+
+            }
+
+        }
 
         console.log(`The onCreate event document is: ${util.inspect(data)}`);
         console.log(`The docId of the creation was: ${util.inspect(docId)}`);
@@ -208,6 +293,7 @@ exports.core1 = functions.firestore
             status:'pending'
 
         }).then(() => {
+            //TODO: Find a way to update status to the proper document without the if statements (incentive agnostic).
             //When core is triggered update the status of the invites_transaction or cron_transaction to pending:
             if (data.type == 'invite'){
                 return db.collection('invite_transaction').doc(data.stimulus_doc_id).update({status:'pending',tx_core_doc_id: docId});
@@ -220,6 +306,7 @@ exports.core1 = functions.firestore
                 return db.collection('user_list').doc(data.user_id).get()
                     .then(doc => {
                         if (!doc.exists){
+                            //TODO: Maybe trigger an alarm here.
                             console.log('The user does not exist in the user_list collection!')
                         } else {
                             var userPaymentData = doc.data()
@@ -250,7 +337,7 @@ exports.core1 = functions.firestore
                     json: true,
                     body: userPaymentInfo,
                     resolveWithFullResponse: true,
-                  }).then((response) => {
+                }).then((response) => {
                             if (response.statusCode >= 400) {
                             throw new Error(`HTTP Error: ${response.statusCode}`);
                             }
@@ -273,9 +360,13 @@ exports.core1 = functions.firestore
 
                                 });
                             }
-                        });
+                });
 
-                    });
+            });
+
+        
+
+        
 
          
     });
