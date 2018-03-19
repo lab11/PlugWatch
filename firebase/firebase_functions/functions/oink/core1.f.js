@@ -182,6 +182,7 @@ exports = module.exports = functions.firestore
                             console.log('Posted with payment service response: ', response.body);
                             console.log('Payment service status: ', response.statusCode);
                             var checkErrorFromBody = response.body;
+                            log.console(`This is the check of error in body: ${checkErrorFromBody.error_code != null}`)
 
                             if (checkErrorFromBody.success === 'false' || checkErrorFromBody.error_code != null){
                                 log.console('Error in transaction. Try again.');
