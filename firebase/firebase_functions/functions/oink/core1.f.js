@@ -185,7 +185,7 @@ exports = module.exports = functions.firestore
                             console.log(`This is the check of error in body: ${checkErrorFromBody.error_code != null}`)
 
                             if (checkErrorFromBody.success === 'false' || checkErrorFromBody.error_code != null || checkErrorFromBody.detail == "Invalid Signature."){
-                                log.console('Error in transaction. Try again.');
+                                console.log('Error in transaction. Try again.');
                                 return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: data.msgs.push('Transaction Error')});
                             }
                             else {
