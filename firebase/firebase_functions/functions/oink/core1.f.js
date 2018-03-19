@@ -32,6 +32,10 @@ exports = module.exports = functions.firestore
         console.log(`Previous data: ${util.inspect(previousData)}`)
         console.log(`previous data exists?: ${util.inspect(event.data.previous.exists)}`)
 
+        if (!event.data.exists){
+            return null;
+        }
+
         if (event.data.previous.exists){
             if (data.status != 'failed' || data.num_attempts >= 5 || data.reattempt){
                 return null;
