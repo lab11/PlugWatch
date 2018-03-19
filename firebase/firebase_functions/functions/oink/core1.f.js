@@ -29,9 +29,10 @@ exports = module.exports = functions.firestore
         const previousData = event.data.previous.data();
         const docId = event.params.docId;
         var userPaymentInfo = {}
-        console.log(event.data.previous.exists())
+        console.log(`Previous data: ${util.inspect(previousData)}`)
+        console.log(`previous data exists?: ${util.inspect(event.data.previous.exists)}`)
 
-        if (event.data.previous.exists()){
+        if (event.data.previous.exists){
             if (data.status != 'failed' || data.num_attempts >= 5 || data.reattempt){
                 return null;
 
