@@ -65,6 +65,7 @@ exports = module.exports = functions.firestore
                             .then(() => {
                                 //Calculating the amount to pay and write on tx_core_payment collection
                                 var toPay = data.num_invites * costInvite;
+                                toPay = Math.round(toPay * 100) / 100
                                 return db.collection('tx_core_payment').add({
                                     user_id: data.user_id,
                                     amount: toPay,
@@ -108,6 +109,7 @@ exports = module.exports = functions.firestore
                             .doc(docId).update({valid_num_invites: validNumEvents, status: 'enqueued'})
                             .then(() => {
                                 var toPay = validNumEvents * costInvite;
+                                toPay = Math.round(toPay * 100) / 100
                                 return db.collection('tx_core_payment').add({
                                     user_id: data.user_id,
                                     amount: toPay,
