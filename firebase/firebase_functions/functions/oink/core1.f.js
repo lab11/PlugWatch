@@ -168,7 +168,7 @@ exports = module.exports = functions.firestore
                     resolveWithFullResponse: true,
                 }).then((response) => {
                             if (response.statusCode >= 400) {
-                            throw new Error(`HTTP Error: ${response.statusCode}`);
+                                return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: data.msgs.push('HTTP Error')});
                             }
                             
                             console.log('Posted with payment service response: ', response.body);
@@ -177,6 +177,7 @@ exports = module.exports = functions.firestore
 
                             if (checkErrorFromBody.success === 'false' || checkErrorFromBody.error_code != null){
                                 log.console('Error in transaction. Try again.');
+                                return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: data.msgs.push('Transaction Error')});
                             }
                             else {
                                 var logDb = {}
@@ -187,6 +188,8 @@ exports = module.exports = functions.firestore
                                     transaction: userPaymentInfo.transaction_id
                             
 
+                                }).then(() =>{
+                                    return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'completed', msgs: data.msgs.push('Payment completed')});
                                 });
                             }
                 });
