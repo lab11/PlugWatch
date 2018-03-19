@@ -29,6 +29,7 @@ exports = module.exports = functions.firestore
         const previousData = event.data.previous.data();
         const docId = event.params.docId;
         var userPaymentInfo = {}
+        var localMsgs = []
         console.log(`Previous data: ${util.inspect(previousData)}`)
         console.log(`previous data exists?: ${util.inspect(event.data.previous.exists)}`)
         console.log(typeof data.msgs)
@@ -47,7 +48,8 @@ exports = module.exports = functions.firestore
 
             } else {
                 //TODO: Implement re-attempt of payment n times.
-                db.collection('tx_core_payment').doc(docId).update({reattempt: true, num_attempts: data.num_attempts + 1, msgs: data.msgs.push('attempt '+ (data.num_attempts + 1))});
+                localMsgs.push('attempt '+ (data.num_attempts + 1))
+                db.collection('tx_core_payment').doc(docId).update({reattempt: true, num_attempts: data.num_attempts + 1, msgs: localMsgs });
                 return db.collection('user_list').doc(data.user_id).get()
                     .then(doc => {
                         if (!doc.exists){
@@ -85,17 +87,19 @@ exports = module.exports = functions.firestore
                             resolveWithFullResponse: true,
                         }).then((response) => {
                                     if (response.statusCode >= 400) {
+                                        localMsgs.push('HTTP Error')
                                         console.log(`HTTP Error: ${response.statusCode}`);
-                                        return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: data.msgs.push('HTTP Error')});
+                                        return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: localMsgs});
                                     }
                                     
                                     console.log('Posted with payment service response: ', response.body);
                                     console.log('Payment service status: ', response.statusCode);
                                     var checkErrorFromBody = response.body;
         
-                                    if (checkErrorFromBody.success === 'false' || checkErrorFromBody.error_code != null){
-                                        log.console('Error in transaction:', checkErrorFromBody);
-                                        return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: data.msgs.push('Transaction Error')});
+                                    if (checkErrorFromBody.success === 'false' || checkErrorFromBody.error_code != null || checkErrorFromBody.detail == "Invalid Signature."){
+                                        console.log('Error in transaction:', checkErrorFromBody);
+                                        localMsgs.push('Transaction Error')
+                                        return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: localMsgs});
                                     }
                                     else {
                                         var logDb = {}
@@ -106,7 +110,8 @@ exports = module.exports = functions.firestore
                                             transaction: userPaymentInfo.transaction_id
                                             //TODO: Add the docId of the stimuli or the tx_core_payment.
                                         }).then(() =>{
-                                            return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'completed', msgs: data.msgs.push('Payment completed')});
+                                            localMsgs.push('Payment completed')
+                                            return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'completed', msgs: localMsgs});
                                         });
                                     }
                         });
@@ -151,7 +156,7 @@ exports = module.exports = functions.firestore
                             
                         }
                     }).then(() => {
-                        return db.collection('tx_core_payment').doc(docId).update({payment_service: userPaymentInfo.payment_service});
+                        return db.collection('tx_core_payment').doc(docId).update({payment_service: userPaymentInfo.payment_service, num_attempts: data.num_attempts + 1});
                     });
 
             }).then(() => {
@@ -176,7 +181,8 @@ exports = module.exports = functions.firestore
                     resolveWithFullResponse: true,
                 }).then((response) => {
                             if (response.statusCode >= 400) {
-                                return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: data.msgs.push('HTTP Error')});
+                                localMsgs.push("HTTP Error")
+                                return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: localMsgs});
                             }
                             
                             console.log('Posted with payment service response: ', response.body);
@@ -185,8 +191,9 @@ exports = module.exports = functions.firestore
                             console.log(`This is the check of error in body: ${checkErrorFromBody.error_code != null}`)
 
                             if (checkErrorFromBody.success === 'false' || checkErrorFromBody.error_code != null || checkErrorFromBody.detail == "Invalid Signature."){
-                                console.log('Error in transaction. Try again.');
-                                return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: data.msgs.push('Transaction Error')});
+                                console.log('Error in transaction:', checkErrorFromBody);
+                                localMsgs.push('Transaction Error')
+                                return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: localMsgs});
                             }
                             else {
                                 var logDb = {}
@@ -198,9 +205,8 @@ exports = module.exports = functions.firestore
                             
 
                                 }).then(() =>{
-                                    var message = data.msgs
-                                    console.log(`this is msgs: ${util.inspect(message.push('Payment completed'))}`)
-                                    return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'completed', msgs: message.push('Payment completed')});
+                                    localMsgs.push('Payment completed')
+                                    return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'completed', msgs: localMsgs});
                                 });
                             }
                 });
