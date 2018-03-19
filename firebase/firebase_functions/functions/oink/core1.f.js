@@ -198,7 +198,7 @@ exports = module.exports = functions.firestore
 
                                 }).then(() =>{
                                     var message = data.msgs
-                                    console.log(message.push('Payment completed'))
+                                    console.log(`this is msgs: ${util.inspect(message.push('Payment completed'))}`)
                                     return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'completed', msgs: message.push('Payment completed')});
                                 });
                             }
