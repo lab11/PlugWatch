@@ -195,7 +195,8 @@ exports = module.exports = functions.firestore
                             
 
                                 }).then(() =>{
-                                    return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'completed', msgs: data.msgs.push('Payment completed')});
+                                    var message = data.msgs
+                                    return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'completed', msgs: message.push('Payment completed')});
                                 });
                             }
                 });
