@@ -31,6 +31,8 @@ exports = module.exports = functions.firestore
         var userPaymentInfo = {}
         console.log(`Previous data: ${util.inspect(previousData)}`)
         console.log(`previous data exists?: ${util.inspect(event.data.previous.exists)}`)
+        console.log(typeof data.msgs)
+        console.log(data.msgs)
 
         if (!event.data.exists){
             return null;
