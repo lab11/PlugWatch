@@ -28,7 +28,7 @@ var FieldValue = admin.firestore.FieldValue;
 // * event: Event that triggered the function. In this case this is the new document created by the App.
 
 
-exports.helloWorld = functions.https.onRequest((request, Response) => {
+exports = module.exports = functions.https.onRequest((request, Response) => {
     response.send("Hello from Joe");
 })
 
