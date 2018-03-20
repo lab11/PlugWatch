@@ -30,24 +30,19 @@ exports = module.exports = functions.firestore
         const docId = event.params.docId;
         var userPaymentInfo = {}
         var localMsgs = []
-        console.log(`Previous data: ${util.inspect(previousData)}`)
-        console.log(`previous data exists?: ${util.inspect(event.data.previous.exists)}`)
-        console.log(typeof data.msgs)
-        console.log(data.msgs)
-
+        
+        //Check if the document was deleted, if so return null (for avoiding infinite loop)
         if (!event.data.exists){
             return null;
         }
 
+        //Check if the document is not new, if so check the status, num_attempts and reattempt flag (for avoiding infinite loops)
         if (event.data.previous.exists){
             if (data.status != 'failed' || data.num_attempts >= 5 || data.reattempt){
                 return null;
 
-            // } else if (data.status == 'failed' && data.msgs[data.msgs.length - 1].startsWith('attempt')){
-            //     return null;
-
             } else {
-                //TODO: Implement re-attempt of payment n times.
+                //Starting a new reattempt
                 localMsgs.push('attempt '+ (data.num_attempts + 1))
                 db.collection('tx_core_payment').doc(docId).update({reattempt: true, num_attempts: data.num_attempts + 1, msgs: localMsgs });
                 return db.collection('user_list').doc(data.user_id).get()
@@ -63,9 +58,8 @@ exports = module.exports = functions.firestore
                             userPaymentInfo['payment_service'] = userPaymentData.payment_service;
                             
                         }
-                    })//.then(() => { // this might be redundant
-                        //return db.collection('tx_core_payment').doc(docId).update({payment_service: userPaymentInfo.payment_service});
-                    //})
+                    })
+                    //Creating the format of the body for the HTTP request
                     .then(() => {
                         userPaymentInfo['amount'] = data.amount;
                         userPaymentInfo['type'] = data.type;
@@ -107,8 +101,9 @@ exports = module.exports = functions.firestore
                                             amount:data.amount,
                                             type: data.type,
                                             user_id: data.user_id,
-                                            transaction: userPaymentInfo.transaction_id
-                                            //TODO: Add the docId of the stimuli or the tx_core_payment.
+                                            transaction: userPaymentInfo.transaction_id,
+                                            tx_core_doc_id: docId
+                                            
                                         }).then(() =>{
                                             localMsgs.push('Payment completed')
                                             return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'completed', msgs: localMsgs});
@@ -132,15 +127,11 @@ exports = module.exports = functions.firestore
             status:'pending'
 
         }).then(() => {
-            //TODO: Find a way to update status to the proper document without the if statements (incentive agnostic).
-            //When core is triggered update the status of the invites_transaction or cron_transaction to pending:
-            if (data.type == 'invite'){
-                return db.collection('invite_transaction').doc(data.stimulus_doc_id).update({status:'pending',tx_core_doc_id: docId});
+            //Updating the status of the document that generated the transaction:
+            var doc_path_string = data.type + '_transaction'
+            return db.collection(doc_path_string).doc(data.stimulus_doc_id).update({status:'pending',tx_core_doc_id: docId});
 
-            } else {
-                return db.collection('cron_transaction').doc(data.stimulus_doc_id).update({status:'pending', tx_core_doc_id: docId});
-            }
-        
+            //Getting the info from user_list to complete the API request
             }).then(() => {
                 return db.collection('user_list').doc(data.user_id).get()
                     .then(doc => {
@@ -159,6 +150,7 @@ exports = module.exports = functions.firestore
                         return db.collection('tx_core_payment').doc(docId).update({payment_service: userPaymentInfo.payment_service, num_attempts: data.num_attempts + 1});
                     });
 
+            //Creating the format of the body for the HTTP request
             }).then(() => {
                 userPaymentInfo['amount'] = data.amount;
                 userPaymentInfo['type'] = data.type;
@@ -180,6 +172,7 @@ exports = module.exports = functions.firestore
                     body: userPaymentInfo,
                     resolveWithFullResponse: true,
                 }).then((response) => {
+                            //Checking the API response:
                             if (response.statusCode >= 400) {
                                 localMsgs.push("HTTP Error")
                                 return db.collection('tx_core_payment').doc(docId).update({reattempt: false, status:'failed', msgs: localMsgs});
@@ -188,7 +181,7 @@ exports = module.exports = functions.firestore
                             console.log('Posted with payment service response: ', response.body);
                             console.log('Payment service status: ', response.statusCode);
                             var checkErrorFromBody = response.body;
-                            console.log(`This is the check of error in body: ${checkErrorFromBody.error_code != null}`)
+                            
 
                             if (checkErrorFromBody.success === 'false' || checkErrorFromBody.error_code != null || checkErrorFromBody.detail == "Invalid Signature."){
                                 console.log('Error in transaction:', checkErrorFromBody);
@@ -201,7 +194,8 @@ exports = module.exports = functions.firestore
                                     amount:data.amount,
                                     type: data.type,
                                     user_id: data.user_id,
-                                    transaction: userPaymentInfo.transaction_id
+                                    transaction: userPaymentInfo.transaction_id,
+                                    tx_core_doc_id: docId
                             
 
                                 }).then(() =>{
