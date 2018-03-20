@@ -138,6 +138,7 @@ exports = module.exports = functions.firestore
                         if (!doc.exists){
                             //TODO: Maybe trigger an alarm here.
                             console.log('The user does not exist in the user_list collection!')
+                            return null;
                         } else {
                             var userPaymentData = doc.data()
                             //send all the common data among all APIs and trigger an HTTP function based on the user payment service.
