@@ -14,13 +14,8 @@ var FieldValue = admin.firestore.FieldValue;
 
 exports = module.exports = functions.https
     .onRequest((req, res) => {
-        const reqBody = req.body
-        console.log(util.inspect(reqBody));
-        console.log(req.statusCode);
         console.log(util.inspect(req.query));
-        console.log(util.inspect(req.params));
-        console.log(util.inspect(req.query.format));
 
-        res.status(200).send(reqBody);
+        res.status(200).send(req.query);
     
 });
