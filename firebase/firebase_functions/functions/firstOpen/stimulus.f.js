@@ -26,32 +26,24 @@ var FieldValue = admin.firestore.FieldValue;
 // * Validation bit: bit set to high if account has ever been longed in on device
 // * costFirstOpen: The value paid 
 // * event: Event that triggered the function. In this case this is the new document created by the App.
-
-
+/*
 exports = module.exports = functions.https.onRequest((request, response) => {
     response.send("Hello from Joe");
 })
+*/
 
-
-
-
-
-
-/*
 exports = module.exports = functions.firestore
-    .document('invite_transaction/{docId}').onCreate((event) =>{
+    .document('firstOpen_transaction/{docId}').onCreate((event) =>{
         //Getting the data that was modified and initializing all the parameters for payment.
         const data = event.data.data();
         const docId = event.params.docId;
-        const threshold = 100;
-        var totalNumInv = 0;
-        var totalNumFailedInv = 0;
-        const costInvite = 0.1;
-
-        console.log(`The onCreate event document is: ${util.inspect(data)}`);
+        const costFirstOpen = 5;
+        var previouslyOpened = false;
+        
+        //console.log(`The onCreate event document is: ${util.inspect(data)}`);
         console.log(`The docId of the creation was: ${util.inspect(docId)}`);
 
-        return db.collection('invite_transaction').where('user_id','==', data.user_id).get() //We need to sum over non-failed transaction.
+        return db.collection('firstOpen_transaction').where('user_id','==', data.user_id).get() //We need to sum over non-failed transaction.
                 .then(snapshot => {
                         //Calculating the total num of invites that the specific user has sent.
                         return snapshot.forEach(doc => {
@@ -60,7 +52,7 @@ exports = module.exports = functions.firestore
                     
                 }).then(() => {
                     //Calculating the total number of invites in status "failed"
-                    return db.collection('invite_transaction').where('user_id','==', data.user_id).where('status','==','failed').get() // Calculating the num. of failed transactions.
+                    return db.collection('firstOpen_transaction').where('user_id','==', data.user_id).where('status','==','failed').get() // Calculating the num. of failed transactions.
                             .then(snapshot => {
                                 return snapshot.forEach(doc => {
                                 totalNumFailedInv += doc.data().num_invites;
@@ -76,7 +68,7 @@ exports = module.exports = functions.firestore
 
                     //Verifying if the number of invites is less than threshold:
                     if (totalNumInv <= threshold) {
-                        return db.collection('invite_transaction')
+                        return db.collection('firstOpen_transaction')
                             .doc(docId).update({valid_num_invites: data.num_invites, status:'enqueued'})
                             .then(() => {
                                 //Calculating the amount to pay and write on tx_core_payment collection
@@ -98,7 +90,7 @@ exports = module.exports = functions.firestore
                                 return console.log('Added document with ID: ', ref.id);
                             }).catch(err => {
                                 console.log('Error getting docs in invites under threshold', err);
-                                return db.collection('invite_transaction')
+                                return db.collection('firstOpen_transaction')
                                     .doc(docId).update({status:'failed'});
                             });
                                 
@@ -107,7 +99,7 @@ exports = module.exports = functions.firestore
                         var validNumEvents = threshold - (totalNumInv - data.num_invites)
                         console.log(`valid num events: ${validNumEvents}`);
                         if (validNumEvents <= 0){
-                            return db.collection('invite_transaction')
+                            return db.collection('firstOpen_transaction')
                             .doc(docId).update({valid_num_invites: 0, status:'restricted'})
                             .then(() => {
                                 return console.log(`User ${data.user_id} exceeded the quota of Invites.`);
@@ -115,12 +107,12 @@ exports = module.exports = functions.firestore
 
                             }).catch(err => {
                                 console.log('Error getting docs in invites for exceeded quota', err);
-                                return db.collection('invite_transaction')
+                                return db.collection('firstOpen_transaction')
                                     .doc(docId).update({status:'failed'});
                             });
 
                         } else {
-                            return db.collection('invite_transaction')
+                            return db.collection('firstOpen_transaction')
                             .doc(docId).update({valid_num_invites: validNumEvents, status: 'enqueued'})
                             .then(() => {
                                 var toPay = validNumEvents * costInvite;
@@ -141,7 +133,7 @@ exports = module.exports = functions.firestore
                                 return console.log('Added document with ID: ', ref.id);
                             }).catch(err => {
                                 console.log('Error getting docs in invites for exceeded quota > 0', err);
-                                return db.collection('invite_transaction')
+                                return db.collection('firstOpen_transaction')
                                     .doc(docId).update({status:'failed'});
 
                             });
@@ -152,7 +144,7 @@ exports = module.exports = functions.firestore
                     }
                 }).catch(err => {
                     console.log('Error getting documents', err);
-                    return db.collection('invite_transaction')
+                    return db.collection('firstOpen_transaction')
                                     .doc(docId).update({status:'failed'});
                     
                 });
@@ -172,7 +164,7 @@ exports = module.exports = functions.https
     var dummyCron = db.collection('firstOpen_transaction').add(reqBody);
     res.status(200).send(reqBody);
 });
-*/
+
 
 
 //https://us-central1-paymenttoy.cloudfunctions.net/generatorsFirstOpen
