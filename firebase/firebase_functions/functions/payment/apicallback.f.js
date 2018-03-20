@@ -17,8 +17,10 @@ exports = module.exports = functions.https
         const reqBody = req.body
         console.log(util.inspect(reqBody));
         console.log(req.statusCode);
-        console.log(util.inspect(res.query));
-        
+        console.log(util.inspect(req.query));
+        console.log(util.inspect(req.params));
+        console.log(util.inspect(req.query.format));
+
         res.status(200).send(reqBody);
     
 });
