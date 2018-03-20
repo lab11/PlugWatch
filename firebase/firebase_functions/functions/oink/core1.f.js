@@ -49,8 +49,9 @@ exports = module.exports = functions.firestore
                     .then(doc => {
                         if (!doc.exists){
                             //TODO: Maybe trigger an alarm here.
-                            console.log('The user does not exist in the user_list collection!')
-                            return null; // No reattempt since this should be trigger an alarm for possible fraud.
+                            db.collection('alarms_db').add({timestamp: FieldValue.serverTimestamp(),user_id:data.user_id, reason:"User ID does not exist.",tx_core_doc_id:docId });
+                            throw new Error('Invalid or unexisting User ID.');
+                            // No reattempt since this should be trigger an alarm for possible fraud.
                         } else {
                             var userPaymentData = doc.data()
                             //send all the common data among all APIs and trigger an HTTP function based on the user payment service.
@@ -139,7 +140,8 @@ exports = module.exports = functions.firestore
                         if (!doc.exists){
                             //TODO: Maybe trigger an alarm here.
                             console.log('The user does not exist in the user_list collection!')
-                            return null;
+                            db.collection('alarms_db').add({timestamp: FieldValue.serverTimestamp(),user_id:data.user_id, reason:"User ID does not exist.",tx_core_doc_id:docId });
+                            throw new Error('Invalid or unexisting User ID.');
                         } else {
                             var userPaymentData = doc.data()
                             //send all the common data among all APIs and trigger an HTTP function based on the user payment service.
