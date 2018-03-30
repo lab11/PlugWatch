@@ -250,6 +250,8 @@ Rev 3
 <wire x1="57.15" y1="92.964" x2="57.15" y2="50.927" width="0.0254" layer="20"/>
 <text x="8.89" y="52.578" size="0.8128" layer="25" font="vector" ratio="12" rot="R270" align="bottom-center">BLE_TXD</text>
 <text x="9.144" y="20.32" size="1.27" layer="25" font="vector" ratio="12" align="bottom-center">SD CARD</text>
+<text x="47.498" y="73.914" size="1.778" layer="25" font="vector" ratio="12">APN</text>
+<text x="47.752" y="72.644" size="0.8128" layer="25" font="vector" ratio="12">(on, on)</text>
 </plain>
 <libraries>
 <library name="Particle">
@@ -2792,7 +2794,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="NAME" x="41.021" y="88.9" size="1.016" layer="26" font="vector" ratio="12" rot="MR270" align="bottom-center"/>
 <attribute name="VALUE" x="43.053" y="88.9" size="1.016" layer="28" font="vector" ratio="12" rot="MR270" align="bottom-center"/>
 </element>
-<element name="U16" library="18250571" package="SWDIP4_300X138P100" value="1825057-1" x="53.594" y="78.6892" smashed="yes">
+<element name="APN_SWITCH" library="18250571" package="SWDIP4_300X138P100" value="1825057-1" x="53.594" y="78.6892" smashed="yes">
 <attribute name="MANUFACTURER_PART_NUMBER" value="18250571" x="53.594" y="78.6892" size="1.778" layer="27" display="off"/>
 <attribute name="VENDOR" value="TE Connectivity" x="53.594" y="78.6892" size="1.778" layer="27" display="off"/>
 </element>
@@ -4157,8 +4159,8 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <via x="7.62" y="86.614" extent="1-16" drill="0.3048"/>
 <via x="8.382" y="54.356" extent="1-16" drill="0.3048"/>
 <contactref element="R29" pad="1"/>
-<contactref element="U16" pad="1"/>
-<contactref element="U16" pad="2"/>
+<contactref element="APN_SWITCH" pad="1"/>
+<contactref element="APN_SWITCH" pad="2"/>
 <wire x1="41.656" y1="89.33306875" x2="41.656" y2="90.424" width="0.1524" layer="16"/>
 <via x="41.656" y="90.424" extent="1-16" drill="0.35"/>
 </signal>
@@ -4390,7 +4392,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 </signal>
 <signal name="APN_DIP_1">
 <contactref element="ASSY1" pad="WKP"/>
-<contactref element="U16" pad="4"/>
+<contactref element="APN_SWITCH" pad="4"/>
 <wire x1="40.1955" y1="57.4097125" x2="40.182903125" y2="57.42564375" width="0.2032" layer="1"/>
 <wire x1="40.182903125" y1="57.42564375" x2="40.1955" y2="57.53343125" width="0.2032" layer="1"/>
 <wire x1="40.1955" y1="57.53343125" x2="40.1955" y2="79.111009375" width="0.2032" layer="1"/>
@@ -4405,7 +4407,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 </signal>
 <signal name="APN_DIP_2">
 <contactref element="ASSY1" pad="DAC"/>
-<contactref element="U16" pad="3"/>
+<contactref element="APN_SWITCH" pad="3"/>
 <wire x1="40.5003" y1="79.13634375" x2="41.13265625" y2="80.0227" width="0.2032" layer="1"/>
 <wire x1="40.5003" y1="57.51565625" x2="40.5003" y2="79.13634375" width="0.2032" layer="1"/>
 <wire x1="52.2605" y1="80.0227" x2="53.594" y2="78.6892" width="0.2032" layer="1"/>
