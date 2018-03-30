@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="8.5.1">
+<eagle version="8.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="mil" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
@@ -60,12 +60,12 @@
 <library>
 <packages>
 <package name="21-0382">
-<smd name="1" x="-1.905" y="1.27" dx="1.3462" dy="0.5334" layer="1"/>
-<smd name="2" x="-1.905" y="0" dx="1.3462" dy="0.5334" layer="1"/>
-<smd name="3" x="-1.905" y="-1.27" dx="1.3462" dy="0.5334" layer="1"/>
-<smd name="4" x="1.905" y="-1.27" dx="1.3462" dy="0.5334" layer="1"/>
-<smd name="5" x="1.905" y="0" dx="1.3462" dy="0.5334" layer="1"/>
-<smd name="6" x="1.905" y="1.27" dx="1.3462" dy="0.5334" layer="1"/>
+<smd name="1" x="-1.525" y="1.27" dx="1.3462" dy="0.5334" layer="1"/>
+<smd name="2" x="-1.525" y="0" dx="1.3462" dy="0.5334" layer="1"/>
+<smd name="3" x="-1.525" y="-1.27" dx="1.3462" dy="0.5334" layer="1"/>
+<smd name="4" x="1.525" y="-1.27" dx="1.3462" dy="0.5334" layer="1"/>
+<smd name="5" x="1.525" y="0" dx="1.3462" dy="0.5334" layer="1"/>
+<smd name="6" x="1.525" y="1.27" dx="1.3462" dy="0.5334" layer="1"/>
 <wire x1="-1.9304" y1="1.016" x2="-1.9304" y2="1.524" width="0.1524" layer="51"/>
 <wire x1="-1.9304" y1="1.524" x2="-2.2352" y2="1.4986" width="0.1524" layer="51"/>
 <wire x1="-2.2352" y1="1.4986" x2="-2.2098" y2="1.016" width="0.1524" layer="51"/>
@@ -96,15 +96,15 @@
 <wire x1="-0.3048" y1="1.9812" x2="-1.9304" y2="1.9812" width="0.1524" layer="51"/>
 <wire x1="-1.9304" y1="1.9812" x2="-1.9304" y2="-1.9812" width="0.1524" layer="51"/>
 <wire x1="0.3048" y1="2.0066" x2="-0.3048" y2="1.9812" width="0.1524" layer="51" curve="-180"/>
-<text x="-1.9812" y="0.5334" size="1.27" layer="51" ratio="6" rot="SR0">*</text>
+<text x="-3.2" y="1.6" size="1.27" layer="51" ratio="6" rot="SR0">*</text>
 <wire x1="-2.0574" y1="-2.1336" x2="2.0574" y2="-2.1336" width="0.1524" layer="21"/>
 <wire x1="2.0574" y1="-2.1336" x2="2.0574" y2="-1.8796" width="0.1524" layer="21"/>
 <wire x1="2.0574" y1="2.1336" x2="-2.0574" y2="2.1336" width="0.1524" layer="21"/>
 <wire x1="-2.0574" y1="2.1336" x2="-2.0574" y2="1.8796" width="0.1524" layer="21"/>
 <wire x1="-2.0574" y1="-1.8796" x2="-2.0574" y2="-2.1336" width="0.1524" layer="21"/>
 <wire x1="2.0574" y1="1.8796" x2="2.0574" y2="2.1336" width="0.1524" layer="21"/>
-<text x="-2.7432" y="1.524" size="1.27" layer="21" ratio="6" rot="SR0">*</text>
-<text x="-3.2766" y="-0.635" size="1.27" layer="25" ratio="6" rot="SR0">&gt;Name</text>
+<text x="-3.2" y="1.6" size="1.27" layer="21" ratio="6" rot="SR0">*</text>
+<text x="-1.9766" y="2.465" size="1.27" layer="25" font="vector" ratio="12" rot="SR0">&gt;Name</text>
 </package>
 <package name="21-0382-M">
 <smd name="1" x="-1.9558" y="1.27" dx="1.651" dy="0.5842" layer="1"/>
@@ -219,6 +219,7 @@
 </symbols>
 <devicesets>
 <deviceset name="DS2401P+" prefix="U">
+<description>A one wire serial number chip.</description>
 <gates>
 <gate name="A" symbol="DS2401P+" x="0" y="0"/>
 </gates>
@@ -234,8 +235,9 @@
 </connects>
 <technologies>
 <technology name="">
-<attribute name="MANUFACTURER_PART_NUMBER" value="DS2401P+" constant="no"/>
-<attribute name="VENDOR" value="Maxim Integrated Products" constant="no"/>
+<attribute name="DIGIKEY" value="DS2401P+-ND" constant="no"/>
+<attribute name="MANUFACTURER" value="Maxim Integrated" constant="no"/>
+<attribute name="MPN" value="DS2401P+" constant="no"/>
 </technology>
 </technologies>
 </device>
