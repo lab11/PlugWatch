@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="8.5.1">
+<eagle version="8.7.1">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -218,11 +218,12 @@ PRE-FILT</text>
 <wire x1="43.561" y1="22.733" x2="45.466" y2="22.733" width="0.127" layer="21" curve="-85.020894"/>
 <wire x1="43.561" y1="23.368" x2="45.466" y2="23.368" width="0.127" layer="21"/>
 <text x="44.704" y="53.34" size="0.8128" layer="25" font="vector" ratio="12" rot="R270" align="bottom-center">!LIGHT_INT</text>
-<text x="28.448" y="4.064" size="1.016" layer="25" font="vector" ratio="12">Noah Klugman
+<text x="39.624" y="1.016" size="1.016" layer="25" font="vector" ratio="12">PowerWatch
+Noah Klugman
 Branden Ghena
 Neal Jackson
-Rev 3
-03/18</text>
+Josh Adkins
+Rev 3, 03/18</text>
 <text x="44.704" y="90.424" size="0.8128" layer="25" font="vector" ratio="12" align="bottom-center">WIFI_PWR_EN</text>
 <text x="46.736" y="41.656" size="0.8128" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center">AUDIO_OUT</text>
 <text x="46.736" y="50.8" size="0.8128" layer="25" font="vector" ratio="12" rot="R270" align="bottom-center">GPS_RXD</text>
@@ -250,7 +251,7 @@ Rev 3
 <wire x1="57.15" y1="92.964" x2="57.15" y2="50.927" width="0.0254" layer="20"/>
 <text x="8.89" y="52.578" size="0.8128" layer="25" font="vector" ratio="12" rot="R270" align="bottom-center">BLE_TXD</text>
 <text x="9.144" y="20.32" size="1.27" layer="25" font="vector" ratio="12" align="bottom-center">SD CARD</text>
-<text x="47.498" y="73.914" size="1.778" layer="25" font="vector" ratio="12">APN</text>
+<text x="47.752" y="73.914" size="1.778" layer="25" font="vector" ratio="12">APN</text>
 <text x="47.752" y="72.644" size="0.8128" layer="25" font="vector" ratio="12">(on, on)</text>
 </plain>
 <libraries>
@@ -2677,7 +2678,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="DIGIKEY" value="5001K-ND" x="23.622" y="36.576" size="1.778" layer="27" display="off"/>
 <attribute name="VALUE" x="23.622" y="34.036" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="U$3" library="logos" package="UCB_CAL_200MIL" value="" x="18.542" y="6.604" smashed="yes"/>
+<element name="U$3" library="logos" package="UCB_CAL_200MIL" value="" x="32.512" y="1.016" smashed="yes"/>
 <element name="U10" library="chips" package="TSOT23-6" value="SIP32510" x="37.084" y="45.212" smashed="yes" rot="MR0">
 <attribute name="DIGIKEY" value=" SIP32510DT-T1-GE3CT-ND" x="37.084" y="45.212" size="1.778" layer="27" display="off"/>
 <attribute name="MANUFACTURER" value="Vishay" x="37.084" y="45.212" size="1.778" layer="27" display="off"/>
@@ -4450,7 +4451,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <approved hash="4,16,af63997d16a2c586"/>
 <approved hash="4,16,bfd58a946bb1a236"/>
 <approved hash="5,16,2c7a43e0a8ec8f5f"/>
-<approved hash="6,16,3a57c92be9e06f6f"/>
 </errors>
 </board>
 </drawing>

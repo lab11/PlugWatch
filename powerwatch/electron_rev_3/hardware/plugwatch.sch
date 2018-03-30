@@ -4161,7 +4161,7 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <attribute name="MPN" value="RMCF0402FT150R"/>
 </part>
 <part name="GND41" library="supply1" deviceset="GND" device=""/>
-<part name="U16" library="18250571" deviceset="1825057-1" device=""/>
+<part name="APN_SWITCH" library="18250571" deviceset="1825057-1" device=""/>
 <part name="P+6" library="supply1" deviceset="VCC" device=""/>
 </parts>
 <sheets>
@@ -4251,7 +4251,7 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <attribute name="DIGIKEY" x="147.32" y="167.64" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
 <instance part="GND41" gate="1" x="154.94" y="149.86"/>
-<instance part="U16" gate="A" x="21.336" y="83.82"/>
+<instance part="APN_SWITCH" gate="A" x="21.336" y="83.82"/>
 <instance part="P+6" gate="VCC" x="15.24" y="91.44"/>
 </instances>
 <busses>
@@ -4716,12 +4716,12 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <wire x1="147.32" y1="172.72" x2="147.32" y2="175.26" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="U16" gate="A" pin="1"/>
+<pinref part="APN_SWITCH" gate="A" pin="1"/>
 <wire x1="21.336" y1="83.82" x2="15.24" y2="83.82" width="0.1524" layer="91"/>
 <wire x1="15.24" y1="83.82" x2="15.24" y2="88.9" width="0.1524" layer="91"/>
 <wire x1="15.24" y1="83.82" x2="15.24" y2="80.01" width="0.1524" layer="91"/>
 <wire x1="15.24" y1="80.01" x2="21.336" y2="80.01" width="0.1524" layer="91"/>
-<pinref part="U16" gate="A" pin="2"/>
+<pinref part="APN_SWITCH" gate="A" pin="2"/>
 <junction x="15.24" y="83.82"/>
 <pinref part="P+6" gate="VCC" pin="VCC"/>
 </segment>
@@ -4769,7 +4769,7 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <label x="60.96" y="137.16" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
-<pinref part="U16" gate="A" pin="4"/>
+<pinref part="APN_SWITCH" gate="A" pin="4"/>
 <wire x1="36.576" y1="83.82" x2="40.386" y2="83.82" width="0.1524" layer="91"/>
 <label x="40.386" y="83.82" size="1.27" layer="95" xref="yes"/>
 </segment>
@@ -4781,7 +4781,7 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <label x="60.96" y="134.62" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
-<pinref part="U16" gate="A" pin="3"/>
+<pinref part="APN_SWITCH" gate="A" pin="3"/>
 <wire x1="36.576" y1="80.01" x2="40.386" y2="80.01" width="0.1524" layer="91"/>
 <label x="40.386" y="80.01" size="1.27" layer="95" xref="yes"/>
 </segment>
