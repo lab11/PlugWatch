@@ -206,8 +206,8 @@
 #define UART0_ENABLED 1
 
 #if (UART0_ENABLED == 1)
-#define RX_PIN_NUMBER             28
-#define TX_PIN_NUMBER             29
+#define RX_PIN_NUMBER             17 /* C3 on Particle Header */
+#define TX_PIN_NUMBER             16 /* C2 on Particle Header */
 #define UART0_CONFIG_HWFC         NRF_UART_HWFC_DISABLED
 #define UART0_CONFIG_PARITY       NRF_UART_PARITY_EXCLUDED
 #define UART0_CONFIG_BAUDRATE     NRF_UART_BAUDRATE_38400
