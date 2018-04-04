@@ -76,3 +76,29 @@ I recommend `particle serial monitor --follow`
 Annoyingly, every time the particle resets, the modem disappears and reappears.
 The `--follow` flag will automatically reconnect, but there's a bit of a delay,
 so you're gonna lose the first few messages. I've never solved this puzzle.
+
+### Listening to the Event Stream
+
+The `Particle.publish()` command allows electron-initiated events to be published to the Particle Cloud; webhooks can then be used to do something with these events. However webhooks need to be specified per event name (or event name's starting prefix), which is somewhat obnoxious for development. 
+
+Thankfully the entire event-stream for a Particle "product" is available as an HTML5 Server Side Event; the stream is accessible per-product via a URL like https://api.particle.io/v1/products/PRODUCT_SLUG/events?access_token=TOKENVALUE
+
+where `PRODUCT_SLUG` (Particle terminology) is the short alpha-numeric name of the product (to get this click on a specific product in the Particle web console https://console.particle.io/products and pull the "slug" from the resulting URL, e.g. https://console.particle.io/PRODUCT_SLUG/devices).
+
+#### Generating an API Token
+
+As you see above the API requires an access token; this can be generated from the Web UI but the following code is useful for generating one with no expiration (which can be useful to avoid a situation like where your curl script for dumping the event stream doesn't check for API access errors and thus you get email from Particle complaining about hammering their API with failed authentication attempts):
+
+`curl https://api.particle.io/oauth/token -u particle:particle -d grant_type=password -d 'username=YOUR_PARTICLE_ACCOUNT_EMAIL_ADDRESS' -d 'password=YOUR_PARTICLE_ACCOUNT_PASSWORD’ -d 'expires_in=0'`
+
+The particle account should be one with access to the product(s) whose event streams you want to listen to. `particle:particle` is *NOT* a placeholder; it's ignored so you can leave it as is. The `-d 'expires_in=0'` is the key to creating the infinite-life token. If successful you should see curl return something like:
+
+`{"token_type":"bearer","access_token":"0123456789abcdef0123456789abcdef01234567",
+{"token":"0123456789abcdef0123456789abcdef01234567","expires_at":null,"client":"__PASSWORD_ONLY__"}`
+
+You can then paste the `access_token` value into the `TOKENVALUE` part of the API URL above.
+
+
+
+
+
