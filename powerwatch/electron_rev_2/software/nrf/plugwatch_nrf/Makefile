@@ -14,8 +14,11 @@ APPLICATION_SRCS += nrf_drv_common.c
 APPLICATION_SRCS += nrf_delay.c
 APPLICATION_SRCS += led.c
 APPLICATION_SRCS += ble_db_discovery.c
-APPLICATION_SRCS += uart.c
 APPLICATION_SRCS += retarget.c
+APPLICATION_SRCS += nrf_drv_uart.c
+APPLICATION_SRCS += app_fifo.c
+APPLICATION_SRCS += app_uart_fifo.c
+#APPLICATION_SRCS += nrf_delay.c
 
 APPLICATION_SRCS += simple_ble.c
 APPLICATION_SRCS += simple_adv.c

@@ -26,7 +26,7 @@
 #include "ble_conn_params.h"
 #include "ble_db_discovery.h"
 #include "ble_lbs_c.h"
-#include "nrf_log.h"
+#include "nrf_delay.h"
 
 #include "led.h"
 
@@ -34,9 +34,9 @@
 #define PERIPHERAL_LINK_COUNT     0                                        /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
 
 #define UART_TX_BUF_SIZE          256                                      /**< Size of the UART TX buffer, in bytes. Must be a power of two. */
-#define UART_RX_BUF_SIZE          1                                        /**< Size of the UART RX buffer, in bytes. Must be a power of two. */
+#define UART_RX_BUF_SIZE          256                                      /**< Size of the UART RX buffer, in bytes. Must be a power of two. */
 
-#define CENTRAL_SCANNING_LED      13                                       /**< Scanning LED will be on when the device is scanning. */
+#define CENTRAL_SCANNING_LED      29                                       /**< Scanning LED will be on when the device is scanning. */
 //#define CENTRAL_CONNECTED_LED     13                                       /**< Connected LED will be on when the device is connected. */
 #define APP_TIMER_PRESCALER       0                                        /**< Value of the RTC1 PRESCALER register. */
 #define APP_TIMER_MAX_TIMERS      (2+BSP_APP_TIMERS_NUMBER)                /**< Maximum number of timers used by the application. */
@@ -63,8 +63,6 @@
 #define UUID16_SIZE               2                                        /**< Size of a UUID, in bytes. */
 
 #define MAX_TEST_DATA_BYTES     (15U)                /**< max number of test bytes to be used for tx and rx. */
-#define UART_TX_BUF_SIZE 256                         /**< UART TX buffer size. */
-#define UART_RX_BUF_SIZE 1                           /**< UART RX buffer size. */
 
 #define SCAN_LIST_MAX_LEN 20
 
@@ -81,14 +79,6 @@ static const uint8_t plugwatch_wit_ffe3_uuid[] = {0x00, 0x00, 0x48, 0x43,
 
 static size_t scan_name_list_len = 0;
 static char* scan_name_list[SCAN_LIST_MAX_LEN];
-
-typedef enum {
-  UART_WAIT=0,
-  SCAN_START,
-  SCAN_TIME,
-} state_t;
-
-static state_t state = UART_WAIT;
 
 /**@brief Variable length data encapsulation in terms of length and pointer to data. */
 typedef struct
@@ -194,6 +184,8 @@ static inline void scan_stop(void)
     {
         APP_ERROR_CHECK(err_code);
     }
+
+    led_off(CENTRAL_SCANNING_LED);
 }
 
 /**@brief Function to start scanning.
@@ -273,6 +265,11 @@ static void on_adv_report(const ble_evt_t * const p_ble_evt)
         adv_data.p_data     = (uint8_t *)p_gap_evt->params.adv_report.data;
         adv_data.data_len   = p_gap_evt->params.adv_report.dlen;
 
+        printf("Raw Advertisement: ");
+        for (int i = 0; i < adv_data.data_len; i++) {
+          printf("%02x", adv_data.p_data[i]);
+        }
+        printf("\n");
 
         //search for advertising names
         bool found_name = false;
@@ -301,17 +298,24 @@ static void on_adv_report(const ble_evt_t * const p_ble_evt)
         }
         if (found_name)
         {
-            if (strlen(m_target_periph_name) != 0)
-            {
+            //if (strlen(m_target_periph_name) != 0)
+            //{
                 //if(memcmp(m_target_periph_name, dev_name.p_data, dev_name.data_len )== 0)
                 //{
                 //    do_connect = true;
                 //}
-                if (scan_name_list_len < SCAN_LIST_MAX_LEN) {
-                  scan_name_list[scan_name_list_len] = malloc(dev_name.data_len);
-                  memcpy(dev_name.p_data, scan_name_list[scan_name_list_len++], dev_name.data_len);
-                }
-            }
+            //}
+            //if (scan_name_list_len < SCAN_LIST_MAX_LEN) {
+              char name[32];
+              memcpy(dev_name.p_data, name, dev_name.data_len);
+              printf("Found device: ");
+              for (int i = 0; i < dev_name.data_len; i++) {
+                printf("%x", dev_name.p_data[i]);
+              }
+              printf("\n");
+              //scan_name_list[scan_name_list_len] = malloc(dev_name.data_len);
+              //memcpy(dev_name.p_data, scan_name_list[scan_name_list_len++], dev_name.data_len);
+            //}
         }
     }
 
@@ -344,19 +348,23 @@ static void uart_evt_callback(app_uart_evt_t * uart_evt) {
       break;
     case (APP_UART_DATA_READY):
       err_code = app_uart_get(&data[index++]);
+      app_uart_put(data[index - 1]);
       if (err_code != NRF_ERROR_INVALID_STATE) {
         APP_ERROR_CHECK(err_code);
       }
-      if (data[index-1] == '\r' || index <= 64) {
+      if (data[index-1] == '\n' || index >= 64) {
+        printf("Received: %s", data);
         if (memcmp(data, "SCAN", 4) == 0) {
+          printf("SCAN START!\n");
           scan_start();
         }
+        memset(data, 0, 64);
+        index = 0;
       }
 
 
       break;
     case (APP_UART_TX_EMPTY):
-      // change state to uart waiting
       break;
     default: break;
   }
@@ -404,7 +412,7 @@ static void on_ble_evt(const ble_evt_t * const p_ble_evt)
         // the LEDs status and start scanning again.
         case BLE_GAP_EVT_DISCONNECTED:
         {
-            scan_start();
+            //scan_start();
         } break; // BLE_GAP_EVT_DISCONNECTED
 
         case BLE_GAP_EVT_ADV_REPORT:
@@ -422,7 +430,7 @@ static void on_ble_evt(const ble_evt_t * const p_ble_evt)
             {
               // stop scan, send list of found device names
               scan_stop();
-              printf("%u", scan_name_list_len);
+              printf("%u\n", scan_name_list_len);
               for (size_t i = 0; i < scan_name_list_len; i++) {
                 printf("|%s", scan_name_list[i]);
                 free(scan_name_list[i]);
@@ -604,8 +612,6 @@ int main(void)
 {
     ret_code_t err_code;
 
-    err_code = NRF_LOG_INIT();
-    APP_ERROR_CHECK(err_code);
     leds_init();
 
     // UART
@@ -637,11 +643,11 @@ int main(void)
     // Start scanning for peripherals and initiate connection to devices which
     // advertise.
     //scan_start();
-
-    //NRF_LOG_PRINTF("\r\nBlinky Start!\r\n");
-
-    // Turn on the LED to signal scanning.
+    printf("\n\rSETUP COMPLETE!\n\r");
     led_on(CENTRAL_SCANNING_LED);
+    nrf_delay_ms(500);
+    led_off(CENTRAL_SCANNING_LED);
+
 
     for (;;)
     {
