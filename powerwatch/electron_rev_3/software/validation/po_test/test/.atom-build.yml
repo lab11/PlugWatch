@@ -1,0 +1,41 @@
+---
+cmd: po electron build
+
+targets:
+  Build:
+    args:
+      - electron
+      - build
+    cmd: po
+    keymap: ctrl-alt-1
+    name: Build
+  Flash:
+    args:
+      - electron
+      - flash
+    cmd: po
+    keymap: ctrl-alt-2
+    name: Flash
+  Clean:
+    args:
+      - electron
+      - clean
+    cmd: po
+    keymap: ctrl-alt-3
+    name: Clean
+  DFU:
+    args:
+      - electron
+      - dfu
+    cmd: po
+    keymap: ctrl-alt-4
+    name: DFU
+  OTA:
+    args:
+      - electron
+      - ota
+      - --multi
+    cmd: po
+    keymap: ctrl-alt-5
+    name: DFU
+          

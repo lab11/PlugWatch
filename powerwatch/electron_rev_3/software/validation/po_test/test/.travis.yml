@@ -1,0 +1,10 @@
+dist: trusty
+sudo: required
+language: generic
+
+script:
+  - ci/travis.sh
+
+cache:
+  directories:
+  - /Users/noah/bin
