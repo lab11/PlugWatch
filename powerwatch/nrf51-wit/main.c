@@ -15,6 +15,17 @@
 
 #include <simple_ble.h>
 
+#include "nrf_drv_config.h"
+
+
+/*******************************************************************************
+ * Platform Configuration
+ ******************************************************************************/
+
+#define LED0 29
+#define UART_TX_BUF_SIZE        256
+#define UART_RX_BUF_SIZE        256
+
 
 /*******************************************************************************
  * Function Prototypes
@@ -581,27 +592,31 @@ void toggle_relay (void) {
   }
 }
 
-/*
-static void button_callback(__attribute__ ((unused)) int btn_num,
-                            int val,
-                            __attribute__ ((unused)) int arg2,
-                            __attribute__ ((unused)) void *ud) {
-  if (val == 1 && _state == OORT_STATE_NONE) {
-    printf("Button press! Toggle the relay!\n");
-    toggle_relay();
-  }
-}
-*/
-
 int main (void) {
   uint32_t err_code;
 
-  printf("[Wit Energy]\n");
-  printf("Press the user button to toggle the relay.\n");
+  // Setup nrf LEDs
+  led_init(LED0);
+  led_on(LED0);
 
-  // Button press toggles meter relay.
-  //button_subscribe(button_callback, NULL);
-  //button_enable_interrupt(0);
+  // Setup nrf UART
+  const app_uart_comm_params_t comm_params = {
+    RX_PIN_NUMBER,
+    TX_PIN_NUMBER,
+    0,
+    0,
+    APP_UART_FLOW_CONTROL_DISABLED,
+    false,
+    UART_BAUDRATE_BAUDRATE_Baud115200
+  };
+
+  APP_UART_FIFO_INIT(&comm_params,
+      UART_RX_BUF_SIZE,
+      UART_TX_BUF_SIZE,
+      uart_error_handle,
+      APP_IRQ_PRIORITY_LOW,
+      err_code);
+  APP_ERROR_CHECK(err_code);
 
   // Setup simple BLE. This does most of the nordic setup.
   simple_ble_init(&_ble_config);
@@ -619,4 +634,7 @@ int main (void) {
   err_code = ble_db_discovery_init(db_disc_handler);
   ble_db_discovery_evt_register(&_oort_info_service_uuid);
   ble_db_discovery_evt_register(&_oort_sensor_service_uuid);
+
+  // And kick things off
+  setup_oort();
 }
