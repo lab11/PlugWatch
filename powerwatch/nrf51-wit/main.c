@@ -4,9 +4,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <app_uart.h>
 #include <ble_conn_params.h>
 #include <ble_db_discovery.h>
 #include <ble_stack_handler_types.h>
+#include <led.h>
 #include <nordic_common.h>
 #include <nrf.h>
 #include <nrf_error.h>
@@ -446,6 +448,7 @@ static void __on_ble_evt (ble_evt_t* p_ble_evt) {
     }
 
     case BLE_GATTC_EVT_HVX: {
+      led_toggle(LED0);
       // Got notification
       const ble_gattc_evt_hvx_t* hvx = &p_ble_evt->evt.gattc_evt.params.hvx;
 
@@ -592,6 +595,14 @@ void toggle_relay (void) {
   }
 }
 
+void uart_error_handle (app_uart_evt_t * p_event) {
+    if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR) {
+        APP_ERROR_HANDLER(p_event->data.error_communication);
+    } else if (p_event->evt_type == APP_UART_FIFO_ERROR) {
+        APP_ERROR_HANDLER(p_event->data.error_code);
+    }
+}
+
 int main (void) {
   uint32_t err_code;
 
@@ -617,6 +628,8 @@ int main (void) {
       APP_IRQ_PRIORITY_LOW,
       err_code);
   APP_ERROR_CHECK(err_code);
+
+  printf("!!! Boot. UART Init !!!\n");
 
   // Setup simple BLE. This does most of the nordic setup.
   simple_ble_init(&_ble_config);
