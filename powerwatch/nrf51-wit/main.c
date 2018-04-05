@@ -11,6 +11,7 @@
 #include <led.h>
 #include <nordic_common.h>
 #include <nrf.h>
+#include <nrf_delay.h>
 #include <nrf_error.h>
 #include <nrf_sdm.h>
 #include <softdevice_handler.h>
@@ -463,12 +464,16 @@ static void __on_ble_evt (ble_evt_t* p_ble_evt) {
       int watts         = convert_oort_to_p1milliunits(hvx->data + 7);
       int pf   = convert_oort_to_p1milliunits(hvx->data + 10);
       int freq = convert_oort_to_p1milliunits(hvx->data + 13);
+      /*
       printf("relay:        %4s\n", (relay_status) ? "on" : "off");
       printf("voltage:      %4i.%04i V\n", voltage / 10000, voltage % 10000);
       printf("current:      %4i.%04i A\n", current / 10000, current % 10000);
       printf("watts:        %4i.%04i W\n", watts / 10000, watts % 10000);
       printf("power factor: %4i.%04i\n", pf / 10000, pf % 10000);
       printf("frequency:    %4i.%04i Hz\n\n", freq / 10000, freq % 10000);
+      */
+      printf("!M R%d V%d C%d W%d P%d F%d\n",
+          relay_status, voltage, current, watts, pf, freq);
 
       __next();
       break;
@@ -562,10 +567,6 @@ void db_disc_handler (ble_db_discovery_evt_t* p_evt) {
   }
 }
 
-void ble_error (uint32_t error_code) {
-  printf("BLE ERROR: Code = 0x%x\n", (int) error_code);
-}
-
 // Called by the softdevice (via serialization) when a BLE event occurs.
 static void __ble_evt_dispatch (ble_evt_t* p_ble_evt) {
   __on_ble_evt(p_ble_evt);
@@ -597,10 +598,73 @@ void toggle_relay (void) {
 
 void uart_error_handle (app_uart_evt_t * p_event) {
     if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR) {
+      while(true) {
+        nrf_delay_ms(500);
+        led_toggle(LED0);
+        nrf_delay_ms(500);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+      }
         APP_ERROR_HANDLER(p_event->data.error_communication);
     } else if (p_event->evt_type == APP_UART_FIFO_ERROR) {
+      while(true) {
+        nrf_delay_ms(500);
+        led_toggle(LED0);
+        nrf_delay_ms(500);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+        nrf_delay_ms(100);
+        led_toggle(LED0);
+      }
         APP_ERROR_HANDLER(p_event->data.error_code);
     }
+}
+
+/*
+void ble_error (uint32_t error_code) {
+  printf("BLE ERROR: Code = 0x%x\n", (int) error_code);
+}
+*/
+
+void ble_error(uint32_t error_code) {
+  while(true) {
+    nrf_delay_ms(500);
+    led_toggle(LED0);
+    nrf_delay_ms(500);
+    led_toggle(LED0);
+    nrf_delay_ms(100);
+    led_toggle(LED0);
+    nrf_delay_ms(100);
+    led_toggle(LED0);
+  }
 }
 
 int main (void) {
@@ -650,4 +714,8 @@ int main (void) {
 
   // And kick things off
   setup_oort();
+
+  while (true) {
+    power_manage();
+  }
 }
