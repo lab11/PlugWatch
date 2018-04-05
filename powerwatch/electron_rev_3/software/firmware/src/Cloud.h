@@ -16,6 +16,7 @@
 #define IMU_EVENT "gi"
 #define IMU_ERROR_EVENT "!i"
 #define LIGHT_EVENT "gl"
+#define NRFWIT_EVENT "n"
 #define SD_ERROR_EVENT "!s"
 #define SD_READ_EVENT "gr"
 #define WIFI_SCAN_EVENT "gw"
