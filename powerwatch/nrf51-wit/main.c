@@ -21,6 +21,10 @@
 #include "nrf_drv_config.h"
 
 
+//#define DEBUG(...) printf(__VA_ARGS__)
+#define DEBUG(...)
+
+
 /*******************************************************************************
  * Platform Configuration
  ******************************************************************************/
@@ -185,7 +189,7 @@ static void __next (void) {
     case OORT_STATE_NONE: break;
 
     case OORT_STATE_SETUP: {
-      printf("O: SETUP\n");
+      DEBUG("O: SETUP\n");
       // Do the initial setup with the oort
       _state = OORT_STATE_SETUP_SEARCHING;
 
@@ -201,7 +205,7 @@ static void __next (void) {
     }
 
     case OORT_STATE_SETUP_SEARCHING: {
-      printf("O: SEARCHING\n");
+      DEBUG("O: SEARCHING\n");
       _state = OORT_STATE_SETUP_CONNECTING;
 
       // Go ahead and connect to the meter.
@@ -217,7 +221,7 @@ static void __next (void) {
     }
 
     case OORT_STATE_SETUP_CONNECTING: {
-      printf("O: CONNECTING\n");
+      DEBUG("O: CONNECTING\n");
       // Move to trying to discover info service.
       _state = OORT_STATE_SETUP_DISCOVERING_SERVICES;
 
@@ -230,7 +234,7 @@ static void __next (void) {
     }
 
     case OORT_STATE_SETUP_DISCOVERING_SERVICES: {
-      printf("O: DISCOVERING\n");
+      DEBUG("O: DISCOVERING\n");
       _state = OORT_STATE_SETUP_READING_SYSTEMID;
 
       err_code = sd_ble_gattc_read(_conn_handle, _char_handle_systemid, 0);
@@ -242,7 +246,7 @@ static void __next (void) {
     }
 
     case OORT_STATE_SETUP_READING_SYSTEMID: {
-      printf("O: READING\n");
+      DEBUG("O: READING\n");
       _state = OORT_STATE_SETUP_WRITING_CLOCK;
 
       if (_read_len == 8) {
@@ -293,7 +297,7 @@ static void __next (void) {
     }
 
     case OORT_STATE_SETUP_WRITING_CLOCK: {
-      printf("O: WRITING CLOCK\n");
+      DEBUG("O: WRITING CLOCK\n");
       _state = OORT_STATE_SETUP_ENABLING_NOTIFICATIONS;
 
       uint8_t to_send[2];
@@ -317,7 +321,7 @@ static void __next (void) {
     }
 
     case OORT_STATE_SETUP_ENABLING_NOTIFICATIONS: {
-      printf("O: EN NOTIFICATIONS\n");
+      DEBUG("O: EN NOTIFICATIONS\n");
       _setup = true;
       if (_next_state != OORT_STATE_NONE) {
         _state      = _next_state;
@@ -331,13 +335,13 @@ static void __next (void) {
     }
 
     case OORT_STATE_RELAY_TOGGLE_START: {
-      printf("O: TOGGLE START\n");
+      DEBUG("O: TOGGLE START\n");
       _state = OORT_STATE_RELAY_TOGGLE_WAITING_NOTIFICATION;
       break;
     }
 
     case OORT_STATE_RELAY_TOGGLE_WAITING_NOTIFICATION: {
-      printf("O: TOGGLE WAIT NOTIF\n");
+      DEBUG("O: TOGGLE WAIT NOTIF\n");
       _state = OORT_STATE_RELAY_TOGGLE_WRITING;
       uint8_t onoff      = _read_buffer[0] ^ 0x1;
       uint8_t to_send[2] = {0x4, onoff};
@@ -360,7 +364,7 @@ static void __next (void) {
     }
 
     case OORT_STATE_RELAY_TOGGLE_WRITING: {
-      printf("O: TOGGLE WRITING\n");
+      DEBUG("O: TOGGLE WRITING\n");
       if (_next_state != OORT_STATE_NONE) {
         _state      = _next_state;
         _next_state = OORT_STATE_NONE;
@@ -518,7 +522,7 @@ static void __on_ble_evt (ble_evt_t* p_ble_evt) {
       _state      = OORT_STATE_NONE;
       _next_state = OORT_STATE_NONE;
 
-      printf("Disconnected! Attempting to reconnect\n");
+      printf("Disconnected. Attempting to reconnect\n");
       setup_oort();
       break;
     }
@@ -580,7 +584,7 @@ static void __ble_evt_dispatch (ble_evt_t* p_ble_evt) {
  ******************************************************************************/
 
 void setup_oort (void) {
-  printf("SETUP OORT\n");
+  DEBUG("SETUP OORT\n");
   _state = OORT_STATE_SETUP;
   __next();
 }
