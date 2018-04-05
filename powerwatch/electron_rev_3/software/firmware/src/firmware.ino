@@ -21,6 +21,7 @@
 #include "Heartbeat.h"
 #include "Imu.h"
 #include "Light.h"
+#include "NrfWit.h"
 #include "SDCard.h"
 #include "Subsystem.h"
 #include "firmware.h"
@@ -170,6 +171,11 @@ retained float LIGHT_LUX = 0;
 auto lightSubsystem = Light(SD, &LIGHT_FREQUENCY, &LIGHT_LUX);
 
 //***********************************
+//* NrfWit
+//***********************************
+auto nrfWitSubsystem = NrfWit(SD);
+
+//***********************************
 //* WIFI
 //***********************************
 retained int WIFI_FREQUENCY = Wifi::DEFAULT_FREQ;
@@ -279,6 +285,7 @@ void setup() {
   chargeStateSubsystem.setup();
   imuSubsystem.setup();
   lightSubsystem.setup();
+  nrfWitSubsystem.setup();
   gpsSubsystem.setup();
   wifiSubsystem.setup();
 
@@ -313,6 +320,7 @@ void loop() {
   chargeStateSubsystem.loop();
   imuSubsystem.loop();
   lightSubsystem.loop();
+  nrfWitSubsystem.loop();
   gpsSubsystem.loop();
   wifiSubsystem.loop();
   esp8266.loop();
