@@ -15,6 +15,7 @@ String do_meta_data() {
   String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell());
 
   res = String(System.version().c_str());
+  res = res + String("|") + String(System.versionNumber());
   res = res + String("|") + power_stats;
   res = res + String("|") + String(freemem);
   res = res + String("|") + String(sig.rssi) + String("|") + String(sig.qual);

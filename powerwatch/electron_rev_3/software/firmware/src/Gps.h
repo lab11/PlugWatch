@@ -11,7 +11,7 @@ public:
   static const int DEFAULT_FREQ = 1000 * 60 * 10;  // 10 min
 
   Gps(SDCard &sd, int* frequency) :
-    PeriodicSubsystem(sd, "gps_log", frequency) {}
+  PeriodicSubsystem(sd, "gps_log", frequency) {}
 
   // Arduino setup
   void setup();
@@ -21,5 +21,7 @@ private:
   // The cloud can also `force` a call of this function.
   void periodic(bool force);
 
+  void send(bool force);
+  virtual int cloudCommand(String command);
   String cloudFunctionName() { return "gps"; }
 };

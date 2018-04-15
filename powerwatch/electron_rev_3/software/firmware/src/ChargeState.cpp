@@ -25,6 +25,7 @@ void ChargeState::periodic(bool force) {
   static bool last_charge_state = false;
   bool charge_state = powerCheck.getIsCharging();
 
+  /*
   if (charge_state == true) {
     digitalWrite(debug_led_1, LOW);
     message = CHARGE_STATE_WALL;
@@ -32,6 +33,7 @@ void ChargeState::periodic(bool force) {
     digitalWrite(debug_led_1, HIGH);
     message = CHARGE_STATE_BATTERY;
   }
+  */
 
   if (charge_state != last_charge_state) {
     log.appendFromISR("Charge state change to " + String(charge_state));

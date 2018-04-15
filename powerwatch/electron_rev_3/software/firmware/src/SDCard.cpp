@@ -8,10 +8,20 @@ void SDCard::setup() {
 
   pinMode(SD_ENABLE_PIN, OUTPUT);
   digitalWrite(SD_ENABLE_PIN, LOW);
+
+  pinMode(SD_INT_PIN, INPUT);
 }
 
 void SDCard::loop() {
   super::loop();
+
+  if (digitalRead(SD_INT_PIN) == LOW) {
+    log.debug("SD removed");
+    Cloud::Publish(SD_ERROR_EVENT, "removed");
+    removed_flag = true; //only publish 1 event
+  } else {
+    removed_flag = false;
+  }
 
   if (power_cycle_flag) {
     power_cycle_flag = false;
@@ -38,6 +48,7 @@ int SDCard::cloudCommand(String command) {
   }
   if (command.startsWith("read ")) {
     read_filename = command.substring(5);
+    //TODO read the file
     return 0;
   }
 
@@ -45,6 +56,7 @@ int SDCard::cloudCommand(String command) {
 }
 
 void SDCard::PowerCycle() {
+  log.debug("power cycle SD");
 	digitalWrite(SD_ENABLE_PIN, HIGH);
 	delay(1000);
 	digitalWrite(SD_ENABLE_PIN, LOW);
@@ -61,7 +73,7 @@ void SDCard::Write(String filename, String to_write) {
 	File file_to_write;
 	String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
 	String final_to_write = time_str + String("|") + to_write;
-	if (!file_to_write.open(filename, O_RDWR | O_CREAT | O_APPEND)) {
+	if (!file_to_write.open(filename, O_WRITE | O_CREAT | O_APPEND)) {
 		//sd.errorHalt("opening for write failed");
 		Serial.println(String("opening ") + String(filename) + String(" for write failed"));
 		Cloud::Publish(SD_ERROR_EVENT, String(filename) + String(" write"));

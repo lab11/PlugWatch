@@ -23,6 +23,8 @@
 #define WIFI_ERROR_EVENT "!w"
 #define AUDIO_EVENT "ga"
 #define AUDIO_ERROR_EVENT "!a"
+#define GPS_EVENT "gt"
+
 
 
 class Cloud {
