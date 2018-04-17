@@ -48,7 +48,7 @@ void SDCard::loop() {
   if (delete_filename != "") {
     log.append("Delete " + delete_filename);
     bool sd_res = Delete(delete_filename);
-    query_filename = "";
+    delete_filename = "";
     Cloud::Publish(SD_DELETE_EVENT, String(sd_res));
   }
 }
