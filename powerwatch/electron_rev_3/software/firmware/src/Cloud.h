@@ -17,14 +17,18 @@
 #define IMU_ERROR_EVENT "!i"
 #define LIGHT_EVENT "gl"
 #define NRFWIT_EVENT "n"
-#define SD_ERROR_EVENT "!s"
-#define SD_READ_EVENT "gr"
+
 #define WIFI_SCAN_EVENT "gw"
 #define WIFI_ERROR_EVENT "!w"
 #define AUDIO_EVENT "ga"
 #define AUDIO_ERROR_EVENT "!a"
 #define GPS_EVENT "gt"
 
+#define SD_ERROR_EVENT "!s"
+#define SD_READ_EVENT "gsa"
+#define SD_REBOOT_EVENT "gsb"
+#define SD_QUERY_EVENT "gsc"
+#define SD_DELETE_EVENT "gsd"
 
 
 class Cloud {

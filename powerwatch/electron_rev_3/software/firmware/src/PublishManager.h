@@ -29,7 +29,7 @@ public:
    bool publish(String eventName, String data, int priority) {
 
      if (priority == HIGH) { //Added if high priority force add to the queue
-       cout << "\tHIGH ADDED" << "\n";
+       //cout << "\tHIGH ADDED" << "\n";
        if (pubQueue.size() >= _maxCacheSize) {
          //cout << "\tHIGH WILL EVICT" << "\n";
          bool found_low = false;
