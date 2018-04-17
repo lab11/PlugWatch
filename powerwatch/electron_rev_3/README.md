@@ -1,4 +1,4 @@
-# Electron Sensor Board Rev 2
+# Electron Sensor Board Rev 3
 This sensor board is part of the [GridWatch](http://grid.watch) project.
 
 The goal of this board is to test data collection in Accra. It contains 
