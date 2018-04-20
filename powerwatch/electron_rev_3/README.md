@@ -27,18 +27,42 @@ But I had to then also:
 Then blow out that terminal becase you don't really want that `nvm use` to persist.
 If everything's hunky dory, you can now run `particle --version` or some such.
 
+#### Installing dfu-util For Flashing Firmware
+
+In order to use "particle flash" to locally re-flash the Electron firmware over USB, you will need dfu-util installed. On MacOS this should be sufficient:
+
+    brew install dfu-util
+    
+Particle docs have more details for getting them on Windows or with MacPorts: https://docs.particle.io/faq/particle-tools/installing-dfu-util/core/
 
 ### Compiling
 
     particle compile electron
     
+#### Using the Particle IDE
+
+Particle has extended the Atom IDE to make a "Particle Dev" app: https://docs.particle.io/guide/tools-and-features/dev/
+
+It's not really that different that the web IDE, including actually sending compilation to their cloud, but it allows you to work with local (and git-controlled) files, and also importantly doesn't have the horrible mouse scrolling of the web IDE that often leads to accidental "browser back" commands that lose your edits.
+
+Install Particle Dev from the link above, run it, and:
+
+    File->Open-> navigate to the "firmware" directory and select "open" (do not choose any individual file in it).
+    Choose "Electron" as the target device in the bottom bar icon (may default to Photon).
+    Log in to your particle account if it doesn't show you already logged in (left side of bottom bar or Particle-> menu).
+    Compile using the Cloud-Checkmark icon in the left bar.
+    
+If all goes well you should see "Compiling in the cloud..." in the bottom bar and then a "Success!" message, and the firmware binary should appear in the `firmware` directory with a name starting like `electron_0.7.0_firmware_XXXXXXXX.bin`.
+
+Note: if you hit the compile button and it instantly reports "Success!" without delay, and doesn't actually produce a firmware image, it probably means despite showing you logged in that you should logout and re-login.
+
 #### Compiling Locally
 
-The paricle CLI will use the cloud still, which is annoyingly slow IMHO.
+The paricle CLI and IDE will use the cloud still, which is annoyingly slow IMHO.
 While there's theoretically a path to _actual_ local compilation, down that road
 lies madness. Your best bet is their [Atom plugin](https://atom.io/packages/particle-dev-local-compiler).
 You'll need to install Docker first. Compiles are still slower than I'd like,
-but only a few seconds at least.
+but only a few seconds at least. 
 
 #### Cryptic error / error you didn't have before?
 
@@ -66,7 +90,7 @@ especially across open/closing.
 
 `stty -f /dev/tty.usbmodem14321 14400 && particle flash --usb $(ls -t | grep firmware | head -1)`
 
-The first part puts the particle into DFU mode. The last part chooses the most
+The first part puts the particle into DFU mode. Note that you'll need to replace the `14321` in the above with whatever ID the USB Particle shows up on your machine (just use tab-completion).  The last part chooses the most
 recent file based on filesystem timestamp.
   
 ### Listening to Serial
