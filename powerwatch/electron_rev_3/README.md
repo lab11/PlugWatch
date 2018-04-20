@@ -43,18 +43,18 @@ Particle docs have more details for getting them on Windows or with MacPorts: ht
 
 Particle has extended the Atom IDE to make a "Particle Dev" app: https://docs.particle.io/guide/tools-and-features/dev/
 
-It's not really that different that the web IDE, including actually sending compilation to their cloud, but it allows you to work with local (and git-controlled) files, and also importantly doesn't have the horrible mouse scrolling of the web IDE that often leads to accidental "browser back" commands that lose your edits.
+It's really not that different that the web IDE, including actually sending compilation to their cloud, but it allows you to work with local git-controlled files (like these!), and also importantly doesn't have the horrible mouse scrolling behavior of the web IDE that often leads to accidental "browser back" commands that lose your edits.
 
 Install Particle Dev from the link above, run it, and:
 
-    File->Open-> navigate to the "firmware" directory and select "open" (do not choose any individual file in it).
-    Choose "Electron" as the target device in the bottom bar icon (may default to Photon).
-    Log in to your particle account if it doesn't show you already logged in (left side of bottom bar or Particle-> menu).
-    Compile using the Cloud-Checkmark icon in the left bar.
+* File->Open-> navigate to the `software/firmware/` directory of this code and select "open" (do not choose any individual file in it).
+* Choose `Electron` as the target device in the bottom bar icon (may default to `Photon`). NOTE: you may have to do this regularly (e.g. every time you restart the IDE or re-open your project).
+* Log in to your particle account if it doesn't show you already logged in (left side of bottom bar or Particle-> menu).
+* Compile using the Cloud+Checkmark icon in the left bar.
     
-If all goes well you should see "Compiling in the cloud..." in the bottom bar and then a "Success!" message, and the firmware binary should appear in the `firmware` directory with a name starting like `electron_0.7.0_firmware_XXXXXXXX.bin`.
+If all goes well you should see `Compiling in the cloud...` in the bottom bar and then a `Success!` message, and the firmware binary should appear in the `firmware/` directory with a name that looks like `electron_0.7.0_firmware_XXXXXXXX.bin`.
 
-Note: if you hit the compile button and it instantly reports "Success!" without delay, and doesn't actually produce a firmware image, it probably means despite showing you logged in that you should logout and re-login.
+Note: if you hit the compile button and it instantly reports `Success!` without delay, and doesn't actually produce a firmware image, it probably means that despite showing you aslogged in that you need to logout and re-login.
 
 #### Compiling Locally
 
