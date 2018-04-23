@@ -22,8 +22,8 @@ protected:
   enum runReasonCode {
     rPeriodic,
     rCloud,
-    rManual,
-    rChargeState
+    rChargeState,
+    rOther,
   };
   // do a reading (and for now, also publish and log it):
   virtual void run(runReasonCode reason);
@@ -43,7 +43,6 @@ protected:
 private:
   int* frequency; // should point to retained memory for this instance
   Timer timer;
-  bool timer_flag = false;
 
   void timerCallback();
   int setFrequencyFromISR(int frequency);
@@ -54,6 +53,7 @@ public:
     frequency { frequency },
     timer { Timer(*frequency, &PeriodicSubsystem2::timerCallback, *this) } {}
 
+  bool timer_flag = false;
   virtual void setup();
   virtual void loop();
   virtual String getReading() = 0;

@@ -6,6 +6,8 @@
 
 #include <queue>
 
+#define DLIM "|"
+
 class SDCard;
 
 class FileLog {

@@ -11,7 +11,7 @@ void Cloud::setup() {
 void Cloud::Publish(String tag, String message) {
   bool success;
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
-  String to_publish = time_str + String("|") + message;
+  String to_publish = time_str + String(DLIM) + message;
   success = Particle.publish(tag, to_publish);
   //TODO write to publish log
   cloud_publish_cnt = cloud_publish_cnt + 1;

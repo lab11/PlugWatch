@@ -19,7 +19,7 @@ void Wifi::construct_ssid_list() {
 void Wifi::send(bool force) {
     String message = String(ssid_set.size());
     for (auto i = ssid_set.begin(); i != ssid_set.end(); ++i) {
-      message += "|";
+      message += DLIM;
       message += *i;
     }
     if (force) {

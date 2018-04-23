@@ -35,8 +35,8 @@ void PeriodicSubsystem2::run(runReasonCode reason) {
     case rCloud:
       messagePrefix = "C";
       break;
-    case rManual:
-      messagePrefix = "M";
+    case rOther:
+      messagePrefix = "O";
       break;
     case rChargeState:
       messagePrefix = "S";
@@ -45,7 +45,7 @@ void PeriodicSubsystem2::run(runReasonCode reason) {
       // just leave blank for now
       break;
   }
-  message = messagePrefix + "|" + message;
+  message = messagePrefix + DLIM + message;
 
   // really this needs to be broken up into separate log
   // and Publish events, especially since there may be data or
