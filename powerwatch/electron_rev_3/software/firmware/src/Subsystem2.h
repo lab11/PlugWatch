@@ -16,9 +16,7 @@ protected:
   virtual int maxFreq() { return MAX_FREQ; }
 
   // Subclasses must define:
-  String classTag = "";
-  void setClassTag(String tag) { classTag = tag; }
-
+  String eventTag = "";
 
   // why was run() called?
   enum runReasonCode {

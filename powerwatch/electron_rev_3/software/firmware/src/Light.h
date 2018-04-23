@@ -23,7 +23,7 @@ public:
     lux { lux }
     {
       light_sensor.init();
-      classTag = LIGHT_EVENT;
+      eventTag = LIGHT_EVENT;
     }
     String getReading();
 

@@ -51,7 +51,7 @@ void PeriodicSubsystem2::run(runReasonCode reason) {
   // and Publish events, especially since there may be data or
   // Publish message caps.
   log.append(message);
-  Cloud::Publish(classTag, message);
+  Cloud::Publish(eventTag, message);
 }
 
 int PeriodicSubsystem2::setFrequencyFromISR(int new_frequency) {

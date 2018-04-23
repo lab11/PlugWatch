@@ -14,8 +14,7 @@ public:
 
   Gps(SDCard &sd, int* frequency) :
   PeriodicSubsystem2(sd, "gps_log", frequency) {
-    classTag = GPS_EVENT;
-    // setClassTag(GPS_EVENT);
+    eventTag = GPS_EVENT;
   }
 
   // Arduino setup
