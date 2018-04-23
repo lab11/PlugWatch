@@ -1,6 +1,5 @@
 #include <Particle.h>
 
-#include "Cloud.h"
 #include "Heartbeat.h"
 #include "FileLog.h"
 
@@ -29,20 +28,12 @@ String do_meta_data() {
   return res;
 }
 
-void Heartbeat::send(bool force) {
+String Heartbeat::getReading() {
+    (*count)++;
+    log.append("Heartbeat! Count: " + String(*count));
     String meta = do_meta_data();
     String message = String(*count)+String("|")+String(meta);
-    if (force) {
-      message = "FORCE|" + message;
-    }
-    log.append(message);
-    Cloud::Publish(HEARTBEAT_EVENT, message);
-}
-
-void Heartbeat::periodic(bool force) {
-  (*count)++;
-  log.append("Heartbeat! Count: " + String(*count));
-  send(force);
+    return(message);
 }
 
 int Heartbeat::cloudCommand(String command) {
