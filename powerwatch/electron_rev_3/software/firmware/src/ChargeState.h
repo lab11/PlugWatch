@@ -4,17 +4,19 @@
 
 #include "FileLog.h"
 #include "SDCard.h"
-#include "Subsystem.h"
+#include "Subsystem2.h"
 
 /* Checks charging state at `frequency`. Publishes every change. */
-class ChargeState: public PeriodicSubsystem {
-  typedef PeriodicSubsystem super;
+class ChargeState: public PeriodicSubsystem2 {
+  typedef PeriodicSubsystem2 super;
 
-  String message;
+  // XXXX this is redundant
+  // String message;
 
 public:
   ChargeState(SDCard &sd, int* frequency) :
-    PeriodicSubsystem(sd, "charge_state_log", frequency) {}
+    PeriodicSubsystem2(sd, "charge_state_log", frequency)
+    { eventTag = CHARGE_STATE_EVENT; }
 
   static const int DEFAULT_FREQ = 1000 * 5;  // 5 seconds
 
@@ -22,6 +24,8 @@ public:
   const String CHARGE_STATE_WALL = "w";
 
   void setup();
+  void loop();
+  String getReading();
 
 private:
   void send();

@@ -15,32 +15,43 @@ void ChargeState::setup() {
   powerCheck.setup();
 }
 
-void ChargeState::send() {
-    String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell()) + String("|") + String(powerCheck.getIsCharging());
-    Cloud::Publish(CHARGE_STATE_EVENT, message + String("|") + power_stats);
-    log.append(power_stats);
+void ChargeState::loop() {
+  static bool last_charge_state = false;
+
+
+  if (timer_flag) {
+    timer_flag = false;
+    bool charge_state = powerCheck.getIsCharging();
+    // only report if the charge state has changed:
+    if (charge_state != last_charge_state) {
+      // XXXX was already commented out; pretty sure redundant with report
+      // of powerCheck.getIsCharging()
+      /*
+      if (charge_state == true) {
+        digitalWrite(debug_led_1, LOW);
+        message = CHARGE_STATE_WALL;
+      } else {
+        digitalWrite(debug_led_1, HIGH);
+        message = CHARGE_STATE_BATTERY;
+      }
+      */
+
+      last_charge_state = charge_state;
+      // XXXX Note: if we want to report on all sensors any time charge state
+      // changes, we could set a global flag here that is handled in top-level
+      // loop, which calls run(rChargeState) on all the classes
+
+      log.append("Charge state change to " + String(charge_state));
+      run(rPeriodic); // or rChargeState change?
+    }
+  }
 }
 
-void ChargeState::periodic(bool force) {
-  static bool last_charge_state = false;
-  bool charge_state = powerCheck.getIsCharging();
-
-  /*
-  if (charge_state == true) {
-    digitalWrite(debug_led_1, LOW);
-    message = CHARGE_STATE_WALL;
-  } else {
-    digitalWrite(debug_led_1, HIGH);
-    message = CHARGE_STATE_BATTERY;
-  }
-  */
-
-  if (charge_state != last_charge_state) {
-    log.appendFromISR("Charge state change to " + String(charge_state));
-    last_charge_state = charge_state;
-    send();
-  }
-  if (force) {
-    send();
-  }
+String ChargeState::getReading() {
+    String power_stats = String(FuelGauge().getSoC()) + String(DLIM)
+      + String(FuelGauge().getVCell()) + String(DLIM)
+      + String(powerCheck.getIsCharging());
+    // XXXX we don't actually set message anywhere currently
+    // return(message + String(DLIM) + power_stats);
+    return(power_stats);
 }
