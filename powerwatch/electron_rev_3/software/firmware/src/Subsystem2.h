@@ -38,10 +38,10 @@ protected:
   // Subclasses should add their own methods, then call super if none match.
   virtual int cloudCommand(String command);
   // run calls this to get the data and format the send and log data
+  int* frequency; // should point to retained memory for this instance
 
 
 private:
-  int* frequency; // should point to retained memory for this instance
   Timer timer;
 
   void timerCallback();
