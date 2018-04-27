@@ -7,7 +7,7 @@
 void Light::send(bool force) {
   String message = String(*lux);
   if (force) {
-    message = "FORCE|" + message;
+    message = "F|" + message;
   }
   log.append(message);
   Cloud::Publish(LIGHT_EVENT, message);
@@ -15,7 +15,7 @@ void Light::send(bool force) {
 
 void Light::periodic(bool force) {
   *lux = light_sensor.getLux();
-  log.append("Light! Lux: " + String(*lux));
+  log.append("Lux: " + String(*lux));
   send(force);
 }
 

@@ -9,10 +9,10 @@
 
 // Third party libraries
 #include <CellularHelper.h>
-#include <google-maps-device-locator.h>
 
 // Our code
 #include "ChargeState.h"
+#include "SMS.h"
 #include "Cloud.h"
 #include "FileLog.h"
 #include "Gps.h"
@@ -30,20 +30,27 @@
 //***********************************
 //* TODO's
 //***********************************
-//System state logging
-//Ack routine
+//System state logging testing
 //IMU readings on charge state
-//SD interrupts
+//IMU temp only
+//SD testing
+//SMS integration
+//   disable on particle apn
+//   add set of features to sms
+//
 
 //***********************************
 //* Critical System Config
 //***********************************
 PRODUCT_ID(4861);
-PRODUCT_VERSION(6);
+PRODUCT_VERSION(7);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
+//STARTUP(cellular_sms_received_handler_set(smsRecvFlag, NULL, NULL)); //TODO this needs to be added for SMS
+
+
 //ArduinoOutStream cout(Serial);
-//STARTUP(cellular_credentials_set("http://mtnplay.com.gh", "", "", NULL));
+STARTUP(cellular_credentials_set("http://mtnplay.com.gh", "", "", NULL));
 SYSTEM_MODE(MANUAL);
 
 //**********************************
@@ -51,6 +58,10 @@ SYSTEM_MODE(MANUAL);
 //**********************************
 int debug_led_1 = C5;
 
+//**********************************
+//* Allow all peripherals to be run on event
+//**********************************
+bool power_state_change_flag = false;
 
 //***********************************
 //* Watchdogs
@@ -187,9 +198,11 @@ auto wifiSubsystem = Wifi(SD, esp8266, &WIFI_FREQUENCY, &serial5_response, &seri
 retained int GPS_FREQUENCY = Gps::DEFAULT_FREQ;
 auto gpsSubsystem = Gps(SD, &GPS_FREQUENCY);
 
-// TODO: Look into this library
-//GoogleMapsDeviceLocator locator;
-
+//***********************************
+//* SMS
+//***********************************
+retained int SMS_FREQUENCY = SMS::DEFAULT_FREQ;
+auto SMSSubsystem = SMS(SD, &SMS_FREQUENCY);
 
  //***********************************
  //* CLOUD FUNCTIONS
@@ -276,6 +289,7 @@ void setup() {
 
   // Setup SD card first so that other setups can log
   SD.setup();
+  delay(100);
 
   system_events_setup();
 
@@ -283,9 +297,9 @@ void setup() {
   timeSyncSubsystem.setup();
   heartbeatSubsystem.setup();
   chargeStateSubsystem.setup();
-  imuSubsystem.setup();
-  lightSubsystem.setup();
-  nrfWitSubsystem.setup();
+  //imuSubsystem.setup();
+  //lightSubsystem.setup();
+  //nrfWitSubsystem.setup();
   gpsSubsystem.setup();
   wifiSubsystem.setup();
 
@@ -313,14 +327,27 @@ void loop() {
     }
   }
 
+  if (power_state_change_flag) {
+    //imuSubsystem.run();
+    //lightSubsystem.run();
+    //nrfWitSubsystem.run();
+    //gpsSubsystem.run();
+    //wifiSubsystem.run();
+    //esp8266.run();
+    //log.debug("calling peripherals");
+    power_state_change_flag = false;
+  }
+
+
+
   SD.loop();
   resetSubsystem.loop();
   timeSyncSubsystem.loop();
   heartbeatSubsystem.loop();
   chargeStateSubsystem.loop();
-  imuSubsystem.loop();
-  lightSubsystem.loop();
-  nrfWitSubsystem.loop();
+  //imuSubsystem.loop();
+  //lightSubsystem.loop();
+  //nrfWitSubsystem.loop();
   gpsSubsystem.loop();
   wifiSubsystem.loop();
   esp8266.loop();

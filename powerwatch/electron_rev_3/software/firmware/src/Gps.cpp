@@ -34,7 +34,7 @@ void Gps::send(bool force) {
       message = t.readLatLon();
   }
   if (force) {
-    message = "FORCE|" + message;
+    message = "F|" + message;
   }
   log.append(message);
   Cloud::Publish(GPS_EVENT, message);

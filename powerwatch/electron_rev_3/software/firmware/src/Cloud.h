@@ -30,6 +30,7 @@
 #define SD_QUERY_EVENT "gsc"
 #define SD_DELETE_EVENT "gsd"
 
+#define SMS_EVENT "gy"
 
 class Cloud {
 public:
