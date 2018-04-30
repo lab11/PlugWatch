@@ -224,7 +224,7 @@ auto SMSSubsystem = SMS(SD, &SMS_FREQUENCY);
 // just keep track of everything that happens
 auto EventLog = FileLog(SD, "event_log.txt");
 
-String SYSTEM_EVENT = "s";
+// String SYSTEM_EVENT = "s";
 retained int system_event_count = 0;
 retained String last_system_event_time = "";
 retained int last_system_event_type = -999;
