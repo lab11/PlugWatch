@@ -33,7 +33,7 @@ protected:
   virtual void periodic(bool force) = 0;
 
   // Subclasses may override `frequency` bounds
-  const int MIN_FREQ = 1000 * 1;
+  const int MIN_FREQ = 1000 * 5;
   const int MAX_FREQ = 1000 * 60 * 60;
   virtual int minFreq() { return MIN_FREQ; }
   virtual int maxFreq() { return MAX_FREQ; }

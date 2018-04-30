@@ -36,6 +36,8 @@
 
 #define SYSTEM_EVENT "z"
 
+#define SMS_EVENT "gy"
+
 class Cloud {
 public:
   static void setup();

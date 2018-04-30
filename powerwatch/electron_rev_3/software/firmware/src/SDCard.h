@@ -13,18 +13,23 @@
 class SDCard: public Subsystem {
 	typedef Subsystem super;
 
-	const uint8_t SD_INT_PIN = D6; //TODO add in cloud event if this changes
+	const uint8_t SD_INT_PIN = D6;
 	const uint8_t SD_ENABLE_PIN = D5;
 	const uint8_t SD_CHIP_SELECT = A2;
-
+	
+	#define SCK A3
+	#define  MISO A4
+	#define MOSI A5
+	#define  SS A2
 	// SCK => A3, MISO => A4, MOSI => A5, SS => A2 (default)
-	SdFat sd; // rev3 HW
+	SdFat sd;
+
+	//SdFatSoftSpi<A5, A4, A3> sd; // rev2 HW
+	//SdFatSoftSpi<A4, A5, A3> sd; // rev1 HW
 
 	bool power_cycle_flag = false;
 	bool removed_flag = false;
 	String read_filename = "";
-	String query_filename = "";
-	String delete_filename = "";
 
 public:
 	explicit SDCard() :
@@ -43,14 +48,9 @@ public:
 
 	void Write(String filename, String to_write);
 
-	String Stat(String filename);
-
-  bool Delete(String filename);
-
 	String Read(String filename);
 
 private:
 	String cloudFunctionName() { return "sd"; }
-	bool sendDataOverTCP(String data);
 	int cloudCommand(String command);
 };

@@ -61,7 +61,8 @@ Note: if you hit the compile button and it instantly reports `Success!` without 
 The paricle CLI and IDE will use the cloud still, which is annoyingly slow IMHO.
 While there's theoretically a path to _actual_ local compilation, down that road
 lies madness. Your best bet is their [Atom plugin](https://atom.io/packages/particle-dev-local-compiler).
-You'll need to install Docker first. Compiles are still slower than I'd like,
+You'll need to install and run Docker first, then in Particle Dev go to Settings->Install, search for 
+"Particle Dev Local Compiler" and click install. Compiles are still slower than I'd like,
 but only a few seconds at least. 
 
 #### Cryptic error / error you didn't have before?

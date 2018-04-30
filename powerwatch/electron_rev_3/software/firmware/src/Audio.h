@@ -2,10 +2,10 @@
 
 #include <Particle.h>
 
+#include "Cloud.h"
 #include "FileLog.h"
 #include "SDCard.h"
 #include "Subsystem2.h"
-#include "Cloud.h"
 
 #include "ISL29035.h"
 

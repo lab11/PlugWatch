@@ -5,6 +5,8 @@
 
 //Meta Data
 String do_meta_data() {
+
+  /*
   String res;
   uint32_t freemem = System.freeMemory();
   CellularSignal sig = Cellular.RSSI();
@@ -26,6 +28,8 @@ String do_meta_data() {
     res = res + String("|No Bands Avail");
   }
   return res;
+  */
+  return "a";
 }
 
 String Heartbeat::getReading() {
