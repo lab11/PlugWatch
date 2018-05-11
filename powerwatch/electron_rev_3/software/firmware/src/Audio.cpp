@@ -1,25 +1,15 @@
 #include <Particle.h>
 
-#include "Cloud.h"
 #include "Audio.h"
-#include "FileLog.h"
 
-void Audio::send(bool force) {
-  String message = String(*hz_and_mag);
-  if (force) {
-    message = "FORCE|" + message;
-  }
-  log.append(message);
-  Cloud::Publish(AUDIO_EVENT, message);
-}
-
-void Audio::periodic(bool force) {
+String Audio::getReading() {
   //TODO
   /*
   *hz_and_mag = audio_sensor.getHzMag();
   log.append("Audio! Hz: " + String(*hz_and_mag));
   send(force);
   */
+  return(String(*hz_and_mag));
 }
 
 int Audio::cloudCommand(String command) {

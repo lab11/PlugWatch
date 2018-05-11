@@ -2,14 +2,15 @@
 
 #include <Particle.h>
 
+#include "Cloud.h"
 #include "FileLog.h"
 #include "SDCard.h"
-#include "Subsystem.h"
+#include "Subsystem2.h"
 
 #include "ISL29035.h"
 
-class Audio: public PeriodicSubsystem {
-  typedef PeriodicSubsystem super;
+class Audio: public PeriodicSubsystem2 {
+  typedef PeriodicSubsystem2 super;
 
   ISL29035 audio_sensor;
   float* hz_and_mag;
@@ -18,13 +19,13 @@ public:
   static const int DEFAULT_FREQ = 1000 * 60 * 1;  // 1 min
 
   Audio(SDCard &sd, int* frequency, float* hz_and_mag) :
-    PeriodicSubsystem(sd, "audio_log", frequency),
+    PeriodicSubsystem2(sd, "audio_log", frequency),
     hz_and_mag { hz_and_mag }
-    { audio_sensor.init(); }
+    { audio_sensor.init(); eventTag = AUDIO_EVENT; }
+
+    String getReading();
 
 private:
-  void periodic(bool force);
-  void send(bool force);
   String cloudFunctionName() { return "ad"; }
 
   //   - "get hz and mag"/"ga"   Return audio value

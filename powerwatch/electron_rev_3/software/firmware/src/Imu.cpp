@@ -56,19 +56,19 @@ String Imu::self_test() {
    String imu_st = "";
    String ak_st = "";
    imu_st += String(c,HEX);
-   imu_st += "|";
+   imu_st += DLIM;
    if (c == 0x71) {
      myIMU.MPU9250SelfTest(myIMU.SelfTest);
      imu_st += String(myIMU.SelfTest[0]);
-     imu_st += "|";
+     imu_st += DLIM;
      imu_st += String(myIMU.SelfTest[1]);
-     imu_st += "|";
+     imu_st += DLIM;
      imu_st += String(myIMU.SelfTest[2]);
-     imu_st += "|";
+     imu_st += DLIM;
      imu_st += String(myIMU.SelfTest[3]);
-     imu_st += "|";
+     imu_st += DLIM;
      imu_st += String(myIMU.SelfTest[4]);
-     imu_st += "|";
+     imu_st += DLIM;
      imu_st += String(myIMU.SelfTest[5]);
 
      myIMU.calibrateMPU9250(myIMU.gyroBias, myIMU.accelBias);
@@ -76,11 +76,11 @@ String Imu::self_test() {
      byte d = myIMU.readByte(AK8963_ADDRESS, WHO_AM_I_AK8963);
      myIMU.initAK8963(myIMU.magCalibration);
      ak_st += String(d,HEX);
-     ak_st += "|";
+     ak_st += DLIM;
      ak_st += String(myIMU.magCalibration[0]);
-     ak_st += "|";
+     ak_st += DLIM;
      ak_st += String(myIMU.magCalibration[1]);
-     ak_st += "|";
+     ak_st += DLIM;
      ak_st += String(myIMU.magCalibration[2]);
    } // if (c == 0x71)
    else {
@@ -135,38 +135,38 @@ String Imu::do_sample() {
   myIMU.delt_t = millis() - myIMU.count;
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
   String imu = time_str;
-  imu += "|";
+  imu += DLIM;
   if (myIMU.delt_t > 1) { //GO AS FAST AS POSSIBLE
     String x_accel_mg = String(1000*myIMU.ax);
     imu += x_accel_mg;
     String y_accel_mg = String(1000*myIMU.ay);
-    imu += "|";
+    imu += DLIM;
     imu += y_accel_mg;
     String z_accel_mg = String(1000*myIMU.az);
-    imu += "|";
+    imu += DLIM;
     imu += z_accel_mg;
     String x_gyro_ds = String(myIMU.gx);
-    imu += "|";
+    imu += DLIM;
     imu += x_gyro_ds;
     String y_gyro_ds = String(myIMU.gy);
-    imu += "|";
+    imu += DLIM;
     imu += y_gyro_ds;
     String z_gyro_ds = String(myIMU.gz);
-    imu += "|";
+    imu += DLIM;
     imu += z_gyro_ds;
     String x_mag_mg = String(myIMU.mx);
-    imu += "|";
+    imu += DLIM;
     imu += x_mag_mg;
     String y_mag_mg = String(myIMU.my);
-    imu += "|";
+    imu += DLIM;
     imu += y_mag_mg;
     String z_mag_mg = String(myIMU.mz);
-    imu += "|";
+    imu += DLIM;
     imu += z_mag_mg;
     myIMU.tempCount = myIMU.readTempData();  // Read the adc values
     myIMU.temperature = ((float) myIMU.tempCount) / 333.87 + 21.0; // Temperature in degrees Centigrade
     String tmp_c = String(myIMU.temperature);
-    imu += "|";
+    imu += DLIM;
     imu += tmp_c;
     myIMU.count = millis();
   }

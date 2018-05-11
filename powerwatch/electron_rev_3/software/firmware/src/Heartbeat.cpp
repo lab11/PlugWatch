@@ -1,6 +1,5 @@
 #include <Particle.h>
 
-#include "Cloud.h"
 #include "Heartbeat.h"
 #include "FileLog.h"
 
@@ -12,23 +11,24 @@ String do_meta_data() {
   uint32_t freemem = System.freeMemory();
   CellularSignal sig = Cellular.RSSI();
   CellularBand band_avail;
-  //String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell()) + String("|") + String(powerCheck.getIsCharging());
-  // TODO Fix PowerCheck
-  const char *addrStr = "8.8.8.8";
+  //String power_stats = String(FuelGauge().getSoC()) + String(DLIM) + String(FuelGauge().getVCell()) + String(DLIM) + String(powerCheck.getIsCharging());
+
+  //const char *addrStr = "8.8.8.8";
 
   //boolean ok = CellularHelper.ping(addrStr);
   //Serial.printlnf("ping addr %s=%d", addrStr, ok);
 
+  // TODO Fix PowerCheck
   String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell());
 
   res = String(System.version().c_str());
-  res = res + String("|") + String(System.versionNumber());
-  res = res + String("|") + power_stats;
-  res = res + String("|") + String(freemem);
-  res = res + String("|") + String(sig.rssi) + String("|") + String(sig.qual);
+  res = res + String(DLIM) + String(System.versionNumber());
+  res = res + String(DLIM) + power_stats;
+  res = res + String(DLIM) + String(freemem);
+  res = res + String(DLIM) + String(sig.rssi) + String(DLIM) + String(sig.qual);
 
   if (Cellular.getBandSelect(band_avail)) {
-    res  = res + String("|") + String(band_avail);
+    res  = res + String(DLIM) + String(band_avail);
   }
   else {
     res = res + String("|No Bands Avail");
@@ -38,20 +38,12 @@ String do_meta_data() {
   return "a";
 }
 
-void Heartbeat::send(bool force) {
+String Heartbeat::getReading() {
+    (*count)++;
+    log.append("Heartbeat! Count: " + String(*count));
     String meta = do_meta_data();
-    String message = String(*count)+String("|")+String(meta);
-    if (force) {
-      message = "FORCE|" + message;
-    }
-    log.append(message);
-    Cloud::Publish(HEARTBEAT_EVENT, message);
-}
-
-void Heartbeat::periodic(bool force) {
-  (*count)++;
-  log.append("Heartbeat! Count: " + String(*count));
-  send(force);
+    String message = String(*count)+String(DLIM)+String(meta);
+    return(message);
 }
 
 int Heartbeat::cloudCommand(String command) {
