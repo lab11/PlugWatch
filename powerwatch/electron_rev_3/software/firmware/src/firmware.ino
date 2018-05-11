@@ -99,6 +99,7 @@ STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
 //STARTUP(cellular_credentials_set("http://mtnplay.com.gh", "", "", NULL));
 SYSTEM_MODE(MANUAL);
 bool handshake_flag = false;
+OneWire ds(B0);
 
 //**********************************
 //* Pin Configuration
