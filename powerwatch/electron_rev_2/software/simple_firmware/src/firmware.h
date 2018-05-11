@@ -1,16 +1,9 @@
-/**
- * Cloud Interface.
- */
-
 #pragma once
 
-#include <Particle.h>
+extern int debug_led_1;
+extern bool power_state_change_flag;
 
-#define ERROR_EVENT "!"
 
-//Adding a G for a particle cloud webhook
-//a webhook only matches on prefix, so all G gets set
-//to one chain, and all ! get sent to another chain
 #define CHARGE_STATE_EVENT "gc"
 #define HEARTBEAT_EVENT "gh"
 #define IMU_EVENT "gi"
@@ -30,10 +23,6 @@
 #define SD_QUERY_EVENT "gsc"
 #define SD_DELETE_EVENT "gsd"
 
-#define SMS_EVENT "gy"
-
-class Cloud {
-public:
-  static void setup();
-  static void Publish(String tag, String message);
-};
+const int TWELVE_HOURS = 1000 * 60 * 60 * 12;
+const String CHARGE_STATE_BATTERY = "b";
+const String CHARGE_STATE_WALL = "w";

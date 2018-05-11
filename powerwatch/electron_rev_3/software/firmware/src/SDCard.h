@@ -16,7 +16,11 @@ class SDCard: public Subsystem {
 	const uint8_t SD_INT_PIN = D6;
 	const uint8_t SD_ENABLE_PIN = D5;
 	const uint8_t SD_CHIP_SELECT = A2;
-
+	
+	#define SCK A3
+	#define  MISO A4
+	#define MOSI A5
+	#define  SS A2
 	// SCK => A3, MISO => A4, MOSI => A5, SS => A2 (default)
 	SdFat sd;
 

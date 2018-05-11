@@ -1,0 +1,272 @@
+/*
+ * Project sensor_board_v2
+ * Description: For Q2 2018 Deployment in Ghana
+ * Author: Noah Klugman; Pat Pannuto
+ */
+
+// Native
+#include <Particle.h>
+
+// Third party libraries
+#include <CellularHelper.h>
+
+// Our code
+#include "PowerCheck.h"
+#include "ESP8266.h"
+#include "firmware.h"
+#include "SdFat.h"
+#include <set>
+
+//***********************************
+//* Critical System Config
+//***********************************
+PRODUCT_ID(4861);
+PRODUCT_VERSION(1);
+//STARTUP(System.enableFeature(FEATURE_RESET_INFO));
+STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
+//STARTUP(cellular_sms_received_handler_set(smsRecvFlag, NULL, NULL)); //TODO this needs to be added for SMS
+
+
+//ArduinoOutStream cout(Serial);
+STARTUP(cellular_credentials_set("http://mtnplay.com.gh", "", "", NULL));
+SYSTEM_MODE(MANUAL);
+
+//**********************************
+//* Pin Configuration
+//**********************************
+int debug_led_1 = C5;
+
+//***********************************
+//* Watchdogs
+//***********************************
+const int HARDWARE_WATCHDOG_TIMEOUT_MS = 1000 * 60;
+ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, System.reset);
+
+
+String POWER_LOG = "power_log.txt";
+String WIFI_LOG = "wifi_log.txt";
+String CHARGE_LOG = "charge_log.txt";
+String SYSTEM_LOG = "system_log.txt";
+String SYNC_LOG = "sync_log.txt";
+
+//***********************************
+//* SD Card
+//***********************************
+SdFat sd;
+const uint8_t chipSelect = A2;
+File myFile;
+const uint8_t SD_ENABLE_PIN = D5;
+
+void sd_write(String filename, String to_write) {
+  if (!sd.begin(chipSelect, SPI_HALF_SPEED)) {
+  		Serial.println("CAN'T OPEN SD");
+      digitalWrite(SD_ENABLE_PIN, HIGH);
+    	delay(1000);
+    	digitalWrite(SD_ENABLE_PIN, LOW);
+    	delay(1000);
+      Serial.println("DONE PowerCycle");
+      return;
+  	}
+  	File file_to_write;
+  	String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
+  	String final_to_write = time_str + String("|") + String(to_write);
+  	if (!file_to_write.open(filename, O_WRITE | O_CREAT | O_AT_END)) {
+  		Serial.println(String("opening ") + String(filename) + String(" for write failed"));
+  		return;
+  	}
+  	file_to_write.println(final_to_write);
+  	file_to_write.close();
+  	Serial.println(String("wrote : ") + String(filename) + String(":") + to_write);
+}
+
+
+//***********************************
+//* ESP8266 WIFI Module
+//***********************************
+String serial5_response;
+bool serial5_recv_done;
+auto esp8266 = ESP8266(&serial5_response, &serial5_recv_done);
+String* response;
+bool* done;
+unsigned long scan_start_time;
+std::set<String> ssid_set;
+
+//***********************************
+//* PowerCheck
+//***********************************
+PowerCheck powerCheck;
+
+
+//***********************************
+//* System Events
+//***********************************
+String SYSTEM_EVENT = "s";
+retained int system_event_count = 0;
+retained String last_system_event_time = "";
+retained int last_system_event_type = -999;
+retained int num_reboots = 0;
+
+void system_events_setup() {
+  Particle.variable("d", system_event_count);
+  Particle.variable("e", last_system_event_time);
+  Particle.variable("f", last_system_event_type);
+}
+
+void handle_all_system_events(system_event_t event, int param) {
+  system_event_count++;
+  Serial.printlnf("got event %d with value %d", event, param);
+  String system_event_str = String((int)event) + "|" + String(param);
+  String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
+  last_system_event_time = time_str;
+  last_system_event_type = param;
+  //Particle.publish(SYSTEM_EVENT, system_event_str, PRIVATE);
+  //sd_write(SYSTEM_LOG, system_event_str);
+}
+
+//***********************************
+//* ye-old Arduino
+//***********************************
+void setup() {
+
+  // Some legacy bits that I'm not sure what we want to do with
+  num_reboots++;
+  Particle.variable("r", num_reboots);
+  Particle.variable("v", String(System.version().c_str()));
+
+  // Set up debugging UART
+  Serial.begin(9600);
+  Serial.println("Initial Setup.");
+
+  // Set up I2C
+  Wire.begin();
+
+  // For now, just grab everything that happens and log about it
+  // https://docs.particle.io/reference/firmware/photon/#system-events
+  //System.on(all_events, handle_all_system_events);
+
+  // Setup SD card first so that other setups can log
+  pinMode(SD_ENABLE_PIN, OUTPUT);
+  digitalWrite(SD_ENABLE_PIN, LOW);
+  delay(100);
+
+  //system_events_setup();
+  powerCheck.setup();
+  FuelGauge().quickStart();
+
+  sd_write("setup", "setup");
+
+
+  //LEDStatus status;
+  //status.off();
+  //Particle.connect();
+
+  Serial.println("Setup complete.");
+}
+
+void power_send() {
+    String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell()) + String("|") + String(powerCheck.getIsCharging());
+    Particle.publish(CHARGE_STATE_EVENT, power_stats, PRIVATE);
+    sd_write(POWER_LOG, power_stats);
+}
+
+void wifi_send() {
+  String message = String(ssid_set.size());
+  for (auto i = ssid_set.begin(); i != ssid_set.end(); ++i) {
+    message += "|";
+    message += *i;
+  }
+  Particle.publish(WIFI_SCAN_EVENT, message, PRIVATE);
+  sd_write(WIFI_LOG, message);
+}
+
+void construct_ssid_list() {
+  size_t place = 0;
+  while (place < response->length() and place >= 0) {
+    size_t first = response->indexOf('"', place);
+    size_t second = response->indexOf('"', first+1);
+    String ssid = response->substring(first+1, second);
+    ssid_set.insert(ssid);
+    place = response->indexOf("CWLAP", second);
+  }
+}
+
+
+void loop() {
+
+  Serial.println("loop");
+
+  /*
+
+  //******************************************
+  // Sync if needed
+  //******************************************
+  if (! Particle.syncTimePending()) { // if not currently syncing
+    unsigned long now = millis();
+    unsigned long last = Particle.timeSyncedLast();
+    if ((now - last) > TWELVE_HOURS) { // been a while
+      Serial.println("syncing");
+      sd_write(SYNC_LOG, "now " + String(now) + ", last sync " + String(last));
+      Particle.syncTime(); // kick off a sync
+    }
+  }
+
+
+
+  //******************************************
+  // Allow particle to do any processing
+  // https://docs.particle.io/reference/firmware/photon/#manual-mode
+  //******************************************
+  if (Particle.connected()) {
+    Particle.process();
+  } else {
+    // Don't attempt to connect too frequently as connection attempts hang MY_DEVICES
+    static int last_connect_time = 0;
+    const int connect_interval_sec = 60;
+    int now = Time.now(); // unix time
+    if ((last_connect_time == 0) || (now-last_connect_time > connect_interval_sec)) {
+      last_connect_time = now;
+      Particle.connect();
+    }
+  }
+
+
+
+  //******************************************
+  // Power Change
+  //******************************************
+  static bool last_charge_state = false;
+  bool charge_state = powerCheck.getIsCharging();
+  if (charge_state != last_charge_state) {
+    Serial.println(String(charge_state));
+    power_send();
+    last_charge_state = charge_state;
+    sd_write(POWER_LOG, String(charge_state));
+  }
+  */
+
+  /*
+
+  //******************************************
+  // Wifi
+  //******************************************
+  /*
+  ssid_set.clear();
+  scan_start_time = millis();
+  esp8266.beginScan();
+  if (*done) {
+    *done = false;
+    construct_ssid_list();
+    wifi_send();
+  }
+  esp8266.loop();
+  */
+
+  sd_write("file_a", "S");
+
+  //delay(4000);
+
+
+
+  //Call the automatic watchdog
+  wd.checkin();
+}

@@ -19,7 +19,12 @@ void ChargeState::send() {
     String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell()) + String("|") + String(powerCheck.getIsCharging());
     Cloud::Publish(CHARGE_STATE_EVENT, message + String("|") + power_stats);
     log.append(power_stats);
+
+    //set a flag in firmware.ino to allow for all peripherals to be sampled
+    power_state_change_flag = true;
 }
+
+
 
 void ChargeState::periodic(bool force) {
   static bool last_charge_state = false;

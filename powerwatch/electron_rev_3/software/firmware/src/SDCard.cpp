@@ -15,14 +15,6 @@ void SDCard::setup() {
 void SDCard::loop() {
   super::loop();
 
-  if (digitalRead(SD_INT_PIN) == LOW) {
-    log.debug("SD removed");
-    Cloud::Publish(SD_ERROR_EVENT, "removed");
-    removed_flag = true; //only publish 1 event
-  } else {
-    removed_flag = false;
-  }
-
   if (power_cycle_flag) {
     power_cycle_flag = false;
     PowerCycle();
@@ -64,10 +56,11 @@ void SDCard::PowerCycle() {
 }
 
 void SDCard::Write(String filename, String to_write) {
+  /*
   log.debug("write begin: " + filename);
 	if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
 		log.debug("CAN'T OPEN SD");
-		Cloud::Publish(SD_ERROR_EVENT, "init");
+		//Cloud::Publish(SD_ERROR_EVENT, "init");
     return;
 	}
 	File file_to_write;
@@ -82,6 +75,22 @@ void SDCard::Write(String filename, String to_write) {
 	file_to_write.println(final_to_write);
 	file_to_write.close();
 	log.debug(String("wrote : ") + String(filename) + String(":") + to_write);
+  */
+  if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
+		Serial.println("CAN'T OPEN SD");
+    return;
+	}
+	File file_to_write;
+	String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
+	String final_to_write = time_str + String("|") + String(to_write);
+	if (!file_to_write.open(filename, O_WRITE | O_CREAT | O_AT_END)) {
+		Serial.println(String("opening ") + String(filename) + String(" for write failed"));
+		return;
+	}
+	file_to_write.println(final_to_write);
+	file_to_write.close();
+	Serial.println(String("wrote : ") + String(filename) + String(":") + to_write);
+
 }
 
 String SDCard::Read(String filename) {
