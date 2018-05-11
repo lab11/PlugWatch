@@ -9,10 +9,10 @@
 
 // Third party libraries
 #include <CellularHelper.h>
+#include <google-maps-device-locator.h>
 
 // Our code
 #include "ChargeState.h"
-#include "SMS.h"
 #include "Cloud.h"
 #include "FileLog.h"
 #include "Gps.h"
@@ -25,50 +25,94 @@
 #include "SDCard.h"
 #include "Subsystem.h"
 #include "firmware.h"
+#include "OneWire.h"
 
 
 //***********************************
 //* TODO's
 //***********************************
-//System state logging testing
-//IMU readings on charge state
-//IMU temp only
-//SD testing
-//SMS integration
-//   disable on particle apn
-//   add set of features to sms
-//
+
+//System
+//  State Machine refactor
+//    remove timers?
+//    remove threads
+//    think about on-event actions (do we do at all? do we keep a buffer?)
+//  Merge in Matt's branch
+//  Sanity check cloud commands // controls. Minimize them. Document.
+//  Integrate with the publish manager (maybe not a concern anymore?)
+//  Figure out what to do with system events
+//  figure out when to go to safe mode
+//  control the debug light
+//  add in periodic reset
+//Peripherals
+//  add temp alone
+//  make wifi syncronus
+//  wifi ssid cloud hashing
+//  write audio transfer
+//  APN libraries / switches
+//  Add unique ID chip
+//SD
+//  add delete (maybe not?)
+//  add format (maybe not?)
+//  check powercycle
+//  add upload file, upload all
+//Default Heartbeat Packet
+//  size of free mem on SD Card (maybe not?)
+//  system mem
+//  temp
+//  cellular strength
+//  system count (retained)
+//  software version (maybe not?)
+//  isCharging
+//  num heartbeat (retained)
+//Identity Packet (daily?)
+//  IMEI
+//  ICCID
+//  Cape ID
+//  SD Card name
+//  Last GPS
+//  WiT MAC
+//  System Count
+//Heartbeat Stretch goals
+//  SMS Heartbeat
+//    disable on particle apn
+//    figure out endpoint
+//  Heartbeat on certain system events (upgrade in specific)
+//Tests
+//  SD works without cellular
+//  Cellular works without SD
+//  Device comes back from dead battery
+//  Cross validate wits, temp, light, audio?
+//Random ideas
+//  Can we run on 0.8.0?
 
 //***********************************
 //* Critical System Config
 //***********************************
-PRODUCT_ID(4861);
-PRODUCT_VERSION(7);
+int version_num = 2; //hack
+PRODUCT_ID(7456); //US testbed
+PRODUCT_VERSION(2);
+SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
-//STARTUP(cellular_sms_received_handler_set(smsRecvFlag, NULL, NULL)); //TODO this needs to be added for SMS
-
-
 //ArduinoOutStream cout(Serial);
-STARTUP(cellular_credentials_set("http://mtnplay.com.gh", "", "", NULL));
+//STARTUP(cellular_credentials_set("http://mtnplay.com.gh", "", "", NULL));
 SYSTEM_MODE(MANUAL);
+bool handshake_flag = false;
+OneWire ds(B0);
 
 //**********************************
 //* Pin Configuration
 //**********************************
-int debug_led_1 = C5;
+int reset_btn = A0;
 
-//**********************************
-//* Allow all peripherals to be run on event
-//**********************************
-bool power_state_change_flag = false;
 
 //***********************************
 //* Watchdogs
 //***********************************
 const int HARDWARE_WATCHDOG_TIMEOUT_MS = 1000 * 60;
-ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, System.reset);
-
+ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, soft_watchdog_reset);
+retained int system_cnt;
 
 //***********************************
 //* SD Card
@@ -106,6 +150,7 @@ public:
   void loop() {
     super::loop();
     if (reset_flag) {
+      log.append("resetting");
       System.reset();
     }
   }
@@ -198,11 +243,9 @@ auto wifiSubsystem = Wifi(SD, esp8266, &WIFI_FREQUENCY, &serial5_response, &seri
 retained int GPS_FREQUENCY = Gps::DEFAULT_FREQ;
 auto gpsSubsystem = Gps(SD, &GPS_FREQUENCY);
 
-//***********************************
-//* SMS
-//***********************************
-retained int SMS_FREQUENCY = SMS::DEFAULT_FREQ;
-auto SMSSubsystem = SMS(SD, &SMS_FREQUENCY);
+// TODO: Look into this library
+//GoogleMapsDeviceLocator locator;
+
 
  //***********************************
  //* CLOUD FUNCTIONS
@@ -229,11 +272,14 @@ retained int system_event_count = 0;
 retained String last_system_event_time = "";
 retained int last_system_event_type = -999;
 retained int num_reboots = 0;
+retained int num_manual_reboots = 0;
 
 void system_events_setup() {
   Particle.variable("d", system_event_count);
   Particle.variable("e", last_system_event_time);
   Particle.variable("f", last_system_event_type);
+  Particle.variable("m", num_manual_reboots);
+  Particle.variable("w", num_reboots);
 }
 
 void handle_all_system_events(system_event_t event, int param) {
@@ -247,14 +293,16 @@ void handle_all_system_events(system_event_t event, int param) {
   EventLog.append(system_event_str);
 }
 
-// Catch Serial5 events and pass them on to the ESP8266 driver
-//void serialEvent5() {
-//  String recv = "";
-//  while (Serial5.available()) {
-//    recv.concat(Serial5.readString());
-//  }
-//  esp8266.updateResponse(recv);
-//}
+void system_reset_to_safemode() {
+  num_manual_reboots++;
+  Cloud::Publish(SYSTEM_EVENT, "manual reboot"); //TODO test if this hangs
+  System.enterSafeMode();
+}
+
+int force_handshake(String cmd) {
+  handshake_flag = true;
+  return 0;
+}
 
 //***********************************
 //* ye-old Arduino
@@ -270,6 +318,7 @@ void setup() {
   Particle.variable("v", String(System.version().c_str()));
   Particle.function("soc",get_soc);
   Particle.function("battv",get_battv);
+  Particle.function("handshake", force_handshake);
 
   // Set up debugging UART
   Serial.begin(9600);
@@ -282,14 +331,14 @@ void setup() {
   // https://docs.particle.io/reference/firmware/photon/#system-events
   System.on(all_events, handle_all_system_events);
 
-  FuelGauge().quickStart();
 
+  // Get the reset button going
+  pinMode(reset_btn, INPUT);
+  attachInterrupt(reset_btn, system_reset_to_safemode, RISING, 3);
 
-  pinMode(debug_led_1, OUTPUT);
 
   // Setup SD card first so that other setups can log
   SD.setup();
-  delay(100);
 
   system_events_setup();
 
@@ -297,20 +346,35 @@ void setup() {
   timeSyncSubsystem.setup();
   heartbeatSubsystem.setup();
   chargeStateSubsystem.setup();
-  //imuSubsystem.setup();
-  //lightSubsystem.setup();
-  //nrfWitSubsystem.setup();
+  imuSubsystem.setup();
+  lightSubsystem.setup();
+  nrfWitSubsystem.setup();
   gpsSubsystem.setup();
   wifiSubsystem.setup();
+  FuelGauge().quickStart();
 
   LEDStatus status;
   status.off();
+
   Particle.connect();
 
   Serial.println("Setup complete.");
 }
 
 void loop() {
+
+  if (System.updatesPending())
+  {
+    int ms = millis();
+    while(millis()-ms < 60000) Particle.process();
+  }
+
+  if (handshake_flag) {
+  handshake_flag = false;
+  Particle.publish("spark/device/session/end", "", PRIVATE);
+  }
+
+
   // Allow particle to do any processing
   // https://docs.particle.io/reference/firmware/photon/#manual-mode
   if (Particle.connected()) {
@@ -327,31 +391,76 @@ void loop() {
     }
   }
 
-  if (power_state_change_flag) {
-    //imuSubsystem.run();
-    //lightSubsystem.run();
-    //nrfWitSubsystem.run();
-    //gpsSubsystem.run();
-    //wifiSubsystem.run();
-    //esp8266.run();
-    //log.debug("calling peripherals");
-    power_state_change_flag = false;
+  static bool once = false;
+  if (!once && Particle.connected()) {
+         Particle.keepAlive(30); // send a ping every 30 seconds
+         once = true;
   }
-
-
 
   SD.loop();
   resetSubsystem.loop();
   timeSyncSubsystem.loop();
   heartbeatSubsystem.loop();
   chargeStateSubsystem.loop();
-  //imuSubsystem.loop();
-  //lightSubsystem.loop();
-  //nrfWitSubsystem.loop();
+  imuSubsystem.loop();
+  lightSubsystem.loop();
+  nrfWitSubsystem.loop();
   gpsSubsystem.loop();
   wifiSubsystem.loop();
   esp8266.loop();
 
   //Call the automatic watchdog
   wd.checkin();
+
+  system_cnt++;
+}
+
+void soft_watchdog_reset() {
+  //reset_flag = true; //let the reset subsystem shutdown gracefully
+  //TODO change to system reset after a certain number of times called
+  System.reset();
+}
+
+void id() {
+  byte i;
+  boolean present;
+  byte data[8];     // container for the data from device
+  byte crc_calc;    //calculated CRC
+  byte crc_byte;    //actual CRC as sent by DS2401
+  //1-Wire bus reset, needed to start operation on the bus,
+  //returns a 1/TRUE if presence pulse detected
+  present = ds.reset();
+  if (present == TRUE)
+  {
+    ds.write(0x33);  //Send Read data command
+    data[0] = ds.read();
+    Serial.print("Family code: 0x");
+    PrintTwoDigitHex (data[0], 1);
+    Serial.print("Hex ROM data: ");
+    for (i = 1; i <= 6; i++)
+    {
+      data[i] = ds.read(); //store each byte in different position in array
+      PrintTwoDigitHex (data[i], 0);
+      Serial.print(" ");
+    }
+    Serial.println();
+    crc_byte = ds.read(); //read CRC, this is the last byte
+    crc_calc = OneWire::crc8(data, 7); //calculate CRC of the data
+    Serial.print("Calculated CRC: 0x");
+    PrintTwoDigitHex (crc_calc, 1);
+    Serial.print("Actual CRC: 0x");
+    PrintTwoDigitHex (crc_byte, 1);
+  }
+  else //Nothing is connected in the bus
+  {
+    Serial.println("xxxxx Nothing connected xxxxx");
+  }
+}
+
+
+void PrintTwoDigitHex (byte b, boolean newline)
+{
+  Serial.print(b/16, HEX);
+  Serial.print(b%16, HEX);
+  if (newline) Serial.println();
 }

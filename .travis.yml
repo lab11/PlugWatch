@@ -1,0 +1,21 @@
+sudo: false
+language: node_js
+
+addons:
+  apt:
+    packages:
+      - expect
+
+cache:
+  directories:
+    - "node_modules"
+    - "$HOME/bin"
+
+before_script:
+  - true #npm install -g particle-cli
+  - bash <( curl -sL https://particle.io/install-cli )
+  - export PATH="$PATH:$HOME/bin"
+
+script:
+  - ./.particle-cli-login.expect "$particle_email" "$particle_password" "$(which particle)"
+  - (pushd powerwatch/electron_rev_3/software && particle compile electron firmware/)

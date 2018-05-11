@@ -28,6 +28,7 @@ public:
   String getReading();
 
 private:
+  bool power_state_change_flag;
   void send();
   void sample();
   void periodic(bool force);

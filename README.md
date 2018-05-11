@@ -1,5 +1,7 @@
 # PlugWatch
 
+[![Build Status](https://travis-ci.org/lab11/PlugWatch.svg?branch=master)](https://travis-ci.org/lab11/PlugWatch)
+
 PlugWatch is part of the [GridWatch](http://grid.watch) project.
 
 Unlike GridWatch, PlugWatch is not designed to run on everyday phones, rather it uses dedicated

@@ -12,8 +12,14 @@ String do_meta_data() {
   CellularSignal sig = Cellular.RSSI();
   CellularBand band_avail;
   //String power_stats = String(FuelGauge().getSoC()) + String(DLIM) + String(FuelGauge().getVCell()) + String(DLIM) + String(powerCheck.getIsCharging());
+
+  //const char *addrStr = "8.8.8.8";
+
+  //boolean ok = CellularHelper.ping(addrStr);
+  //Serial.printlnf("ping addr %s=%d", addrStr, ok);
+
   // TODO Fix PowerCheck
-  String power_stats = String(FuelGauge().getSoC()) + String(DLIM) + String(FuelGauge().getVCell());
+  String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell());
 
   res = String(System.version().c_str());
   res = res + String(DLIM) + String(System.versionNumber());
