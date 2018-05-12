@@ -361,6 +361,48 @@ void setup() {
   Serial.println("Setup complete.");
 }
 
+// The loop will act as a state machine. Certain particle calls are called every
+// loop then states are executed in order. The following enumeration defines
+// the states. Each state has a timeout. On timeout we reset the Particle
+// and log that state as an error, moving on to the next state.
+enum SystemState {
+  CheckCloudEvent,
+  CheckTimeSync,
+  SenseChargeState,
+  SenseMPU,
+  SenseWiFi,
+  SenseTemp,
+  SenseCell,
+  SenseSDPresent,
+  SenseLight,
+  SenseWit,
+  SenseGPS,
+  LogPacket,
+  SendPacket,
+  LogError,
+  SendError,
+  Wait
+};
+
+enum SystemResult {
+  Busy,
+  Done,
+  Error
+};
+
+retained SystemState state = Wait;
+retained SystemState lastState = Wait;
+Timer stateTimer(60000,soft_watchdog_reset,true);
+void manageStateTimer(unsigned int period) {
+  if(state != lastState) {
+          stateTimer.stop();
+          stateTimer.changePeriod(period);
+          stateTimer.reset();
+          stateTimer.start();
+          lastState = state;
+  }
+}
+
 void loop() {
 
   if (System.updatesPending())
@@ -397,17 +439,148 @@ void loop() {
          once = true;
   }
 
-  SD.loop();
-  resetSubsystem.loop();
-  timeSyncSubsystem.loop();
-  heartbeatSubsystem.loop();
-  chargeStateSubsystem.loop();
-  imuSubsystem.loop();
-  lightSubsystem.loop();
-  nrfWitSubsystem.loop();
-  gpsSubsystem.loop();
-  wifiSubsystem.loop();
-  esp8266.loop();
+
+  switch(state) {
+  case CheckCloudEvent:
+  break;
+  case CheckTimeSync:
+    manageStateTimer(180000);
+
+    SystemResult result = timeSyncSubsystem.loop();
+
+    //return result or error
+    if(result == Error) {
+      //Log the error in the error struct
+    } else if(result == Done) {
+      //get the result from the charge state and put it into the system struct
+      state = SenseChargeState;
+    }
+  break;
+  case SenseChargeState:
+    //It should not take more than 1s to sense charge state
+    manageStateTimer(1000);
+
+    //Call the loop function for sensing charge state
+    SystemResult result = chargeStateSubsystem.loop();
+
+    //return result or error
+    if(result == Error) {
+      //Log the error in the error struct
+    } else if(result == Done) {
+      //get the result from the charge state and put it into the system struct
+      state = SenseMPU;
+    }
+  break;
+  case SenseMPU:
+    //It should not take more than 1s to check the IMU
+    manageStateTimer(1000);
+
+    SystemResult result = imuSubsystem.loop();
+
+    //return result or error
+    if(result == Error) {
+      //Log the error in the error struct
+    } else if(result == Done) {
+      //get the result from the charge state and put it into the system struct
+      state = SenseWiFi;
+    }
+  break;
+  case SenseWiFi:
+    //It might take a while to get all of the wifi SSIDs
+    manageStateTimer(20000);
+
+    SystemResult result = wifiSubsystem.loop();
+
+    //return result or error
+    if(result == Error) {
+      //Log the error in the error struct
+    } else if(result == Done) {
+      //get the result from the charge state and put it into the system struct
+      state = SenseTemp;
+    }
+  break;
+  case SenseTemp:
+    //temperature should not take more than 1s
+    manageStateTimer(1000);
+
+    SystemResult result = imuSubsystem.loop();
+
+    //return result or error
+    if(result == Error) {
+      //Log the error in the error struct
+    } else if(result == Done) {
+      //get the result from the charge state and put it into the system struct
+      state = SenseCell;
+    }
+  break;
+  case SenseCell:
+  break;
+  case SenseSDPresent:
+    //This should just be a GPIO pin
+    manageStateTimer(1000);
+
+    SystemResult result = SD.loop();
+
+    //return result or error
+    if(result == Error) {
+      //Log the error in the error struct
+    } else if(result == Done) {
+      //get the result from the charge state and put it into the system struct
+      state = SenseLight;
+    }
+  break;
+  case SenseLight:
+    manageStateTimer(1000);
+
+    SystemResult result = lightSubsystem.loop();
+
+    //return result or error
+    if(result == Error) {
+      //Log the error in the error struct
+    } else if(result == Done) {
+      //get the result from the charge state and put it into the system struct
+      state = SenseWit;
+    }
+  break;
+  case SenseWit:
+    //This requires scanning for an advertisement
+    manageStateTimer(5000);
+
+    SystemResult result = nrfWitSubsystem.loop();
+
+    //return result or error
+    if(result == Error) {
+      //Log the error in the error struct
+    } else if(result == Done) {
+      //get the result from the charge state and put it into the system struct
+      state = SenseGPS;
+    }
+  break;
+  case SenseGPS:
+    manageStateTimer(1000);
+    SystemResult result = gpsSubsystem.loop();
+
+    //return result or error
+    if(result == Error) {
+      //Log the error in the error struct
+    } else if(result == Done) {
+      //get the result from the charge state and put it into the system struct
+      state = SenseGPS;
+    }
+  break;
+  case LogPacket:
+  break;
+  case SendPacket:
+  break;
+  case LogError:
+  break;
+  case SendError:
+  break;
+  case Wait:
+  break;
+  }
+
+  //resetSubsystem.loop();
 
   //Call the automatic watchdog
   wd.checkin();
