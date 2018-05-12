@@ -16,7 +16,7 @@ class SDCard: public Subsystem {
 	const uint8_t SD_INT_PIN = D6;
 	const uint8_t SD_ENABLE_PIN = D5;
 	const uint8_t SD_CHIP_SELECT = A2;
-	
+
 	#define SCK A3
 	#define  MISO A4
 	#define MOSI A5
@@ -32,14 +32,8 @@ class SDCard: public Subsystem {
 	String read_filename = "";
 
 public:
-	explicit SDCard() :
-		Subsystem(*this, "sd_log.txt") {}
-
-	// Arduino setup
 	void setup();
-
-	// Arduino loop
-	void loop();
+	LoopStatus loop();
 
   /**
 	 * Power cycles SD Card. Blocking call.
@@ -49,8 +43,4 @@ public:
 	void Write(String filename, String to_write);
 
 	String Read(String filename);
-
-private:
-	String cloudFunctionName() { return "sd"; }
-	int cloudCommand(String command);
 };

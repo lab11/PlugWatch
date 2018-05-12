@@ -1,11 +1,13 @@
 #include <Particle.h>
 
 #include "Heartbeat.h"
-#include "FileLog.h"
 
-//Meta Data
+LoopStatus loop() {
+  (*count)++;
+  return FinishedSuccess;
+}
+
 String do_meta_data() {
-
   /*
   String res;
   uint32_t freemem = System.freeMemory();
@@ -35,21 +37,12 @@ String do_meta_data() {
   }
   return res;
   */
-  return "a";
+  return "<Heartbeat Metadata>";
 }
 
-String Heartbeat::getReading() {
-    (*count)++;
+String Heartbeat::getResult() {
     log.append("Heartbeat! Count: " + String(*count));
     String meta = do_meta_data();
     String message = String(*count)+String(DLIM)+String(meta);
     return(message);
-}
-
-int Heartbeat::cloudCommand(String command) {
-  if ((command == "gc") || (command == "get count")) {
-    return *count;
-  }
-
-  return super::cloudCommand(command);
 }

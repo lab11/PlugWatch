@@ -1,18 +1,16 @@
 #pragma once
 
+#include <set>
+
 #include <Particle.h>
 
-#include "FileLog.h"
-#include "SDCard.h"
 #include "Subsystem.h"
 
 #include "ESP8266.h"
 
-#include <set>
 
-
-class Wifi: public PeriodicSubsystem {
-  typedef PeriodicSubsystem super;
+class Wifi: public Subsystem {
+  typedef Subsystem super;
 
   ESP8266 esp8266;
   String* response;
@@ -22,21 +20,16 @@ class Wifi: public PeriodicSubsystem {
   bool force;
 
 public:
-  static const int DEFAULT_FREQ = 1000 * 30;  // 1 min
-
-  Wifi(SDCard &sd, ESP8266 &esp8266, int* frequency, String* response, bool* done):
-  PeriodicSubsystem(sd, "wifi_log", frequency),
+  Wifi(ESP8266 &esp8266, int* frequency, String* response, bool* done):
   esp8266 { esp8266 },
   response { response },
   done { done } {}
 
-  void loop();
+  LoopStatus loop();
+  String getResult();
 
 private:
   void periodic(bool force);
   void send(bool force);
   void construct_ssid_list();
-  String cloudFunctionName() { return "wf"; }
-
-  virtual int cloudCommand(String command);
 };

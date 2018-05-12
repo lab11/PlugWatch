@@ -11,7 +11,6 @@
 void SMS::setup() {
   super::setup();
 
-
   int atResult;
   log.debug("SMS Entering sms setup");
   uCmd.setDebug(false);
@@ -25,26 +24,13 @@ void SMS::setup() {
   deleteSMSOnStart();
 }
 
-
-
-void SMS::send(bool force) {
-  String message = "";
-  log.append(message);
-  Cloud::Publish(SMS_EVENT, message);
-}
-
-void SMS::periodic(bool force) {
-  log.append("SMS");
+LoopStatus SMS::loop() {
   if (smsAvailableFlag == 1) {
     smsRecvCheck();
     smsAvailableFlag = 0;
   }
+  return FinishedSuccess;
 }
-
-int SMS::cloudCommand(String command) {
-  return super::cloudCommand(command);
-}
-
 
 int SMS::sendSMS(const char* msg, const char* telNr) {
     if (smsSent <= smsLimit) {
