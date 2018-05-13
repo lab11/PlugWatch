@@ -136,7 +136,7 @@ class Reset: public Subsystem {
   // Defer this to the `loop` method so the cloud will get the ACK
   bool reset_flag = false;
 
-  String cloudFunctionName() { return "reset"; }
+  /*String cloudFunctionName() { return "reset"; }
   int cloudCommand(String command) {
     // Escape hatch if things are really borked
     if (command == "hard") {
@@ -144,19 +144,19 @@ class Reset: public Subsystem {
     }
     reset_flag = true;
     return 0;
-  }
+  }*/
 
 public:
-  void loop() {
+  LoopStatus loop() {
     super::loop();
     if (reset_flag) {
-      log.append("resetting");
+      //log.append("resetting");
       System.reset();
     }
   }
 };
 
-auto resetSubsystem = Reset(SD, "reset_log.txt");
+auto resetSubsystem = Reset();
 
 //***********************************
 //* Time Sync
@@ -170,78 +170,64 @@ class TimeSync: public Subsystem {
   typedef Subsystem super;
   using Subsystem::Subsystem;
 
-  String cloudFunctionName() { return "timeSync"; }
-  int cloudCommand(String command) {
-    if (command == "now") {
-      sync();
-    }
-    return 0;
-  }
-
   void sync() {
     if (! Particle.syncTimePending()) { // if not currently syncing
       unsigned long now = millis();
       unsigned long last = Particle.timeSyncedLast();
 
       if ((now - last) > TWELVE_HOURS) { // been a while
-        log.append("now " + String(now) + ", last sync " + String(last));
+        //log.append("now " + String(now) + ", last sync " + String(last));
         Particle.syncTime(); // kick off a sync
       }
     }
   }
 
 public:
-  void loop() {
+  LoopStatus loop() {
     sync();
+    return FinishedSuccess;
   }
 };
 
-auto timeSyncSubsystem = TimeSync(SD, "time_sync.txt");
+auto timeSyncSubsystem = TimeSync();
 
 //***********************************
 //* Heartbeat
 //***********************************
-retained int HEARTBEAT_FREQUENCY = Heartbeat::DEFAULT_FREQ;
 retained int HEARTBEAT_COUNT = 0;
-auto heartbeatSubsystem = Heartbeat(SD, &HEARTBEAT_FREQUENCY, &HEARTBEAT_COUNT);
+auto heartbeatSubsystem = Heartbeat(&HEARTBEAT_COUNT);
 
 //***********************************
 //* Charge state
 //***********************************
-retained int CHARGE_STATE_FREQUENCY = ChargeState::DEFAULT_FREQ;
-auto chargeStateSubsystem = ChargeState(SD, &CHARGE_STATE_FREQUENCY);
+auto chargeStateSubsystem = ChargeState();
 
 //***********************************
 //* IMU
 //***********************************
-retained int IMU_FREQUENCY = Imu::DEFAULT_FREQ;
-retained int IMU_SAMPLE_COUNT = Imu::DEFAULT_SAMPLE_COUNT;
-retained int IMU_SAMPLE_RATE = Imu::DEFAULT_SAMPLE_RATE_MS;
-auto imuSubsystem = Imu(SD, &IMU_FREQUENCY, &IMU_SAMPLE_COUNT, &IMU_SAMPLE_RATE);
+retained int IMU_MOTION_THRESHOLD = Imu::DEFAULT_MOTION_THRESHOLD;
+auto imuSubsystem = Imu(&IMU_MOTION_THRESHOLD);
 
 //***********************************
 //* LIGHT
 //***********************************
-retained int LIGHT_FREQUENCY = Light::DEFAULT_FREQ;
 retained float LIGHT_LUX = 0;
-auto lightSubsystem = Light(SD, &LIGHT_FREQUENCY, &LIGHT_LUX);
+auto lightSubsystem = Light(&LIGHT_LUX);
 
 //***********************************
 //* NrfWit
 //***********************************
-auto nrfWitSubsystem = NrfWit(SD);
+auto nrfWitSubsystem = NrfWit();
 
 //***********************************
 //* WIFI
 //***********************************
-retained int WIFI_FREQUENCY = Wifi::DEFAULT_FREQ;
-auto wifiSubsystem = Wifi(SD, esp8266, &WIFI_FREQUENCY, &serial5_response, &serial5_recv_done);
+auto wifiSubsystem = Wifi(esp8266, &serial5_response, &serial5_recv_done);
 
 //***********************************
 //* GPS
 //***********************************
-retained int GPS_FREQUENCY = Gps::DEFAULT_FREQ;
-auto gpsSubsystem = Gps(SD, &GPS_FREQUENCY);
+auto gpsSubsystem = Gps();
 
 // TODO: Look into this library
 //GoogleMapsDeviceLocator locator;
@@ -408,15 +394,15 @@ void manageStateTimer(unsigned int period) {
 //This structure is what all of the drivers will return. It will
 //be packetized and send to the cloud in the sendPacket state
 struct ResultStruct {
-    String* chargeStateResult;
-    String* mpuResult;
-    String* wifiResult;
-    String* tempResult;
-    String* cellResult;
-    String* sdStatusResult;
-    String* lightResult;
-    String* witResult;
-    String* gpsResult;
+    String chargeStateResult;
+    String mpuResult;
+    String wifiResult;
+    String tempResult;
+    String cellResult;
+    String sdStatusResult;
+    String lightResult;
+    String witResult;
+    String gpsResult;
 };
 
 ResultStruct sensingResults;
@@ -459,9 +445,11 @@ void loop() {
 
 
   switch(state) {
-  case CheckCloudEvent:
+  case CheckCloudEvent: {
+
+  }
   break;
-  case CheckTimeSync:
+  case CheckTimeSync: {
     manageStateTimer(180000);
 
     LoopStatus result = timeSyncSubsystem.loop();
@@ -473,8 +461,9 @@ void loop() {
       //get the result from the charge state and put it into the system struct
       state = SenseChargeState;
     }
+  }
   break;
-  case SenseChargeState:
+  case SenseChargeState: {
     //It should not take more than 1s to sense charge state
     manageStateTimer(1000);
 
@@ -486,11 +475,12 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
-      sensingResults.chargeStateResult = &chargeStateSubsystem.getResult();
+      sensingResults.chargeStateResult = chargeStateSubsystem.getResult();
       state = SenseMPU;
     }
+  }
   break;
-  case SenseMPU:
+  case SenseMPU: {
     //It should not take more than 1s to check the IMU
     manageStateTimer(1000);
 
@@ -501,11 +491,12 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
-      sensingResults.mpuResult = &imuSubsystem.getResult();
+      sensingResults.mpuResult = imuSubsystem.getResult();
       state = SenseWiFi;
     }
+  }
   break;
-  case SenseWiFi:
+  case SenseWiFi: {
     //It might take a while to get all of the wifi SSIDs
     manageStateTimer(20000);
 
@@ -516,11 +507,12 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
-      sensingResults.wifiResult = &wifiSubsystem.getResult();
+      sensingResults.wifiResult = wifiSubsystem.getResult();
       state = SenseTemp;
     }
+  }
   break;
-  case SenseTemp:
+  case SenseTemp: {
     //temperature should not take more than 1s
     manageStateTimer(1000);
 
@@ -531,13 +523,15 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
-      sensingResults.tempResult = &imuSubsystem.getResult();
+      sensingResults.tempResult = imuSubsystem.getResult();
       state = SenseCell;
     }
+  }
   break;
-  case SenseCell:
+  case SenseCell: {
+  }
   break;
-  case SenseSDPresent:
+  case SenseSDPresent: {
     //This should just be a GPIO pin
     manageStateTimer(1000);
 
@@ -548,11 +542,12 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
-      sensingResults.sdStatusResult = &SD.getResult();
+      sensingResults.sdStatusResult = SD.getResult();
       state = SenseLight;
     }
+  }
   break;
-  case SenseLight:
+  case SenseLight: {
     manageStateTimer(1000);
 
     LoopStatus result = lightSubsystem.loop();
@@ -562,11 +557,12 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
-      sensingResults.lightResult = &lightSubsystem.getResult();
+      sensingResults.lightResult = lightSubsystem.getResult();
       state = SenseWit;
     }
+  }
   break;
-  case SenseWit:
+  case SenseWit: {
     //This requires scanning for an advertisement
     manageStateTimer(5000);
 
@@ -577,11 +573,12 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
-      sensingResults.witResult = &nrfWitSubsystem.getResult();
+      sensingResults.witResult = nrfWitSubsystem.getResult();
       state = SenseGPS;
     }
+  }
   break;
-  case SenseGPS:
+  case SenseGPS: {
     manageStateTimer(1000);
     LoopStatus result = gpsSubsystem.loop();
 
@@ -590,9 +587,10 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
-      sensingResults.gpsResult = &gpsSubsystem.getResult();
+      sensingResults.gpsResult = gpsSubsystem.getResult();
       state = SenseGPS;
     }
+  }
   break;
   case LogPacket:
   break;
