@@ -18,7 +18,7 @@
 #include "Gps.h"
 #include "ESP8266.h"
 #include "Wifi.h"
-#include "Heartbeat.h"
+#include "CellStatus.h"
 #include "Imu.h"
 #include "Light.h"
 #include "NrfWit.h"
@@ -133,10 +133,9 @@ auto esp8266 = ESP8266(&serial5_response, &serial5_recv_done);
 auto timeSyncSubsystem = Timesync();
 
 //***********************************
-//* Heartbeat
+//* CellStatus
 //***********************************
-retained int HEARTBEAT_COUNT = 0;
-auto heartbeatSubsystem = Heartbeat(&HEARTBEAT_COUNT);
+auto cellStatus = CellStatus();
 
 //***********************************
 //* Charge state
@@ -237,7 +236,6 @@ void setup() {
   SD.setup();
 
   timeSyncSubsystem.setup();
-  heartbeatSubsystem.setup();
   chargeStateSubsystem.setup();
   imuSubsystem.setup();
   lightSubsystem.setup();
@@ -318,6 +316,40 @@ struct ResultStruct {
     String gpsResult;
 };
 
+// A function to clear all the fields of a resultStruct
+void clearResults(ResultStruct* r) {
+  r->chargeStateResult = "";
+  r->mpuResult = "";
+  r->wifiResult = "";
+  r->cellResult = "";
+  r->sdStatusResult = "";
+  r->lightResult = "";
+  r->witResult = "";
+  r->gpsResult = "";
+}
+
+// A function to take all of the resutl strings and concatenate them together
+String stringifyResults(ResultStruct r) {
+  String result = "";
+  result += r.chargeStateResult;
+  result += DLIM;
+  result += r.mpuResult;
+  result += DLIM;
+  result += r.wifiResult;
+  result += DLIM;
+  result += r.cellResult;
+  result += DLIM;
+  result += r.sdStatusResult;
+  result += DLIM;
+  result += r.lightResult;
+  result += DLIM;
+  result += r.witResult;
+  result += DLIM;
+  result += r.gpsResult;
+  result += '\n';
+  return result;
+}
+
 ResultStruct sensingResults;
 
 void loop() {
@@ -340,6 +372,8 @@ void loop() {
   }
 
   switch(state) {
+  int mill;
+
   case CheckCloudEvent: {
     manageStateTimer(120000);
 
@@ -452,6 +486,18 @@ void loop() {
   }
   break;
   case SenseCell: {
+    manageStateTimer(2000);
+
+    LoopStatus result = cellStatus.loop();
+
+    //return result or error
+    if(result == FinishedError) {
+      //Log the error in the error struct
+    } else if(result == FinishedSuccess) {
+      //get the result from the charge state and put it into the system struct
+      sensingResults.cellResult = cellStatus.getResult();
+      state = SenseSDPresent;
+    }
   }
   break;
   case SenseSDPresent: {
@@ -515,15 +561,41 @@ void loop() {
     }
   }
   break;
-  case LogPacket:
+  case LogPacket: {
+    manageStateTimer(10000);
+
+    String packet = stringifyResults(sensingResults);
+    DataLog.append(packet);
+    state = SendPacket;
+  }
   break;
-  case SendPacket:
+  case SendPacket: {
+    manageStateTimer(10000);
+
+    String packet = stringifyResults(sensingResults);
+    Cloud::Publish("g",packet);
+    state = LogError;
+  }
   break;
-  case LogError:
+  case LogError: {
+    manageStateTimer(10000);
+    state = SendError;
+  }
   break;
-  case SendError:
+  case SendError: {
+    manageStateTimer(10000);
+    state = Wait;
+    mill = millis();
+  }
   break;
-  case Wait:
+  case Wait: {
+    manageStateTimer(120000);
+
+    if(millis() - mill > 60000) {
+      clearResults(&sensingResults);
+      state = CheckCloudEvent;
+    }
+  }
   break;
   }
 
