@@ -24,6 +24,7 @@
 #include "NrfWit.h"
 #include "SDCard.h"
 #include "Subsystem.h"
+#include "Timesync.h"
 #include "firmware.h"
 #include "OneWire.h"
 
@@ -127,69 +128,9 @@ bool serial5_recv_done;
 auto esp8266 = ESP8266(&serial5_response, &serial5_recv_done);
 
 //***********************************
-//* Reset Monitor
+//* Timesync
 //***********************************
-class Reset: public Subsystem {
-  typedef Subsystem super;
-  using Subsystem::Subsystem;
-
-  // Defer this to the `loop` method so the cloud will get the ACK
-  bool reset_flag = false;
-
-  /*String cloudFunctionName() { return "reset"; }
-  int cloudCommand(String command) {
-    // Escape hatch if things are really borked
-    if (command == "hard") {
-      System.reset();
-    }
-    reset_flag = true;
-    return 0;
-  }*/
-
-public:
-  LoopStatus loop() {
-    super::loop();
-    if (reset_flag) {
-      //log.append("resetting");
-      System.reset();
-    }
-  }
-};
-
-auto resetSubsystem = Reset();
-
-//***********************************
-//* Time Sync
-//*
-//* Particle synchronizes its clock when it first connects. Over time, it will
-//* drift away from real time. This routine will re-sync local time.
-//***********************************
-const int TWELVE_HOURS = 1000 * 60 * 60 * 12;
-
-class TimeSync: public Subsystem {
-  typedef Subsystem super;
-  using Subsystem::Subsystem;
-
-  void sync() {
-    if (! Particle.syncTimePending()) { // if not currently syncing
-      unsigned long now = millis();
-      unsigned long last = Particle.timeSyncedLast();
-
-      if ((now - last) > TWELVE_HOURS) { // been a while
-        //log.append("now " + String(now) + ", last sync " + String(last));
-        Particle.syncTime(); // kick off a sync
-      }
-    }
-  }
-
-public:
-  LoopStatus loop() {
-    sync();
-    return FinishedSuccess;
-  }
-};
-
-auto timeSyncSubsystem = TimeSync();
+auto timeSyncSubsystem = Timesync();
 
 //***********************************
 //* Heartbeat
@@ -328,7 +269,6 @@ void setup() {
 
   system_events_setup();
 
-  resetSubsystem.setup();
   timeSyncSubsystem.setup();
   heartbeatSubsystem.setup();
   chargeStateSubsystem.setup();
@@ -603,8 +543,6 @@ void loop() {
   case Wait:
   break;
   }
-
-  //resetSubsystem.loop();
 
   //Call the automatic watchdog
   wd.checkin();
