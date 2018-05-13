@@ -2,6 +2,7 @@
 
 #include <Particle.h>
 
+#include "FileLog.h"
 #include "Subsystem.h"
 
 /* Checks charging state at `frequency`. Publishes every change. */
@@ -11,7 +12,7 @@ class ChargeState: public Subsystem {
   String result;
 
 public:
-  ChargeState() : { eventTag = CHARGE_STATE_EVENT; }
+  ChargeState();
 
   const String CHARGE_STATE_BATTERY = "b";
   const String CHARGE_STATE_WALL = "w";

@@ -16,8 +16,6 @@ LoopStatus ChargeState::loop() {
   String power_stats = String(FuelGauge().getSoC()) + String(DLIM)
   + String(FuelGauge().getVCell()) + String(DLIM)
   + String(powerCheck.getIsCharging());
-  // XXXX we don't actually set message anywhere currently
-  // return(message + String(DLIM) + power_stats);
 
   result = power_stats;
 }
