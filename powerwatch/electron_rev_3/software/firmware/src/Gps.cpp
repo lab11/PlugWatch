@@ -2,40 +2,30 @@
 #include "AssetTracker.h"
 
 #include "Gps.h"
-#include "Subsystem.h"
-#include "Cloud.h"
 
 AssetTracker t = AssetTracker();
 
 void Gps::setup() {
   super::setup();
 
-  // GPS setup here
+  // GPS-specifc setup here
   t.begin();
   t.gpsOn();
 }
 
-void Gps::periodic(bool force) {
-  // GPS periodic operation here
+LoopStatus Gps::loop() {
+  //log.debug("Gps::getReading() called");
   t.updateGPS();
-
-}
-
-int Gps::cloudCommand(String command) {
-  if ((command == "gps") || (command == "get gps")) {
-      send(true);
-  }
-  return super::cloudCommand(command);
-}
-
-void Gps::send(bool force) {
   String message = "-1";
   if (t.gpsFix()) {
       message = t.readLatLon();
   }
-  if (force) {
-    message = "F|" + message;
-  }
-  log.append(message);
-  Cloud::Publish(GPS_EVENT, message);
+  //log.debug("Gps::getReading() done and message set to: " + message);
+  this->result = message;
+
+  return FinishedSuccess;
+}
+
+String Gps::getResult() {
+  return this->result;
 }

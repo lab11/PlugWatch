@@ -12,7 +12,7 @@ void SDCard::setup() {
   pinMode(SD_INT_PIN, INPUT);
 }
 
-void SDCard::loop() {
+LoopStatus SDCard::loop() {
   super::loop();
 
   if (power_cycle_flag) {
@@ -20,7 +20,7 @@ void SDCard::loop() {
     PowerCycle();
 
     // Power cycling is slow, so don't do anything else this loop, let others go
-    return;
+    return FinishedSuccess;
   }
 
   if (read_filename != "") {
@@ -31,20 +31,8 @@ void SDCard::loop() {
 
     Cloud::Publish(SD_READ_EVENT,sd_res);
   }
-}
 
-int SDCard::cloudCommand(String command) {
-  if ((command == "cycle") || (command == "reboot")) {
-    power_cycle_flag = true;
-    return 0;
-  }
-  if (command.startsWith("read ")) {
-    read_filename = command.substring(5);
-    //TODO read the file
-    return 0;
-  }
-
-  return -1;
+  return FinishedSuccess;
 }
 
 void SDCard::PowerCycle() {

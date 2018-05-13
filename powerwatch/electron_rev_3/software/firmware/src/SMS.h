@@ -7,8 +7,8 @@
 #include "Subsystem.h"
 #include "uCommand.h"
 
-class SMS: public PeriodicSubsystem {
-  typedef PeriodicSubsystem super;
+class SMS: public Subsystem {
+  typedef Subsystem super;
 
   //TODO make cloud setable
   String alertNumber = "+4136588407";
@@ -23,23 +23,14 @@ class SMS: public PeriodicSubsystem {
   int smsAvailableFlag = 0;
 
 public:
-  static const int DEFAULT_FREQ = 1000 * 60 * 1;  // 1 min
-
   void setup();
+  LoopStatus loop();
+
   void smsRecvFlag(void* data, int index);
 
-  SMS(SDCard &sd, int* frequency) :
-    PeriodicSubsystem(sd, "sms_log", frequency) {}
-
 private:
-  void periodic(bool force);
-  void send(bool force);
-  String cloudFunctionName() { return "sms"; }
-
   int sendSMS(const char* msg, const char* telNr);
   int processMessage(String messageText, String phoneReturn);
   void smsRecvCheck();
   void deleteSMSOnStart();
-
-  virtual int cloudCommand(String command);
 };

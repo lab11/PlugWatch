@@ -1,28 +1,14 @@
 #include <Particle.h>
 
-#include "Cloud.h"
 #include "Light.h"
-#include "FileLog.h"
 
-void Light::send(bool force) {
-  String message = String(*lux);
-  if (force) {
-    message = "F|" + message;
-  }
-  log.append(message);
-  Cloud::Publish(LIGHT_EVENT, message);
-}
-
-void Light::periodic(bool force) {
+LoopStatus loop() {
   *lux = light_sensor.getLux();
-  log.append("Lux: " + String(*lux));
-  send(force);
+  return FinishedSuccess;
 }
 
-int Light::cloudCommand(String command) {
-  if ((command == "gl") || (command == "get light")) {
-    return *lux;
-  }
-
-  return super::cloudCommand(command);
+String Light::getReading() {
+  String message = String(*lux);
+  //log.append("Light! Lux: " + message);
+  return(message);
 }
