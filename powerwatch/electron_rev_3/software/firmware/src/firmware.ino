@@ -170,29 +170,13 @@ auto wifiSubsystem = Wifi(esp8266, &serial5_response, &serial5_recv_done);
 //***********************************
 auto gpsSubsystem = Gps();
 
-// TODO: Look into this library
-//GoogleMapsDeviceLocator locator;
-
-
- //***********************************
- //* CLOUD FUNCTIONS
- //***********************************
- // Legacy functions
- int get_soc(String c) { //cloudfunction
-     return (int)(FuelGauge().getSoC());
- }
-
- int get_battv(String c) { //cloudfunction
-     return (int)(100 * FuelGauge().getVCell());
- }
-
-
 //***********************************
 //* System Events
 //***********************************
 // Not sure if we want to do anything with these in the long run, but for now
 // just keep track of everything that happens
 auto EventLog = FileLog(SD, "event_log.txt");
+auto DataLog = FileLog(SD, "data_log.txt");
 
 // String SYSTEM_EVENT = "s";
 retained int system_event_count = 0;
@@ -201,14 +185,6 @@ retained int last_system_event_type = -999;
 retained int num_reboots = 0;
 retained int num_manual_reboots = 0;
 
-void system_events_setup() {
-  Particle.variable("d", system_event_count);
-  Particle.variable("e", last_system_event_time);
-  Particle.variable("f", last_system_event_type);
-  Particle.variable("m", num_manual_reboots);
-  Particle.variable("w", num_reboots);
-}
-
 void handle_all_system_events(system_event_t event, int param) {
   system_event_count++;
   Serial.printlnf("got event %d with value %d", event, param);
@@ -216,13 +192,13 @@ void handle_all_system_events(system_event_t event, int param) {
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
   last_system_event_time = time_str;
   last_system_event_type = param;
-  Cloud::Publish(SYSTEM_EVENT, system_event_str);
   EventLog.append(system_event_str);
 }
 
 void system_reset_to_safemode() {
   num_manual_reboots++;
-  Cloud::Publish(SYSTEM_EVENT, "manual reboot"); //TODO test if this hangs
+  // Commenting out this should be logged as a system event
+  // Cloud::Publish(SYSTEM_EVENT, "manual reboot"); //TODO test if this hangs
   System.enterSafeMode();
 }
 
@@ -239,12 +215,7 @@ void setup() {
   //   System.enterSafeMode();
   // }
 
-  // Some legacy bits that I'm not sure what we want to do with
-  num_reboots++;
-  Particle.variable("r", num_reboots);
-  Particle.variable("v", String(System.version().c_str()));
-  Particle.function("soc",get_soc);
-  Particle.function("battv",get_battv);
+  //This function tells the particle to force a reconnect with the cloud
   Particle.function("handshake", force_handshake);
 
   // Set up debugging UART
@@ -258,16 +229,12 @@ void setup() {
   // https://docs.particle.io/reference/firmware/photon/#system-events
   System.on(all_events, handle_all_system_events);
 
-
   // Get the reset button going
   pinMode(reset_btn, INPUT);
   attachInterrupt(reset_btn, system_reset_to_safemode, RISING, 3);
 
-
   // Setup SD card first so that other setups can log
   SD.setup();
-
-  system_events_setup();
 
   timeSyncSubsystem.setup();
   heartbeatSubsystem.setup();
@@ -297,7 +264,6 @@ enum SystemState {
   SenseChargeState,
   SenseMPU,
   SenseWiFi,
-  SenseTemp,
   SenseCell,
   SenseSDPresent,
   SenseLight,
@@ -309,6 +275,14 @@ enum SystemState {
   SendError,
   Wait
 };
+
+enum ParticleCloudState {
+  ConnectionCheck,
+  UpdateCheck,
+  HandshakeCheck
+};
+
+ParticleCloudState cloudState = ConnectionCheck;
 
 //Retained system states are used to diagnose restarts (error vs hard reset)
 retained SystemState state = Wait;
@@ -337,7 +311,6 @@ struct ResultStruct {
     String chargeStateResult;
     String mpuResult;
     String wifiResult;
-    String tempResult;
     String cellResult;
     String sdStatusResult;
     String lightResult;
@@ -348,45 +321,71 @@ struct ResultStruct {
 ResultStruct sensingResults;
 
 void loop() {
-
-  if (System.updatesPending())
-  {
-    int ms = millis();
-    while(millis()-ms < 60000) Particle.process();
-  }
-
-  if (handshake_flag) {
-  handshake_flag = false;
-  Particle.publish("spark/device/session/end", "", PRIVATE);
-  }
-
-
   // Allow particle to do any processing
   // https://docs.particle.io/reference/firmware/photon/#manual-mode
+
+  // This is the only thing that will happen outside of the state machine!
+  // Everything else, including reconnection attempts and cloud update Checks
+  // Should happen in the cloud event state
+  static bool once = false;
   if (Particle.connected()) {
     Particle.process();
-  } else {
-    // Don't attempt to connect too frequently as connection attempts hang MY_DEVICES
-    static int last_connect_time = 0;
-    const int connect_interval_sec = 60;
-    int now = Time.now(); // unix time
 
-    if ((last_connect_time == 0) || (now-last_connect_time > connect_interval_sec)) {
-      last_connect_time = now;
-      Particle.connect();
+    // We need to set up the keepalive the first time the particle becomes
+    // connected
+    if(!once) {
+        Particle.keepAlive(30); // send a ping every 30 seconds
+        once = true;
     }
   }
 
-  static bool once = false;
-  if (!once && Particle.connected()) {
-         Particle.keepAlive(30); // send a ping every 30 seconds
-         once = true;
-  }
-
-
   switch(state) {
   case CheckCloudEvent: {
+    manageStateTimer(120000);
 
+    switch(cloudState) {
+    int ms;
+    case ConnectionCheck: {
+      //Check if we have a connection - if it's been a whiel attempt to reconnect
+      if(!Particle.connected()) {
+        // Don't attempt to connect too frequently as connection attempts hang MY_DEVICES
+        static int last_connect_time = 0;
+        const int connect_interval_sec = 60;
+        int now = Time.now(); // unix time
+
+        if ((last_connect_time == 0) || (now-last_connect_time > connect_interval_sec)) {
+          last_connect_time = now;
+          Particle.connect();
+        }
+      }
+      cloudState = UpdateCheck;
+      ms = millis();
+    }
+    break;
+    case UpdateCheck: {
+      if (System.updatesPending())
+      {
+        //Spend a minute just trying to fetch the update
+        if(millis() - ms < 60000) {
+          Particle.process();
+        } else {
+          cloudState = HandshakeCheck;
+        }
+      } else {
+        cloudState = HandshakeCheck;
+      }
+    }
+    break;
+    case HandshakeCheck: {
+      if (handshake_flag) {
+        handshake_flag = false;
+        Particle.publish("spark/device/session/end", "", PRIVATE);
+      }
+      cloudState = ConnectionCheck;
+      state = CheckTimeSync;
+    }
+    break;
+    }
   }
   break;
   case CheckTimeSync: {
@@ -448,22 +447,6 @@ void loop() {
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
       sensingResults.wifiResult = wifiSubsystem.getResult();
-      state = SenseTemp;
-    }
-  }
-  break;
-  case SenseTemp: {
-    //temperature should not take more than 1s
-    manageStateTimer(1000);
-
-    LoopStatus result = imuSubsystem.loop();
-
-    //return result or error
-    if(result == FinishedError) {
-      //Log the error in the error struct
-    } else if(result == FinishedSuccess) {
-      //get the result from the charge state and put it into the system struct
-      sensingResults.tempResult = imuSubsystem.getResult();
       state = SenseCell;
     }
   }
