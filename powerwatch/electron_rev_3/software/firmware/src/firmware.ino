@@ -384,9 +384,17 @@ enum SystemState {
   Wait
 };
 
+//Retained system states are used to diagnose restarts (error vs hard reset)
 retained SystemState state = Wait;
 retained SystemState lastState = Wait;
+
+//State Timer is reused to make sure a state doesn't loop for too long.
+//If it loops for too long we just call a reset. This can get us out of
+//liveness bugs in a specific driver
 Timer stateTimer(60000,soft_watchdog_reset,true);
+
+//Before calling each state's loop function the state should call this
+//function with a period of the maximum time the state is allowed to take
 void manageStateTimer(unsigned int period) {
   if(state != lastState) {
           stateTimer.stop();
@@ -396,6 +404,22 @@ void manageStateTimer(unsigned int period) {
           lastState = state;
   }
 }
+
+//This structure is what all of the drivers will return. It will
+//be packetized and send to the cloud in the sendPacket state
+struct ResultStruct {
+    String* chargeStateResult;
+    String* mpuResult;
+    String* wifiResult;
+    String* tempResult;
+    String* cellResult;
+    String* sdStatusResult;
+    String* lightResult;
+    String* witResult;
+    String* gpsResult;
+};
+
+ResultStruct sensingResults;
 
 void loop() {
 
@@ -462,6 +486,7 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
+      sensingResults.chargeStateResult = &chargeStateSubsystem.getResult();
       state = SenseMPU;
     }
   break;
@@ -476,6 +501,7 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
+      sensingResults.mpuResult = &imuSubsystem.getResult();
       state = SenseWiFi;
     }
   break;
@@ -490,6 +516,7 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
+      sensingResults.wifiResult = &wifiSubsystem.getResult();
       state = SenseTemp;
     }
   break;
@@ -504,6 +531,7 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
+      sensingResults.tempResult = &imuSubsystem.getResult();
       state = SenseCell;
     }
   break;
@@ -520,6 +548,7 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
+      sensingResults.sdStatusResult = &SD.getResult();
       state = SenseLight;
     }
   break;
@@ -533,6 +562,7 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
+      sensingResults.lightResult = &lightSubsystem.getResult();
       state = SenseWit;
     }
   break;
@@ -547,6 +577,7 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
+      sensingResults.witResult = &nrfWitSubsystem.getResult();
       state = SenseGPS;
     }
   break;
@@ -559,6 +590,7 @@ void loop() {
       //Log the error in the error struct
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
+      sensingResults.gpsResult = &gpsSubsystem.getResult();
       state = SenseGPS;
     }
   break;
