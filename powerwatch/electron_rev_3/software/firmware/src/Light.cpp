@@ -2,13 +2,12 @@
 
 #include "Light.h"
 
-LoopStatus loop() {
+LoopStatus Light::loop() {
   *lux = light_sensor.getLux();
   return FinishedSuccess;
 }
 
-String Light::getReading() {
-  String message = String(*lux);
-  //log.append("Light! Lux: " + message);
-  return(message);
+String Light::getResult() {
+  result = String(*lux);
+  return(result);
 }
