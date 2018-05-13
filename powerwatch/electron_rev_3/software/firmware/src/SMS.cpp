@@ -12,14 +12,14 @@ void SMS::setup() {
   super::setup();
 
   int atResult;
-  log.debug("SMS Entering sms setup");
+  //log.debug("SMS Entering sms setup");
   uCmd.setDebug(false);
 
   atResult = uCmd.setSMSMode(1);
   if(atResult == RESP_OK) {
-      log.debug("SMS Text mode setup okay");
+      //log.debug("SMS Text mode setup okay");
   } else {
-      log.debug("SMS Did not set up SMS mode");
+      //log.debug("SMS Did not set up SMS mode");
   }
   deleteSMSOnStart();
 }
@@ -56,11 +56,11 @@ int SMS::sendSMS(const char* msg, const char* telNr) {
             switch (ret)
             {
                 case WAIT:
-                  log.debug("SMS Waiting");
+                  //log.debug("SMS Waiting");
                 case RESP_OK:
                   break;
                 default:
-                  log.debug("SMS Message not sent");
+                  //log.debug("SMS Message not sent");
                   break;
             }
 
@@ -191,7 +191,7 @@ int SMS::processMessage(String messageText, String phoneReturn)
     //A particle publish message limit is (up to 255 bytes) - so let's limit by the same SMS character limit - minus 2 to be over safe again.
     if (messageText.length() > 158)
     {
-        log.debug("Some muppet sent this to us: " + messageText);
+        //log.debug("Some muppet sent this to us: " + messageText);
     }
     //If the message text is too long, just return and do nothing
     return 0;

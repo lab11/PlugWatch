@@ -2,6 +2,7 @@
 
 #include <Particle.h>
 
+#include "FileLog.h"
 #include "Subsystem.h"
 
 class Heartbeat: public Subsystem {

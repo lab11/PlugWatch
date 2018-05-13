@@ -2,7 +2,7 @@
 
 #include "Heartbeat.h"
 
-LoopStatus loop() {
+LoopStatus Heartbeat::loop() {
   (*count)++;
   return FinishedSuccess;
 }
@@ -41,7 +41,7 @@ String do_meta_data() {
 }
 
 String Heartbeat::getResult() {
-    log.append("Heartbeat! Count: " + String(*count));
+    //log.append("Heartbeat! Count: " + String(*count));
     String meta = do_meta_data();
     String message = String(*count)+String(DLIM)+String(meta);
     return(message);

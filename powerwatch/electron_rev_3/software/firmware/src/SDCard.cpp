@@ -24,7 +24,7 @@ LoopStatus SDCard::loop() {
   }
 
   if (read_filename != "") {
-    log.append("Read " + read_filename);
+    //log.append("Read " + read_filename);
 
     String sd_res = Read(read_filename);
     read_filename = "";
@@ -36,7 +36,7 @@ LoopStatus SDCard::loop() {
 }
 
 void SDCard::PowerCycle() {
-  log.debug("power cycle SD");
+  //log.debug("power cycle SD");
 	digitalWrite(SD_ENABLE_PIN, HIGH);
 	delay(1000);
 	digitalWrite(SD_ENABLE_PIN, LOW);
@@ -82,7 +82,7 @@ void SDCard::Write(String filename, String to_write) {
 }
 
 String SDCard::Read(String filename) {
-  log.debug("read begin: " + filename);
+  //log.debug("read begin: " + filename);
 	File myFile;
 	if (!myFile.open(filename, O_READ)) {
 		//sd.errorHalt(String("opening ") + String(filename) + String(" for read failed"));

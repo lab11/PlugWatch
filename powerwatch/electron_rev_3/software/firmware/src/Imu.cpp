@@ -5,17 +5,13 @@
 #include <quaternionFilters.h>
 
 #include "Imu.h"
+#include "FileLog.h"
 
 void Imu::setup() {
   super::setup();
 
   // TODO: Report error if this fails and don't try to use IMU in this session
   self_test_str = self_test();
-}
-
-void Imu::periodic(bool force) {
-  // TODO: Make this work. Will crash if you try to sample now.
-  //start_sampling();
 }
 
 void Imu::start_sampling() {
@@ -26,7 +22,7 @@ void Imu::start_sampling() {
   }
 }
 
-void Imu::loop() {
+LoopStatus Imu::loop() {
   super::loop();
 
   if (sample_flag) {
@@ -37,7 +33,7 @@ void Imu::loop() {
 
       Serial.println("ending sample");
       Serial.println(sample_buffer);
-      log.append(sample_buffer);
+      //log.append(sample_buffer);
       sample_buffer = "";
     } else {
       current_count += 1;
@@ -84,7 +80,7 @@ String Imu::self_test() {
      ak_st += String(myIMU.magCalibration[2]);
    } // if (c == 0x71)
    else {
-     log.error("Could not connect to MPU9250: 0x" + String(c, HEX));
+     //log.error("Could not connect to MPU9250: 0x" + String(c, HEX));
    }
    return imu_st + "\n" + ak_st;
  }
@@ -171,4 +167,8 @@ String Imu::do_sample() {
     myIMU.count = millis();
   }
   return imu;
+}
+
+String Imu::getResult() {
+    return result;
 }

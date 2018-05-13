@@ -20,6 +20,8 @@ class Imu: public Subsystem {
   String sample_buffer;
   int current_count;
 
+  String result;
+
 public:
   Imu(int* sample_count, int* sample_rate) :
     Subsystem(),
@@ -29,6 +31,7 @@ public:
 
   void setup();
   LoopStatus loop();
+  String getResult();
 
   String self_test();
 
