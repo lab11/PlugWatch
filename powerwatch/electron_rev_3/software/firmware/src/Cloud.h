@@ -40,6 +40,5 @@
 
 class Cloud {
 public:
-  static void setup();
-  static void Publish(String tag, String message);
+  static bool Publish(String tag, String message);
 };
