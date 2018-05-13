@@ -14,7 +14,9 @@ class Audio: public Subsystem {
 public:
   Audio(float* hz_and_mag) :
     hz_and_mag { hz_and_mag }
-    { audio_sensor.init(); eventTag = AUDIO_EVENT; }
-
-  String getReading();
+    { audio_sensor.init(); }
+ 
+  void setup();
+  LoopStatus loop();
+  String getResult();
 };

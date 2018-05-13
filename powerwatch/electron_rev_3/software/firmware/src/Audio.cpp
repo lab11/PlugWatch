@@ -2,12 +2,15 @@
 
 #include "Audio.h"
 
-String Audio::getReading() {
+void Audio::setup() {
+
+}
+
+LoopStatus Audio::loop() {
+
+}
+
+String Audio::getResult() {
   //TODO
-  /*
-  *hz_and_mag = audio_sensor.getHzMag();
-  log.append("Audio! Hz: " + String(*hz_and_mag));
-  send(force);
-  */
   return(String(*hz_and_mag));
 }
