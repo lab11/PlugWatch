@@ -18,7 +18,6 @@ void Imu::start_sampling() {
   if (!sampling) {
     sampling = true;
     current_count = 0;
-    sample_timer.start();
   }
 }
 
@@ -28,23 +27,18 @@ LoopStatus Imu::loop() {
   if (sample_flag) {
     sample_flag = false;
 
-    if (current_count >= *sample_count) {
+    /*if (current_count >= *sample_count) {
       sample_timer.stop();
 
       Serial.println("ending sample");
       Serial.println(sample_buffer);
-      //log.append(sample_buffer);
       sample_buffer = "";
     } else {
       current_count += 1;
       String res = do_sample();
       sample_buffer = String(sample_buffer) + String(res) + String("\n");
-    }
+    }*/
   }
-}
-
-void Imu::sampleTimerCallback() {
-  sample_flag = true;
 }
 
 String Imu::self_test() {

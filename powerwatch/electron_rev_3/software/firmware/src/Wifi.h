@@ -20,7 +20,7 @@ class Wifi: public Subsystem {
   bool force;
 
 public:
-  Wifi(ESP8266 &esp8266, int* frequency, String* response, bool* done):
+  Wifi(ESP8266 &esp8266, String* response, bool* done):
   esp8266 { esp8266 },
   response { response },
   done { done } {}

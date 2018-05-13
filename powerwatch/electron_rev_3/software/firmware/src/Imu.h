@@ -11,10 +11,8 @@ class Imu: public Subsystem {
 
   MPU9250 myIMU;
   String self_test_str;
-
-  int* sample_count;
-  int* sample_rate;
-  Timer sample_timer;
+  
+  int* motion_threshold;
   bool sampling = false;
   bool sample_flag = false;
   String sample_buffer;
@@ -23,11 +21,11 @@ class Imu: public Subsystem {
   String result;
 
 public:
-  Imu(int* sample_count, int* sample_rate) :
+  static const int DEFAULT_MOTION_THRESHOLD = 0.1; //0.1g motion threshold
+   
+  Imu(int* motion_threshold) :
     Subsystem(),
-    sample_count { sample_count },
-    sample_rate { sample_rate },
-    sample_timer { Timer(*sample_rate, &Imu::sampleTimerCallback, *this) } {}
+    motion_threshold { motion_threshold } {}
 
   void setup();
   LoopStatus loop();
