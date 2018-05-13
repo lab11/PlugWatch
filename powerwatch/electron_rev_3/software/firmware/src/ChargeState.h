@@ -12,8 +12,6 @@ class ChargeState: public Subsystem {
   String result;
 
 public:
-  ChargeState();
-
   const String CHARGE_STATE_BATTERY = "b";
   const String CHARGE_STATE_WALL = "w";
 
