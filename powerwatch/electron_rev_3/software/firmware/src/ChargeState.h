@@ -18,5 +18,5 @@ public:
 
   void setup();
   LoopStatus loop();
-  String getReading();
+  String getResult();
 };

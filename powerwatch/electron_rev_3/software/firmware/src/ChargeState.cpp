@@ -22,6 +22,6 @@ LoopStatus ChargeState::loop() {
   result = power_stats;
 }
 
-String getResult() {
+String ChargeState::getResult() {
   return result;
 }
