@@ -378,7 +378,7 @@ void loop() {
       manageStateTimer(120000);
 
       switch(cloudState) {
-        int ms;
+        int particle_connect_time;
 
         case ConnectionCheck: {
           //Check if we have a connection - if it's been a while attempt to reconnect
@@ -394,14 +394,14 @@ void loop() {
             }
           }
           cloudState = UpdateCheck;
-          ms = millis();
+          particle_connect_time = millis();
           break;
         }
 
         case UpdateCheck: {
           if (System.updatesPending()) {
             //Spend a minute just trying to fetch the update
-            if(millis() - ms < 60000) {
+            if(millis() - particle_connect_time < 60000) {
               Particle.process();
             } else {
               cloudState = HandshakeCheck;
