@@ -171,9 +171,12 @@ auto gpsSubsystem = Gps();
 //***********************************
 //* System Events
 //***********************************
-// Not sure if we want to do anything with these in the long run, but for now
-// just keep track of everything that happens
 auto EventLog = FileLog(SD, "event_log.txt");
+std::queue<String> EventQueue;
+
+//***********************************
+//* System Data
+//***********************************
 auto DataLog = FileLog(SD, "data_log.txt");
 
 // String SYSTEM_EVENT = "s";
@@ -190,7 +193,9 @@ void handle_all_system_events(system_event_t event, int param) {
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
   last_system_event_time = time_str;
   last_system_event_type = param;
-  EventLog.append(system_event_str);
+
+  //Push this system event onto the queue to be logged in the error logging state
+  EventQueue.push(system_event_str);
 }
 
 void system_reset_to_safemode() {
@@ -237,10 +242,10 @@ void setup() {
   timeSyncSubsystem.setup();
   chargeStateSubsystem.setup();
   //imuSubsystem.setup();
-  //lightSubsystem.setup();
+  lightSubsystem.setup();
   //nrfWitSubsystem.setup();
-  //gpsSubsystem.setup();
-  //wifiSubsystem.setup();
+  gpsSubsystem.setup();
+  wifiSubsystem.setup();
   FuelGauge().quickStart();
 
   LEDStatus status;
@@ -332,19 +337,19 @@ void clearResults(ResultStruct* r) {
 String stringifyResults(ResultStruct r) {
   String result = "";
   result += r.chargeStateResult;
-  result += DLIM;
+  result += MAJOR_DLIM;
   result += r.mpuResult;
-  result += DLIM;
+  result += MAJOR_DLIM;
   result += r.wifiResult;
-  result += DLIM;
+  result += MAJOR_DLIM;
   result += r.cellResult;
-  result += DLIM;
+  result += MAJOR_DLIM;
   result += r.sdStatusResult;
-  result += DLIM;
+  result += MAJOR_DLIM;
   result += r.lightResult;
-  result += DLIM;
+  result += MAJOR_DLIM;
   result += r.witResult;
-  result += DLIM;
+  result += MAJOR_DLIM;
   result += r.gpsResult;
   result += '\n';
   return result;
@@ -451,7 +456,7 @@ void loop() {
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.chargeStateResult = chargeStateSubsystem.getResult();
-        state = SenseMPU;
+        state = SenseWiFi;
       }
       break;
     }
@@ -501,7 +506,7 @@ void loop() {
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.cellResult = cellStatus.getResult();
-        state = SenseSDPresent;
+        state = SenseLight;
       }
       break;
     }
@@ -534,7 +539,7 @@ void loop() {
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.lightResult = lightSubsystem.getResult();
-        state = SenseWit;
+        state = SenseGPS;
       }
       break;
     }
@@ -566,13 +571,15 @@ void loop() {
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.gpsResult = gpsSubsystem.getResult();
-        state = SenseGPS;
+        state = LogPacket;
       }
       break;
     }
 
     case LogPacket: {
       manageStateTimer(10000);
+
+      SD.PowerCycle();
 
       String packet = stringifyResults(sensingResults);
       DataLog.append(packet);
@@ -591,7 +598,16 @@ void loop() {
 
     case LogError: {
       manageStateTimer(10000);
-      state = SendError;
+
+      SD.PowerCycle();
+
+      if(!EventQueue.empty()) {
+        EventLog.append(EventQueue.front());
+        EventQueue.pop();
+      } else {
+        state = SendError;
+      }
+
       break;
     }
 
@@ -610,7 +626,7 @@ void loop() {
         mill = millis();
         first = true;
       }
-      
+
       if(millis() - mill > 60000) {
         clearResults(&sensingResults);
         state = CheckCloudEvent;
