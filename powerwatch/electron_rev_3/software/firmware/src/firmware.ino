@@ -151,8 +151,7 @@ auto imuSubsystem = Imu(&IMU_MOTION_THRESHOLD);
 //***********************************
 //* LIGHT
 //***********************************
-retained float LIGHT_LUX = 0;
-auto lightSubsystem = Light(&LIGHT_LUX);
+auto lightSubsystem = Light();
 
 //***********************************
 //* NrfWit
