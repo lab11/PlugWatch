@@ -295,25 +295,25 @@ Timer stateTimer(60000,soft_watchdog_reset,true);
 //function with a period of the maximum time the state is allowed to take
 void manageStateTimer(unsigned int period) {
   if(state != lastState) {
-          stateTimer.stop();
-          stateTimer.changePeriod(period);
-          stateTimer.reset();
-          stateTimer.start();
-          lastState = state;
+    stateTimer.stop();
+    stateTimer.changePeriod(period);
+    stateTimer.reset();
+    stateTimer.start();
+    lastState = state;
   }
 }
 
 //This structure is what all of the drivers will return. It will
 //be packetized and send to the cloud in the sendPacket state
 struct ResultStruct {
-    String chargeStateResult;
-    String mpuResult;
-    String wifiResult;
-    String cellResult;
-    String sdStatusResult;
-    String lightResult;
-    String witResult;
-    String gpsResult;
+  String chargeStateResult;
+  String mpuResult;
+  String wifiResult;
+  String cellResult;
+  String sdStatusResult;
+  String lightResult;
+  String witResult;
+  String gpsResult;
 };
 
 // A function to clear all the fields of a resultStruct
