@@ -459,8 +459,8 @@ void loop() {
     }
 
     case SenseMPU: {
-      //It should not take more than 1s to check the IMU
-      manageStateTimer(1000);
+      //It should not take more than 10s to check the IMU
+      manageStateTimer(10000);
 
       LoopStatus result = imuSubsystem.loop();
 

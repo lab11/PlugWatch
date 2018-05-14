@@ -14,30 +14,34 @@ void Imu::setup() {
   self_test_str = self_test();
 }
 
-void Imu::start_sampling() {
-  if (!sampling) {
-    sampling = true;
-    current_count = 0;
-  }
-}
-
 LoopStatus Imu::loop() {
   super::loop();
 
-  if (sample_flag) {
-    sample_flag = false;
+  static unsigned current_count = 0;
+  static unsigned long last_sample_time;
 
-    /*if (current_count >= *sample_count) {
-      sample_timer.stop();
-
-      Serial.println("ending sample");
-      Serial.println(sample_buffer);
-      sample_buffer = "";
+  // Idea: Take 1s worth of IMU data at 10Hz (10 samples)
+  if (current_count < 10) {
+    // Sample rate enforcement:
+    if (current_count == 0) {
+      result = "";
+      last_sample_time = millis();
+    } else if ((millis() - last_sample_time) < 100) {
+      return NotFinished;
     } else {
-      current_count += 1;
-      String res = do_sample();
-      sample_buffer = String(sample_buffer) + String(res) + String("\n");
-    }*/
+      last_sample_time = millis();
+    }
+
+    // TODO: I'm not sure that do_sample actually works, need HW
+    //String sample_result = do_sample();
+    String sample_result = "IMU Sample";
+    result += DLIM + String(sample_result);
+
+    current_count++;
+    return NotFinished;
+  } else {
+    current_count = 0;
+    return FinishedSuccess;
   }
 }
 
