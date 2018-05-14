@@ -19,8 +19,8 @@ LoopStatus SDCard::loop() {
     power_cycle_flag = false;
     PowerCycle();
 
-    // Power cycling is slow, so don't do anything else this loop, let others go
-    return FinishedSuccess;
+    // Power cycling is slow, so don't do anything else this loop, let Particle loop run
+    return NotFinished;
   }
 
   if (read_filename != "") {
