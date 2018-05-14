@@ -30,7 +30,7 @@ void Wifi::construct_ssid_list() {
 String Wifi::getResult() {
     String message = String(ssid_set.size());
     for (auto i = ssid_set.begin(); i != ssid_set.end(); ++i) {
-      message += DLIM;
+      message += MINOR_DLIM;
       message += *i;
     }
     //log.append(message);
