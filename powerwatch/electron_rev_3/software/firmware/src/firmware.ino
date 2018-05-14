@@ -10,23 +10,23 @@
 // Third party libraries
 #include <CellularHelper.h>
 #include <google-maps-device-locator.h>
+#include <OneWire.h>
 
 // Our code
+#include "CellStatus.h"
 #include "ChargeState.h"
 #include "Cloud.h"
+#include "ESP8266.h"
 #include "FileLog.h"
 #include "Gps.h"
-#include "ESP8266.h"
-#include "Wifi.h"
-#include "CellStatus.h"
 #include "Imu.h"
 #include "Light.h"
 #include "NrfWit.h"
 #include "SDCard.h"
 #include "Subsystem.h"
 #include "Timesync.h"
+#include "Wifi.h"
 #include "firmware.h"
-#include "OneWire.h"
 
 
 //***********************************
