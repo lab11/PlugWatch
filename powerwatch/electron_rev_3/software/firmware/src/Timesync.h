@@ -14,11 +14,8 @@ class Timesync: public Subsystem {
   typedef Subsystem super;
 
   const int TWELVE_HOURS = 1000 * 60 * 60 * 12;
-  void sync();
 
 public:
   LoopStatus loop();
 
 };
-
-
