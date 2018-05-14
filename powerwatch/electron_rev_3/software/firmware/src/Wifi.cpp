@@ -7,12 +7,12 @@
 void Wifi::construct_ssid_list() {
   size_t place = 0;
   Serial.println();
-  while (place < response->length() and place >= 0) {
-    size_t first = response->indexOf('"', place);
-    size_t second = response->indexOf('"', first+1);
-    String ssid = response->substring(first+1, second);
+  while (place < serial_response->length() and place >= 0) {
+    size_t first = serial_response->indexOf('"', place);
+    size_t second = serial_response->indexOf('"', first+1);
+    String ssid = serial_response->substring(first+1, second);
     ssid_set.insert(ssid);
-    place = response->indexOf("CWLAP", second);
+    place = serial_response->indexOf("CWLAP", second);
   }
 }
 
@@ -26,25 +26,34 @@ String Wifi::getResult() {
     return message;
 }
 
-void Wifi::periodic(bool force) {
-  force = force;
-  ssid_set.clear();
-  //log.append("WIFI| Began scan!");
-  scan_start_time = millis();
-  esp8266.beginScan();
-}
+enum WifiState {
+  Idle,
+  Scanning,
+};
 
 LoopStatus Wifi::loop() {
-  // TODO: integrate starting and such
+  static WifiState state;
 
-  if (*done) {
-    *done = false;
-    // construct list, send/log success
-    construct_ssid_list();
-    //log.append("Wifi Scan! Count: " + String(ssid_set.size()));
+  switch (state) {
+    case Idle: {
+      ssid_set.clear();
+      scan_start_time = millis();
+      esp8266.beginScan();
 
-    return FinishedSuccess;
-  } else {
-    return NotFinished;
+      state = Scanning;
+      return NotFinished;
+    }
+
+    case Scanning: {
+      if (! *serial_done) {
+        return NotFinished;
+      }
+
+      *serial_done = false;
+      construct_ssid_list();
+
+      state = Idle;
+      return FinishedSuccess;
+    }
   }
 }

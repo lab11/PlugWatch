@@ -21,11 +21,11 @@ LoopStatus Gps::loop() {
       message = t.readLatLon();
   }
   //log.debug("Gps::getReading() done and message set to: " + message);
-  this->result = message;
+  result = message;
 
   return FinishedSuccess;
 }
 
 String Gps::getResult() {
-  return this->result;
+  return result;
 }

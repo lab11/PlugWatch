@@ -10,15 +10,12 @@ class Light: public Subsystem {
   typedef Subsystem super;
 
   ISL29035 light_sensor;
-  float* lux;
+  float lux;
 
   String result;
 
 public:
-  Light(float* lux) : Subsystem(),
-    lux { lux }
-    { light_sensor.init(); }
-
+  void setup();
   LoopStatus loop();
   String getResult();
 };

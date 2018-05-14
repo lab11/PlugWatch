@@ -10,23 +10,23 @@
 // Third party libraries
 #include <CellularHelper.h>
 #include <google-maps-device-locator.h>
+#include <OneWire.h>
 
 // Our code
+#include "CellStatus.h"
 #include "ChargeState.h"
 #include "Cloud.h"
+#include "ESP8266.h"
 #include "FileLog.h"
 #include "Gps.h"
-#include "ESP8266.h"
-#include "Wifi.h"
-#include "CellStatus.h"
 #include "Imu.h"
 #include "Light.h"
 #include "NrfWit.h"
 #include "SDCard.h"
 #include "Subsystem.h"
 #include "Timesync.h"
+#include "Wifi.h"
 #include "firmware.h"
-#include "OneWire.h"
 
 
 //***********************************
@@ -151,8 +151,7 @@ auto imuSubsystem = Imu(&IMU_MOTION_THRESHOLD);
 //***********************************
 //* LIGHT
 //***********************************
-retained float LIGHT_LUX = 0;
-auto lightSubsystem = Light(&LIGHT_LUX);
+auto lightSubsystem = Light();
 
 //***********************************
 //* NrfWit
@@ -307,14 +306,14 @@ void manageStateTimer(unsigned int period) {
 //This structure is what all of the drivers will return. It will
 //be packetized and send to the cloud in the sendPacket state
 struct ResultStruct {
-    String chargeStateResult;
-    String mpuResult;
-    String wifiResult;
-    String cellResult;
-    String sdStatusResult;
-    String lightResult;
-    String witResult;
-    String gpsResult;
+  String chargeStateResult;
+  String mpuResult;
+  String wifiResult;
+  String cellResult;
+  String sdStatusResult;
+  String lightResult;
+  String witResult;
+  String gpsResult;
 };
 
 // A function to clear all the fields of a resultStruct
@@ -367,242 +366,259 @@ void loop() {
     // We need to set up the keepalive the first time the particle becomes
     // connected
     if(!once) {
-        Particle.keepAlive(30); // send a ping every 30 seconds
-        once = true;
+      Particle.keepAlive(30); // send a ping every 30 seconds
+      once = true;
     }
   }
 
   switch(state) {
-  case CheckCloudEvent: {
-    manageStateTimer(120000);
+    case CheckCloudEvent: {
+      manageStateTimer(120000);
 
-    switch(cloudState) {
-    int ms;
-    case ConnectionCheck: {
-      //Check if we have a connection - if it's been a whiel attempt to reconnect
-      if(!Particle.connected()) {
-        // Don't attempt to connect too frequently as connection attempts hang MY_DEVICES
-        static int last_connect_time = 0;
-        const int connect_interval_sec = 60;
-        int now = Time.now(); // unix time
+      switch(cloudState) {
+        int particle_connect_time;
 
-        if ((last_connect_time == 0) || (now-last_connect_time > connect_interval_sec)) {
-          last_connect_time = now;
-          Particle.connect();
+        case ConnectionCheck: {
+          //Check if we have a connection - if it's been a while attempt to reconnect
+          if(!Particle.connected()) {
+            // Don't attempt to connect too frequently as connection attempts hang MY_DEVICES
+            static int last_connect_time = 0;
+            const int connect_interval_sec = 60;
+            int now = Time.now(); // unix time
+
+            if ((last_connect_time == 0) || (now-last_connect_time > connect_interval_sec)) {
+              last_connect_time = now;
+              Particle.connect();
+            }
+          }
+          cloudState = UpdateCheck;
+          particle_connect_time = millis();
+          break;
+        }
+
+        case UpdateCheck: {
+          if (System.updatesPending()) {
+            //Spend a minute just trying to fetch the update
+            if(millis() - particle_connect_time < 60000) {
+              Particle.process();
+            } else {
+              cloudState = HandshakeCheck;
+            }
+          } else {
+            cloudState = HandshakeCheck;
+          }
+          break;
+        }
+
+        case HandshakeCheck: {
+          if (handshake_flag) {
+            handshake_flag = false;
+            Particle.publish("spark/device/session/end", "", PRIVATE);
+          }
+          cloudState = ConnectionCheck;
+          state = CheckTimeSync;
+          break;
         }
       }
-      cloudState = UpdateCheck;
-      ms = millis();
+      break;
     }
-    break;
-    case UpdateCheck: {
-      if (System.updatesPending())
-      {
-        //Spend a minute just trying to fetch the update
-        if(millis() - ms < 60000) {
-          Particle.process();
-        } else {
-          cloudState = HandshakeCheck;
-        }
-      } else {
-        cloudState = HandshakeCheck;
+
+    case CheckTimeSync: {
+      manageStateTimer(180000);
+
+      LoopStatus result = timeSyncSubsystem.loop();
+
+      //return result or error
+      if(result == FinishedError) {
+        //Log the error in the error struct
+      } else if(result == FinishedSuccess) {
+        //get the result from the charge state and put it into the system struct
+        state = SenseChargeState;
       }
+      break;
     }
-    break;
-    case HandshakeCheck: {
-      if (handshake_flag) {
-        handshake_flag = false;
-        Particle.publish("spark/device/session/end", "", PRIVATE);
+
+    case SenseChargeState: {
+      //It should not take more than 1s to sense charge state
+      manageStateTimer(1000);
+
+      //Call the loop function for sensing charge state
+      LoopStatus result = chargeStateSubsystem.loop();
+
+      //return result or error
+      if(result == FinishedError) {
+        //Log the error in the error struct
+      } else if(result == FinishedSuccess) {
+        //get the result from the charge state and put it into the system struct
+        sensingResults.chargeStateResult = chargeStateSubsystem.getResult();
+        state = SenseMPU;
       }
-      cloudState = ConnectionCheck;
-      state = CheckTimeSync;
-    }
-    break;
-    }
-  }
-  break;
-  case CheckTimeSync: {
-    manageStateTimer(180000);
-
-    LoopStatus result = timeSyncSubsystem.loop();
-
-    //return result or error
-    if(result == FinishedError) {
-      //Log the error in the error struct
-    } else if(result == FinishedSuccess) {
-      //get the result from the charge state and put it into the system struct
-      state = SenseChargeState;
-    }
-  }
-  break;
-  case SenseChargeState: {
-    //It should not take more than 1s to sense charge state
-    manageStateTimer(1000);
-
-    //Call the loop function for sensing charge state
-    LoopStatus result = chargeStateSubsystem.loop();
-
-    //return result or error
-    if(result == FinishedError) {
-      //Log the error in the error struct
-    } else if(result == FinishedSuccess) {
-      //get the result from the charge state and put it into the system struct
-      sensingResults.chargeStateResult = chargeStateSubsystem.getResult();
-      state = LogPacket;
-    }
-  }
-  break;
-  case SenseMPU: {
-    //It should not take more than 1s to check the IMU
-    manageStateTimer(1000);
-
-    LoopStatus result = imuSubsystem.loop();
-
-    //return result or error
-    if(result == FinishedError) {
-      //Log the error in the error struct
-    } else if(result == FinishedSuccess) {
-      //get the result from the charge state and put it into the system struct
-      sensingResults.mpuResult = imuSubsystem.getResult();
-      state = SenseWiFi;
-    }
-  }
-  break;
-  case SenseWiFi: {
-    //It might take a while to get all of the wifi SSIDs
-    manageStateTimer(20000);
-
-    LoopStatus result = wifiSubsystem.loop();
-
-    //return result or error
-    if(result == FinishedError) {
-      //Log the error in the error struct
-    } else if(result == FinishedSuccess) {
-      //get the result from the charge state and put it into the system struct
-      sensingResults.wifiResult = wifiSubsystem.getResult();
-      state = SenseCell;
-    }
-  }
-  break;
-  case SenseCell: {
-    manageStateTimer(2000);
-
-    LoopStatus result = cellStatus.loop();
-
-    //return result or error
-    if(result == FinishedError) {
-      //Log the error in the error struct
-    } else if(result == FinishedSuccess) {
-      //get the result from the charge state and put it into the system struct
-      sensingResults.cellResult = cellStatus.getResult();
-      state = SenseSDPresent;
-    }
-  }
-  break;
-  case SenseSDPresent: {
-    //This should just be a GPIO pin
-    manageStateTimer(1000);
-
-    LoopStatus result = SD.loop();
-
-    //return result or error
-    if(result == FinishedError) {
-      //Log the error in the error struct
-    } else if(result == FinishedSuccess) {
-      //get the result from the charge state and put it into the system struct
-      sensingResults.sdStatusResult = SD.getResult();
-      state = SenseLight;
-    }
-  }
-  break;
-  case SenseLight: {
-    manageStateTimer(1000);
-
-    LoopStatus result = lightSubsystem.loop();
-
-    //return result or error
-    if(result == FinishedError) {
-      //Log the error in the error struct
-    } else if(result == FinishedSuccess) {
-      //get the result from the charge state and put it into the system struct
-      sensingResults.lightResult = lightSubsystem.getResult();
-      state = SenseWit;
-    }
-  }
-  break;
-  case SenseWit: {
-    //This requires scanning for an advertisement
-    manageStateTimer(5000);
-
-    LoopStatus result = nrfWitSubsystem.loop();
-
-    //return result or error
-    if(result == FinishedError) {
-      //Log the error in the error struct
-    } else if(result == FinishedSuccess) {
-      //get the result from the charge state and put it into the system struct
-      sensingResults.witResult = nrfWitSubsystem.getResult();
-      state = SenseGPS;
-    }
-  }
-  break;
-  case SenseGPS: {
-    manageStateTimer(1000);
-    LoopStatus result = gpsSubsystem.loop();
-
-    //return result or error
-    if(result == FinishedError) {
-      //Log the error in the error struct
-    } else if(result == FinishedSuccess) {
-      //get the result from the charge state and put it into the system struct
-      sensingResults.gpsResult = gpsSubsystem.getResult();
-      state = SenseGPS;
-    }
-  }
-  break;
-  case LogPacket: {
-    manageStateTimer(10000);
-
-    String packet = stringifyResults(sensingResults);
-    DataLog.append(packet);
-    state = SendPacket;
-  }
-  break;
-  case SendPacket: {
-    manageStateTimer(10000);
-
-    String packet = stringifyResults(sensingResults);
-    Cloud::Publish("g",packet);
-    state = LogError;
-  }
-  break;
-  case LogError: {
-    manageStateTimer(10000);
-    state = SendError;
-  }
-  break;
-  case SendError: {
-    manageStateTimer(10000);
-    state = Wait;
-  }
-  break;
-  case Wait: {
-    manageStateTimer(120000);
-
-    static bool first = false;
-    static int mill = 0;
-    if(!first) {
-      mill = millis();
-      first = true;
+      break;
     }
 
-    if(millis() - mill > 60000) {
-      clearResults(&sensingResults);
-      state = CheckCloudEvent;
-      first = false;
+    case SenseMPU: {
+      //It should not take more than 10s to check the IMU
+      manageStateTimer(10000);
+
+      LoopStatus result = imuSubsystem.loop();
+
+      //return result or error
+      if(result == FinishedError) {
+        //Log the error in the error struct
+      } else if(result == FinishedSuccess) {
+        //get the result from the charge state and put it into the system struct
+        sensingResults.mpuResult = imuSubsystem.getResult();
+        state = SenseWiFi;
+      }
+      break;
     }
-  }
-  break;
+
+    case SenseWiFi: {
+      //It might take a while to get all of the wifi SSIDs
+      manageStateTimer(20000);
+
+      LoopStatus result = wifiSubsystem.loop();
+
+      //return result or error
+      if(result == FinishedError) {
+        //Log the error in the error struct
+      } else if(result == FinishedSuccess) {
+        //get the result from the charge state and put it into the system struct
+        sensingResults.wifiResult = wifiSubsystem.getResult();
+        state = SenseCell;
+      }
+      break;
+    }
+
+    case SenseCell: {
+      manageStateTimer(2000);
+
+      LoopStatus result = cellStatus.loop();
+
+      //return result or error
+      if(result == FinishedError) {
+        //Log the error in the error struct
+      } else if(result == FinishedSuccess) {
+        //get the result from the charge state and put it into the system struct
+        sensingResults.cellResult = cellStatus.getResult();
+        state = SenseSDPresent;
+      }
+      break;
+    }
+
+    case SenseSDPresent: {
+      //This should just be a GPIO pin
+      manageStateTimer(1000);
+
+      LoopStatus result = SD.loop();
+
+      //return result or error
+      if(result == FinishedError) {
+        //Log the error in the error struct
+      } else if(result == FinishedSuccess) {
+        //get the result from the charge state and put it into the system struct
+        sensingResults.sdStatusResult = SD.getResult();
+        state = SenseLight;
+      }
+      break;
+    }
+
+    case SenseLight: {
+      manageStateTimer(1000);
+
+      LoopStatus result = lightSubsystem.loop();
+
+      //return result or error
+      if(result == FinishedError) {
+        //Log the error in the error struct
+      } else if(result == FinishedSuccess) {
+        //get the result from the charge state and put it into the system struct
+        sensingResults.lightResult = lightSubsystem.getResult();
+        state = SenseWit;
+      }
+      break;
+    }
+
+    case SenseWit: {
+      //This requires scanning for an advertisement
+      manageStateTimer(5000);
+
+      LoopStatus result = nrfWitSubsystem.loop();
+
+      //return result or error
+      if(result == FinishedError) {
+        //Log the error in the error struct
+      } else if(result == FinishedSuccess) {
+        //get the result from the charge state and put it into the system struct
+        sensingResults.witResult = nrfWitSubsystem.getResult();
+        state = SenseGPS;
+      }
+      break;
+    }
+
+    case SenseGPS: {
+      manageStateTimer(1000);
+      LoopStatus result = gpsSubsystem.loop();
+
+      //return result or error
+      if(result == FinishedError) {
+        //Log the error in the error struct
+      } else if(result == FinishedSuccess) {
+        //get the result from the charge state and put it into the system struct
+        sensingResults.gpsResult = gpsSubsystem.getResult();
+        state = SenseGPS;
+      }
+      break;
+    }
+
+    case LogPacket: {
+      manageStateTimer(10000);
+
+      String packet = stringifyResults(sensingResults);
+      DataLog.append(packet);
+      state = SendPacket;
+      break;
+    }
+
+    case SendPacket: {
+      manageStateTimer(10000);
+
+      String packet = stringifyResults(sensingResults);
+      Cloud::Publish("g",packet);
+      state = LogError;
+      break;
+    }
+
+    case LogError: {
+      manageStateTimer(10000);
+      state = SendError;
+      break;
+    }
+
+    case SendError: {
+      manageStateTimer(10000);
+      state = Wait;
+      break;
+    }
+
+    case Wait: {
+      manageStateTimer(120000);
+
+      static bool first = false;
+      static int mill = 0;
+      if(!first) {
+        mill = millis();
+        first = true;
+      }
+      
+      if(millis() - mill > 60000) {
+        clearResults(&sensingResults);
+        state = CheckCloudEvent;
+        first = false;
+
+      }
+      break;
+    }
   }
 
   //Call the automatic watchdog
