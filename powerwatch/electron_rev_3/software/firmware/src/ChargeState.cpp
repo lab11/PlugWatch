@@ -13,8 +13,14 @@ void ChargeState::setup() {
 }
 
 LoopStatus ChargeState::loop() {
-  String power_stats = String(FuelGauge().getSoC()) + String(DLIM)
-  + String(FuelGauge().getVCell()) + String(DLIM)
+  char state_of_charge[4];
+  snprintf(state_of_charge, 4, "%d", (int)FuelGauge().getSoC());
+
+  char vcell[5];
+  snprintf(vcell, 5, "%0.2f", FuelGauge().getVCell());
+
+  String power_stats = String(state_of_charge) + String(DLIM)
+  + String(vcell) + String(DLIM)
   + String(powerCheck.getIsCharging());
 
   result = power_stats;
