@@ -11,13 +11,15 @@ void NrfWit::setup() {
 
 LoopStatus NrfWit::loop() {
   String msg = "";
+
+  // TODO: Framing? Request message? What's this interface?
   msg = Serial4.readString();
   //log.append("NrfWit Got: " + msg);
 
-  this->result = msg;
+  result = msg;
   return FinishedSuccess;
 }
 
 String NrfWit::getResult() {
-  return this->result;
+  return result;
 }
