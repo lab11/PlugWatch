@@ -237,11 +237,11 @@ void setup() {
 
   timeSyncSubsystem.setup();
   chargeStateSubsystem.setup();
-  imuSubsystem.setup();
-  lightSubsystem.setup();
-  nrfWitSubsystem.setup();
-  gpsSubsystem.setup();
-  wifiSubsystem.setup();
+  //imuSubsystem.setup();
+  //lightSubsystem.setup();
+  //nrfWitSubsystem.setup();
+  //gpsSubsystem.setup();
+  //wifiSubsystem.setup();
   FuelGauge().quickStart();
 
   LEDStatus status;
@@ -283,8 +283,8 @@ enum ParticleCloudState {
 ParticleCloudState cloudState = ConnectionCheck;
 
 //Retained system states are used to diagnose restarts (error vs hard reset)
-retained SystemState state = Wait;
-retained SystemState lastState = Wait;
+SystemState state = Wait;
+SystemState lastState = SendError;
 
 //State Timer is reused to make sure a state doesn't loop for too long.
 //If it loops for too long we just call a reset. This can get us out of
@@ -295,11 +295,12 @@ Timer stateTimer(60000,soft_watchdog_reset,true);
 //function with a period of the maximum time the state is allowed to take
 void manageStateTimer(unsigned int period) {
   if(state != lastState) {
-          stateTimer.stop();
-          stateTimer.changePeriod(period);
-          stateTimer.reset();
-          stateTimer.start();
-          lastState = state;
+    Serial.printlnf("Transitioning to state %d from %d", state, lastState);
+    stateTimer.stop();
+    stateTimer.changePeriod(period);
+    stateTimer.reset();
+    stateTimer.start();
+    lastState = state;
   }
 }
 
@@ -372,8 +373,6 @@ void loop() {
   }
 
   switch(state) {
-  int mill;
-
   case CheckCloudEvent: {
     manageStateTimer(120000);
 
@@ -449,7 +448,7 @@ void loop() {
     } else if(result == FinishedSuccess) {
       //get the result from the charge state and put it into the system struct
       sensingResults.chargeStateResult = chargeStateSubsystem.getResult();
-      state = SenseMPU;
+      state = LogPacket;
     }
   }
   break;
@@ -585,15 +584,22 @@ void loop() {
   case SendError: {
     manageStateTimer(10000);
     state = Wait;
-    mill = millis();
   }
   break;
   case Wait: {
     manageStateTimer(120000);
 
+    static bool first = false;
+    static int mill = 0;
+    if(!first) {
+      mill = millis();
+      first = true;
+    }
+
     if(millis() - mill > 60000) {
       clearResults(&sensingResults);
       state = CheckCloudEvent;
+      first = false;
     }
   }
   break;
