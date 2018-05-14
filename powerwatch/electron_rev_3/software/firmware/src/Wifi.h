@@ -13,17 +13,17 @@ class Wifi: public Subsystem {
   typedef Subsystem super;
 
   ESP8266 esp8266;
-  String* response;
-  bool* done;
+  String* serial_response;
+  bool* serial_done;
   std::set<String> ssid_set;
   unsigned long scan_start_time;
   bool force;
 
 public:
-  Wifi(ESP8266 &esp8266, String* response, bool* done):
+  Wifi(ESP8266 &esp8266, String* serial_response, bool* serial_done):
   esp8266 { esp8266 },
-  response { response },
-  done { done } {}
+  serial_response { serial_response },
+  serial_done { serial_done } {}
 
   LoopStatus loop();
   String getResult();
