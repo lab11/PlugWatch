@@ -7,38 +7,32 @@ void SDCard::setup() {
   super::setup();
 
   pinMode(SD_ENABLE_PIN, OUTPUT);
-  digitalWrite(SD_ENABLE_PIN, LOW);
-
   pinMode(SD_INT_PIN, INPUT);
+
+  PowerOn();
 }
 
 LoopStatus SDCard::loop() {
   super::loop();
 
-  if (power_cycle_flag) {
-    power_cycle_flag = false;
-    PowerCycle();
-
-    // Power cycling is slow, so don't do anything else this loop, let Particle loop run
-    return NotFinished;
-  }
-
-  if (read_filename != "") {
-    //log.append("Read " + read_filename);
-
-    String sd_res = Read(read_filename);
-    read_filename = "";
-
-    Cloud::Publish(SD_READ_EVENT,sd_res);
-  }
-
   return FinishedSuccess;
 }
 
-void SDCard::PowerCycle() {
-  //log.debug("power cycle SD");
+String SDCard::getResult() {
+  return result;
+}
+
+void SDCard::PowerOn() {
 	digitalWrite(SD_ENABLE_PIN, HIGH);
 	delay(1000);
+}
+
+void SDCard::PowerOff() {
+  SPI.end();
+	digitalWrite(SCK, LOW);
+	digitalWrite(MISO, LOW);
+	digitalWrite(MOSI, LOW);
+	digitalWrite(SS, LOW);
 	digitalWrite(SD_ENABLE_PIN, LOW);
 	delay(1000);
 }
@@ -64,6 +58,16 @@ void SDCard::Write(String filename, String to_write) {
 	file_to_write.close();
 	log.debug(String("wrote : ") + String(filename) + String(":") + to_write);
   */
+
+  // Let's just make sure the SD card is plugged in
+  if(digitalRead(SD_INT_PIN)) {
+    // This means the card is not present
+		Serial.println("SD Card Not Present");
+    result = "0";
+  } else {
+    result = "1";
+  }
+
   if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
 		Serial.println("CAN'T OPEN SD");
     return;
@@ -77,6 +81,7 @@ void SDCard::Write(String filename, String to_write) {
 	}
 	file_to_write.println(final_to_write);
 	file_to_write.close();
+
 	Serial.println(String("wrote : ") + String(filename) + String(":") + to_write);
 
 }

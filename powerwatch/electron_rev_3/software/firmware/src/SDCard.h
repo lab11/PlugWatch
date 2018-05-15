@@ -24,21 +24,18 @@ class SDCard: public Subsystem {
 	// SCK => A3, MISO => A4, MOSI => A5, SS => A2 (default)
 	SdFat sd;
 
-	//SdFatSoftSpi<A5, A4, A3> sd; // rev2 HW
-	//SdFatSoftSpi<A4, A5, A3> sd; // rev1 HW
-
-	bool power_cycle_flag = false;
-	bool removed_flag = false;
-	String read_filename = "";
+	String result;
 
 public:
 	void setup();
 	LoopStatus loop();
+	String getResult();
 
   /**
 	 * Power cycles SD Card. Blocking call.
 	 */
-	void PowerCycle();
+	void PowerOn();
+	void PowerOff();
 
 	void Write(String filename, String to_write);
 

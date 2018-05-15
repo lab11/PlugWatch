@@ -507,7 +507,7 @@ void loop() {
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.cellResult = cellStatus.getResult();
-        state = SenseLight;
+        state = SenseSDPresent;
       }
       break;
     }
@@ -578,12 +578,12 @@ void loop() {
     }
 
     case LogPacket: {
-      manageStateTimer(10000);
+      manageStateTimer(30000);
 
-      SD.PowerCycle();
-
+      SD.PowerOn();
       String packet = stringifyResults(sensingResults);
       DataLog.append(packet);
+      SD.PowerOff();
       state = SendPacket;
       break;
     }
@@ -598,14 +598,15 @@ void loop() {
     }
 
     case LogError: {
-      manageStateTimer(10000);
+      manageStateTimer(30000);
 
-      SD.PowerCycle();
+      SD.PowerOn();
 
       if(!EventQueue.empty()) {
         EventLog.append(EventQueue.front());
         EventQueue.pop();
       } else {
+        SD.PowerOff();
         state = SendError;
       }
 
