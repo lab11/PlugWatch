@@ -11,58 +11,50 @@ void Imu::setup() {
   super::setup();
 
   // TODO: Report error if this fails and don't try to use IMU in this session
-  self_test_str = self_test();
+  // self_test_str = self_test();
+
+  //set the motion threshold interrupt as an input
+  pinMode(IMU_INT, INPUT);
+
+  // Setup the wake on motion interrupt
+  setWakeOnMotion();
+
+  // Clear the interrupt by reading the interrupt status register
+  Serial.printlnf("%X",myIMU.readByte(MPU9250_ADDRESS, INT_STATUS));
 }
 
 LoopStatus Imu::loop() {
   super::loop();
 
-  static unsigned current_count = 0;
-  static unsigned long last_sample_time;
+  // Read the temperature sensor
+  int temp = myIMU.readTempData();
+  Serial.printlnf("temp data: %d",temp);
 
-  // Idea: Take 1s worth of IMU data at 10Hz (10 samples)
-  if (current_count < 10) {
-    // Sample rate enforcement:
-    if (current_count == 0) {
-      result = "";
-      last_sample_time = millis();
-    } else if ((millis() - last_sample_time) < 100) {
-      return NotFinished;
-    } else {
-      last_sample_time = millis();
-    }
+  // Convert to temperature
+  float tempf = ((float)temp)/333.87 + 21.0;
+  char temp_str[5];
+  snprintf(temp_str, 5, "%0.2f", tempf);
 
-    // TODO: I'm not sure that do_sample actually works, need HW
-    //String sample_result = do_sample();
-    String sample_result = "IMU Sample";
-    result += MINOR_DLIM + String(sample_result);
+  // Sample the wake on Interrupt pin
+  if(digitalRead(IMU_INT)) {
+    result = "1" + String(MINOR_DLIM) + String(temp_str);
 
-    current_count++;
-    return NotFinished;
+    // Clear the interrupt
+    myIMU.readByte(MPU9250_ADDRESS, INT_STATUS);
   } else {
-    current_count = 0;
-    return FinishedSuccess;
+    result = "0" + String(MINOR_DLIM) + String(temp_str);
   }
+
+  return FinishedSuccess;
 }
 
-void Imu:setWakeOnMotion() {
+void Imu::setWakeOnMotion() {
 
   //Reset Device
   myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x80);
-  delay(100);
+  delay(1000);
 
-  //Set to default clock sources
-  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x01);
-  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_2, 0x00);
-  delay(200);
-
-  //****
-  //* Make sure accel is running
-  //****
-  //PWR_MGMT_1 make cycle=0, sleep=0, standby=0
-  cur_reg = imu.readByte(MPU9250_ADDRESS, PWR_MGMT_1);
-  data = cur_reg &= ~0x70;
-  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_1, data);
+  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x00);
 
   //PWR_MGMT_2 set DIS_XA, DIS_YA, DIS_ZA = 0, DIS_XG, DIS_YG, DIS_ZG = 1
   myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_2, 0x07);
@@ -71,7 +63,12 @@ void Imu:setWakeOnMotion() {
   //* Set Acell LPF setting to 184hz BandWidth
   //****
   //ACCEL_CONFIG_@ set ACCEL_FCHOICE_B = 1 and A_DLPFCFG[2:] = 1(b001)
-  myIMU.writeByte(MPU9250_ADDRESS, ACCEL_CONFIG_2, 0x05);
+  myIMU.writeByte(MPU9250_ADDRESS, ACCEL_CONFIG_2, 0x01);
+
+  //****
+  //* Set the motion interrupt to latch mode
+  //****
+  myIMU.writeByte(MPU9250_ADDRESS, INT_PIN_CFG, 0x20);
 
   //****
   //* Enable Motion Interrupt
@@ -95,36 +92,34 @@ void Imu:setWakeOnMotion() {
   //* Set Wakeup Frequency
   //****
   //LP_ACCEL_ODR set LPOSC_CLKSEL [3:0] to 0.24Hz ~ 500Hz
-  myIMU.writeByte(MPU9250_ADDRESS, LP_ACCEL_ODR, 0x03);
+  myIMU.writeByte(MPU9250_ADDRESS, LP_ACCEL_ODR, 0x06);
 
   //****
   //* Enable Cycle Mode
   //****
   //PWR_MGMT_1 make cycle=1
-  cur_reg = imu.readByte(MPU9250_ADDRESS, PWR_MGMT_1);
-  data = cur_reg |= 0x20;
-  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_1, data);
+  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x20);
 }
 
 String Imu::self_test() {
    byte c = myIMU.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
-   String imu_st = "";
+   String myIMU_st = "";
    String ak_st = "";
-   imu_st += String(c,HEX);
-   imu_st += MINOR_DLIM;
+   myIMU_st += String(c,HEX);
+   myIMU_st += MINOR_DLIM;
    if (c == 0x71) {
      myIMU.MPU9250SelfTest(myIMU.SelfTest);
-     imu_st += String(myIMU.SelfTest[0]);
-     imu_st += MINOR_DLIM;
-     imu_st += String(myIMU.SelfTest[1]);
-     imu_st += MINOR_DLIM;
-     imu_st += String(myIMU.SelfTest[2]);
-     imu_st += MINOR_DLIM;
-     imu_st += String(myIMU.SelfTest[3]);
-     imu_st += MINOR_DLIM;
-     imu_st += String(myIMU.SelfTest[4]);
-     imu_st += MINOR_DLIM;
-     imu_st += String(myIMU.SelfTest[5]);
+     myIMU_st += String(myIMU.SelfTest[0]);
+     myIMU_st += MINOR_DLIM;
+     myIMU_st += String(myIMU.SelfTest[1]);
+     myIMU_st += MINOR_DLIM;
+     myIMU_st += String(myIMU.SelfTest[2]);
+     myIMU_st += MINOR_DLIM;
+     myIMU_st += String(myIMU.SelfTest[3]);
+     myIMU_st += MINOR_DLIM;
+     myIMU_st += String(myIMU.SelfTest[4]);
+     myIMU_st += MINOR_DLIM;
+     myIMU_st += String(myIMU.SelfTest[5]);
 
      myIMU.calibrateMPU9250(myIMU.gyroBias, myIMU.accelBias);
      myIMU.initMPU9250();
@@ -141,7 +136,7 @@ String Imu::self_test() {
    else {
      //log.error("Could not connect to MPU9250: 0x" + String(c, HEX));
    }
-   return imu_st + "\n" + ak_st;
+   return myIMU_st + "\n" + ak_st;
  }
 
 String Imu::do_sample() {
@@ -189,43 +184,43 @@ String Imu::do_sample() {
 
   myIMU.delt_t = millis() - myIMU.count;
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
-  String imu = time_str;
-  imu += MINOR_DLIM;
+  String myIMU_st = time_str;
+  myIMU_st += MINOR_DLIM;
   if (myIMU.delt_t > 1) { //GO AS FAST AS POSSIBLE
     String x_accel_mg = String(1000*myIMU.ax);
-    imu += x_accel_mg;
+    myIMU_st += x_accel_mg;
     String y_accel_mg = String(1000*myIMU.ay);
-    imu += MINOR_DLIM;
-    imu += y_accel_mg;
+    myIMU_st += MINOR_DLIM;
+    myIMU_st += y_accel_mg;
     String z_accel_mg = String(1000*myIMU.az);
-    imu += MINOR_DLIM;
-    imu += z_accel_mg;
+    myIMU_st += MINOR_DLIM;
+    myIMU_st += z_accel_mg;
     String x_gyro_ds = String(myIMU.gx);
-    imu += MINOR_DLIM;
-    imu += x_gyro_ds;
+    myIMU_st += MINOR_DLIM;
+    myIMU_st += x_gyro_ds;
     String y_gyro_ds = String(myIMU.gy);
-    imu += MINOR_DLIM;
-    imu += y_gyro_ds;
+    myIMU_st += MINOR_DLIM;
+    myIMU_st += y_gyro_ds;
     String z_gyro_ds = String(myIMU.gz);
-    imu += MINOR_DLIM;
-    imu += z_gyro_ds;
+    myIMU_st += MINOR_DLIM;
+    myIMU_st += z_gyro_ds;
     String x_mag_mg = String(myIMU.mx);
-    imu += MINOR_DLIM;
-    imu += x_mag_mg;
+    myIMU_st += MINOR_DLIM;
+    myIMU_st += x_mag_mg;
     String y_mag_mg = String(myIMU.my);
-    imu += MINOR_DLIM;
-    imu += y_mag_mg;
+    myIMU_st += MINOR_DLIM;
+    myIMU_st += y_mag_mg;
     String z_mag_mg = String(myIMU.mz);
-    imu += MINOR_DLIM;
-    imu += z_mag_mg;
+    myIMU_st += MINOR_DLIM;
+    myIMU_st += z_mag_mg;
     myIMU.tempCount = myIMU.readTempData();  // Read the adc values
     myIMU.temperature = ((float) myIMU.tempCount) / 333.87 + 21.0; // Temperature in degrees Centigrade
     String tmp_c = String(myIMU.temperature);
-    imu += MINOR_DLIM;
-    imu += tmp_c;
+    myIMU_st += MINOR_DLIM;
+    myIMU_st += tmp_c;
     myIMU.count = millis();
   }
-  return imu;
+  return myIMU_st;
 }
 
 String Imu::getResult() {

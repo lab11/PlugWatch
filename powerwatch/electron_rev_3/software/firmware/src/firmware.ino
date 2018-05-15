@@ -290,7 +290,7 @@ void setup() {
 
   timeSyncSubsystem.setup();
   chargeStateSubsystem.setup();
-  //imuSubsystem.setup();
+  imuSubsystem.setup();
   lightSubsystem.setup();
   //nrfWitSubsystem.setup();
   gpsSubsystem.setup();
@@ -484,7 +484,7 @@ void loop() {
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.chargeStateResult = chargeStateSubsystem.getResult();
-        state = SenseWiFi;
+        state = SenseMPU;
       }
       break;
     }

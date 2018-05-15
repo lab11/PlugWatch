@@ -6,14 +6,20 @@
 
 #include "Subsystem.h"
 
-#define MPU9250_ADDRESS 0x69  // Device address when ADO = 1
+#define MPU9250_ADDRESS 0x68  // Device address when ADO = 1
 #define PWR_MGMT_1 0x6B
 #define PWR_MGMT_2 0x6C
 #define ACCEL_CONFIG_2 0x1D
+#define INT_PIN_CFG 0x37
 #define INT_ENABLE 0x38
+#define INT_STATUS 0x3A
+#define TEMP_H 0x41
+#define TEMP_L 0x42
 #define MOT_DETECT_CTRL 0x69
 #define WOM_THR 0x1F
 #define LP_ACCEL_ODR 0x1E
+
+#define IMU_INT D2
 
 class Imu: public Subsystem {
   typedef Subsystem super;
