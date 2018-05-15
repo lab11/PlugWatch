@@ -28,7 +28,6 @@ LoopStatus Imu::loop() {
 
   // Read the temperature sensor
   int temp = myIMU.readTempData();
-  Serial.printlnf("temp data: %d",temp);
 
   // Convert to temperature
   float tempf = ((float)temp)/333.87 + 21.0;
