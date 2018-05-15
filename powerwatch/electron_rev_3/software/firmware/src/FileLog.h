@@ -26,11 +26,11 @@ public:
 
   // Print to serial and log to SD
   void appendFromISR(String str);
-  void append(String str);
+  bool append(String str);
 
   // Print to serial, log to SD, publish to cloud
   void errorFromISR(String str);
-  void error(String str);
+  bool error(String str);
 
 private:
   void processIsrQueue();

@@ -25,11 +25,11 @@ void FileLog::appendFromISR(String str) {
   isr_queue.push(str);
 }
 
-void FileLog::append(String str) {
+bool FileLog::append(String str) {
   processIsrQueue();
 
   Serial.println(filename + ": " + str);
-  sd.Write(filename, str + "\n");
+  return sd.Write(filename, str + "\n");
 }
 
 void FileLog::errorFromISR(String str) {
@@ -37,12 +37,12 @@ void FileLog::errorFromISR(String str) {
   isr_queue.push(str);
 }
 
-void FileLog::error(String str) {
+bool FileLog::error(String str) {
   processIsrQueue();
 
   Serial.println("ERROR|" + filename + ": " + str);
   Cloud::Publish(ERROR_EVENT, str);
-  sd.Write(filename, "ERROR|" + str + "\n");
+  return sd.Write(filename, "ERROR|" + str + "\n");
 }
 
 void FileLog::debugFromISR(String str) {

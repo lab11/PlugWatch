@@ -173,6 +173,7 @@ auto gpsSubsystem = Gps();
 //***********************************
 auto EventLog = FileLog(SD, "event_log.txt");
 std::queue<String> EventQueue;
+std::queue<String> CloudQueue;
 
 //***********************************
 //* System Data
@@ -196,7 +197,20 @@ void handle_all_system_events(system_event_t event, int param) {
   last_system_event_type = param;
 
   //Push this system event onto the queue to be logged in the error logging state
-  EventQueue.push(system_event_str);
+  EventQueue.push(time_str + ": " + system_event_str);
+}
+
+void handle_error(String error, bool cloud) {
+  Serial.printlnf("Got error: %s", error);
+  String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
+  last_system_event_time = time_str;
+
+  //Push this system event onto the queue to be logged in the error logging state
+  if(cloud) {
+      CloudQueue.push(time_str + ": " + error);
+  }
+
+  EventQueue.push(time_str + ": " + error);
 }
 
 void system_reset_to_safemode() {
@@ -210,6 +224,40 @@ int force_handshake(String cmd) {
   handshake_flag = true;
   return 0;
 }
+
+// The loop will act as a state machine. Certain particle calls are called every
+// loop then states are executed in order. The following enumeration defines
+// the states. Each state has a timeout. On timeout we reset the Particle
+// and log that state as an error, moving on to the next state.
+enum SystemState {
+  CheckCloudEvent,
+  CheckTimeSync,
+  SenseChargeState,
+  SenseMPU,
+  SenseWiFi,
+  SenseCell,
+  SenseSDPresent,
+  SenseLight,
+  SenseWit,
+  SenseGPS,
+  LogPacket,
+  SendPacket,
+  LogError,
+  SendError,
+  Wait
+};
+
+enum ParticleCloudState {
+  ConnectionCheck,
+  UpdateCheck,
+  HandshakeCheck
+};
+
+ParticleCloudState cloudState = ConnectionCheck;
+
+// Retained system states are used to diagnose restarts (error vs hard reset)
+retained SystemState state = Wait;
+retained SystemState lastState = SendError;
 
 //***********************************
 //* ye-old Arduino
@@ -254,42 +302,19 @@ void setup() {
 
   Particle.connect();
 
+  // If our state and lastState is the same we got stuck in a
+  // state and didn't transtition
+  if(state == lastState) {
+    String err_str(state);
+    handle_error("Reset after stuck in state " + err_str, true);
+  }
+
+  state = Wait;
+  lastState = SendError;
+
   Serial.println("Setup complete.");
 }
 
-// The loop will act as a state machine. Certain particle calls are called every
-// loop then states are executed in order. The following enumeration defines
-// the states. Each state has a timeout. On timeout we reset the Particle
-// and log that state as an error, moving on to the next state.
-enum SystemState {
-  CheckCloudEvent,
-  CheckTimeSync,
-  SenseChargeState,
-  SenseMPU,
-  SenseWiFi,
-  SenseCell,
-  SenseSDPresent,
-  SenseLight,
-  SenseWit,
-  SenseGPS,
-  LogPacket,
-  SendPacket,
-  LogError,
-  SendError,
-  Wait
-};
-
-enum ParticleCloudState {
-  ConnectionCheck,
-  UpdateCheck,
-  HandshakeCheck
-};
-
-ParticleCloudState cloudState = ConnectionCheck;
-
-//Retained system states are used to diagnose restarts (error vs hard reset)
-SystemState state = Wait;
-SystemState lastState = SendError;
 
 //State Timer is reused to make sure a state doesn't loop for too long.
 //If it loops for too long we just call a reset. This can get us out of
@@ -437,6 +462,7 @@ void loop() {
       //return result or error
       if(result == FinishedError) {
         //Log the error in the error struct
+        handle_error("timeSync error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         state = SenseChargeState;
@@ -454,6 +480,7 @@ void loop() {
       //return result or error
       if(result == FinishedError) {
         //Log the error in the error struct
+        handle_error("chargeState error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.chargeStateResult = chargeStateSubsystem.getResult();
@@ -471,6 +498,7 @@ void loop() {
       //return result or error
       if(result == FinishedError) {
         //Log the error in the error struct
+        handle_error("IMU error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.mpuResult = imuSubsystem.getResult();
@@ -488,6 +516,7 @@ void loop() {
       //return result or error
       if(result == FinishedError) {
         //Log the error in the error struct
+        handle_error("WiFi error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.wifiResult = wifiSubsystem.getResult();
@@ -504,6 +533,7 @@ void loop() {
       //return result or error
       if(result == FinishedError) {
         //Log the error in the error struct
+        handle_error("cellStatus error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.cellResult = cellStatus.getResult();
@@ -521,6 +551,7 @@ void loop() {
       //return result or error
       if(result == FinishedError) {
         //Log the error in the error struct
+        handle_error("cellStatus error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.sdStatusResult = SD.getResult();
@@ -537,6 +568,7 @@ void loop() {
       //return result or error
       if(result == FinishedError) {
         //Log the error in the error struct
+        handle_error("light error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.lightResult = lightSubsystem.getResult();
@@ -554,6 +586,7 @@ void loop() {
       //return result or error
       if(result == FinishedError) {
         //Log the error in the error struct
+        handle_error("nrfWit error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.witResult = nrfWitSubsystem.getResult();
@@ -569,6 +602,7 @@ void loop() {
       //return result or error
       if(result == FinishedError) {
         //Log the error in the error struct
+        handle_error("GPS error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.gpsResult = gpsSubsystem.getResult();
@@ -582,7 +616,9 @@ void loop() {
 
       SD.PowerOn();
       String packet = stringifyResults(sensingResults);
-      DataLog.append(packet);
+      if(DataLog.append(packet)) {
+        handle_error("Data logging error", true);
+      }
       SD.PowerOff();
       state = SendPacket;
       break;
@@ -599,12 +635,16 @@ void loop() {
 
     case LogError: {
       manageStateTimer(30000);
+      static int count = 0;
 
       SD.PowerOn();
-
-      if(!EventQueue.empty()) {
-        EventLog.append(EventQueue.front());
-        EventQueue.pop();
+      if(!EventQueue.empty() && count < 4) {
+        count++;
+        if(EventLog.append(EventQueue.front())) {
+          handle_error("Event logging error", true);
+        } else {
+          EventQueue.pop();
+        }
       } else {
         SD.PowerOff();
         state = SendError;
@@ -614,8 +654,18 @@ void loop() {
     }
 
     case SendError: {
-      manageStateTimer(10000);
-      state = Wait;
+      manageStateTimer(30000);
+      static int count = 0;
+
+      if(!CloudQueue.empty() && count < 4) {
+        count++;
+        Cloud::Publish("!",CloudQueue.front());
+        CloudQueue.pop();
+      } else {
+        state = Wait;
+        count = 0;
+      }
+
       break;
     }
 

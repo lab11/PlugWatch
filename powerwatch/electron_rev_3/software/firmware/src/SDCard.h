@@ -37,7 +37,7 @@ public:
 	void PowerOn();
 	void PowerOff();
 
-	void Write(String filename, String to_write);
+ 	bool Write(String filename, String to_write);
 
 	String Read(String filename);
 };

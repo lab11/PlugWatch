@@ -37,7 +37,7 @@ void SDCard::PowerOff() {
 	delay(1000);
 }
 
-void SDCard::Write(String filename, String to_write) {
+bool SDCard::Write(String filename, String to_write) {
   /*
   log.debug("write begin: " + filename);
 	if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
@@ -64,26 +64,27 @@ void SDCard::Write(String filename, String to_write) {
     // This means the card is not present
 		Serial.println("SD Card Not Present");
     result = "0";
+    return 1;
   } else {
     result = "1";
   }
 
   if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
 		Serial.println("CAN'T OPEN SD");
-    return;
+    return 1;
 	}
 	File file_to_write;
 	String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
 	String final_to_write = time_str + String("|") + String(to_write);
 	if (!file_to_write.open(filename, O_WRITE | O_CREAT | O_AT_END)) {
 		Serial.println(String("opening ") + String(filename) + String(" for write failed"));
-		return;
+		return 1;
 	}
 	file_to_write.println(final_to_write);
 	file_to_write.close();
 
 	Serial.println(String("wrote : ") + String(filename) + String(":") + to_write);
-
+  return 0;
 }
 
 String SDCard::Read(String filename) {
