@@ -247,6 +247,10 @@ enum SystemState {
   Wait
 };
 
+SystemState nextState(SystemState s) {
+    return static_cast<SystemState>(static_cast<int>(s) + 1);
+}
+
 enum ParticleCloudState {
   ConnectionCheck,
   UpdateCheck,
@@ -307,10 +311,11 @@ void setup() {
   if(state == lastState) {
     String err_str(state);
     handle_error("Reset after stuck in state " + err_str, true);
+
+    // If we hung on the last iteration, move on to the next state
+    state = nextState(state);
   }
 
-  state = Wait;
-  lastState = SendError;
 
   Serial.println("Setup complete.");
 }
@@ -336,52 +341,53 @@ void manageStateTimer(unsigned int period) {
 
 //This structure is what all of the drivers will return. It will
 //be packetized and send to the cloud in the sendPacket state
+#define RESULT_LEN 50
 struct ResultStruct {
-  String chargeStateResult;
-  String mpuResult;
-  String wifiResult;
-  String cellResult;
-  String sdStatusResult;
-  String lightResult;
-  String witResult;
-  String gpsResult;
+  char chargeStateResult[RESULT_LEN];
+  char mpuResult[RESULT_LEN];
+  char wifiResult[RESULT_LEN];
+  char cellResult[RESULT_LEN];
+  char sdStatusResult[RESULT_LEN];
+  char lightResult[RESULT_LEN];
+  char witResult[RESULT_LEN];
+  char gpsResult[RESULT_LEN];
 };
 
 // A function to clear all the fields of a resultStruct
 void clearResults(ResultStruct* r) {
-  r->chargeStateResult = "";
-  r->mpuResult = "";
-  r->wifiResult = "";
-  r->cellResult = "";
-  r->sdStatusResult = "";
-  r->lightResult = "";
-  r->witResult = "";
-  r->gpsResult = "";
+  r->chargeStateResult[0] = 0;
+  r->mpuResult[0] = 0;
+  r->wifiResult[0] = 0;
+  r->cellResult[0] = 0;
+  r->sdStatusResult[0] = 0;
+  r->lightResult[0] = 0;
+  r->witResult[0] = 0;
+  r->gpsResult[0] = 0;
 }
 
 // A function to take all of the resutl strings and concatenate them together
 String stringifyResults(ResultStruct r) {
   String result = "";
-  result += r.chargeStateResult;
+  result += String(r.chargeStateResult);
   result += MAJOR_DLIM;
-  result += r.mpuResult;
+  result += String(r.mpuResult);
   result += MAJOR_DLIM;
-  result += r.wifiResult;
+  result += String(r.wifiResult);
   result += MAJOR_DLIM;
-  result += r.cellResult;
+  result += String(r.cellResult);
   result += MAJOR_DLIM;
-  result += r.sdStatusResult;
+  result += String(r.sdStatusResult);
   result += MAJOR_DLIM;
-  result += r.lightResult;
+  result += String(r.lightResult);
   result += MAJOR_DLIM;
-  result += r.witResult;
+  result += String(r.witResult);
   result += MAJOR_DLIM;
-  result += r.gpsResult;
-  result += '\n';
+  result += String(r.gpsResult);
   return result;
 }
 
-ResultStruct sensingResults;
+// retain this so that on the next iteration we still get results on hang
+retained ResultStruct sensingResults;
 
 void loop() {
   // Allow particle to do any processing
@@ -447,7 +453,7 @@ void loop() {
             Particle.publish("spark/device/session/end", "", PRIVATE);
           }
           cloudState = ConnectionCheck;
-          state = CheckTimeSync;
+          state = nextState(state);
           break;
         }
       }
@@ -465,7 +471,7 @@ void loop() {
         handle_error("timeSync error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        state = SenseChargeState;
+        state = nextState(state);
       }
       break;
     }
@@ -483,8 +489,8 @@ void loop() {
         handle_error("chargeState error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        sensingResults.chargeStateResult = chargeStateSubsystem.getResult();
-        state = SenseMPU;
+        strncpy(sensingResults.chargeStateResult, chargeStateSubsystem.getResult().c_str(), RESULT_LEN);
+        state = nextState(state);
       }
       break;
     }
@@ -501,8 +507,8 @@ void loop() {
         handle_error("IMU error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        sensingResults.mpuResult = imuSubsystem.getResult();
-        state = SenseWiFi;
+        strncpy(sensingResults.mpuResult, imuSubsystem.getResult().c_str(), RESULT_LEN);
+        state = nextState(state);
       }
       break;
     }
@@ -519,8 +525,8 @@ void loop() {
         handle_error("WiFi error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        sensingResults.wifiResult = wifiSubsystem.getResult();
-        state = SenseCell;
+        strncpy(sensingResults.wifiResult, wifiSubsystem.getResult().c_str(), RESULT_LEN);
+        state = nextState(state);
       }
       break;
     }
@@ -536,8 +542,8 @@ void loop() {
         handle_error("cellStatus error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        sensingResults.cellResult = cellStatus.getResult();
-        state = SenseSDPresent;
+        strncpy(sensingResults.cellResult, cellStatus.getResult().c_str(), RESULT_LEN);
+        state = nextState(state);
       }
       break;
     }
@@ -554,8 +560,8 @@ void loop() {
         handle_error("cellStatus error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        sensingResults.sdStatusResult = SD.getResult();
-        state = SenseLight;
+        strncpy(sensingResults.sdStatusResult, SD.getResult().c_str(), RESULT_LEN);
+        state = nextState(state);
       }
       break;
     }
@@ -571,8 +577,8 @@ void loop() {
         handle_error("light error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        sensingResults.lightResult = lightSubsystem.getResult();
-        state = SenseWit;
+        strncpy(sensingResults.lightResult, lightSubsystem.getResult().c_str(), RESULT_LEN);
+        state = nextState(state);
       }
       break;
     }
@@ -589,8 +595,8 @@ void loop() {
         handle_error("nrfWit error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        sensingResults.witResult = nrfWitSubsystem.getResult();
-        state = SenseGPS;
+        strncpy(sensingResults.witResult, nrfWitSubsystem.getResult().c_str(), RESULT_LEN);
+        state = nextState(state);
       }
       break;
     }
@@ -605,8 +611,8 @@ void loop() {
         handle_error("GPS error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        sensingResults.gpsResult = gpsSubsystem.getResult();
-        state = LogPacket;
+        strncpy(sensingResults.gpsResult, gpsSubsystem.getResult().c_str(), RESULT_LEN);
+        state = nextState(state);
       }
       break;
     }
@@ -620,7 +626,7 @@ void loop() {
         handle_error("Data logging error", true);
       }
       SD.PowerOff();
-      state = SendPacket;
+      state = nextState(state);
       break;
     }
 
@@ -628,8 +634,10 @@ void loop() {
       manageStateTimer(10000);
 
       String packet = stringifyResults(sensingResults);
-      Cloud::Publish("g",packet);
-      state = LogError;
+      if(!Cloud::Publish("g",packet)) {
+        handle_error("Data publishing error", true);
+      }
+      state = nextState(state);
       break;
     }
 
@@ -647,7 +655,7 @@ void loop() {
         }
       } else {
         SD.PowerOff();
-        state = SendError;
+        state = nextState(state);
       }
 
       break;
@@ -662,7 +670,7 @@ void loop() {
         Cloud::Publish("!",CloudQueue.front());
         CloudQueue.pop();
       } else {
-        state = Wait;
+        state = nextState(state);
         count = 0;
       }
 
