@@ -45,6 +45,67 @@ LoopStatus Imu::loop() {
   }
 }
 
+void Imu:setWakeOnMotion() {
+
+  //Reset Device
+  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x80);
+  delay(100);
+
+  //Set to default clock sources
+  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x01);
+  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_2, 0x00);
+  delay(200);
+
+  //****
+  //* Make sure accel is running
+  //****
+  //PWR_MGMT_1 make cycle=0, sleep=0, standby=0
+  cur_reg = imu.readByte(MPU9250_ADDRESS, PWR_MGMT_1);
+  data = cur_reg &= ~0x70;
+  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_1, data);
+
+  //PWR_MGMT_2 set DIS_XA, DIS_YA, DIS_ZA = 0, DIS_XG, DIS_YG, DIS_ZG = 1
+  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_2, 0x07);
+
+  //****
+  //* Set Acell LPF setting to 184hz BandWidth
+  //****
+  //ACCEL_CONFIG_@ set ACCEL_FCHOICE_B = 1 and A_DLPFCFG[2:] = 1(b001)
+  myIMU.writeByte(MPU9250_ADDRESS, ACCEL_CONFIG_2, 0x05);
+
+  //****
+  //* Enable Motion Interrupt
+  //****
+  //INT_ENABLE set whole register to 0x40 to enable motion interrupt only
+  myIMU.writeByte(MPU9250_ADDRESS, INT_ENABLE, 0x40);
+
+  //****
+  //* Enable Accel Hardware Intelligence
+  //****
+  //MOT_DETECT_CTRL set ACCEL_INTEL_EN=1 and ACCEL_INTEL_MODE=1
+  myIMU.writeByte(MPU9250_ADDRESS, MOT_DETECT_CTRL, 0xC0);
+
+  //****
+  //* Set Motion Threshold
+  //****
+  //WOM_THR set WOM_THRESH[7:0] to 1~255 LSBs (0!1020mg)
+  myIMU.writeByte(MPU9250_ADDRESS, WOM_THR, 0x1F); //TODO think about this value
+
+  //****
+  //* Set Wakeup Frequency
+  //****
+  //LP_ACCEL_ODR set LPOSC_CLKSEL [3:0] to 0.24Hz ~ 500Hz
+  myIMU.writeByte(MPU9250_ADDRESS, LP_ACCEL_ODR, 0x03);
+
+  //****
+  //* Enable Cycle Mode
+  //****
+  //PWR_MGMT_1 make cycle=1
+  cur_reg = imu.readByte(MPU9250_ADDRESS, PWR_MGMT_1);
+  data = cur_reg |= 0x20;
+  myIMU.writeByte(MPU9250_ADDRESS, PWR_MGMT_1, data);
+}
+
 String Imu::self_test() {
    byte c = myIMU.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
    String imu_st = "";
