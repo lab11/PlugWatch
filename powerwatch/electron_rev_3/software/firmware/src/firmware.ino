@@ -188,7 +188,8 @@ retained int num_manual_reboots = 0;
 
 void handle_all_system_events(system_event_t event, int param) {
   system_event_count++;
-  Serial.printlnf("got event %d with value %d", event, param);
+  // cast as per BDub post here: https://community.particle.io/t/system-events-param-problem/32071/14
+  Serial.printlnf("got event H: %lu event L: %lu with value %d", (uint32_t)(event>>32), (uint32_t)event, param);
   String system_event_str = String((int)event) + "|" + String(param);
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
   last_system_event_time = time_str;
