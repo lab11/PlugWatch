@@ -10,16 +10,24 @@ void NrfWit::setup() {
 }
 
 LoopStatus NrfWit::loop() {
-  String msg = "";
+  if (Serial4.available()) {
+    String msg = Serial4.readString();
 
-  // TODO: Framing? Request message? What's this interface?
-  msg = Serial4.readString();
-  //log.append("NrfWit Got: " + msg);
+    int start = msg.indexOf("\r");
+    if (start == -1) return FinishedSuccess;
 
-  result = msg;
+    int end = msg.indexOf("\n", start);
+    if (end == -1) return FinishedSuccess;
+
+    result = msg.substring(start, end);
+  }
+
   return FinishedSuccess;
 }
 
 String NrfWit::getResult() {
-  return result;
+  // Clear advertisement on read
+  String temp = result;
+  result = "";
+  return temp;
 }

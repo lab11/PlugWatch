@@ -237,6 +237,7 @@ void ble_evt_adv_report(ble_evt_t* p_ble_evt) {
         (void)status;
 
         unsigned j;
+        printf("\r");
         for (j=0; j<adv.dlen; j++) {
           printf("%02x", adv.data[j]);
         }
