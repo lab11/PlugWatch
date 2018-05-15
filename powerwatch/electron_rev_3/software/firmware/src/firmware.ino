@@ -8,6 +8,7 @@
 #include <Particle.h>
 
 // Third party libraries
+#include <APNHelperRK.h>
 #include <CellularHelper.h>
 #include <google-maps-device-locator.h>
 #include <OneWire.h>
@@ -263,6 +264,11 @@ ParticleCloudState cloudState = ConnectionCheck;
 retained SystemState state = Wait;
 retained SystemState lastState = SendError;
 
+const APNHelperAPN apns[1] = {
+  {"8901260", "wireless.twilio.com"}
+};
+APNHelper apnHelper(apns, sizeof(apns)/sizeof(apns[0]));
+
 //***********************************
 //* ye-old Arduino
 //***********************************
@@ -270,6 +276,9 @@ void setup() {
   // if (System.resetReason() == RESET_REASON_PANIC) {
   //   System.enterSafeMode();
   // }
+
+  //setup the apns
+  apnHelper.setCredentials();
 
   //This function tells the particle to force a reconnect with the cloud
   Particle.function("handshake", force_handshake);
