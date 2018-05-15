@@ -37,5 +37,5 @@ RAM_KB := 32
 FLASH_KB := 256
 
 # Include the main Makefile
-NRF_BASE_PATH ?= nrf5x-base
+NRF_BASE_PATH ?= ../nrf5x-base
 include $(NRF_BASE_PATH)/make/Makefile
