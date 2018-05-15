@@ -7,6 +7,7 @@ void NrfWit::setup() {
   super::setup();
 
   Serial4.begin(115200);
+  Serial4.setTimeout(2000);
 }
 
 LoopStatus NrfWit::loop() {

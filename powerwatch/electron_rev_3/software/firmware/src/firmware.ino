@@ -292,7 +292,7 @@ void setup() {
   chargeStateSubsystem.setup();
   imuSubsystem.setup();
   lightSubsystem.setup();
-  //nrfWitSubsystem.setup();
+  nrfWitSubsystem.setup();
   gpsSubsystem.setup();
   wifiSubsystem.setup();
   FuelGauge().quickStart();
@@ -572,7 +572,7 @@ void loop() {
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         sensingResults.lightResult = lightSubsystem.getResult();
-        state = SenseGPS;
+        state = SenseWit;
       }
       break;
     }
