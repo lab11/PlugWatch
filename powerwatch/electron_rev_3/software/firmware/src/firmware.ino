@@ -350,7 +350,7 @@ void manageStateTimer(unsigned int period) {
 
 //This structure is what all of the drivers will return. It will
 //be packetized and send to the cloud in the sendPacket state
-#define RESULT_LEN 50
+#define RESULT_LEN 80
 struct ResultStruct {
   char chargeStateResult[RESULT_LEN];
   char mpuResult[RESULT_LEN];
@@ -498,7 +498,7 @@ void loop() {
         handle_error("chargeState error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        strncpy(sensingResults.chargeStateResult, chargeStateSubsystem.getResult().c_str(), RESULT_LEN);
+        strncpy(sensingResults.chargeStateResult, chargeStateSubsystem.getResult().c_str(), RESULT_LEN-1);
         state = nextState(state);
       }
       break;
@@ -516,7 +516,7 @@ void loop() {
         handle_error("IMU error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        strncpy(sensingResults.mpuResult, imuSubsystem.getResult().c_str(), RESULT_LEN);
+        strncpy(sensingResults.mpuResult, imuSubsystem.getResult().c_str(), RESULT_LEN-1);
         state = nextState(state);
       }
       break;
@@ -534,7 +534,7 @@ void loop() {
         handle_error("WiFi error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        strncpy(sensingResults.wifiResult, wifiSubsystem.getResult().c_str(), RESULT_LEN);
+        strncpy(sensingResults.wifiResult, wifiSubsystem.getResult().c_str(), RESULT_LEN-1);
         state = nextState(state);
       }
       break;
@@ -551,7 +551,7 @@ void loop() {
         handle_error("cellStatus error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        strncpy(sensingResults.cellResult, cellStatus.getResult().c_str(), RESULT_LEN);
+        strncpy(sensingResults.cellResult, cellStatus.getResult().c_str(), RESULT_LEN-1);
         state = nextState(state);
       }
       break;
@@ -569,7 +569,7 @@ void loop() {
         handle_error("cellStatus error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        strncpy(sensingResults.sdStatusResult, SD.getResult().c_str(), RESULT_LEN);
+        strncpy(sensingResults.sdStatusResult, SD.getResult().c_str(), RESULT_LEN-1);
         state = nextState(state);
       }
       break;
@@ -586,7 +586,7 @@ void loop() {
         handle_error("light error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        strncpy(sensingResults.lightResult, lightSubsystem.getResult().c_str(), RESULT_LEN);
+        strncpy(sensingResults.lightResult, lightSubsystem.getResult().c_str(), RESULT_LEN-1);
         state = nextState(state);
       }
       break;
@@ -604,7 +604,7 @@ void loop() {
         handle_error("nrfWit error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        strncpy(sensingResults.witResult, nrfWitSubsystem.getResult().c_str(), RESULT_LEN);
+        strncpy(sensingResults.witResult, nrfWitSubsystem.getResult().c_str(), RESULT_LEN-1);
         state = nextState(state);
       }
       break;
@@ -620,7 +620,7 @@ void loop() {
         handle_error("GPS error", false);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
-        strncpy(sensingResults.gpsResult, gpsSubsystem.getResult().c_str(), RESULT_LEN);
+        strncpy(sensingResults.gpsResult, gpsSubsystem.getResult().c_str(), RESULT_LEN-1);
         state = nextState(state);
       }
       break;
