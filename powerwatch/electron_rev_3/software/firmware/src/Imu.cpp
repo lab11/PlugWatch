@@ -10,9 +10,6 @@
 void Imu::setup() {
   super::setup();
 
-  // TODO: Report error if this fails and don't try to use IMU in this session
-  // self_test_str = self_test();
-
   //set the motion threshold interrupt as an input
   pinMode(IMU_INT, INPUT);
 
@@ -20,7 +17,8 @@ void Imu::setup() {
   setWakeOnMotion();
 
   // Clear the interrupt by reading the interrupt status register
-  Serial.printlnf("%X",myIMU.readByte(MPU9250_ADDRESS, INT_STATUS));
+  delay(1000);
+  myIMU.readByte(MPU9250_ADDRESS, INT_STATUS);
 }
 
 LoopStatus Imu::loop() {

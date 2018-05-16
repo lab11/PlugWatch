@@ -2,13 +2,15 @@
 
 #include <Particle.h>
 
-class ESP8266 {
-  protected:
-    String *response;
-    bool *done;
+#include "Subsystem.h"
 
-  public:
-    ESP8266(String* response, bool* done);
-    void beginScan();
-    void loop();
+class ESP8266: public Subsystem {
+  String response;
+  unsigned long start_time;
+
+public:
+  ESP8266();
+  void beginScan();
+  LoopStatus loop();
+  String getResult();
 };

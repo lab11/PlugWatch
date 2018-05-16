@@ -93,7 +93,7 @@
 //***********************************
 int version_num = 2; //hack
 PRODUCT_ID(7456); //US testbed
-PRODUCT_VERSION(8);
+PRODUCT_VERSION(10);
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
@@ -124,9 +124,7 @@ SDCard SD;
 //***********************************
 //* ESP8266 WIFI Module
 //***********************************
-String serial5_response;
-bool serial5_recv_done;
-auto esp8266 = ESP8266(&serial5_response, &serial5_recv_done);
+auto esp8266 = ESP8266();
 
 //***********************************
 //* Timesync
@@ -162,7 +160,7 @@ auto nrfWitSubsystem = NrfWit();
 //***********************************
 //* WIFI
 //***********************************
-auto wifiSubsystem = Wifi(esp8266, &serial5_response, &serial5_recv_done);
+auto wifiSubsystem = Wifi(esp8266);
 
 //***********************************
 //* GPS

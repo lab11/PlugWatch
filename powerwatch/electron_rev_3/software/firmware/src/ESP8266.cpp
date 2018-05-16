@@ -6,12 +6,7 @@ const int WIFI_PWR_EN = B1;
 const int WIFI_PWR_RST = C4;
 const String endstring = "OK\r\n";
 
-ESP8266::ESP8266(String* response, bool* done):
-  response { response },
-  done { done }
-{
-  *done = false;
-
+ESP8266::ESP8266() {
   // Power cycle and reset
   pinMode(WIFI_PWR_EN, OUTPUT);
   digitalWrite(WIFI_PWR_EN, HIGH);
@@ -51,25 +46,33 @@ ESP8266::ESP8266(String* response, bool* done):
     Serial5.read();
   }
 
-  *response = "";
+  response = "";
 }
 
 void ESP8266::beginScan() {
-  *response = "";
-  *done = false;
+  response = "";
+  start_time = millis();
   Serial5.println("AT+CWLAP");
 }
 
-void ESP8266::loop() {
-  unsigned long start_time = millis();
-  if (!*done && Serial5.available()) {
-    while(millis() - start_time < 10000) {
-      String recv = Serial5.readString();
-      response->concat(recv);
-      if (recv.endsWith(endstring)) {
-        *done = true;
-        break;
-      }
+String ESP8266::getResult() {
+  return response;
+}
+
+LoopStatus ESP8266::loop() {
+  if(millis() - start_time < 10000) {
+    if (Serial5.available()) {
+        String recv = Serial5.readString();
+        response.concat(recv);
+        if (recv.endsWith(endstring)) {
+          return FinishedSuccess;
+        } else {
+          return NotFinished;
+        }
+    } else {
+      return NotFinished;
     }
+  } else {
+    return FinishedError;
   }
 }

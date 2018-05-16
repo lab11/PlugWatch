@@ -8,10 +8,11 @@
 void Wifi::construct_ssid_list() {
   size_t place = 0;
   Serial.println();
-  while (place < serial_response->length() and place >= 0) {
-    size_t first = serial_response->indexOf('"', place);
-    size_t second = serial_response->indexOf('"', first+1);
-    String ssid = serial_response->substring(first+1, second);
+  String serial_response = esp8266.getResult();
+  while (place < serial_response.length() and place >= 0) {
+    size_t first = serial_response.indexOf('"', place);
+    size_t second = serial_response.indexOf('"', first+1);
+    String ssid = serial_response.substring(first+1, second);
 
     // Take the crc16 of the ssid - this is a makeshift hash
     uint16_t crc = OneWire::crc16((uint8_t*)ssid.c_str(),ssid.length());
@@ -23,7 +24,7 @@ void Wifi::construct_ssid_list() {
 
     //put the hash in our set
     ssid_set.insert(hash);
-    place = serial_response->indexOf("CWLAP", second);
+    place = serial_response.indexOf("CWLAP", second);
   }
 }
 
@@ -48,7 +49,6 @@ LoopStatus Wifi::loop() {
   switch (state) {
     case Idle: {
       ssid_set.clear();
-      scan_start_time = millis();
       esp8266.beginScan();
 
       state = Scanning;
@@ -56,17 +56,15 @@ LoopStatus Wifi::loop() {
     }
 
     case Scanning: {
-      esp8266.loop();
+      LoopStatus r = esp8266.loop();
 
-      if (! *serial_done) {
-        return NotFinished;
+      if(r == FinishedSuccess) {
+        construct_ssid_list();
+        state = Idle;
+        return r;
+      } else {
+        return r;
       }
-
-      *serial_done = false;
-      construct_ssid_list();
-
-      state = Idle;
-      return FinishedSuccess;
     }
   }
 }
