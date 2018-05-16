@@ -93,7 +93,7 @@
 //***********************************
 int version_num = 2; //hack
 PRODUCT_ID(7456); //US testbed
-PRODUCT_VERSION(7);
+PRODUCT_VERSION(8);
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
@@ -730,6 +730,12 @@ void loop() {
         first = false;
 
       }
+      break;
+    }
+
+    default: {
+      state = Wait;
+      lastState = SendError;
       break;
     }
   }
