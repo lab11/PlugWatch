@@ -93,7 +93,7 @@
 //***********************************
 int version_num = 2; //hack
 PRODUCT_ID(7456); //US testbed
-PRODUCT_VERSION(6);
+PRODUCT_VERSION(7);
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
@@ -330,6 +330,11 @@ void setup() {
 
     // If we hung on the last iteration, move on to the next state
     state = nextState(state);
+  } else {
+    // If we reset and the states aren't the same then we didn't get stuck
+    // I don't know what state we're in but go back to start
+    state = Wait;
+    lastState = SendError;
   }
 
 
