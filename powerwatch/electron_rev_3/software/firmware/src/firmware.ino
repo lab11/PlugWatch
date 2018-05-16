@@ -226,6 +226,7 @@ int force_handshake(String cmd) {
   return 0;
 }
 
+
 // The loop will act as a state machine. Certain particle calls are called every
 // loop then states are executed in order. The following enumeration defines
 // the states. Each state has a timeout. On timeout we reset the Particle
@@ -269,6 +270,11 @@ const APNHelperAPN apns[1] = {
 };
 APNHelper apnHelper(apns, sizeof(apns)/sizeof(apns[0]));
 
+int reset_state(String cmd) {
+  state = Wait;
+  lastState = SendError;
+  System.reset();
+}
 //***********************************
 //* ye-old Arduino
 //***********************************
@@ -282,6 +288,7 @@ void setup() {
 
   //This function tells the particle to force a reconnect with the cloud
   Particle.function("handshake", force_handshake);
+  Particle.function("reset_state", reset_state);
 
   // Set up debugging UART
   Serial.begin(9600);
@@ -337,7 +344,7 @@ Timer stateTimer(60000,soft_watchdog_reset,true);
 
 //Before calling each state's loop function the state should call this
 //function with a period of the maximum time the state is allowed to take
-void manageStateTimer(unsigned int period) {
+void manageStateTimer(unsigned long period) {
   if(state != lastState) {
     Serial.printlnf("Transitioning to state %d from %d", state, lastState);
     stateTimer.stop();
@@ -706,7 +713,7 @@ void loop() {
       manageStateTimer(1200000);
 
       static bool first = false;
-      static int mill = 0;
+      static unsigned long mill = 0;
       if(!first) {
         mill = millis();
         first = true;
