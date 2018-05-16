@@ -93,7 +93,7 @@
 //***********************************
 int version_num = 2; //hack
 PRODUCT_ID(7456); //US testbed
-PRODUCT_VERSION(2);
+PRODUCT_VERSION(4);
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
@@ -478,6 +478,7 @@ void loop() {
       if(result == FinishedError) {
         //Log the error in the error struct
         handle_error("timeSync error", false);
+        state = nextState(state);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         state = nextState(state);
@@ -496,6 +497,8 @@ void loop() {
       if(result == FinishedError) {
         //Log the error in the error struct
         handle_error("chargeState error", false);
+        strncpy(sensingResults.chargeStateResult, "!", RESULT_LEN-1);
+        state = nextState(state);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         strncpy(sensingResults.chargeStateResult, chargeStateSubsystem.getResult().c_str(), RESULT_LEN-1);
@@ -514,6 +517,8 @@ void loop() {
       if(result == FinishedError) {
         //Log the error in the error struct
         handle_error("IMU error", false);
+        strncpy(sensingResults.mpuResult, "!", RESULT_LEN-1);
+        state = nextState(state);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         strncpy(sensingResults.mpuResult, imuSubsystem.getResult().c_str(), RESULT_LEN-1);
@@ -532,6 +537,8 @@ void loop() {
       if(result == FinishedError) {
         //Log the error in the error struct
         handle_error("WiFi error", false);
+        strncpy(sensingResults.wifiResult, "!", RESULT_LEN-1);
+        state = nextState(state);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         strncpy(sensingResults.wifiResult, wifiSubsystem.getResult().c_str(), RESULT_LEN-1);
@@ -549,6 +556,8 @@ void loop() {
       if(result == FinishedError) {
         //Log the error in the error struct
         handle_error("cellStatus error", false);
+        strncpy(sensingResults.cellResult, "!", RESULT_LEN-1);
+        state = nextState(state);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         strncpy(sensingResults.cellResult, cellStatus.getResult().c_str(), RESULT_LEN-1);
@@ -567,6 +576,8 @@ void loop() {
       if(result == FinishedError) {
         //Log the error in the error struct
         handle_error("cellStatus error", false);
+        strncpy(sensingResults.sdStatusResult, "!", RESULT_LEN-1);
+        state = nextState(state);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         strncpy(sensingResults.sdStatusResult, SD.getResult().c_str(), RESULT_LEN-1);
@@ -584,6 +595,8 @@ void loop() {
       if(result == FinishedError) {
         //Log the error in the error struct
         handle_error("light error", false);
+        strncpy(sensingResults.lightResult, "!", RESULT_LEN-1);
+        state = nextState(state);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         strncpy(sensingResults.lightResult, lightSubsystem.getResult().c_str(), RESULT_LEN-1);
@@ -602,6 +615,8 @@ void loop() {
       if(result == FinishedError) {
         //Log the error in the error struct
         handle_error("nrfWit error", false);
+        strncpy(sensingResults.witResult, "!", RESULT_LEN-1);
+        state = nextState(state);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         strncpy(sensingResults.witResult, nrfWitSubsystem.getResult().c_str(), RESULT_LEN-1);
@@ -618,6 +633,7 @@ void loop() {
       if(result == FinishedError) {
         //Log the error in the error struct
         handle_error("GPS error", false);
+        state = nextState(state);
       } else if(result == FinishedSuccess) {
         //get the result from the charge state and put it into the system struct
         strncpy(sensingResults.gpsResult, gpsSubsystem.getResult().c_str(), RESULT_LEN-1);
@@ -687,7 +703,7 @@ void loop() {
     }
 
     case Wait: {
-      manageStateTimer(120000);
+      manageStateTimer(1200000);
 
       static bool first = false;
       static int mill = 0;
@@ -696,7 +712,7 @@ void loop() {
         first = true;
       }
 
-      if(millis() - mill > 60000) {
+      if(millis() - mill > 600000) {
         clearResults(&sensingResults);
         state = CheckCloudEvent;
         first = false;
