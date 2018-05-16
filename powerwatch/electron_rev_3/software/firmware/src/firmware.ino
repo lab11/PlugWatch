@@ -541,7 +541,7 @@ void loop() {
     }
 
     case SenseCell: {
-      manageStateTimer(2000);
+      manageStateTimer(5000);
 
       LoopStatus result = cellStatus.loop();
 
@@ -594,7 +594,7 @@ void loop() {
 
     case SenseWit: {
       //This requires scanning for an advertisement
-      manageStateTimer(5000);
+      manageStateTimer(20000);
 
       LoopStatus result = nrfWitSubsystem.loop();
 

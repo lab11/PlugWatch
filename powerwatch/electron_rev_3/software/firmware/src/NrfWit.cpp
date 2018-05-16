@@ -6,8 +6,27 @@
 void NrfWit::setup() {
   super::setup();
 
+  reset();
+
   Serial4.begin(115200);
-  Serial4.setTimeout(2000);
+  Serial4.setTimeout(500);
+
+  // Clear out the current buffer
+  while(Serial4.available()) {
+    Serial4.read();
+  }
+}
+
+void NrfWit::reset() {
+  // Reset the NRF
+  pinMode(D7, OUTPUT);
+  digitalWrite(D7, LOW);
+  delay(1000);
+  digitalWrite(D7, HIGH);
+  delay(500);
+
+  // Set it back to input in case the button gets pressed
+  pinMode(D7, INPUT);
 }
 
 LoopStatus NrfWit::loop() {
@@ -20,10 +39,19 @@ LoopStatus NrfWit::loop() {
     int end = msg.indexOf("\n", start);
     if (end == -1) return FinishedSuccess;
 
-    result = msg.substring(start, end);
+    if(msg.length() > 62) {
+      result = msg.substring(start+45, start+63);
+    } else {
+      return FinishedSuccess;
+    }
+
+
+    return FinishedSuccess;
+  } else {
+    // It really is an error if serial is unavailable
+    return FinishedError;
   }
 
-  return FinishedSuccess;
 }
 
 String NrfWit::getResult() {

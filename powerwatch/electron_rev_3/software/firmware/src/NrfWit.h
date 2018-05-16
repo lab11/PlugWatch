@@ -10,6 +10,7 @@ class NrfWit: public Subsystem {
   String result;
 
 public:
+  void reset();
   void setup();
   LoopStatus loop();
   String getResult();
