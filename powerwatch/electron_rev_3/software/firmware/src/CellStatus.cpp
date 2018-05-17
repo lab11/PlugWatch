@@ -6,9 +6,13 @@ LoopStatus CellStatus::loop() {
 
   uint32_t freemem = System.freeMemory();
   CellularSignal sig = Cellular.RSSI();
+  CellularDevice dev;
+  dev.size = sizeof(dev);
+  cellular_device_info(&dev, NULL);
 
   result = String(System.version().c_str());
   result = result + String(MINOR_DLIM) + String(System.versionNumber());
+  result = result + String(MINOR_DLIM) + dev.imei + String(MINOR_DLIM) + dev.iccid;
   result = result + String(MINOR_DLIM) + String(freemem);
   result = result + String(MINOR_DLIM) + String(sig.rssi) + String(MINOR_DLIM) + String(sig.qual);
 
