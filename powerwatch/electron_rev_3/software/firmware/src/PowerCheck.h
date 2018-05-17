@@ -34,6 +34,8 @@ public:
 	 */
 	bool getIsCharging();
 
+	bool enableCharging();
+
 private:
 	void interruptHandler();
 

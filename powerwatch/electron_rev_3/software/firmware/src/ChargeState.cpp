@@ -25,6 +25,9 @@ LoopStatus ChargeState::loop() {
   + String(powerCheck.getHasPower());
 
   result = power_stats;
+
+  powerCheck.enableCharging();
+
   return FinishedSuccess;
 }
 

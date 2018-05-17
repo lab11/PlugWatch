@@ -8,6 +8,9 @@ void PowerCheck::setup() {
 
 	// BATT_INT_PC13
 	attachInterrupt(LOW_BAT_UC, &PowerCheck::interruptHandler, this, FALLING);
+
+	// Enable charging
+	pmic.enableCharging();
 }
 
 bool PowerCheck::getHasPower() {
@@ -15,6 +18,10 @@ bool PowerCheck::getHasPower() {
 	// This means we're powered off USB or VIN, so we don't know for sure if there's a battery
 	byte systemStatus = pmic.getSystemStatus();
 	return ((systemStatus & 0x04) != 0);
+}
+
+bool PowerCheck::enableCharging() {
+	return pmic.enableCharging();
 }
 
 /**

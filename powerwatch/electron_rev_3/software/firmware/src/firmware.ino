@@ -268,6 +268,10 @@ const APNHelperAPN apns[1] = {
 };
 APNHelper apnHelper(apns, sizeof(apns)/sizeof(apns[0]));
 
+void reset_helper() {
+  reset_state("");
+}
+
 int reset_state(String cmd) {
   state = Wait;
   lastState = SendError;
@@ -301,7 +305,7 @@ void setup() {
 
   // Get the reset button going
   pinMode(reset_btn, INPUT);
-  attachInterrupt(reset_btn, reset_state(), RISING, 3);
+  attachInterrupt(reset_btn, reset_helper, RISING, 3);
 
   // Setup SD card first so that other setups can log
   SD.setup();
