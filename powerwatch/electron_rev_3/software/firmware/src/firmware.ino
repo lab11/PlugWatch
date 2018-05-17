@@ -93,7 +93,7 @@
 //***********************************
 int version_num = 2; //hack
 PRODUCT_ID(7456); //US testbed
-PRODUCT_VERSION(11);
+PRODUCT_VERSION(12);
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
@@ -301,7 +301,7 @@ void setup() {
 
   // Get the reset button going
   pinMode(reset_btn, INPUT);
-  attachInterrupt(reset_btn, system_reset_to_safemode, RISING, 3);
+  attachInterrupt(reset_btn, reset_state(), RISING, 3);
 
   // Setup SD card first so that other setups can log
   SD.setup();
