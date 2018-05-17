@@ -7,7 +7,7 @@
 #include <queue>
 
 #define MINOR_DLIM "|"
-#define MAJOR_DLIM ","
+#define MAJOR_DLIM ";"
 
 class SDCard;
 
