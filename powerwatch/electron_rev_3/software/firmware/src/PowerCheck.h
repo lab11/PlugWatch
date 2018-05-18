@@ -36,6 +36,8 @@ public:
 
 	bool enableCharging();
 
+	int getChargeCurrent();
+
 private:
 	void interruptHandler();
 

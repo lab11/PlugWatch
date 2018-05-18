@@ -44,6 +44,10 @@ bool PowerCheck::getHasBattery() {
 	}
 }
 
+int PowerCheck::getChargeCurrent() {
+	return pmic.getChargeCurrent();
+}
+
 
 /**
  * Returns true if the Electron is currently charging (red light on)
