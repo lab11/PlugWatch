@@ -235,43 +235,25 @@ function post_event(event) {
     }
 }
 
+var global_data_stream = null;
+
 function restart_data_stream() {
+
+    console.log('Restarting data stream');
+
+    // If we have a stream going, kill it
+    if(global_data_stream) {
+        global_data_stream.abort();
+    }
+
     // Get the particle event stream
     particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'g' }).then(
     
         function(stream) {
+            console.log('Setting data stream');
+            global_data_stream = stream;
             stream.on('event', function(event) {
                 post_event(event);
-            });
-            stream.on('end', function() {
-                console.log('Data stream ended - restarting!');
-                restart_data_stream();
-            });
-            stream.on('error', function() {
-                console.log('Data stream errored - restarting!');
-                restart_data_stream();
-            });
-        }, function(err) {
-            console.log("Failed to getEventStream: ", err);
-        }
-    );
-}
-
-function restart_error_stream() {
-    // Get the particle event stream
-    particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'!' }).then(
-    
-        function(stream) {
-            stream.on('event', function(event) {
-                post_error(event);
-            });
-            stream.on('end', function() {
-                console.log('Error stream ended - restarting!');
-                restart_error_stream();
-            });
-            stream.on('error', function() {
-                console.log('Error stream errored - restarting!');
-                restart_error_stream();
             });
         }, function(err) {
             console.log("Failed to getEventStream: ", err);
@@ -280,4 +262,34 @@ function restart_error_stream() {
 }
 
 restart_data_stream();
+setInterval(restart_data_stream, 600000);
+
+
+var global_error_stream = null;
+
+function restart_error_stream() {
+
+    console.log('Restarting error stream');
+
+    if(global_error_stream) {
+        global_error_stream.abort();
+    }
+
+    // Get the particle event stream
+    particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'!' }).then(
+    
+        function(stream) {
+            console.log('Setting error stream');
+            global_error_stream = stream;
+
+            stream.on('event', function(event) {
+                post_error(event);
+            });
+        }, function(err) {
+            console.log("Failed to getEventStream: ", err);
+        }
+    );
+}
+
 restart_error_stream();
+setInterval(restart_error_stream, 600000);
