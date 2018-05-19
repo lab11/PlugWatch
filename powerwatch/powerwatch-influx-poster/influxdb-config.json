@@ -1,0 +1,8 @@
+{
+    "host": "host.com",
+    "port": 8086,
+    "database": "my_db",
+    "protocol": "http",
+    "username": "my_user",
+    "password": "my_pass"
+}
