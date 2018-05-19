@@ -4,8 +4,9 @@
 #include "PowerCheck.h"
 #include "AssetTracker.h"
 
+int version_num = 5; //hack
 PRODUCT_ID(7381);
-PRODUCT_VERSION(2);
+PRODUCT_VERSION(5);
 
 
 String RESET_LOG = "reset_log.txt";
@@ -13,6 +14,11 @@ String SYNC_LOG = "sync_log.txt";
 String POWER_LOG = "power_log.txt";
 String HEARTBEAT_LOG = "heartbeat_log.txt";
 String GPS_LATLNG_LOG = "gps_log.txt";
+
+
+
+bool reset_flag = false;
+bool handshake_flag = false;
 
 SYSTEM_MODE(MANUAL);
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
@@ -26,7 +32,7 @@ retained bool charge_state;
 retained uint8_t num_manual_reboots = 0;
 int reset_btn = A0;
 
-uint8_t loop_cnt = 0;
+int loop_cnt = 0;
 AssetTracker t = AssetTracker();
 
 //***********************************
@@ -40,9 +46,9 @@ const uint8_t chipSelect = A2;
 File myFile;
 const uint8_t SD_ENABLE_PIN = D5;
 long lastPublish = 0;
-int delayMillis = 10000;
+int delayMillis = 10000 * 10;
 long lastPublishDebug = 0;
-int delayDebugMillis = 1000;
+int delayDebugMillis = 10000;
 
 String reset_message = "";
 retained String last_system_event_time = "";
@@ -64,6 +70,15 @@ const int HARDWARE_WATCHDOG_TIMEOUT_MS = 1000 * 60;
 ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, System.reset);
 
 
+int force_handshake(String cmd) {
+  handshake_flag = true;
+  return 0;
+}
+
+int force_reset(String cmd) {
+  reset_flag = true;
+  return 0;
+}
 
 void setup() {
 
@@ -83,6 +98,7 @@ void setup() {
 
   sd_write("setup", "setup");
   powerCheck.setup();
+  FuelGauge().quickStart();
 
   kill_most_subsystems();
   System.on(all_events, handle_all_system_events);
@@ -92,6 +108,10 @@ void setup() {
   Particle.variable("l_se_type", last_system_event_str);
   Particle.variable("is_charging", charge_state);
   Particle.variable("loop", loop_cnt);
+  Particle.function("handshake", force_handshake);
+  Particle.function("reset", force_reset);
+
+  delay(200);
 
 }
 
@@ -136,6 +156,16 @@ void sd_write(String filename, String to_write) {
 
 void loop() {
   t.updateGPS();
+
+  if (handshake_flag) {
+    handshake_flag = false;
+    Particle.publish("spark/device/session/end", "", PRIVATE);
+  }
+
+  if (reset_flag) {
+    reset_flag = false;
+    System.reset();
+  }
 
   if (System.updatesPending())
   {
@@ -184,22 +214,33 @@ void loop() {
     }
   }
 
+  if (millis()-lastPublishDebug > 1000) {
+    lastPublishDebug = millis();
+
+    bool charge_state_test = powerCheck.getIsCharging();
+    //Particle.publish("tp", String(charge_state_test));
+    if (charge_state_test) {
+      digitalWrite(DEBUG_LED, HIGH);
+    } else {
+      digitalWrite(DEBUG_LED, LOW);
+    }
+  }
+
 
   if (millis()-lastPublish > delayMillis) {
-       digitalWrite(DEBUG_LED, HIGH);
        lastPublish = millis();
        Serial.println("sensing");
        //******************************************
        // Power Change
        //******************************************
-       static bool last_charge_state = false;
-       charge_state = powerCheck.getIsCharging();
+       bool last_charge_state = false;
+       bool charge_state = powerCheck.getIsCharging();
        if (charge_state != last_charge_state) {
          Serial.println(String(charge_state));
          //power_send();
          last_charge_state = charge_state;
          sd_write(POWER_LOG, String(charge_state));
-         String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell()) + String("|") + String(powerCheck.getIsCharging());
+         String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell()) + String("|") + String(charge_state);
          Particle.publish("gp", power_stats);
        }
       //*******************************************
@@ -226,15 +267,6 @@ void loop() {
    }
 
 
-   if (millis()-lastPublishDebug > delayDebugMillis) {
-     lastPublishDebug = millis();
-     Serial.println("checking");
-     digitalWrite(DEBUG_LED, LOW);
-     delay(50);
-     digitalWrite(DEBUG_LED, HIGH);
-   }
-
-
    wd.checkin();
 
 
@@ -244,10 +276,12 @@ void take_heartbeat() {
   uint32_t freemem = System.freeMemory();
   sig = Cellular.RSSI();
   String res = String(System.version().c_str());
-  res = res + String("|") + String(System.versionNumber());
+  res = res + String("|") + String(version_num);
   res = res + String("|") + String(freemem);
   res = res + String("|") + String(sig.rssi) + String("|") + String(sig.qual);
-  res = res + String("|") + String(charge_state);
+  bool charge_state = powerCheck.getIsCharging();
+  String power_stats = String(FuelGauge().getSoC()) + String("|") + String(FuelGauge().getVCell()) + String("|") + String(charge_state);
+  res = res + String("|") + String(power_stats);
   res = res + String("|") + String(loop_cnt);
   Serial.println("hb: " + String(res));
   sd_write(HEARTBEAT_LOG, res);
