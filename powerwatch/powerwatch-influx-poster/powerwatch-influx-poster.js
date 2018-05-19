@@ -235,26 +235,41 @@ function post_event(event) {
     }
 }
 
-// Get the particle event stream
-particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'g' }).then(
+function restart_data_stream() {
+    // Get the particle event stream
+    particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'g' }).then(
+    
+        function(stream) {
+            stream.on('event', function(event) {
+                post_event(event);
+            });
+            stream.on('end', function() {
+                console.log('Data stream ended - restarting!');
+                restart_data_stream();
+            });
+        }, function(err) {
+            console.log("Failed to getEventStream: ", err);
+        }
+    );
+}
 
-    function(stream) {
-        stream.on('event', function(event) {
-            post_event(event);
-        });
-    }, function(err) {
-        console.log("Failed to getEventStream: ", err);
-    }
-);
+function restart_error_stream() {
+    // Get the particle event stream
+    particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'!' }).then(
+    
+        function(stream) {
+            stream.on('event', function(event) {
+                post_error(event);
+            });
+            stream.on('end', function() {
+                console.log('Error stream ended - restarting!');
+                restart_error_stream();
+            });
+        }, function(err) {
+            console.log("Failed to getEventStream: ", err);
+        }
+    );
+}
 
-// Get the particle event stream
-particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'!' }).then(
-
-    function(stream) {
-        stream.on('event', function(event) {
-            post_error(event);
-        });
-    }, function(err) {
-        console.log("Failed to getEventStream: ", err);
-    }
-);
+restart_data_stream();
+restart_error_stream();
