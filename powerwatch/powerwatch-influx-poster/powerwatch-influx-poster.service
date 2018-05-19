@@ -1,0 +1,13 @@
+[Unit]
+Description=Publish powerwatch to influxdb
+After=network.service
+
+[Service]
+ExecStart=/home/adkinsjd/plugwatch/powerwatch/powerwatch-influx-poster/powerwatch-influx-poster.js
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=powerwatch-influx-poster
+
+[Install]
+WantedBy=multi-user.target
