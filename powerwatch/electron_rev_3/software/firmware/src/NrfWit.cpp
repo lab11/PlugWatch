@@ -30,27 +30,35 @@ void NrfWit::reset() {
 }
 
 LoopStatus NrfWit::loop() {
-  if (Serial4.available()) {
-    String msg = Serial4.readString();
+  static bool first = true;
+  static unsigned long mill = 0;
+  if(first) {
+    mill = millis();
+    first = false;
+  }
 
-    int start = msg.indexOf("\r");
-    if (start == -1) return FinishedSuccess;
+  if(millis() - mill < 15000) {
+    if (Serial4.available()) {
+      String msg = Serial4.readString();
+      result.concat(msg);
 
-    int end = msg.indexOf("\n", start);
-    if (end == -1) return FinishedSuccess;
+      int start = result.indexOf("\r");
+      int end = result.indexOf("\n", start);
+      if(start >= 0 && end >= 0 && result.length() > start + 63) {
+        result = msg.substring(start+45, start+63);
+        first = true;
+        return FinishedSuccess;
+      }
 
-    if(msg.length() > 62) {
-      result = msg.substring(start+45, start+63);
+      return NotFinished;
     } else {
-      return FinishedSuccess;
+      return NotFinished;
     }
-
-
-    return FinishedSuccess;
   } else {
-    // It really is an error if serial is unavailable
+    first = true;
     return FinishedError;
   }
+
 
 }
 
