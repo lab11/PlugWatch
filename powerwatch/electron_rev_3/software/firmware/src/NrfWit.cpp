@@ -9,7 +9,7 @@ void NrfWit::setup() {
   reset();
 
   Serial4.begin(115200);
-  Serial4.setTimeout(500);
+  Serial4.setTimeout(100);
 
   // Clear out the current buffer
   while(Serial4.available()) {
