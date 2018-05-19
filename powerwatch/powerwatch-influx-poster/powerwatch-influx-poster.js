@@ -30,6 +30,48 @@ function parseHexString(str) {
     return result;
 }
 
+function post_error(event) {
+    if(event.version && event.data) {
+        if(parseInt(event.version) >= 14) {
+            var fields = {};
+            var tags = {};
+
+            tags['firmware_version'] = event.version;
+            tags['core_id'] = event.coreid;
+            tags['product_id'] = event.productID;
+
+            var timestamp = new Date(event.published_at).getTime();
+            fields['error_string'] = event.data;
+
+            if(event.data.includes("Reset after")) {
+                fields['error_state'] = parseInt(event.data.slice(-1));
+                fields['logging_error'] = false;
+                fields['hanging_error'] = true;
+            }
+
+            if(event.data.includes("Data logging") || event.data.includes("Event logging")) {
+                fields['logging_error'] = true;
+                fields['hanging_error'] = false;
+            }
+
+            console.log(fields);
+            console.log(tags);
+            console.log(timestamp);
+
+            for( var key in fields) {
+                var point = [
+                    key,
+                    tags,
+                    {value: fields[key]},
+                    timestamp
+                ];
+
+                influx_poster.write_data(point);
+            }
+        }
+    }
+}
+
 function post_event(event) {
     if(event.version && event.data) {
         if(parseInt(event.version) >= 14) {
@@ -199,6 +241,18 @@ particle.getEventStream({ product:particle_config.product_id, auth:particle_conf
     function(stream) {
         stream.on('event', function(event) {
             post_event(event);
+        });
+    }, function(err) {
+        console.log("Failed to getEventStream: ", err);
+    }
+);
+
+// Get the particle event stream
+particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'!' }).then(
+
+    function(stream) {
+        stream.on('event', function(event) {
+            post_error(event);
         });
     }, function(err) {
         console.log("Failed to getEventStream: ", err);
