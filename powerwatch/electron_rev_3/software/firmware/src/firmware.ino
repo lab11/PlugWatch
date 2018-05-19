@@ -26,6 +26,7 @@
 #include "SDCard.h"
 #include "Subsystem.h"
 #include "Timesync.h"
+#include "uCommand.h"
 #include "Wifi.h"
 #include "firmware.h"
 
@@ -93,7 +94,7 @@
 //***********************************
 int version_num = 2; //hack
 PRODUCT_ID(7456); //US testbed
-PRODUCT_VERSION(14);
+PRODUCT_VERSION(15);
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
@@ -158,6 +159,11 @@ auto lightSubsystem = Light();
 auto nrfWitSubsystem = NrfWit();
 
 //***********************************
+//* uCommand
+//***********************************
+uCommand uCmd;
+
+//***********************************
 //* WIFI
 //***********************************
 auto wifiSubsystem = Wifi(esp8266);
@@ -173,11 +179,13 @@ auto gpsSubsystem = Gps();
 auto EventLog = FileLog(SD, "event_log.txt");
 std::queue<String> EventQueue;
 std::queue<String> CloudQueue;
+retained char last_cloud_event[50] = "";
 
 //***********************************
 //* System Data
 //***********************************
 auto DataLog = FileLog(SD, "data_log.txt");
+retained char last_logging_event[50] = "";
 
 // String SYSTEM_EVENT = "s";
 retained int system_event_count = 0;
@@ -200,7 +208,7 @@ void handle_all_system_events(system_event_t event, int param) {
 }
 
 void handle_error(String error, bool cloud) {
-  Serial.printlnf("Got error: %s", error);
+  Serial.printlnf("Got error: %s", error.c_str());
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
   last_system_event_time = time_str;
 
@@ -244,6 +252,7 @@ enum SystemState {
   SendPacket,
   LogError,
   SendError,
+  CheckSMS,
   Wait
 };
 
@@ -263,8 +272,9 @@ ParticleCloudState cloudState = ConnectionCheck;
 retained SystemState state = Wait;
 retained SystemState lastState = SendError;
 
-const APNHelperAPN apns[1] = {
-  {"8901260", "wireless.twilio.com"}
+const APNHelperAPN apns[2] = {
+  {"8901260", "wireless.twilio.com"},
+  {"8923301", "http://mtnplay.com.gh"}
 };
 APNHelper apnHelper(apns, sizeof(apns)/sizeof(apns[0]));
 
@@ -280,11 +290,26 @@ int reset_state(String cmd) {
 //***********************************
 //* ye-old Arduino
 //***********************************
-void setup() {
-  // if (System.resetReason() == RESET_REASON_PANIC) {
-  //   System.enterSafeMode();
-  // }
 
+void deleteAllMessages() {
+  // Delete any SMS messages that are already on the cellular modem
+  if(uCmd.checkMessages(10000) == RESP_OK) {
+    uCmd.smsPtr = uCmd.smsResults;
+  } else {
+    handle_error("Failed to check messages", false);
+  }
+
+  for(unsigned int i = 0; i < uCmd.numMessages; i++) {
+    if(uCmd.deleteMessage(uCmd.smsPtr->mess,10000) == RESP_OK) {
+
+    } else {
+      handle_error("Message delete error", false);
+    }
+    uCmd.smsPtr++;
+  }
+}
+
+void setup() {
   //setup the apns
   apnHelper.setCredentials();
 
@@ -318,6 +343,14 @@ void setup() {
   gpsSubsystem.setup();
   wifiSubsystem.setup();
   FuelGauge().quickStart();
+
+  if(uCmd.setSMSMode(1) == RESP_OK) {
+    Serial.println("Set up SMS mode");
+  } else {
+    handle_error("SMS Mode failed", false);
+  }
+
+  deleteAllMessages();
 
   LEDStatus status;
   status.off();
@@ -663,6 +696,8 @@ void loop() {
       String packet = stringifyResults(sensingResults);
       if(DataLog.append(packet)) {
         handle_error("Data logging error", true);
+      } else {
+        strncpy(last_logging_event, String(Time.format(Time.now(),TIME_FORMAT_ISO8601_FULL)).c_str(), 50);
       }
       SD.PowerOff();
       state = nextState(state);
@@ -675,6 +710,8 @@ void loop() {
       String packet = stringifyResults(sensingResults);
       if(!Cloud::Publish("g",packet)) {
         handle_error("Data publishing error", true);
+      } else {
+        strncpy(last_cloud_event, String(Time.format(Time.now(),TIME_FORMAT_ISO8601_FULL)).c_str(), 50);
       }
       state = nextState(state);
       break;
@@ -711,6 +748,37 @@ void loop() {
       } else {
         state = nextState(state);
         count = 0;
+      }
+
+      break;
+    }
+
+    case CheckSMS: {
+      manageStateTimer(45000);
+
+      if(uCmd.checkMessages(10000) == RESP_OK) {
+        uCmd.smsPtr = uCmd.smsResults;
+        Serial.printlnf("Got %d messages",uCmd.numMessages);
+        for(unsigned int i = 0; i < uCmd.numMessages; i++) {
+          Serial.printlnf("Got message: %s from %s",uCmd.smsPtr->sms,uCmd.smsPtr->phone);
+          String message = String(uCmd.smsPtr->sms);
+          if(message == "!Status") {
+              char stat[140] = {0};
+              snprintf(stat, 140, "Log: %s; Cloud: %s", last_logging_event, last_cloud_event);
+              uCmd.sendMessage(stat, uCmd.smsPtr->phone, 10000);
+          } else if(message == "!Reset") {
+              char stat[140] = "ACK";
+              uCmd.sendMessage(stat, uCmd.smsPtr->phone, 10000);
+              delay(10000);
+              reset_helper();
+          }
+        }
+
+        deleteAllMessages();
+        state = nextState(state);
+      } else {
+        handle_error("SMS Check error", false);
+        state = nextState(state);
       }
 
       break;
