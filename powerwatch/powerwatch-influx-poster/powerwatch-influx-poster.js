@@ -172,7 +172,7 @@ function post_event(event) {
                             key,
                             tags,
                             {value: fields[key][i]},
-                            timestamp
+                            timestamp+i
                         ];
 
                         influx_poster.write_data(point);
