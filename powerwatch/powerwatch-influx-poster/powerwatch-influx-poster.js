@@ -247,6 +247,10 @@ function restart_data_stream() {
                 console.log('Data stream ended - restarting!');
                 restart_data_stream();
             });
+            stream.on('error', function() {
+                console.log('Data stream errored - restarting!');
+                restart_data_stream();
+            });
         }, function(err) {
             console.log("Failed to getEventStream: ", err);
         }
@@ -263,6 +267,10 @@ function restart_error_stream() {
             });
             stream.on('end', function() {
                 console.log('Error stream ended - restarting!');
+                restart_error_stream();
+            });
+            stream.on('error', function() {
+                console.log('Error stream errored - restarting!');
                 restart_error_stream();
             });
         }, function(err) {
