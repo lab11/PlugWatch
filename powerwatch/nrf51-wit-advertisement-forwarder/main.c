@@ -177,6 +177,17 @@ static int convert_oort_to_p1milliunits (const uint8_t* oort) {
 //   Current
 // Byte 6-7:
 //   Wattage
+
+unsigned int get_multiplier(unsigned int decimal_value) {
+    switch(decimal_value) {
+        case 0: return 1;
+        case 1: return 10;
+        case 2: return 100;
+        case 3: return 1000;
+    }
+    return 0;
+}
+
 void ble_evt_adv_report(ble_evt_t* p_ble_evt) {
   ble_gap_evt_adv_report_t adv = p_ble_evt->evt.gap_evt.params.adv_report;
 
@@ -197,26 +208,34 @@ void ble_evt_adv_report(ble_evt_t* p_ble_evt) {
       unsigned status = cur[0];
       unsigned power_factor = cur[1];
       unsigned current_decimal_point_value = (cur[2] & 0xC0) >> 6;
-      unsigned wattage_decimal_point_value = (cur[2] & 0xA0) >> 4;
-      unsigned voltage = ((cur[2] & 0x0F) << 8) + cur[3];
-      //unsigned current = (((cur[4] >> 4) & 0xF)*1000 +
-      //                    (cur[4] & 0xF)*100 +
-      //                    ((cur[5] >> 4) & 0xF)*10 +
-      //                    (cur[5] & 0xF)
-      //                   ) / current_decimal_point_value;
-      //unsigned wattage = (((cur[6] >> 4) & 0xF)*1000 +
-      //                    (cur[6] & 0xF)*100 +
-      //                    ((cur[7] >> 4) & 0xF)*10 +
-      //                    (cur[7] & 0xF)
-      //                   ) / wattage_decimal_point_value;
-      uint8_t current_array[3] = {current_decimal_point_value, cur[4], cur[5]};
-      uint8_t wattage_array[3] = {wattage_decimal_point_value, cur[6], cur[7]};
-      unsigned current = convert_oort_to_p1milliunits(current_array);
-      unsigned wattage = convert_oort_to_p1milliunits(wattage_array);
+      unsigned wattage_decimal_point_value = (cur[2] & 0x30) >> 4;
+      unsigned voltage = (((cur[2] & 0x0F) << 8) + cur[3])/10;
+      unsigned current_value = (((cur[4] >> 4) & 0xF)*1000 +
+                                (cur[4] & 0xF)*100 +
+                                ((cur[5] >> 4) & 0xF)*10 +
+                                (cur[5] & 0xF));
+      unsigned wattage_value = (((cur[6] >> 4) & 0xF)*1000 +
+                                (cur[6] & 0xF)*100 +
+                                ((cur[7] >> 4) & 0xF)*10 +
+                                (cur[7] & 0xF));
+
+      //uint8_t current_array[3] = {current_decimal_point_value, cur[4], cur[5]};
+      //uint8_t wattage_array[3] = {wattage_decimal_point_value, cur[6], cur[7]};
+      //unsigned current = convert_oort_to_p1milliunits(current_array);
+      //unsigned wattage = convert_oort_to_p1milliunits(wattage_array);
+
+      //  We really need to do 10^*decimal_point_value
+      //  - but I don't really want to do floating point math
+      //  So this instead
+      unsigned current_multiplier = get_multiplier(current_decimal_point_value);
+      unsigned current = current_value*current_multiplier;
+
+      unsigned wattage_multiplier = get_multiplier(wattage_decimal_point_value);
+      unsigned wattage = wattage_value*wattage_multiplier;
 
       // Validate that the math checks out
       // n.b. there is ~238x headroom in 15A * 120V = 1800W (or 18000000) for 32-bit math
-      unsigned check_wattage = (voltage * current * power_factor) / (100 * 100);
+      unsigned check_wattage = (voltage * current * power_factor) / (100);
       unsigned difference = max(wattage, check_wattage) - min(wattage, check_wattage);
       float error;
       if (wattage > 0) {
