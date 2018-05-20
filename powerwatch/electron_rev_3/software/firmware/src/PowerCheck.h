@@ -36,6 +36,9 @@ public:
 
 	bool enableCharging();
 
+	void lowerChargeVoltage();
+	void setChargeCurrent();
+
 	int getChargeCurrent();
 
 private:

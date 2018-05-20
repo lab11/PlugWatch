@@ -27,6 +27,8 @@ LoopStatus ChargeState::loop() {
   result = power_stats;
 
   powerCheck.enableCharging();
+  powerCheck.setChargeCurrent();
+  powerCheck.lowerChargeVoltage();
 
   return FinishedSuccess;
 }

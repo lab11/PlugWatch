@@ -10,7 +10,10 @@ void PowerCheck::setup() {
 	attachInterrupt(LOW_BAT_UC, &PowerCheck::interruptHandler, this, FALLING);
 
 	// Enable charging
+	pmic.begin();
 	pmic.enableCharging();
+	setChargeCurrent();
+	lowerChargeVoltage();
 }
 
 bool PowerCheck::getHasPower() {
@@ -48,6 +51,14 @@ int PowerCheck::getChargeCurrent() {
 	return pmic.getChargeCurrent();
 }
 
+void PowerCheck::setChargeCurrent() {
+	pmic.setInputCurrentLimit(900);
+	pmic.setChargeCurrent(0,0,0,0,0,0);
+}
+
+void PowerCheck::lowerChargeVoltage() {
+	pmic.setChargeVoltage(4040);
+}
 
 /**
  * Returns true if the Electron is currently charging (red light on)
