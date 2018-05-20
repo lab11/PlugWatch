@@ -74,7 +74,7 @@ function post_error(event) {
 
 function post_event(event) {
     if(event.version && event.data) {
-        if(parseInt(event.version) >= 14) {
+        if(parseInt(event.version) >= 14 && parseInt(event.version) <= 17) {
             var major_field_list = event.data.split(";");
             var fields = {};
             
@@ -176,18 +176,23 @@ function post_event(event) {
                 if(adv_array[0] == 0xFF) {
                     fields['wit_present'] = true;
                     fields['wit_status'] = adv_array[1];
-                    fields['wit_power_factor'] = adv_array[2];
-                    var current_decimal_point_value = (adv_array[3] & 0xC0) >> 6;
-                    var wattage_decimal_point_value = (adv_array[3] & 0xA0) >> 4;
+                    fields['wit_power_factor'] = adv_array[2]/100.0;
+                    var current_decimal_point_value = ((adv_array[3] & 0xC0) >> 6);
+                    var wattage_decimal_point_value = ((adv_array[3] & 0x30) >> 4);
                     fields['wit_voltage_volts'] = (((adv_array[3] & 0x0F) << 8) + adv_array[4])/10;
-                    fields['wit_current_amps'] = (((adv_array[5] >> 4) & 0xF)*1000 
+                
+                    var current_value = (((adv_array[5] >> 4) & 0xF)*1000 
                                             + (adv_array[5] & 0xF)*100 
                                             + ((adv_array[6] >> 4) & 0xF)*10
-                                            + (adv_array[6] & 0xF))/current_decimal_point_value;
-                    fields['wit_power_watts'] = (((adv_array[7] >> 4) & 0xF)*1000 
+                                            + (adv_array[6] & 0xF));
+                    fields['wit_current_amps'] = (current_value/(1000/(Math.pow(10,current_decimal_point_value))));
+
+                    var wattage_value = (((adv_array[7] >> 4) & 0xF)*1000 
                                             + (adv_array[7] & 0xF)*100 
                                             + ((adv_array[8] >> 4) & 0xF)*10
-                                            + (adv_array[8] & 0xF))/wattage_decimal_point_value;
+                                            + (adv_array[8] & 0xF));
+                    fields['wit_power_watts'] = (wattage_value/(1000/(Math.pow(10,wattage_decimal_point_value))));
+
                 } else {
                     fields['wit_present'] = false;
                 }
