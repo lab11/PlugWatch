@@ -34,59 +34,24 @@
 //* TODO's
 //***********************************
 
-//System
-//  State Machine refactor
-//    remove timers?
-//    remove threads
-//    think about on-event actions (do we do at all? do we keep a buffer?)
-//  Merge in Matt's branch
-//  Sanity check cloud commands // controls. Minimize them. Document.
-//  Integrate with the publish manager (maybe not a concern anymore?)
-//  Figure out what to do with system events
-//  figure out when to go to safe mode
 //  control the debug light
 //  add in periodic reset
 //Peripherals
-//  add temp alone
-//  make wifi syncronus
-//  wifi ssid cloud hashing
-//  write audio transfer
-//  APN libraries / switches
 //  Add unique ID chip
-//SD
-//  add delete (maybe not?)
-//  add format (maybe not?)
-//  check powercycle
-//  add upload file, upload all
 //Default Heartbeat Packet
 //  size of free mem on SD Card (maybe not?)
-//  system mem
-//  temp
-//  cellular strength
-//  system count (retained)
-//  software version (maybe not?)
-//  isCharging
-//  num heartbeat (retained)
-//Identity Packet (daily?)
-//  IMEI
-//  ICCID
+//  system count
 //  Cape ID
 //  SD Card name
-//  Last GPS
+//  SD Card file size
 //  WiT MAC
-//  System Count
 //Heartbeat Stretch goals
 //  SMS Heartbeat
 //    disable on particle apn
 //    figure out endpoint
 //  Heartbeat on certain system events (upgrade in specific)
 //Tests
-//  SD works without cellular
-//  Cellular works without SD
 //  Device comes back from dead battery
-//  Cross validate wits, temp, light, audio?
-//Random ideas
-//  Can we run on 0.8.0?
 
 //***********************************
 //* Critical System Config
@@ -263,8 +228,9 @@ ParticleCloudState cloudState = ConnectionCheck;
 retained SystemState state = Wait;
 retained SystemState lastState = SendError;
 
-const APNHelperAPN apns[1] = {
-  {"8901260", "wireless.twilio.com"}
+const APNHelperAPN apns[2] = {
+  {"8901260", "wireless.twilio.com"},
+  {"8923301", "http://mtnplay.com.gh"}
 };
 APNHelper apnHelper(apns, sizeof(apns)/sizeof(apns[0]));
 
