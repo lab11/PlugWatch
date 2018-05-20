@@ -44,7 +44,7 @@ function post_error(event) {
             fields['error_string'] = event.data;
 
             if(event.data.includes("Reset after")) {
-                fields['error_state'] = parseInt(event.data.slice(-1));
+                fields['error_state'] = parseInt(event.data.split(' ')[-1]);
                 fields['logging_error'] = false;
                 fields['hanging_error'] = true;
             }
@@ -171,7 +171,6 @@ function post_event(event) {
             } else {
                 fields['wit_error'] = false; 
                 var adv_array = parseHexString(adv_string);
-                console.log(adv_array);
 
                 if(adv_array[0] == 0xFF) {
                     fields['wit_present'] = true;
@@ -208,13 +207,13 @@ function post_event(event) {
                 fields['gps_longitude'] = parseFlot(gps_fields[1]);
             }
 
-            if(major_fields_list.length > 8) {
+            if(major_field_list.length > 9) {
                 //These fields should go in version 18 and greater
-                system_status_fields = major_fields_list[8];
+                system_status_fields = major_field_list[9].split('|');
                 fields['system_loop_count'] = system_status_fields[0];
                 tags['shield_id'] = system_status_fields[1];
 
-                sd_status_fields = major_fields_list[9];
+                sd_status_fields = major_field_list[10].split('|');
                 fields['sd_log_count'] = sd_status_fields[0];
                 fields['sd_log_size'] = sd_status_fields[1];
             }
