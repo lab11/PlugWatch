@@ -87,6 +87,29 @@ bool SDCard::Write(String filename, String to_write) {
   return 0;
 }
 
+int SDCard::getSize(String filename) {
+
+  if(digitalRead(SD_INT_PIN)) {
+    // This means the card is not present
+		Serial.println("SD Card Not Present");
+    return -1;
+  }
+
+  if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
+		Serial.println("CAN'T OPEN SD");
+    return -1;
+	}
+	File f;
+	if (!f.open(filename, O_RDONLY)) {
+		Serial.println(String("opening ") + String(filename) + String(" to read filesize failed"));
+		return -1;
+	}
+  int size = f.fileSize();
+	f.close();
+
+  return size;
+}
+
 String SDCard::Read(String filename) {
   //log.debug("read begin: " + filename);
 	File myFile;

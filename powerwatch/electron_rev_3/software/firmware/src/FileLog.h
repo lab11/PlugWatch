@@ -32,6 +32,9 @@ public:
   void errorFromISR(String str);
   bool error(String str);
 
+  // Get size
+  int getFileSize();
+
 private:
   void processIsrQueue();
 };

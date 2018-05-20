@@ -29,27 +29,15 @@
 #include "Wifi.h"
 #include "firmware.h"
 
-
 //***********************************
 //* TODO's
 //***********************************
 
 //  control the debug light
-//  add in periodic reset
-//Peripherals
-//  Add unique ID chip
-//Default Heartbeat Packet
-//  size of free mem on SD Card (maybe not?)
-//  system count
-//  Cape ID
-//  SD Card name
-//  SD Card file size
+// Default Heartbeat Packet
 //  WiT MAC
-//Heartbeat Stretch goals
+// Heartbeat Stretch goals
 //  SMS Heartbeat
-//    disable on particle apn
-//    figure out endpoint
-//  Heartbeat on certain system events (upgrade in specific)
 //Tests
 //  Device comes back from dead battery
 
@@ -58,28 +46,28 @@
 //***********************************
 int version_num = 2; //hack
 PRODUCT_ID(7456); //US testbed
-PRODUCT_VERSION(17);
+PRODUCT_VERSION(18);
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
-//ArduinoOutStream cout(Serial);
-//STARTUP(cellular_credentials_set("http://mtnplay.com.gh", "", "", NULL));
 SYSTEM_MODE(MANUAL);
 bool handshake_flag = false;
 OneWire ds(B0);
+String id(void);
+String shield_id = "";
 
 //**********************************
 //* Pin Configuration
 //**********************************
 int reset_btn = A0;
 
-
 //***********************************
 //* Watchdogs
 //***********************************
 const int HARDWARE_WATCHDOG_TIMEOUT_MS = 1000 * 60;
 ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, soft_watchdog_reset);
-retained int system_cnt;
+unsigned long system_cnt = 0;
+retained unsigned long sd_cnt = 0;
 
 //***********************************
 //* SD Card
@@ -205,6 +193,7 @@ enum SystemState {
   SenseLight,
   SenseWit,
   SenseGPS,
+  UpdateSystemStat,
   LogPacket,
   SendPacket,
   LogError,
@@ -284,6 +273,7 @@ void setup() {
   gpsSubsystem.setup();
   wifiSubsystem.setup();
   FuelGauge().quickStart();
+  shield_id = id();
 
   LEDStatus status;
   status.off();
@@ -340,6 +330,8 @@ struct ResultStruct {
   char lightResult[RESULT_LEN];
   char witResult[RESULT_LEN];
   char gpsResult[RESULT_LEN];
+  char systemStat[RESULT_LEN];
+  char SDstat[RESULT_LEN];
 };
 
 // A function to clear all the fields of a resultStruct
@@ -352,6 +344,8 @@ void clearResults(ResultStruct* r) {
   r->lightResult[0] = 0;
   r->witResult[0] = 0;
   r->gpsResult[0] = 0;
+  r->systemStat[0] = 0;
+  r->SDstat[0] = 0;
 }
 
 // A function to take all of the resutl strings and concatenate them together
@@ -372,6 +366,10 @@ String stringifyResults(ResultStruct r) {
   result += String(r.witResult);
   result += MAJOR_DLIM;
   result += String(r.gpsResult);
+  result += MAJOR_DLIM;
+  result += String(r.systemStat);
+  result += MAJOR_DLIM;
+  result += String(r.SDstat);
   return result;
 }
 
@@ -379,12 +377,16 @@ String stringifyResults(ResultStruct r) {
 retained ResultStruct sensingResults;
 
 void loop() {
-  // Allow particle to do any processing
-  // https://docs.particle.io/reference/firmware/photon/#manual-mode
 
   // This is the only thing that will happen outside of the state machine!
   // Everything else, including reconnection attempts and cloud update Checks
   // Should happen in the cloud event state
+
+  // If we haven't reset in a day just reset
+  if(millis() > 86400000) {
+    reset_helper();
+  }
+
   static bool once = false;
   if (Particle.connected()) {
     Particle.process();
@@ -622,26 +624,54 @@ void loop() {
       break;
     }
 
+    case UpdateSystemStat: {
+      manageStateTimer(1000);
+      snprintf(sensingResults.systemStat, RESULT_LEN-1, "%lu|%s", system_cnt,shield_id.c_str());
+      state = nextState(state);
+      break;
+    }
+
     case LogPacket: {
-      manageStateTimer(30000);
+      manageStateTimer(40000);
 
       SD.PowerOn();
       String packet = stringifyResults(sensingResults);
       if(DataLog.append(packet)) {
         handle_error("Data logging error", true);
+      } else {
+        sd_cnt++;
       }
+
+      int size = DataLog.getFileSize();
+      if(size == -1) {
+        handle_error("Data loggign size error", false);
+      } else {
+        snprintf(sensingResults.SDstat, RESULT_LEN-1, "%d|%d", sd_cnt, size);
+      }
+
       SD.PowerOff();
       state = nextState(state);
       break;
     }
 
     case SendPacket: {
-      manageStateTimer(10000);
+      manageStateTimer(20000);
 
       String packet = stringifyResults(sensingResults);
-      if(!Cloud::Publish("g",packet)) {
-        handle_error("Data publishing error", true);
+      if(packet.length() > 240) {
+        if(!Cloud::Publish("g",packet.substring(0,240))) {
+          handle_error("Data publishing error", true);
+        }
+        if(!Cloud::Publish("g",packet.substring(240))) {
+          handle_error("Data publishing error", true);
+        }
+      } else {
+        if(!Cloud::Publish("g",packet)) {
+          handle_error("Data publishing error", true);
+        }
+
       }
+
       state = nextState(state);
       break;
     }
@@ -694,9 +724,9 @@ void loop() {
 
       if(millis() - mill > 600000) {
         clearResults(&sensingResults);
+        system_cnt++;
         state = CheckCloudEvent;
         first = false;
-
       }
       break;
     }
@@ -711,7 +741,6 @@ void loop() {
   //Call the automatic watchdog
   wd.checkin();
 
-  system_cnt++;
 }
 
 void soft_watchdog_reset() {
@@ -720,10 +749,12 @@ void soft_watchdog_reset() {
   System.reset();
 }
 
-void id() {
+String id() {
   byte i;
   boolean present;
   byte data[8];     // container for the data from device
+  char temp[4];
+  String id = "";
   byte crc_calc;    //calculated CRC
   byte crc_byte;    //actual CRC as sent by DS2401
   //1-Wire bus reset, needed to start operation on the bus,
@@ -735,24 +766,36 @@ void id() {
     data[0] = ds.read();
     Serial.print("Family code: 0x");
     PrintTwoDigitHex (data[0], 1);
+    snprintf(temp, 4, "%02X", data[0]);
+    id.concat(String(temp));
     Serial.print("Hex ROM data: ");
     for (i = 1; i <= 6; i++)
     {
       data[i] = ds.read(); //store each byte in different position in array
+      snprintf(temp, 4, "%02X", data[i]);
+      id.concat(String(temp));
       PrintTwoDigitHex (data[i], 0);
       Serial.print(" ");
     }
     Serial.println();
     crc_byte = ds.read(); //read CRC, this is the last byte
     crc_calc = OneWire::crc8(data, 7); //calculate CRC of the data
+
     Serial.print("Calculated CRC: 0x");
     PrintTwoDigitHex (crc_calc, 1);
     Serial.print("Actual CRC: 0x");
     PrintTwoDigitHex (crc_byte, 1);
+
+    if(crc_calc == crc_byte) {
+      return id;
+    } else {
+      return "ERR";
+    }
   }
   else //Nothing is connected in the bus
   {
     Serial.println("xxxxx Nothing connected xxxxx");
+    return "ERR";
   }
 }
 

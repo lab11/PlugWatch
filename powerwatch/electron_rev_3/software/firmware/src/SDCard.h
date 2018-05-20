@@ -38,6 +38,7 @@ public:
 	void PowerOff();
 
  	bool Write(String filename, String to_write);
+	int getSize(String filename);
 
 	String Read(String filename);
 };

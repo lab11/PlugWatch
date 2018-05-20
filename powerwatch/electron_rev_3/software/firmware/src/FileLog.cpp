@@ -55,3 +55,7 @@ void FileLog::debug(String str) {
 
   Serial.println("DEBUG|" + filename + ": " + str);
 }
+
+int FileLog::getFileSize() {
+  return sd.getSize(filename);
+}
