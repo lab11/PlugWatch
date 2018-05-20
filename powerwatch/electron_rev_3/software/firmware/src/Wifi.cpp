@@ -44,11 +44,12 @@ enum WifiState {
 };
 
 LoopStatus Wifi::loop() {
-  static WifiState state;
+  static WifiState state = Idle;
 
   switch (state) {
     case Idle: {
       ssid_set.clear();
+      esp8266.powerOn();
       esp8266.beginScan();
 
       state = Scanning;
@@ -61,9 +62,14 @@ LoopStatus Wifi::loop() {
       if(r == FinishedSuccess) {
         construct_ssid_list();
         state = Idle;
-        return r;
+        esp8266.powerOff();
+        return FinishedSuccess;
+      } else if (r == NotFinished) {
+        return NotFinished;
       } else {
-        return r;
+        state = Idle;
+        esp8266.powerOff();
+        return FinishedError;
       }
     }
   }

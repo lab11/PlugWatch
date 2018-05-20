@@ -13,4 +13,6 @@ public:
   void beginScan();
   LoopStatus loop();
   String getResult();
+  void powerOff();
+  void powerOn();
 };

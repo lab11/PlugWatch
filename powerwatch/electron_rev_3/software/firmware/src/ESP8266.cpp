@@ -9,21 +9,27 @@ const String endstring = "OK\r\n";
 ESP8266::ESP8266() {
   // Power cycle and reset
   pinMode(WIFI_PWR_EN, OUTPUT);
-  digitalWrite(WIFI_PWR_EN, HIGH);
   pinMode(WIFI_PWR_RST, OUTPUT);
-  digitalWrite(WIFI_PWR_RST, HIGH);
 
+  powerOff();
+
+  response = "";
+}
+
+void ESP8266::powerOff() {
+  digitalWrite(WIFI_PWR_RST, LOW);
   digitalWrite(WIFI_PWR_EN, LOW);
   delay(1000);
-  digitalWrite(WIFI_PWR_EN, HIGH);
-  delay(1000);
+}
 
-  digitalWrite(WIFI_PWR_RST, LOW);
+void ESP8266::powerOn() {
+  digitalWrite(WIFI_PWR_EN, HIGH);
   delay(1000);
   digitalWrite(WIFI_PWR_RST, HIGH);
   delay(1000);
 
   // Reset and set baud rate to 9600 if at 115200
+  Serial5.end();
   Serial5.begin(115200);
   Serial5.println("AT+RST");
   delay(1000);
@@ -45,8 +51,6 @@ ESP8266::ESP8266() {
   while(Serial5.available()) {
     Serial5.read();
   }
-
-  response = "";
 }
 
 void ESP8266::beginScan() {

@@ -28,6 +28,7 @@
 #include "Timesync.h"
 #include "Wifi.h"
 #include "firmware.h"
+#include "BatteryCheck.h"
 
 //***********************************
 //* TODO's
@@ -128,6 +129,11 @@ std::queue<String> EventQueue;
 std::queue<String> CloudQueue;
 
 //***********************************
+//* Battery check
+//***********************************
+BatteryCheck batteryCheck(20, 1800);
+
+//***********************************
 //* System Data
 //***********************************
 auto DataLog = FileLog(SD, "data_log.txt");
@@ -153,7 +159,7 @@ void handle_all_system_events(system_event_t event, int param) {
 }
 
 void handle_error(String error, bool cloud) {
-  Serial.printlnf("Got error: %s", error);
+  Serial.printlnf("Got error: %s", error.c_str());
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
   last_system_event_time = time_str;
 
@@ -176,7 +182,6 @@ int force_handshake(String cmd) {
   handshake_flag = true;
   return 0;
 }
-
 
 // The loop will act as a state machine. Certain particle calls are called every
 // loop then states are executed in order. The following enumeration defines
@@ -214,8 +219,8 @@ enum ParticleCloudState {
 ParticleCloudState cloudState = ConnectionCheck;
 
 // Retained system states are used to diagnose restarts (error vs hard reset)
-retained SystemState state = Wait;
-retained SystemState lastState = SendError;
+retained SystemState state = CheckCloudEvent;
+retained SystemState lastState = Wait;
 
 const APNHelperAPN apns[2] = {
   {"8901260", "wireless.twilio.com"},
@@ -228,8 +233,8 @@ void reset_helper() {
 }
 
 int reset_state(String cmd) {
-  state = Wait;
-  lastState = SendError;
+  state = CheckCloudEvent;
+  lastState = Wait;
   System.reset();
 }
 //***********************************
@@ -278,7 +283,8 @@ void setup() {
   LEDStatus status;
   status.off();
 
-  Particle.connect();
+  // The last thing we do is to check the battery
+  batteryCheck.setup();
 
   // If our state and lastState is the same we got stuck in a
   // state and didn't transtition
@@ -291,10 +297,9 @@ void setup() {
   } else {
     // If we reset and the states aren't the same then we didn't get stuck
     // I don't know what state we're in but go back to start
-    state = Wait;
-    lastState = SendError;
+    state = CheckCloudEvent;
+    lastState = Wait;
   }
-
 
   Serial.println("Setup complete.");
 }
@@ -387,6 +392,10 @@ void loop() {
     reset_helper();
   }
 
+  //Check the battery!
+  batteryCheck.loop();
+
+  // If we connected call particle process for cloud events
   static bool once = false;
   if (Particle.connected()) {
     Particle.process();
@@ -410,11 +419,11 @@ void loop() {
           //Check if we have a connection - if it's been a while attempt to reconnect
           if(!Particle.connected()) {
             // Don't attempt to connect too frequently as connection attempts hang MY_DEVICES
-            static int last_connect_time = 0;
+            static unsigned long last_connect_time = 0;
             const int connect_interval_sec = 60;
-            int now = Time.now(); // unix time
+            unsigned long now = millis(); // unix time
 
-            if ((last_connect_time == 0) || (now-last_connect_time > connect_interval_sec)) {
+            if ((last_connect_time == 0) || (now-last_connect_time > connect_interval_sec*1000)) {
               last_connect_time = now;
               Particle.connect();
             }
@@ -511,7 +520,7 @@ void loop() {
 
     case SenseWiFi: {
       //It might take a while to get all of the wifi SSIDs
-      manageStateTimer(20000);
+      manageStateTimer(30000);
 
       LoopStatus result = wifiSubsystem.loop();
 
@@ -635,18 +644,20 @@ void loop() {
       manageStateTimer(40000);
 
       SD.PowerOn();
+
+      //We should get the sd stat before logging the packet to the sd card
+      int size = DataLog.getFileSize();
+      if(size == -1) {
+        handle_error("Data logging size error", false);
+      } else {
+        snprintf(sensingResults.SDstat, RESULT_LEN-1, "%d|%d", sd_cnt, size);
+      }
+
       String packet = stringifyResults(sensingResults);
       if(DataLog.append(packet)) {
         handle_error("Data logging error", true);
       } else {
         sd_cnt++;
-      }
-
-      int size = DataLog.getFileSize();
-      if(size == -1) {
-        handle_error("Data loggign size error", false);
-      } else {
-        snprintf(sensingResults.SDstat, RESULT_LEN-1, "%d|%d", sd_cnt, size);
       }
 
       SD.PowerOff();
@@ -732,8 +743,8 @@ void loop() {
     }
 
     default: {
-      state = Wait;
-      lastState = SendError;
+      state = CheckCloudEvent;
+      lastState = Wait;
       break;
     }
   }
