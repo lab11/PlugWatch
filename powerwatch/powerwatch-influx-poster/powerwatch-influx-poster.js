@@ -74,7 +74,7 @@ function post_error(event) {
 
 function post_event(event) {
     if(event.version && event.data) {
-        if(parseInt(event.version) >= 14 && parseInt(event.version) <= 17) {
+        if(parseInt(event.version) >= 14) {
             var major_field_list = event.data.split(";");
             var fields = {};
             
@@ -207,6 +207,18 @@ function post_event(event) {
                 fields['gps_latitude'] = parseFlot(gps_fields[0]);
                 fields['gps_longitude'] = parseFlot(gps_fields[1]);
             }
+
+            if(major_fields_list.length > 8) {
+                //These fields should go in version 18 and greater
+                system_status_fields = major_fields_list[8];
+                fields['system_loop_count'] = system_status_fields[0];
+                tags['shield_id'] = system_status_fields[1];
+
+                sd_status_fields = major_fields_list[9];
+                fields['sd_log_count'] = sd_status_fields[0];
+                fields['sd_log_size'] = sd_status_fields[1];
+            }
+
             console.log(fields);
             console.log(tags);
             console.log(timestamp);
