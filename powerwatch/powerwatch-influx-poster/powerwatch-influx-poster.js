@@ -139,6 +139,7 @@ function post_event(event) {
             tags['particle_firmware_number'] = cell_fields[1];
             tags['cellular_imei'] = cell_fields[2];
             tags['sim_iccid'] = cell_fields[3];
+            fields['free_memory'] = cell_fields[4];
             fields['cellular_rssi'] = cell_fields[5];
             fields['cellular_quality'] = cell_fields[6];
 
@@ -270,7 +271,11 @@ function restart_data_stream() {
             console.log('Setting data stream');
             global_data_stream = stream;
             stream.on('event', function(event) {
-                post_event(event);
+                try {
+                    post_event(event);
+                } catch(error) {
+                    console.log('Event handling error: ' + error)
+                }
             });
         }, function(err) {
             console.log("Failed to getEventStream: ", err);
