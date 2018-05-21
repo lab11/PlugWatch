@@ -132,7 +132,7 @@ std::deque<String> DataDeque;
 //***********************************
 //* Battery check
 //***********************************
-BatteryCheck batteryCheck(20, 1800);
+BatteryCheck batteryCheck(20, 60);
 
 //***********************************
 //* System Data
@@ -248,9 +248,8 @@ int reset_state(String cmd) {
 //* ye-old Arduino
 //***********************************
 void setup() {
-  // if (System.resetReason() == RESET_REASON_PANIC) {
-  //   System.enterSafeMode();
-  // }
+  // The first thing we do is to check the battery
+  batteryCheck.checkAndSleepIfNecessary();
 
   //setup the apns
   apnHelper.setCredentials();
@@ -277,6 +276,7 @@ void setup() {
   // Setup SD card first so that other setups can log
   SD.setup();
 
+  //setup the other subsystems
   timeSyncSubsystem.setup();
   chargeStateSubsystem.setup();
   imuSubsystem.setup();
@@ -287,11 +287,23 @@ void setup() {
   FuelGauge().quickStart();
   shield_id = id();
 
+  //Turn off the audio front end section
+  pinMode(B4, OUTPUT);
+  digitalWrite(B4, LOW);
+
+  // Enable the other power pins to outputs and set them high for now
+  // NRF
+  pinMode(B5, OUTPUT);
+  digitalWrite(B5, HIGH);
+  // GPS
+  pinMode(D3, OUTPUT);
+  digitalWrite(B5, HIGH);
+  // SD
+  SD.PowerOff();
+
   LEDStatus status;
   status.off();
 
-  // The last thing we do is to check the battery
-  batteryCheck.setup();
 
   // If our state and lastState is the same we got stuck in a
   // state and didn't transtition
@@ -364,6 +376,8 @@ void clearResults(ResultStruct* r) {
 String stringifyResults(ResultStruct r) {
   String result = "";
   result += String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
+  result += MINOR_DLIM;
+  result += String(millis());
   result += MAJOR_DLIM;
   result += String(r.chargeStateResult);
   result += MAJOR_DLIM;
@@ -401,8 +415,6 @@ void loop() {
     reset_helper();
   }
 
-  //Check the battery!
-  batteryCheck.loop();
 
   // If we connected call particle process for cloud events
   static bool once = false;
@@ -420,6 +432,9 @@ void loop() {
   switch(state) {
     case CheckCloudEvent: {
       manageStateTimer(120000);
+
+      //Check the battery!
+      batteryCheck.checkAndSleepIfNecessary();
 
       switch(cloudState) {
         int particle_connect_time;
