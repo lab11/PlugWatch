@@ -127,6 +127,7 @@ auto gpsSubsystem = Gps();
 auto EventLog = FileLog(SD, "event_log.txt");
 std::queue<String> EventQueue;
 std::queue<String> CloudQueue;
+std::deque<String> DataDeque;
 
 //***********************************
 //* Battery check
@@ -155,7 +156,9 @@ void handle_all_system_events(system_event_t event, int param) {
   last_system_event_type = param;
 
   //Push this system event onto the queue to be logged in the error logging state
-  EventQueue.push(time_str + ": " + system_event_str);
+  if(EventQueue.size() < 200) {
+    EventQueue.push(time_str + ": " + system_event_str);
+  }
 }
 
 void handle_error(String error, bool cloud) {
@@ -165,10 +168,14 @@ void handle_error(String error, bool cloud) {
 
   //Push this system event onto the queue to be logged in the error logging state
   if(cloud) {
+    if(CloudQueue.size() < 200) {
       CloudQueue.push(time_str + ": " + error);
+    }
   }
 
-  EventQueue.push(time_str + ": " + error);
+  if(EventQueue.size() < 200) {
+    EventQueue.push(time_str + ": " + error);
+  }
 }
 
 void system_reset_to_safemode() {
@@ -356,6 +363,8 @@ void clearResults(ResultStruct* r) {
 // A function to take all of the resutl strings and concatenate them together
 String stringifyResults(ResultStruct r) {
   String result = "";
+  result += String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
+  result += MAJOR_DLIM;
   result += String(r.chargeStateResult);
   result += MAJOR_DLIM;
   result += String(r.mpuResult);
@@ -666,28 +675,60 @@ void loop() {
     }
 
     case SendPacket: {
-      manageStateTimer(20000);
+      manageStateTimer(40000);
+
+      static int count = 0;
+
+      if(count == 0) {
+        String packet = stringifyResults(sensingResults);
+
+        // Add the packet to the data queue
+        if(DataDeque.size() < 200) {
+          DataDeque.push_front(packet);
+        } else {
+          DataDeque.pop_back();
+          DataDeque.push_front(packet);
+        }
+      }
+      count++;
+
+
+      Serial.printlnf("Data Queue size %d",DataDeque.size());
 
       if(Particle.connected()) {
-        String packet = stringifyResults(sensingResults);
-        if(packet.length() > 240) {
-          if(!Cloud::Publish("g",packet.substring(0,240))) {
-            handle_error("Data publishing error", true);
-          }
-          if(!Cloud::Publish("g",packet.substring(240))) {
-            handle_error("Data publishing error", true);
+        if(!DataDeque.empty() && count < 5) {
+
+          Serial.printlnf("Sending data - size %d",DataDeque.size());
+          String toSend = DataDeque.front();
+
+          if(toSend.length() > 240) {
+            if(!Cloud::Publish("g",toSend.substring(0,240))) {
+              handle_error("Data publishing error", true);
+            } else {
+              if(!Cloud::Publish("g",toSend.substring(240))) {
+                handle_error("Data publishing error", true);
+              } else {
+                DataDeque.pop_front();
+              }
+            }
+          } else {
+            if(!Cloud::Publish("g",toSend)) {
+              handle_error("Data publishing error", true);
+            } else {
+              DataDeque.pop_front();
+            }
           }
         } else {
-          if(!Cloud::Publish("g",packet)) {
-            handle_error("Data publishing error", true);
-          }
-
+          count = 0;
+          state = nextState(state);
         }
+
       } else {
         handle_error("Data publishing error", true);
+        count = 0;
+        state = nextState(state);
       }
 
-      state = nextState(state);
       break;
     }
 

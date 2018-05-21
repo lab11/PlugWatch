@@ -30,6 +30,7 @@ LoopStatus CellStatus::loop() {
     result = result + String(MINOR_DLIM) + dev.imei + String(MINOR_DLIM) + dev.iccid;
     result = result + String(MINOR_DLIM) + String(freemem);
     result = result + String(MINOR_DLIM) + "!" + String(MINOR_DLIM) + "!";
+    result = result + String(MINOR_DLIM) + String("No Bands Avail");
   }
 
   return FinishedSuccess;
