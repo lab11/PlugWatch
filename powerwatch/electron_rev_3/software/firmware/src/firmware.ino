@@ -668,19 +668,23 @@ void loop() {
     case SendPacket: {
       manageStateTimer(20000);
 
-      String packet = stringifyResults(sensingResults);
-      if(packet.length() > 240) {
-        if(!Cloud::Publish("g",packet.substring(0,240))) {
-          handle_error("Data publishing error", true);
-        }
-        if(!Cloud::Publish("g",packet.substring(240))) {
-          handle_error("Data publishing error", true);
+      if(Particle.connected()) {
+        String packet = stringifyResults(sensingResults);
+        if(packet.length() > 240) {
+          if(!Cloud::Publish("g",packet.substring(0,240))) {
+            handle_error("Data publishing error", true);
+          }
+          if(!Cloud::Publish("g",packet.substring(240))) {
+            handle_error("Data publishing error", true);
+          }
+        } else {
+          if(!Cloud::Publish("g",packet)) {
+            handle_error("Data publishing error", true);
+          }
+
         }
       } else {
-        if(!Cloud::Publish("g",packet)) {
-          handle_error("Data publishing error", true);
-        }
-
+        handle_error("Data publishing error", true);
       }
 
       state = nextState(state);
@@ -700,6 +704,7 @@ void loop() {
           EventQueue.pop();
         }
       } else {
+        count = 0;
         SD.PowerOff();
         state = nextState(state);
       }
@@ -711,10 +716,15 @@ void loop() {
       manageStateTimer(30000);
       static int count = 0;
 
-      if(!CloudQueue.empty() && count < 4) {
-        count++;
-        Cloud::Publish("!",CloudQueue.front());
-        CloudQueue.pop();
+      if(Particle.connected()) {
+        if(!CloudQueue.empty() && count < 4) {
+          count++;
+          Cloud::Publish("!",CloudQueue.front());
+          CloudQueue.pop();
+        } else {
+          state = nextState(state);
+          count = 0;
+        }
       } else {
         state = nextState(state);
         count = 0;
