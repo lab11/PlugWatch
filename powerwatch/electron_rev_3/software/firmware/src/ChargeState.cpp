@@ -22,7 +22,9 @@ LoopStatus ChargeState::loop() {
   String power_stats = String(state_of_charge) + String(MINOR_DLIM)
   + String(vcell) + String(MINOR_DLIM)
   + String(powerCheck.getIsCharging()) + String(MINOR_DLIM)
-  + String(powerCheck.getHasPower());
+  + String(powerCheck.getHasPower()) + String(MINOR_DLIM)
+  + String(powerCheck.lastUnplugMillis) + String(MINOR_DLIM)
+  + String(powerCheck.lastPlugMillis);
 
   result = power_stats;
 

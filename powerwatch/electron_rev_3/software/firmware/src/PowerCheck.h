@@ -41,10 +41,16 @@ public:
 
 	int getChargeCurrent();
 
+	volatile unsigned long lastUnplugMillis = 0;
+	volatile int lastUnplugTime = 0;
+	volatile unsigned long lastPlugMillis = 0;
+	volatile int lastPlugTime = 0;
+
 private:
 	void interruptHandler();
 
 	PMIC pmic;
 	volatile bool hasBattery = true;
-	volatile unsigned long lastChange = 0;
+	volatile bool hasPower = true;
+	volatile unsigned long lastChange;
 };

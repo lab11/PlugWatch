@@ -20,7 +20,8 @@ bool PowerCheck::getHasPower() {
 	// Bit 2 (mask 0x4) == PG_STAT. If non-zero, power is good
 	// This means we're powered off USB or VIN, so we don't know for sure if there's a battery
 	byte systemStatus = pmic.getSystemStatus();
-	return ((systemStatus & 0x04) != 0);
+	hasPower = ((systemStatus & 0x04) != 0);
+	return hasPower;
 }
 
 bool PowerCheck::enableCharging() {
@@ -84,15 +85,17 @@ bool PowerCheck::getIsCharging() {
 }
 
 void PowerCheck::interruptHandler() {
-	if (millis() - lastChange < 100) {
-		// We very recently had a change; assume there is no battey and we're rapidly switching
-		// between fast charge and charge done
-		hasBattery = false;
-	}
-	else {
-		// Note: It's quite possible that hasBattery will be false when there is a battery; the logic
-		// in getHasBattery() takes this into account by checking lastChange as well.
-		hasBattery = true;
+	bool p = hasPower;
+	if(p != getHasPower()) {
+		if(p == true) {
+			// We had power and now don't
+			lastUnplugMillis = millis();
+			lastUnplugTime = Time.now();
+		} else {
+			// We didn't have power and now do
+			lastPlugMillis = millis();
+			lastPlugTime = Time.now();
+		}
 	}
 	lastChange = millis();
 }
