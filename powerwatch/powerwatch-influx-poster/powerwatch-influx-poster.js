@@ -44,7 +44,8 @@ function post_error(event) {
             fields['error_string'] = event.data;
 
             if(event.data.includes("Reset after")) {
-                fields['error_state'] = parseInt(event.data.split(' ')[-1]);
+                chunks = event.data.split(' ');
+                fields['error_state'] = parseInt(chunks[chunks.length -1]);
                 fields['logging_error'] = false;
                 fields['hanging_error'] = true;
             }
