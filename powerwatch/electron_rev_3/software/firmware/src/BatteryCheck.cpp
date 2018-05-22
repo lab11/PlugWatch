@@ -1,7 +1,9 @@
 #include "BatteryCheck.h"
+#include "PowerCheck.h"
 
 static FuelGauge fuel;
 static PMIC pmic;
+extern PowerCheck powerCheck;
 
 BatteryCheck::BatteryCheck(float minimumSoC, long sleepTimeSecs)
 	: minimumSoC(minimumSoC), sleepTimeSecs(sleepTimeSecs) {
@@ -25,12 +27,9 @@ void BatteryCheck::loop() {
 
 void BatteryCheck::checkAndSleepIfNecessary() {
 	float soc = fuel.getSoC();
-
-	// If the state of charge is good and less than minimum sleepT
-	// We don't consider current charging state because of previous problems
-	// Dying even while charging
-	if (soc != 0.0 && soc < minimumSoC) {
+	Serial.printlnf("SoC: %f", soc);
+	if(soc != 0.0 && soc < minimumSoC && !powerCheck.getHasPower()) {
+	//if(soc != 0.0 && soc < minimumSoC && !pmic.isPowerGood()) {
 		System.sleep(SLEEP_MODE_DEEP, sleepTimeSecs);
 	}
-
 }
