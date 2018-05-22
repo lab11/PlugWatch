@@ -2,6 +2,7 @@
 #include "AssetTracker.h"
 
 #include "Gps.h"
+#include "FileLog.h"
 
 AssetTracker t = AssetTracker();
 
@@ -16,13 +17,23 @@ void Gps::setup() {
 LoopStatus Gps::loop() {
   //log.debug("Gps::getReading() called");
   t.updateGPS();
-  String message = "-1";
+  String LatLon = "";
+  String GPSmilli = "";
+  String GPSsatellites = "";
   if (t.gpsFix()) {
-      message = t.readLatLon();
+    LatLon = t.readLatLon();
+  } else {
+    LatLon = "-1";
   }
-  //log.debug("Gps::getReading() done and message set to: " + message);
-  result = message;
 
+  if(t.getSatellites() > 0) {
+    GPSmilli = String(t.getGpsTimestamp());
+  } else {
+    GPSmilli = "-1";
+  }
+
+  GPSsatellites = String(t.getSatellites());
+  result = LatLon + String(MINOR_DLIM) + GPSmilli + String(MINOR_DLIM) + GPSsatellites;
   return FinishedSuccess;
 }
 

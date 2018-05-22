@@ -80,9 +80,20 @@ bool SDCard::Write(String filename, String to_write) {
 		Serial.println(String("opening ") + String(filename) + String(" for write failed"));
 		return 1;
 	}
-	file_to_write.println(final_to_write);
+	int r = file_to_write.write(final_to_write.c_str());
+  if (r < 0) {
+    Serial.println("Writing to file failed");
+    file_to_write.flush();
+	  file_to_write.close();
+    return 1;
+  } else {
+    Serial.printlnf("Successfully wrote %d bytes to file", r);
+  }
+
+  delay(1000);
   file_to_write.flush();
-	file_to_write.close();
+  file_to_write.close();
+  delay(1000);
 
 	Serial.println(String("wrote : ") + String(filename) + String(":") + to_write);
   return 0;
