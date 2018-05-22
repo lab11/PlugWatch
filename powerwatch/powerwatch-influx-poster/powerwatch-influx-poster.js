@@ -31,6 +31,7 @@ function parseHexString(str) {
 }
 
 function post_error(event) {
+    console.log(event);
     if(event.version && event.data) {
         if(parseInt(event.version) >= 14) {
             var fields = {};
@@ -74,6 +75,7 @@ function post_error(event) {
 }
 
 function post_event(event) {
+    console.log(event);
     if(event.version && event.data) {
         if(parseInt(event.version) >= 14) {
             var major_field_list = event.data.split(";");
@@ -109,6 +111,11 @@ function post_event(event) {
                 fields['is_powered'] = false;
             } else if(charge_fields[3] == "1") {
                 fields['is_powered'] = true;
+            }
+
+            if(parseInt(event.version) > 20) {
+                fields['last_unplug_millis'] = charge_fields[4];
+                fields['last_plug_millis'] = charge_fields[5];
             }
 
             // MPU
@@ -224,8 +231,8 @@ function post_event(event) {
                 } else {
                     fields['gps_fix'] = true;
                     gps_fields = major_field_list[8].split(',');
-                    fields['gps_latitude'] = parseFlot(gps_fields[0]);
-                    fields['gps_longitude'] = parseFlot(gps_fields[1]);
+                    fields['gps_latitude'] = parseFloat(gps_fields[0]);
+                    fields['gps_longitude'] = parseFloat(gps_fields[1]);
                 }
             }
             
