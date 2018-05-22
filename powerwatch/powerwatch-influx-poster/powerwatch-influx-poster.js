@@ -91,7 +91,7 @@ function post_event(event) {
                 var timestamp = new Date(major_field_list[0]).getTime();
             } else {
                 var timestamp = new Date(major_field_list[0].split('|')[0]).getTime();
-                fields['millis'] = new Date(major_field_list[0].split('|')[1]);
+                fields['millis'] = major_field_list[0].split('|')[1];
             }
             
             // Charge State
