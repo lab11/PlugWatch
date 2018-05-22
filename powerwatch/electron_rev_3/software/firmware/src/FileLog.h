@@ -10,6 +10,7 @@
 #define MAJOR_DLIM ";"
 
 class SDCard;
+//retained char current_name[50];
 
 class FileLog {
   SDCard &sd;
@@ -18,7 +19,7 @@ class FileLog {
   std::queue<String> isr_queue;
 
 public:
-	FileLog(SDCard &sd, String filename) : sd{sd}, filename{filename} {}
+	FileLog(SDCard &sd, String filename, char* current_name) : sd{sd}, filename{filename}, current_name{current_name} {}
 
   // Only print to Serial
   void debugFromISR(String str);
@@ -35,6 +36,9 @@ public:
   // Get size
   int getFileSize();
 
+  String getCurrentName();
+
 private:
   void processIsrQueue();
+  char* current_name;
 };

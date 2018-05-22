@@ -28,8 +28,18 @@ void FileLog::appendFromISR(String str) {
 bool FileLog::append(String str) {
   processIsrQueue();
 
-  Serial.println(filename + ": " + str);
-  return sd.Write(filename, str + "\n");
+  String fname = String(current_name) + String('_') + filename;
+  int size = sd.getSize(fname);
+  if(current_name[0] == 0 || size == -1 || size > 65000) {
+    //generate a new filename
+    randomSeed(millis());
+    int r = random(100000000);
+    snprintf(current_name,50,"%d",r);
+  }
+
+  fname = String(current_name) + String('_') + filename;
+  Serial.println(fname + ": " + str);
+  return sd.Write(fname, str + "\n");
 }
 
 void FileLog::errorFromISR(String str) {
@@ -57,5 +67,10 @@ void FileLog::debug(String str) {
 }
 
 int FileLog::getFileSize() {
-  return sd.getSize(filename);
+  String fname = String(current_name) + String('_') + filename;
+  return sd.getSize(fname);
+}
+
+String FileLog::getCurrentName() {
+  return String(current_name);
 }

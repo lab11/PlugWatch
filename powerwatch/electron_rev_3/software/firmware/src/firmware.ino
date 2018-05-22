@@ -124,7 +124,8 @@ auto gpsSubsystem = Gps();
 //***********************************
 //* System Events
 //***********************************
-auto EventLog = FileLog(SD, "event_log.txt");
+retained char event_log_name[50];
+auto EventLog = FileLog(SD, "event_log.txt", event_log_name);
 std::queue<String> EventQueue;
 std::queue<String> CloudQueue;
 std::deque<String> DataDeque;
@@ -132,12 +133,13 @@ std::deque<String> DataDeque;
 //***********************************
 //* Battery check
 //***********************************
-BatteryCheck batteryCheck(20, 60);
+BatteryCheck batteryCheck(50, 60);
 
 //***********************************
 //* System Data
 //***********************************
-auto DataLog = FileLog(SD, "data_log.txt");
+retained char data_log_name[50];
+auto DataLog = FileLog(SD, "data_log.txt", data_log_name);
 
 // String SYSTEM_EVENT = "s";
 retained int system_event_count = 0;
@@ -563,7 +565,7 @@ void loop() {
     }
 
     case SenseCell: {
-      manageStateTimer(5000);
+      manageStateTimer(20000);
 
       LoopStatus result = cellStatus.loop();
 
@@ -674,7 +676,7 @@ void loop() {
       if(size == -1) {
         handle_error("Data logging size error", false);
       } else {
-        snprintf(sensingResults.SDstat, RESULT_LEN-1, "%d|%d", sd_cnt, size);
+        snprintf(sensingResults.SDstat, RESULT_LEN-1, "%d|%d|%s", sd_cnt, size, DataLog.getCurrentName().c_str());
       }
 
       String packet = stringifyResults(sensingResults);
@@ -799,7 +801,7 @@ void loop() {
         first = true;
       }
 
-      if(millis() - mill > 600000) {
+      if(millis() - mill > 60000) {
         clearResults(&sensingResults);
         system_cnt++;
         state = CheckCloudEvent;
