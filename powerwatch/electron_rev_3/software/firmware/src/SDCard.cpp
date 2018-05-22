@@ -81,6 +81,7 @@ bool SDCard::Write(String filename, String to_write) {
 		return 1;
 	}
 	file_to_write.println(final_to_write);
+  file_to_write.flush();
 	file_to_write.close();
 
 	Serial.println(String("wrote : ") + String(filename) + String(":") + to_write);
