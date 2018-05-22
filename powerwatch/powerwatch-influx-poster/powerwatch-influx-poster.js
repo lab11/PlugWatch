@@ -205,14 +205,30 @@ function post_event(event) {
             }
 
             // GPS
-            if(major_field_list[8] == '-1'){
-                fields['gps_fix'] = false;
+            if(parseInt(event.version) > 20) {
+                gps_subfields = major_field_list[8].split('|');
+                if(gps_subfields[0] == '-1'){
+                    fields['gps_fix'] = false;
+                } else {
+                    fields['gps_fix'] = true;
+                    gps_fields = gps_subfields[0].split(',');
+                    fields['gps_latitude'] = parseFloat(gps_fields[0]);
+                    fields['gps_longitude'] = parseFloat(gps_fields[1]);
+                }
+
+                fields['gps_time_millis'] = parseInt(gps_subfields[1]);
+                fields['gps_satellites'] = parseInt(gps_subfields[2]);
             } else {
-                fields['gps_fix'] = true;
-                gps_fields = major_field_list[8].split(',');
-                fields['gps_latitude'] = parseFlot(gps_fields[0]);
-                fields['gps_longitude'] = parseFlot(gps_fields[1]);
+                if(major_field_list[8] == '-1'){
+                    fields['gps_fix'] = false;
+                } else {
+                    fields['gps_fix'] = true;
+                    gps_fields = major_field_list[8].split(',');
+                    fields['gps_latitude'] = parseFlot(gps_fields[0]);
+                    fields['gps_longitude'] = parseFlot(gps_fields[1]);
+                }
             }
+            
 
             if(major_field_list.length > 9) {
                 //These fields should go in version 18 and greater
