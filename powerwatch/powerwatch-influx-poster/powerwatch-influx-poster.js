@@ -223,7 +223,7 @@ function post_event(event) {
                 sd_status_fields = major_field_list[10].split('|');
                 fields['sd_log_count'] = sd_status_fields[0];
                 fields['sd_log_size'] = sd_status_fields[1];
-                if(parseInt(event.version > 19) {
+                if(parseInt(event.version > 19)) {
                     fields['sd_log_name'] = sd_status_fields[2];
                 }
             }
