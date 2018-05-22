@@ -87,7 +87,12 @@ function post_event(event) {
             //More tags after parsing some of the cellular data
 
             // Time
-            var timestamp = new Date(major_field_list[0]).getTime();
+            if(parseInt(event.version) < 20) {
+                var timestamp = new Date(major_field_list[0]).getTime();
+            } else {
+                var timestamp = new Date(major_field_list[0].split('|')[0]).getTime();
+                fields['millis'] = new Date(major_field_list[0].split('|')[1]);
+            }
             
             // Charge State
             var charge_fields = major_field_list[1].split('|');
