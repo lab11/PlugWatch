@@ -346,3 +346,34 @@ function restart_error_stream() {
 
 restart_error_stream();
 setInterval(restart_error_stream, 600000);
+
+var global_spark_stream = null;
+
+function restart_spark_stream() {
+
+    console.log('Restarting spark stream');
+
+    if(global_spark_stream) {
+        global_spark_stream.abort();
+    }
+
+    // Get the particle event stream
+    particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken}).then(
+    
+        function(stream) {
+            console.log('Setting spark stream');
+            global_spark_stream = stream;
+
+            stream.on('event', function(event) {
+                if(event.name.includes('spark')) {
+                    console.log(event);
+                }
+            });
+        }, function(err) {
+            console.log("Failed to getEventStream: ", err);
+        }
+    );
+}
+
+restart_spark_stream();
+setInterval(restart_spark_stream, 600000);
