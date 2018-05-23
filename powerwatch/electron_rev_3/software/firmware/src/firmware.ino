@@ -48,7 +48,7 @@
 //***********************************
 int version_num = 2; //hack
 PRODUCT_ID(7456); //US testbed
-PRODUCT_VERSION(21);
+PRODUCT_VERSION(22);
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
@@ -69,6 +69,7 @@ int reset_btn = A0;
 const int HARDWARE_WATCHDOG_TIMEOUT_MS = 1000 * 60;
 ApplicationWatchdog wd(HARDWARE_WATCHDOG_TIMEOUT_MS, soft_watchdog_reset);
 unsigned long system_cnt = 0;
+retained unsigned long reboot_cnt = 0;
 retained unsigned long sd_cnt = 0;
 
 //***********************************
@@ -139,15 +140,16 @@ std::deque<String> DataDeque;
 //***********************************
 //* Battery check
 //***********************************
-BatteryCheck batteryCheck(50, 60);
-retained char last_cloud_event[50] = "";
+BatteryCheck batteryCheck(5, 60);
+unsigned long last_cloud_event = 0;
 
 //***********************************
 //* System Data
 //***********************************
 retained char data_log_name[50];
 auto DataLog = FileLog(SD, "data_log.txt", data_log_name);
-retained char last_logging_event[50] = "";
+unsigned long last_logging_event  = 0;
+
 
 // String SYSTEM_EVENT = "s";
 retained int system_event_count = 0;
@@ -256,30 +258,15 @@ int reset_state(String cmd) {
   System.reset();
 }
 
-void deleteAllMessages() {
-  // Delete any SMS messages that are already on the cellular modem
-  if(uCmd.checkMessages(10000) == RESP_OK) {
-    uCmd.smsPtr = uCmd.smsResults;
-  } else {
-    handle_error("Failed to check messages", false);
-  }
-
-  for(unsigned int i = 0; i < uCmd.numMessages; i++) {
-    if(uCmd.deleteMessage(uCmd.smsPtr->mess,10000) == RESP_OK) {
-
-    } else {
-      handle_error("Message delete error", false);
-    }
-    uCmd.smsPtr++;
-  }
-}
-
 //***********************************
 //* ye-old Arduino
 //***********************************
 void setup() {
   // The first thing we do is to check the battery
   batteryCheck.checkAndSleepIfNecessary();
+
+  // Keep track of reboots
+  reboot_cnt++;
 
   //setup the apns
   apnHelper.setCredentials();
@@ -336,8 +323,6 @@ void setup() {
   } else {
     handle_error("SMS Mode failed", false);
   }
-
-  deleteAllMessages();
 
   LEDStatus status;
   status.off();
@@ -697,7 +682,7 @@ void loop() {
 
     case UpdateSystemStat: {
       manageStateTimer(1000);
-      snprintf(sensingResults.systemStat, RESULT_LEN-1, "%lu|%s", system_cnt,shield_id.c_str());
+      snprintf(sensingResults.systemStat, RESULT_LEN-1, "%lu|%s|%u", system_cnt, shield_id.c_str(), reboot_cnt);
       state = nextState(state);
       break;
     }
@@ -720,7 +705,7 @@ void loop() {
         handle_error("Data logging error", true);
       } else {
         sd_cnt++;
-        strncpy(last_logging_event, String(Time.format(Time.now(),TIME_FORMAT_ISO8601_FULL)).c_str(), 50);
+        last_logging_event = millis();
       }
 
       SD.PowerOff();
@@ -774,13 +759,13 @@ void loop() {
           }
         } else {
           count = 0;
+          last_cloud_event = millis();
           state = nextState(state);
         }
 
       } else {
         handle_error("Data publishing error", true);
         count = 0;
-        strncpy(last_cloud_event, String(Time.format(Time.now(),TIME_FORMAT_ISO8601_FULL)).c_str(), 50);
         state = nextState(state);
       }
 
@@ -830,31 +815,60 @@ void loop() {
     }
 
     case CheckSMS: {
-      manageStateTimer(45000);
+      manageStateTimer(120000);
 
-      if(uCmd.checkMessages(10000) == RESP_OK) {
-        uCmd.smsPtr = uCmd.smsResults;
-        Serial.printlnf("Got %d messages",uCmd.numMessages);
-        for(unsigned int i = 0; i < uCmd.numMessages; i++) {
-          Serial.printlnf("Got message: %s from %s",uCmd.smsPtr->sms,uCmd.smsPtr->phone);
-          String message = String(uCmd.smsPtr->sms);
-          if(message == "!Status") {
-              char stat[140] = {0};
-              snprintf(stat, 140, "Log: %s; Cloud: %s", last_logging_event, last_cloud_event);
-              uCmd.sendMessage(stat, uCmd.smsPtr->phone, 10000);
-          } else if(message == "!Reset") {
-              char stat[140] = "ACK";
-              uCmd.sendMessage(stat, uCmd.smsPtr->phone, 10000);
-              delay(10000);
-              reset_helper();
+      SINGLE_THREADED_BLOCK() {
+        if(uCmd.checkMessages(10000) == RESP_OK) {
+          uCmd.smsPtr = uCmd.smsResults;
+          Serial.printlnf("Got %d messages",uCmd.numMessages);
+          bool first = true;
+
+          for(unsigned int i = 0; i < uCmd.numMessages; i++) {
+            Serial.printlnf("Got message: %s from %s",uCmd.smsPtr->sms,uCmd.smsPtr->phone);
+            String message = String(uCmd.smsPtr->sms);
+            String phone = String(uCmd.smsPtr->phone);
+
+            // Delete the message
+            if(uCmd.deleteMessage(uCmd.smsPtr->mess,10000) == RESP_OK) {
+              Serial.println("Deleted message");
+            } else {
+              Serial.println("Error deleting message");
+            }
+
+            if(first) {
+              // Respond to the message
+              first = false;
+              if(message == "!Status") {
+                Serial.println("About to send status response");
+                String packet = stringifyResults(sensingResults);
+                if(!uCmd.sendMessage((char*)packet.substring(0,100).c_str(), (char*)phone.c_str(), 10000) == RESP_OK) {
+                  Serial.println("Error sending message");
+                }
+                if(!uCmd.sendMessage((char*)packet.substring(100,200).c_str(), (char*)phone.c_str(), 10000) == RESP_OK) {
+                  Serial.println("Error sending message");
+                }
+                if(packet.length() > 200) {
+                  if(!uCmd.sendMessage((char*)packet.substring(200).c_str(), (char*)phone.c_str(), 10000) == RESP_OK) {
+                    Serial.println("Error sending message");
+                  }
+                }
+              } else if(message == "!Reset") {
+                Serial.println("About to send reset response");
+                char stat[140] = "ACK";
+                if(!uCmd.sendMessage(stat, (char*)phone.c_str(), 10000) == RESP_OK) {
+                  Serial.println("Error sending message");
+                }
+                delay(10000);
+                reset_helper();
+              }
+            }
           }
-        }
 
-        deleteAllMessages();
-        state = nextState(state);
-      } else {
-        handle_error("SMS Check error", false);
-        state = nextState(state);
+          state = nextState(state);
+        } else {
+          handle_error("SMS Check error", false);
+          state = nextState(state);
+        }
       }
 
       break;
