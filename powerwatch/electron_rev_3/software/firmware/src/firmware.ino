@@ -26,6 +26,7 @@
 #include "SDCard.h"
 #include "Subsystem.h"
 #include "Timesync.h"
+#include "uCommand.h"
 #include "Wifi.h"
 #include "firmware.h"
 #include "BatteryCheck.h"
@@ -112,6 +113,11 @@ auto lightSubsystem = Light();
 auto nrfWitSubsystem = NrfWit();
 
 //***********************************
+//* uCommand
+//***********************************
+uCommand uCmd;
+
+//***********************************
 //* WIFI
 //***********************************
 auto wifiSubsystem = Wifi(esp8266);
@@ -134,12 +140,14 @@ std::deque<String> DataDeque;
 //* Battery check
 //***********************************
 BatteryCheck batteryCheck(50, 60);
+retained char last_cloud_event[50] = "";
 
 //***********************************
 //* System Data
 //***********************************
 retained char data_log_name[50];
 auto DataLog = FileLog(SD, "data_log.txt", data_log_name);
+retained char last_logging_event[50] = "";
 
 // String SYSTEM_EVENT = "s";
 retained int system_event_count = 0;
@@ -212,6 +220,7 @@ enum SystemState {
   SendPacket,
   LogError,
   SendError,
+  CheckSMS,
   Wait
 };
 
@@ -246,6 +255,25 @@ int reset_state(String cmd) {
   lastState = Wait;
   System.reset();
 }
+
+void deleteAllMessages() {
+  // Delete any SMS messages that are already on the cellular modem
+  if(uCmd.checkMessages(10000) == RESP_OK) {
+    uCmd.smsPtr = uCmd.smsResults;
+  } else {
+    handle_error("Failed to check messages", false);
+  }
+
+  for(unsigned int i = 0; i < uCmd.numMessages; i++) {
+    if(uCmd.deleteMessage(uCmd.smsPtr->mess,10000) == RESP_OK) {
+
+    } else {
+      handle_error("Message delete error", false);
+    }
+    uCmd.smsPtr++;
+  }
+}
+
 //***********************************
 //* ye-old Arduino
 //***********************************
@@ -302,6 +330,14 @@ void setup() {
   digitalWrite(B5, HIGH);
   // SD
   SD.PowerOff();
+
+  if(uCmd.setSMSMode(1) == RESP_OK) {
+    Serial.println("Set up SMS mode");
+  } else {
+    handle_error("SMS Mode failed", false);
+  }
+
+  deleteAllMessages();
 
   LEDStatus status;
   status.off();
@@ -684,6 +720,7 @@ void loop() {
         handle_error("Data logging error", true);
       } else {
         sd_cnt++;
+        strncpy(last_logging_event, String(Time.format(Time.now(),TIME_FORMAT_ISO8601_FULL)).c_str(), 50);
       }
 
       SD.PowerOff();
@@ -743,6 +780,7 @@ void loop() {
       } else {
         handle_error("Data publishing error", true);
         count = 0;
+        strncpy(last_cloud_event, String(Time.format(Time.now(),TIME_FORMAT_ISO8601_FULL)).c_str(), 50);
         state = nextState(state);
       }
 
@@ -786,6 +824,37 @@ void loop() {
       } else {
         state = nextState(state);
         count = 0;
+      }
+
+      break;
+    }
+
+    case CheckSMS: {
+      manageStateTimer(45000);
+
+      if(uCmd.checkMessages(10000) == RESP_OK) {
+        uCmd.smsPtr = uCmd.smsResults;
+        Serial.printlnf("Got %d messages",uCmd.numMessages);
+        for(unsigned int i = 0; i < uCmd.numMessages; i++) {
+          Serial.printlnf("Got message: %s from %s",uCmd.smsPtr->sms,uCmd.smsPtr->phone);
+          String message = String(uCmd.smsPtr->sms);
+          if(message == "!Status") {
+              char stat[140] = {0};
+              snprintf(stat, 140, "Log: %s; Cloud: %s", last_logging_event, last_cloud_event);
+              uCmd.sendMessage(stat, uCmd.smsPtr->phone, 10000);
+          } else if(message == "!Reset") {
+              char stat[140] = "ACK";
+              uCmd.sendMessage(stat, uCmd.smsPtr->phone, 10000);
+              delay(10000);
+              reset_helper();
+          }
+        }
+
+        deleteAllMessages();
+        state = nextState(state);
+      } else {
+        handle_error("SMS Check error", false);
+        state = nextState(state);
       }
 
       break;
