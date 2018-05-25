@@ -222,7 +222,7 @@ enum SystemState {
   SendPacket,
   LogError,
   SendError,
-  CheckSMS,
+  //CheckSMS,
   Wait
 };
 
@@ -814,7 +814,7 @@ void loop() {
       break;
     }
 
-    case CheckSMS: {
+    /*case CheckSMS: {
       manageStateTimer(120000);
 
       SINGLE_THREADED_BLOCK() {
@@ -872,7 +872,7 @@ void loop() {
       }
 
       break;
-    }
+    }*/
 
     case Wait: {
       manageStateTimer(1200000);
