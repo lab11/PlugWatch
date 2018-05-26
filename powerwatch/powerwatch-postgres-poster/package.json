@@ -1,0 +1,12 @@
+{
+    "name": "powerwatch-postgres-poster",
+    "version": "0.0.1",
+    "description": "Consume SSE events and post them to postgres",
+    "private": true,
+    "dependencies": {
+        "particle-api-js": "^6.4.3"
+    },
+    "engines": {
+        "node": ">=4.3.2"
+    }
+}
