@@ -45,7 +45,11 @@ LoopStatus NrfWit::loop() {
       int start = result.indexOf("\r");
       int end = result.indexOf("\n", start);
       if(start >= 0 && end >= 0 && result.length() > start + 63) {
+#ifdef NRF_CONNECTION
+        result = msg.substring(start+4, start+36);
+#else // NRF_ADVERTISEMENTS
         result = msg.substring(start+45, start+63);
+#endif
         first = true;
         return FinishedSuccess;
       }

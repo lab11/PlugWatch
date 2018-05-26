@@ -476,7 +476,7 @@ static void __on_ble_evt (ble_evt_t* p_ble_evt) {
       printf("power factor: %4i.%04i\n", pf / 10000, pf % 10000);
       printf("frequency:    %4i.%04i Hz\n\n", freq / 10000, freq % 10000);
       */
-      printf("!M R%d V%d C%d W%d P%d F%d\n",
+      printf("\r!M R%d V%d C%d W%d P%d F%d\n",
           relay_status, voltage, current, watts, pf, freq);
 
       __next();
