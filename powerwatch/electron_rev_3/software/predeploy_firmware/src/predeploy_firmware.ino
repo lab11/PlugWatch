@@ -10,8 +10,10 @@
  SYSTEM_THREAD(ENABLED);
  #include <APNHelperRK.h>
 
- PRODUCT_ID(XXX);
+ PRODUCT_ID(1111); //NEW PRODUCT
  PRODUCT_VERSION(1);
+
+ int last_millis;
 
  const APNHelperAPN apns[2] = {
    {"8901260", "wireless.twilio.com"},
@@ -70,10 +72,12 @@ void loop() {
     if(!once) {
       Particle.keepAlive(30);
       once = true;
+    }
   }
   if (System.updatesPending()) {
-      if(millis() - particle_connect_time < 60000) {
+      if(last_millis - millis() < 60000) {
           Particle.process();
+          last_millis = millis();
       } else {
           handshake_flag = false;
           Particle.publish("spark/device/session/end", "", PRIVATE);
