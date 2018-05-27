@@ -10,8 +10,9 @@
  SYSTEM_THREAD(ENABLED);
  #include <APNHelperRK.h>
 
- PRODUCT_ID(1111); //NEW PRODUCT
- PRODUCT_VERSION(1);
+ PRODUCT_ID(7563); //NEW PRODUCT; temporarily set to
+                   // Ghana Pre-Deploy Test Electron's Product ID
+ PRODUCT_VERSION(5);
 
  int last_millis;
 
@@ -48,6 +49,7 @@ void setup() {
 
   Particle.function("handshake", force_handshake);
   Particle.function("reset_state", reset_state);
+  Particle.function("ping", ping_func);
 
 }
 
@@ -59,6 +61,10 @@ int reset_state(String cmd) {
   System.reset();
 }
 
+int ping_func(String cmd) {
+  return 1;
+}
+
 void kill_most_subsystems() {
   digitalWrite(WIFI_ENABLE_PIN, LOW);
   digitalWrite(AUDIO_ENABLE_PIN, LOW);
@@ -67,6 +73,21 @@ void kill_most_subsystems() {
 
 void loop() {
   static bool once = false;
+
+  int particle_connect_time;
+  if(!Particle.connected()) {
+    // Don't attempt to connect too frequently as connection attempts hang MY_DEVICES
+    static unsigned long last_connect_time = 0;
+    const int connect_interval_sec = 60;
+    unsigned long now = millis(); // unix time
+
+    if ((last_connect_time == 0) || (now-last_connect_time > connect_interval_sec*1000)) {
+      last_connect_time = now;
+      Particle.connect();
+    }
+  }
+  particle_connect_time = millis();
+
   if (Particle.connected()) {
     Particle.process();
     if(!once) {
@@ -75,13 +96,15 @@ void loop() {
     }
   }
   if (System.updatesPending()) {
-      if(last_millis - millis() < 60000) {
-          Particle.process();
-          last_millis = millis();
-      } else {
-          handshake_flag = false;
-          Particle.publish("spark/device/session/end", "", PRIVATE);
-      }
+    if(last_millis - millis() < 60000) {
+        Particle.process();
+      last_millis = millis();
+    }
+  }
+
+  if (handshake_flag) {
+    handshake_flag = false;
+    Particle.publish("spark/device/session/end", "", PRIVATE);
   }
   id();
 }
