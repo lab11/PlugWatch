@@ -10,9 +10,8 @@
  SYSTEM_THREAD(ENABLED);
  #include <APNHelperRK.h>
 
- PRODUCT_ID(7563); //NEW PRODUCT; temporarily set to
-                   // Ghana Pre-Deploy Test Electron's Product ID
- PRODUCT_VERSION(5);
+ PRODUCT_ID(7008); // 7008 is PowerWatch_A; 7009 is PowerWatch_B
+ PRODUCT_VERSION(1);
 
  int last_millis;
 
