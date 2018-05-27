@@ -8,10 +8,14 @@ import time
 import pyscreen
 import serial
 import datetime
+from psheets import *
 
 shield_fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', 18)
 case_fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', 30)
 case_fnt_l = ImageFont.truetype('/Library/Fonts/Arial.ttf', 70)
+
+product_a_id = 7008
+product_b_id = 7009
 
 ports = glob.glob('/dev/tty.u*')
 cur_max = 0
@@ -22,14 +26,20 @@ for port in ports:
         cur_max = num
         electron_port = port
 
-#os.system("stty -f " + electron_port + " 14400") #go to dfu
-#os.system("particle update") #update
-#time.sleep(30) #wait for serial to come back
 os.system("stty -f " + electron_port + " 14400") #go to dfu
-os.system("particle flash --usb first.bin")
-time.sleep(20)
+time.sleep(4)
+os.system("particle update") #update
+raw_input("Press <Enter> to continue")
+
+
+os.system("stty -f " + electron_port + " 14400") #go to dfu
+time.sleep(4)
+os.system("particle flash --usb predeploy_A.bin")
+raw_input("Press <Enter> to continue")
 
 ser=serial.Serial(electron_port, 9600)
+version = ser.readline().strip()
+version = ser.readline().strip()
 version = ser.readline().strip()
 version = ser.readline().strip()
 version = ser.readline().strip()
@@ -38,11 +48,13 @@ version = ser.readline().strip()
 particle_id = version.split(",")[0]
 shield_id = version.split(",")[1]
 
-
 time_str = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+
 with open("device_list.txt", "a") as myfile:
         myfile.write(particle_id + "," + shield_id + "," + time_str + "\n")
-
+print "WROTE TO LOCAL LOG"
+append(time_str,particle_id,shield_id,product_a_id)
+print "WROTE TO GOOGLE"
 print "PRINTING: " + particle_id + ":" + shield_id
 
 def print_small(msg,copy):
