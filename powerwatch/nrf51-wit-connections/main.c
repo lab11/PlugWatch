@@ -478,6 +478,13 @@ static void __on_ble_evt (ble_evt_t* p_ble_evt) {
       */
       printf("\r!M R%d V%d C%d W%d P%d F%d\n",
           relay_status, voltage, current, watts, pf, freq);
+//#define PRINT_MAC_ADDRS
+#ifdef PRINT_MAC_ADDRS
+      uint8_t* addr = _oort_address.addr;
+      printf("\rType: %d (<-- be wary if not 0) MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+          _oort_address.addr_type,
+          addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+#endif
 
       __next();
       break;
