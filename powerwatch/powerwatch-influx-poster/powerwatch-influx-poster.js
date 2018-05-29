@@ -37,7 +37,7 @@ function post_error(event) {
             var fields = {};
             var tags = {};
 
-            tags['firmware_version'] = event.version;
+            tags['firmware_version'] = parseInt(event.version);
             tags['core_id'] = event.coreid;
             tags['product_id'] = event.productID;
 
@@ -83,7 +83,7 @@ function post_event(event) {
             
             // Get our tagset
             var tags = {};
-            tags['firmware_version'] = event.version;
+            tags['firmware_version'] = parseInt(event.version);
             tags['core_id'] = event.coreid;
             tags['product_id'] = event.productID;
             //More tags after parsing some of the cellular data
@@ -93,7 +93,7 @@ function post_event(event) {
                 var timestamp = new Date(major_field_list[0]).getTime();
             } else {
                 var timestamp = new Date(major_field_list[0].split('|')[0]).getTime();
-                fields['millis'] = major_field_list[0].split('|')[1];
+                fields['millis'] = parseInt(major_field_list[0].split('|')[1]);
             }
             
             // Charge State
@@ -114,8 +114,8 @@ function post_event(event) {
             }
 
             if(parseInt(event.version) > 20) {
-                fields['last_unplug_millis'] = charge_fields[4];
-                fields['last_plug_millis'] = charge_fields[5];
+                fields['last_unplug_millis'] = parseInt(charge_fields[4]);
+                fields['last_plug_millis'] = parseInt(charge_fields[5]);
             }
 
             // MPU
@@ -151,9 +151,9 @@ function post_event(event) {
             tags['particle_firmware_number'] = cell_fields[1];
             tags['cellular_imei'] = cell_fields[2];
             tags['sim_iccid'] = cell_fields[3];
-            fields['free_memory'] = cell_fields[4];
-            fields['cellular_rssi'] = cell_fields[5];
-            fields['cellular_quality'] = cell_fields[6];
+            fields['free_memory'] = parseInt(cell_fields[4]);
+            fields['cellular_rssi'] = parseInt(cell_fields[5]);
+            fields['cellular_quality'] = parseInt(cell_fields[6]);
 
             var bands = cell_fields[7];
             if(bands === 'No Bands Avail') {
@@ -163,7 +163,7 @@ function post_event(event) {
                 fields['num_cellular_bands'] = band_nums.length;
                 fields['cellular_bands'] = [];
                 for(var i = 0; i < band_nums.length; i++) {
-                    fields['cellular_bands'][i] = band_nums[i];
+                    fields['cellular_bands'][i] = parseInt(band_nums[i]);
                 }
             }
 
@@ -240,12 +240,12 @@ function post_event(event) {
             if(major_field_list.length > 9) {
                 //These fields should go in version 18 and greater
                 system_status_fields = major_field_list[9].split('|');
-                fields['system_loop_count'] = system_status_fields[0];
+                fields['system_loop_count'] = parseInt(system_status_fields[0]);
                 tags['shield_id'] = system_status_fields[1];
 
                 sd_status_fields = major_field_list[10].split('|');
-                fields['sd_log_count'] = sd_status_fields[0];
-                fields['sd_log_size'] = sd_status_fields[1];
+                fields['sd_log_count'] = parseInt(sd_status_fields[0]);
+                fields['sd_log_size'] = parseInt(sd_status_fields[1]);
                 if(parseInt(event.version) > 19) {
                     fields['sd_log_name'] = sd_status_fields[2];
                 }
