@@ -4,6 +4,7 @@
 #include "OneWire.h"
 #include "Wifi.h"
 #include "FileLog.h"
+#include "Base64RK.h"
 
 void Wifi::construct_ssid_list() {
   size_t place = 0;
@@ -17,25 +18,24 @@ void Wifi::construct_ssid_list() {
     // Take the crc16 of the ssid - this is a makeshift hash
     uint16_t crc = OneWire::crc16((uint8_t*)ssid.c_str(),ssid.length());
 
-    //convert this crc back into a string
-    char buffer[3];
-    snprintf(buffer, 3, "%X", crc);
-    String hash = buffer;
-
     //put the hash in our set
-    ssid_set.insert(hash);
+    ssid_set.insert(crc & 0xff);
     place = serial_response.indexOf("CWLAP", second);
   }
 }
 
 String Wifi::getResult() {
-    String message = String(ssid_set.size());
+    uint8_t buf[100];
+    buf[0] = ssid_set.size();
+
+    uint8_t j = 1;
     for (auto i = ssid_set.begin(); i != ssid_set.end(); ++i) {
-      message += MINOR_DLIM;
-      message += *i;
+      buf[j]= *i;
+      j++;
     }
+
     //log.append(message);
-    return message;
+    return Base64::encodeToString(buf, j + 1);
 }
 
 enum WifiState {

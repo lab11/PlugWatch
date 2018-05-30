@@ -13,7 +13,7 @@ class Wifi: public Subsystem {
   typedef Subsystem super;
 
   ESP8266 esp8266;
-  std::set<String> ssid_set;
+  std::set<uint8_t> ssid_set;
   bool force;
 
 public:
