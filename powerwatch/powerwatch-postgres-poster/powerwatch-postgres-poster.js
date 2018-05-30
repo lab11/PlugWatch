@@ -88,7 +88,7 @@ function insert_data(device, timestamp, table_obj) {
             if(err.code == 42703) {
                 console.log('Attempting to alter the table!');
                 //we can pull the erroneous column out of the err code
-                var column_name = err['error'].split("\"")[1];
+                var column_name = err.toString().split("\"")[1];
                 var params = [];
 
                 var type = get_type(table_obj[column_name]);
