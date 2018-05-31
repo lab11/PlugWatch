@@ -1,0 +1,13 @@
+{
+    "name": "powerwatch-parser",
+    "version": "0.0.1",
+    "description": "parses powerwatch packets",
+    "private": true,
+    "scripts": {
+        "start": "powerwatch-parser.js"
+    },
+    "main": "powerwatch-parser.js",
+    "engines": {
+        "node": ">=4.3.2"
+    }
+}
