@@ -281,6 +281,10 @@ function restart_data_stream() {
                     console.log('Event handling error: ' + error)
                 }
             });
+            stream.on('error', function(event) {
+                console.log('Stream had error:');
+                console.log(event);
+            });
         }, function(err) {
             console.log("Failed to getEventStream: ", err);
         }
@@ -310,6 +314,10 @@ function restart_error_stream() {
 
             stream.on('event', function(event) {
                 post_error(event);
+            });
+            stream.on('error', function(event) {
+                console.log('Stream had error:');
+                console.log(event);
             });
         }, function(err) {
             console.log("Failed to getEventStream: ", err);
@@ -341,6 +349,10 @@ function restart_spark_stream() {
                 if(event.name.includes('spark')) {
                     console.log(event);
                 }
+            });
+            stream.on('error', function(event) {
+                console.log('Stream had error:');
+                console.log(event);
             });
         }, function(err) {
             console.log("Failed to getEventStream: ", err);
