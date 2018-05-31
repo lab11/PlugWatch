@@ -48,7 +48,9 @@
 //***********************************
 int version_num = 2; //hack
 PRODUCT_ID(7456); //US testbed
-PRODUCT_VERSION(23);
+int product_id = 7456;
+PRODUCT_VERSION(24);
+int version_int = 24;
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
@@ -150,6 +152,11 @@ retained char data_log_name[50];
 auto DataLog = FileLog(SD, "data_log.txt", data_log_name);
 unsigned long last_logging_event  = 0;
 
+//***********************************
+//* UDP
+//***********************************
+//UDP udp;
+
 
 // String SYSTEM_EVENT = "s";
 retained int system_event_count = 0;
@@ -220,6 +227,7 @@ enum SystemState {
   UpdateSystemStat,
   LogPacket,
   SendPacket,
+  SendUDP,
   LogError,
   SendError,
   //CheckSMS,
@@ -755,16 +763,67 @@ void loop() {
               handle_error("Data publishing error", true);
             } else {
               DataDeque.pop_front();
+              last_cloud_event = millis();
             }
           }
         } else {
           count = 0;
-          last_cloud_event = millis();
           state = nextState(state);
         }
 
       } else {
         handle_error("Data publishing error", true);
+        count = 0;
+        state = nextState(state);
+      }
+
+      break;
+    }
+
+    case SendUDP: {
+      manageStateTimer(40000);
+
+      static int count = 0;
+      count++;
+
+      Serial.printlnf("Data Queue size %d",DataDeque.size());
+
+      if(Cellular.ready()) {
+        UDP udp;
+
+        if(udp.begin(8888) != true) {
+          Serial.println("UDP Begin error");
+        }
+
+        if(!DataDeque.empty() && count < 5) {
+
+          Serial.printlnf("Sending data - size %d",DataDeque.size());
+          String toSend = DataDeque.front();
+
+          //construct some json
+          String data = "\"data\": \"" + toSend + "\", ";
+          String version = "\"version\": " + String(version_int) + ", ";
+          String product = "\"productID\": " + String(product_id) + ", ";
+          String core = "\"coreid\": \"" + System.deviceID() + "\"";
+          String blob = "{ " + data + version + product + core + " }";
+
+          int r = udp.sendPacket(blob.c_str(),blob.length(), IPAddress(141,212,11,145), 5000);
+          if(r < 0) {
+            handle_error("Data publishing error", false);
+            Serial.printlnf("Got error code: %d",r);
+          } else {
+            DataDeque.pop_front();
+            last_cloud_event = millis();
+          }
+
+        } else {
+          count = 0;
+          state = nextState(state);
+        }
+
+        udp.stop();
+      } else {
+        handle_error("Data publishing error", false);
         count = 0;
         state = nextState(state);
       }
