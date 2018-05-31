@@ -204,15 +204,24 @@ server.on('listening', function() {
 server.on('message', function(msg, rinfo) {
     console.log(msg);
     console.log(rinfo);
-    
+
     if(rinfo.port == 8888) {
+        //Turn msg into json
         try {
-            post_event(msg);
+            msgString = msg.toString('utf8');
+            evt = JSON.parse(msgString);
+            console.log(evt);
+        } catch(e) {
+            console.log('Error converting to JSON');
+            console.log(e)
+        }
+
+        try {
+            post_event(evt);
         } catch(e) {
             console.log('UDP handling error: ' + error)
         }
     }
 });
-
 
 
