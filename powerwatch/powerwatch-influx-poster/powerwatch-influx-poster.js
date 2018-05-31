@@ -5,7 +5,6 @@ var influx_config = require('./influxdb-config.json');
 
 var Particle = require('particle-api-js');
 var powerwatch_parser = require('../powerwatch-parser');
-console.log(powerwatch_parser.parse_packet);
 var particle = new Particle();
 
 var INFLUX_LINE_LIMIT = 200000;
@@ -23,10 +22,10 @@ var influx_poster = new InfluxPoster({
 
 function post_error(event) {
     
-    r = powerwatch_parser.parse_error(event);
-    fields = r[0];
-    tags = r[1];
-    timestamp = r[2];
+    var r = powerwatch_parser.parse_error(event);
+    var fields = r[0];
+    var tags = r[1];
+    var timestamp = r[2];
     
     if(fields && tags && timestamp) {
         for( var key in fields) {
@@ -46,10 +45,10 @@ function post_error(event) {
 
 function post_event(event) {
 
-    r = powerwatch_parser.parse_packet(event);
-    fields = r[0];
-    tags = r[1];
-    timestamp = r[2];
+    var r = powerwatch_parser.parse_packet(event);
+    var fields = r[0];
+    var tags = r[1];
+    var timestamp = r[2];
 
     if(fields && tags && timestamp) {
     
