@@ -6,6 +6,8 @@ var influx_config = require('./influxdb-config.json');
 var Particle = require('particle-api-js');
 var powerwatch_parser = require('../powerwatch-parser');
 var particle = new Particle();
+var dgram = require('dgram');
+var server = dgram.createSocket({type: 'udp4', reuseAddr: true}).bind(5000);
 
 var INFLUX_LINE_LIMIT = 200000;
 var INFLUX_TIME_LIMIT = 15*1000;
@@ -187,3 +189,30 @@ function restart_spark_stream() {
 
 restart_spark_stream();
 setInterval(restart_spark_stream, 600000);
+
+
+//This is the udp section of the listener
+server.on('error', function(error) {
+    console.log('UDP error:');
+    console.log(error);
+});
+
+server.on('listening', function() {
+    console.log('UDP listening on ' + server.address().address + ':' + server.address().port);
+});
+
+server.on('message', function(msg, rinfo) {
+    console.log(msg);
+    console.log(rinfo);
+    
+    if(rinfo.port == 8888) {
+        try {
+            post_event(msg);
+        } catch(e) {
+            console.log('UDP handling error: ' + error)
+        }
+    }
+});
+
+
+
