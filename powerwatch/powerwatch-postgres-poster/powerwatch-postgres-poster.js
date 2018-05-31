@@ -8,6 +8,8 @@ var format      = require('pg-format');
 var Particle = require('particle-api-js');
 var powerwatch_parser = require('../powerwatch-parser');
 var particle = new Particle();
+var dgram = require('dgram');
+var server = dgram.createSocket({type: 'udp4', reuseAddr: true}).bind(5000);
 
 const pg_pool = new  Pool( {
     user: timescale_config.username,
@@ -362,3 +364,39 @@ function restart_spark_stream() {
 
 restart_spark_stream();
 setInterval(restart_spark_stream, 600000);
+
+
+//This is the udp section of the listener
+server.on('error', function(error) {
+    console.log('UDP error:');
+    console.log(error);
+});
+
+server.on('listening', function() {
+    console.log('UDP listening on ' + server.address().address + ':' + server.address().port);
+});
+
+server.on('message', function(msg, rinfo) {
+    console.log(msg);
+    console.log(rinfo);
+
+    if(rinfo.port == 8888) {
+        //Turn msg into json
+        try {
+            msgString = msg.toString('utf8');
+            evt = JSON.parse(msgString);
+            console.log(evt);
+        } catch(e) {
+            console.log('Error converting to JSON');
+            console.log(e)
+        }
+
+        try {
+            post_event(evt);
+        } catch(e) {
+            console.log('UDP handling error: ' + error)
+        }
+    }
+});
+
+
