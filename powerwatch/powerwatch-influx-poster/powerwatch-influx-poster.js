@@ -96,8 +96,13 @@ function restart_data_stream() {
     }
 
     // Get the particle event stream
-    particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'g' }).then(
+    var eventStream = particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'g' })
+    eventStream.catch(function(err) {
+        console.log("Error in event stream");
+        console.log(err);
+    });
     
+    eventStream.then(
         function(stream) {
             console.log('Setting data stream');
             global_data_stream = stream;
@@ -133,8 +138,13 @@ function restart_error_stream() {
     }
 
     // Get the particle event stream
-    particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'!' }).then(
+    var eventStream = particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'!' })
+    eventStream.catch(function(err) {
+        console.log("Error in event stream");
+        console.log(err);
+    });
     
+    eventStream.then(
         function(stream) {
             console.log('Setting error stream');
             global_error_stream = stream;
@@ -166,8 +176,13 @@ function restart_spark_stream() {
     }
 
     // Get the particle event stream
-    particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken}).then(
-    
+    var eventStream = particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken});
+    eventStream.catch(function(err) {
+        console.log("Error in event stream");
+        console.log(err);
+    });
+
+    eventStream.then(
         function(stream) {
             console.log('Setting spark stream');
             global_spark_stream = stream;
