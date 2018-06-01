@@ -19,10 +19,13 @@ LoopStatus ChargeState::loop() {
   char vcell[5];
   snprintf(vcell, 5, "%0.2f", FuelGauge().getVCell());
 
+  uint8_t charge = powerCheck.getIsCharging();
+  uint8_t power = powerCheck.getHasPower();
+  uint8_t both = (charge << 1) | power;
+
   String power_stats = String(state_of_charge) + String(MINOR_DLIM)
   + String(vcell) + String(MINOR_DLIM)
-  + String(powerCheck.getIsCharging()) + String(MINOR_DLIM)
-  + String(powerCheck.getHasPower()) + String(MINOR_DLIM)
+  + String(both) + String(MINOR_DLIM)
   + String(powerCheck.lastUnplugMillis) + String(MINOR_DLIM)
   + String(powerCheck.lastPlugMillis);
 

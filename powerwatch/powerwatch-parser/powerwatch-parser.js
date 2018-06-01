@@ -27,8 +27,11 @@ function parse_packet(event) {
             // Time
             if(parseInt(event.version) < 20) {
                 var timestamp = new Date(major_field_list[0]).getTime();
-            } else {
+            } else if(parseInt(event.version) < 24) {
                 var timestamp = new Date(major_field_list[0].split('|')[0]).getTime();
+                fields['millis'] = parseInt(major_field_list[0].split('|')[1]);
+            } else {
+                var timestamp = parseInt(major_field_list[0].split('|')[0])*1000;
                 fields['millis'] = parseInt(major_field_list[0].split('|')[1]);
             }
             
@@ -36,22 +39,42 @@ function parse_packet(event) {
             var charge_fields = major_field_list[1].split('|');
             fields['state_of_charge'] = parseInt(charge_fields[0]);
             fields['cell_voltage'] = parseFloat(charge_fields[1]);
+            
+            if(parseInt(event.version) < 24) {
+                if(charge_fields[2] == "0") {
+                    fields['is_charging'] = false;
+                } else if(charge_fields[2] == "1") {
+                    fields['is_charging'] = true;
+                }
 
-            if(charge_fields[2] == "0") {
-                fields['is_charging'] = false;
-            } else if(charge_fields[2] == "1") {
-                fields['is_charging'] = true;
-            }
+                if(charge_fields[3] == "0") {
+                    fields['is_powered'] = false;
+                } else if(charge_fields[3] == "1") {
+                    fields['is_powered'] = true;
+                }
 
-            if(charge_fields[3] == "0") {
-                fields['is_powered'] = false;
-            } else if(charge_fields[3] == "1") {
-                fields['is_powered'] = true;
-            }
+                if(parseInt(event.version) > 20) {
+                    fields['last_unplug_millis'] = parseInt(charge_fields[4]);
+                    fields['last_plug_millis'] = parseInt(charge_fields[5]);
+                }
+            } else {
+                var both = parseInt(charge_fields[2]);
+                if(both & 0x02) {
+                    fields['is_charging'] = true;
+                } else {
+                    fields['is_charging'] = false;
+                }
 
-            if(parseInt(event.version) > 20) {
-                fields['last_unplug_millis'] = parseInt(charge_fields[4]);
-                fields['last_plug_millis'] = parseInt(charge_fields[5]);
+                if(both & 0x01) {
+                    fields['is_powered'] = true;
+                } else {
+                    fields['is_powered'] = false;
+                }
+
+                if(parseInt(event.version) > 20) {
+                    fields['last_unplug_millis'] = parseInt(charge_fields[3]);
+                    fields['last_plug_millis'] = parseInt(charge_fields[4]);
+                }
             }
 
             // MPU
@@ -65,41 +88,78 @@ function parse_packet(event) {
             fields['die_temperature'] = parseFloat(mpu_fields[1]);
             
             // WIFI
-            if(major_field_list[3] == '!') {
-                fields['wifi_error'] = true; 
+            if(parseInt(event.version) < 24) {
+                if(major_field_list[3] == '!') {
+                    fields['wifi_error'] = true; 
+                } else {
+                    fields['wifi_error'] = false; 
+                    var wifi_fields = major_field_list[3].split('|');
+                    var num_networks = parseInt(wifi_fields[0]);
+                    fields['num_wifi_networks'] = num_networks;
+
+                    fields['wifi_networks'] = [];
+
+                    for(var i = 0; i < num_networks; i++) {
+                        fields['wifi_networks'][i] = wifi_fields[i+1];
+                    }
+                }
             } else {
-                fields['wifi_error'] = false; 
-                var wifi_fields = major_field_list[3].split('|');
-                var num_networks = parseInt(wifi_fields[0]);
-                fields['num_wifi_networks'] = num_networks;
+                if(major_field_list[3] == '!') {
+                    fields['wifi_error'] = true; 
+                } else {
+                    fields['wifi_error'] = false; 
+                    var buf = Buffer.from(major_field_list[3], 'base64');
+                    var num = buf[0];
+                    fields['num_wifi_networks'] = num;
 
-                fields['wifi_networks'] = [];
-
-                for(var i = 0; i < num_networks; i++) {
-                    fields['wifi_networks'][i] = wifi_fields[i+1];
+                    fields['wifi_networks'] = [];
+                    for(var i = 0; i < num; i++) {
+                        fields['wifi_networks'][i] = buf[i+1].toString(16).toUpperCase();
+                    }
                 }
             }
 
 
             // Cell Status
-            var cell_fields = major_field_list[4].split('|');
-            tags['particle_firmware_revision'] = cell_fields[0];
-            tags['particle_firmware_number'] = cell_fields[1];
-            tags['cellular_imei'] = cell_fields[2];
-            tags['sim_iccid'] = cell_fields[3];
-            fields['free_memory'] = parseInt(cell_fields[4]);
-            fields['cellular_rssi'] = parseInt(cell_fields[5]);
-            fields['cellular_quality'] = parseInt(cell_fields[6]);
+            if(parseInt(event.version) < 24) {
+                var cell_fields = major_field_list[4].split('|');
+                tags['particle_firmware_revision'] = cell_fields[0];
+                tags['particle_firmware_number'] = cell_fields[1];
+                tags['cellular_imei'] = cell_fields[2];
+                tags['sim_iccid'] = cell_fields[3];
+                fields['free_memory'] = parseInt(cell_fields[4]);
+                fields['cellular_rssi'] = parseInt(cell_fields[5]);
+                fields['cellular_quality'] = parseInt(cell_fields[6]);
 
-            var bands = cell_fields[7];
-            if(bands === 'No Bands Avail') {
-                fields['num_cellular_bands'] = 0;
+                var bands = cell_fields[7];
+                if(bands === 'No Bands Avail') {
+                    fields['num_cellular_bands'] = 0;
+                } else {
+                    band_nums = bands.split(',');
+                    fields['num_cellular_bands'] = band_nums.length;
+                    fields['cellular_bands'] = [];
+                    for(var i = 0; i < band_nums.length; i++) {
+                        fields['cellular_bands'][i] = parseInt(band_nums[i]);
+                    }
+                }
             } else {
-                band_nums = bands.split(',');
-                fields['num_cellular_bands'] = band_nums.length;
-                fields['cellular_bands'] = [];
-                for(var i = 0; i < band_nums.length; i++) {
-                    fields['cellular_bands'][i] = parseInt(band_nums[i]);
+                var cell_fields = major_field_list[4].split('|');
+                tags['particle_firmware_revision'] = cell_fields[0];
+                tags['cellular_imei'] = '35258008' + cell_fields[1];
+                fields['free_memory'] = parseInt(cell_fields[2]);
+                fields['cellular_rssi'] = parseInt(cell_fields[3]);
+                fields['cellular_quality'] = parseInt(cell_fields[4]);
+
+                var bands = cell_fields[5];
+                if(bands === '!') {
+                    fields['num_cellular_bands'] = 0;
+                } else {
+                    band_nums = bands.split(',');
+                    fields['num_cellular_bands'] = band_nums.length;
+                    fields['cellular_bands'] = [];
+                    for(var i = 0; i < band_nums.length; i++) {
+                        fields['cellular_bands'][i] = parseInt(band_nums[i]);
+                    }
                 }
             }
 
