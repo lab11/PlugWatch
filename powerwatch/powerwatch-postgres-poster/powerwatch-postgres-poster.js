@@ -271,7 +271,7 @@ function restart_data_stream() {
     }
 
     // Get the particle event stream
-    var eventStream = particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken});
+    var eventStream = particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'g' });
     eventStream.catch(function(err) {
         console.log("Error in event stream");
         console.log(err);
@@ -312,7 +312,7 @@ function restart_error_stream() {
     }
 
     // Get the particle event stream
-    var eventStream = particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken});
+    var eventStream = particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'!' });
     eventStream.catch(function(err) {
         console.log("Error in event stream");
         console.log(err);
