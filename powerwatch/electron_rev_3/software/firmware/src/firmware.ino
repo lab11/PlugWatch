@@ -406,7 +406,7 @@ void clearResults(ResultStruct* r) {
 // A function to take all of the resutl strings and concatenate them together
 String stringifyResults(ResultStruct r) {
   String result = "";
-  result += String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
+  result += String(Time.now());
   result += MINOR_DLIM;
   result += String(millis());
   result += MAJOR_DLIM;
