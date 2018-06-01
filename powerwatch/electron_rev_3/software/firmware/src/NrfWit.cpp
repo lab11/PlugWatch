@@ -85,7 +85,7 @@ LoopStatus NrfWit::loop() {
         buf[0] = voltage;
         buf[1] = current;
         buf[2] = wattage;
-        buf[4] = frequency;
+        buf[3] = frequency;
 
         Serial.printlnf("Volt: %d, Curr: %d, Watt: %d, Freq: %d", voltage,current,wattage,frequency);
         result = Base64::encodeToString((uint8_t*)buf, 16);
