@@ -211,7 +211,7 @@ function parse_packet(event) {
             } else {
                 var string = major_field_list[7];
                 fields['wit_string'] = string;
-                if(adv_string == '!') {
+                if(string == '!') {
                     fields['wit_present'] = false; 
                     fields['wit_error'] = true; 
                 } else {
