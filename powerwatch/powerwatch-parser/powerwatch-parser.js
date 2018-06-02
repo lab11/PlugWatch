@@ -39,9 +39,9 @@ function parse_packet(event) {
             //If the time more than a year ago (i.e. no sync) assume the time is now
             if(timestamp < 1496367912000) {
                 timestamp = Date.now();
-                fields['time_source'] = 'cloud';
+                tags['time_source'] = 'cloud';
             } else {
-                fields['time_source'] = 'particle';
+                tags['time_source'] = 'particle';
             }
             
             // Charge State
