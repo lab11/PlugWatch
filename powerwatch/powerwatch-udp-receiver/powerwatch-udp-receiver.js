@@ -22,6 +22,7 @@ listener.on('message', function(msg, rinfo) {
     //Turn msg into json
     try {
         msgString = msg.toString('utf8');
+        console.log(msgString);
         evt = JSON.parse(msgString);
         console.log(evt);
     } catch(e) {
