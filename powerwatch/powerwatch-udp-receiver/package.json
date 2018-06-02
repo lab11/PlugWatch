@@ -1,0 +1,11 @@
+{
+    "name": "powerwatch-udp-receiver",
+    "version": "0.0.1",
+    "description": "multiplex udp packets from particle",
+    "private": true,
+    "dependencies": {
+    },
+    "engines": {
+        "node": ">=4.3.2"
+    }
+}

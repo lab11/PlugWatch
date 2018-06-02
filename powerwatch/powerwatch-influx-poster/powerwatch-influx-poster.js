@@ -7,7 +7,7 @@ var Particle = require('particle-api-js');
 var powerwatch_parser = require('../powerwatch-parser');
 var particle = new Particle();
 var dgram = require('dgram');
-var server = dgram.createSocket({type: 'udp4', reuseAddr: true}).bind(5000);
+var server = dgram.createSocket({type: 'udp4', reuseAddr: true}).bind(5001);
 
 var INFLUX_LINE_LIMIT = 200000;
 var INFLUX_TIME_LIMIT = 15*1000;
