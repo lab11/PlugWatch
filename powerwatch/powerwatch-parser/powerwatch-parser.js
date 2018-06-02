@@ -34,6 +34,15 @@ function parse_packet(event) {
                 var timestamp = parseInt(major_field_list[0].split('|')[0])*1000;
                 fields['millis'] = parseInt(major_field_list[0].split('|')[1]);
             }
+
+            
+            //If the time more than a year ago (i.e. no sync) assume the time is now
+            if(timestamp < 1496367912000) {
+                timestamp = Date.now();
+                fields['time_source'] = 'cloud';
+            } else {
+                fields['time_source'] = 'particle';
+            }
             
             // Charge State
             var charge_fields = major_field_list[1].split('|');
