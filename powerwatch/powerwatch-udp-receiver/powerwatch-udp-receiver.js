@@ -32,12 +32,16 @@ listener.on('message', function(msg, rinfo) {
 
     try {
         sender.send(JSON.stringify(evt),5001,'localhost', function(err) {
-            console.log("Got error sending udp 1");
-            console.log(err);
+            if(err) {
+                console.log("Got error sending udp 1");
+                console.log(err);
+            }
         });
         sender.send(JSON.stringify(evt),5002,'localhost', function(err) {
-            console.log("Got error sending udp 2");
-            console.log(err);
+            if(err) {
+                console.log("Got error sending udp 2");
+                console.log(err);
+            }
         });
     } catch(e) {
         console.log('UDP handling error: ' + e)
