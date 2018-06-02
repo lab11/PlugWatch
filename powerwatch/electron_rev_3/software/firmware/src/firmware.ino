@@ -49,8 +49,8 @@
 int version_num = 2; //hack
 PRODUCT_ID(7456); //US testbed
 int product_id = 7456;
-PRODUCT_VERSION(24);
-int version_int = 24;
+PRODUCT_VERSION(25);
+int version_int = 25;
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
@@ -165,9 +165,20 @@ retained int last_system_event_type = -999;
 retained int num_reboots = 0;
 retained int num_manual_reboots = 0;
 
+volatile int network_state = 0;
+volatile int cloud_state = 0;
+
 void handle_all_system_events(system_event_t event, int param) {
   system_event_count++;
   // cast as per BDub post here: https://community.particle.io/t/system-events-param-problem/32071/14
+  if((uint32_t)event == 64) {
+    cloud_state = param;
+  }
+
+  if((uint32_t)event == 32) {
+    network_state = param;
+  }
+
   Serial.printlnf("got event H: %lu event L: %lu with value %d", (uint32_t)(event>>32), (uint32_t)event, param);
   String system_event_str = String((int)event) + "|" + String(param);
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
@@ -239,12 +250,12 @@ SystemState nextState(SystemState s) {
 }
 
 enum ParticleCloudState {
-  ConnectionCheck,
-  UpdateCheck,
+  ParticleConnectionCheck,
+  CellularConnectionCheck,
   HandshakeCheck
 };
 
-ParticleCloudState cloudState = ConnectionCheck;
+ParticleCloudState cloudState = ParticleConnectionCheck;
 
 // Retained system states are used to diagnose restarts (error vs hard reset)
 retained SystemState state = CheckCloudEvent;
@@ -449,55 +460,80 @@ void loop() {
 
   // If we connected call particle process for cloud events
   static bool once = false;
-  if (Particle.connected()) {
-    Particle.process();
-
-    // We need to set up the keepalive the first time the particle becomes
-    // connected
-    if(!once) {
-      Particle.keepAlive(30); // send a ping every 30 seconds
-      once = true;
-    }
+  if(!once) {
+    Particle.keepAlive(30); // send a ping every 30 seconds
+    once = true;
   }
+
+  Particle.process();
 
   switch(state) {
     case CheckCloudEvent: {
-      manageStateTimer(120000);
+      manageStateTimer(240000);
 
-      //Check the battery!
-      batteryCheck.checkAndSleepIfNecessary();
 
       switch(cloudState) {
-        int particle_connect_time;
-
-        case ConnectionCheck: {
-          //Check if we have a connection - if it's been a while attempt to reconnect
-          if(!Particle.connected()) {
-            // Don't attempt to connect too frequently as connection attempts hang MY_DEVICES
-            static unsigned long last_connect_time = 0;
-            const int connect_interval_sec = 60;
-            unsigned long now = millis(); // unix time
-
-            if ((last_connect_time == 0) || (now-last_connect_time > connect_interval_sec*1000)) {
-              last_connect_time = now;
-              Particle.connect();
-            }
+        // First try to connect to the particle cloud for 60s
+        case ParticleConnectionCheck: {
+          static bool first = true;
+          static unsigned long now;
+          if(first) {
+            //Check the battery!
+            batteryCheck.checkAndSleepIfNecessary();
+            Serial.println("Connecting to particle cloud");
+            Particle.connect();
+            now = millis();
           }
-          cloudState = UpdateCheck;
-          particle_connect_time = millis();
+          first = false;
+
+          //Try to connect for 60s
+          if(millis() - now < 60000) {
+              if(Particle.connected()) {
+                Serial.println("Connected to particle cloud");
+                first = true;
+                cloudState = HandshakeCheck;
+              }
+          } else {
+              //We failed to connect to the cloud - try to connect to the cellular network
+              Serial.println("Particle cloud connection failed");
+              //Stop trying to connect to the cloud
+              Particle.disconnect();
+               //0 is the disconnected state
+              while(cloud_state != 0) {
+                Particle.process();
+              };
+
+              //Turn the cellular modem off
+              //Cellular.off();
+              //while(Cellular.ready());
+              //Cellular.on();
+              first = true;
+              cloudState = CellularConnectionCheck;
+          }
           break;
         }
 
-        case UpdateCheck: {
-          if (System.updatesPending()) {
-            //Spend a minute just trying to fetch the update
-            if(millis() - particle_connect_time < 60000) {
-              Particle.process();
-            } else {
-              cloudState = HandshakeCheck;
-            }
+        case CellularConnectionCheck: {
+          static bool first = true;
+          static unsigned long now;
+          if(first) {
+            Serial.println("Connecting to cellular network");
+            Cellular.connect();
+            now = millis();
+          }
+          first = false;
+
+          if(millis() - now < 60000) {
+              if(Cellular.ready()) {
+                Serial.println("Connected to cellular network");
+                delay(5000);
+                first = true;
+                cloudState = HandshakeCheck;
+              }
           } else {
-            cloudState = HandshakeCheck;
+              Serial.println("Cellular connection failed");
+              first = true;
+              cloudState = HandshakeCheck;
           }
           break;
         }
@@ -507,7 +543,7 @@ void loop() {
             handshake_flag = false;
             Particle.publish("spark/device/session/end", "", PRIVATE);
           }
-          cloudState = ConnectionCheck;
+          cloudState = ParticleConnectionCheck;
           state = nextState(state);
           break;
         }

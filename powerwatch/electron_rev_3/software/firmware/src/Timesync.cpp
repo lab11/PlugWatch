@@ -24,6 +24,7 @@ LoopStatus Timesync::loop() {
       Serial.println("UDP Begin error");
       return FinishedError;
     }
+    delay(10000);
     uint8_t packet[48];
     packet[0] = 0x1B;
     unsigned long Sentmillis = millis();
@@ -36,7 +37,7 @@ LoopStatus Timesync::loop() {
     }
 
     unsigned long mill = millis();
-    while(millis() - mill < 40000) {
+    while(millis() - mill < 20000) {
       int size = udp.receivePacket(packet, 48);
       if(size > 0) {
 
