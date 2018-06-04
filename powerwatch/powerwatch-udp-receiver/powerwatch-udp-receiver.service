@@ -1,0 +1,13 @@
+[Unit]
+Description=Multiplex udp for powerwatch
+After=network.service
+
+[Service]
+ExecStart=/home/adkinsjd/plugwatch/powerwatch/powerwatch-udp-receiver/powerwatch-udp-receiver.js
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=powerwatch-udp-receiver
+
+[Install]
+WantedBy=multi-user.target
