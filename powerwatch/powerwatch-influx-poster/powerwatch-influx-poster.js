@@ -10,7 +10,7 @@ var server = dgram.createSocket({type: 'udp4', reuseAddr: true}).bind(5001);
 
 var command = require('commander');
 
-command.option('-c --config [config]', 'Particle configuration file.');
+command.option('-c --config [config]', 'Particle configuration file.').parse(process.argv);
 
 var particle_config = null; 
 if(typeof command.config !== 'undefined') {
