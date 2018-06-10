@@ -6,7 +6,8 @@
     "dependencies": {
         "particle-api-js": "^6.4.3",
         "pg": "^7.3.0",
-        "pg-format": ""
+        "pg-format": "",
+        "commander": ""
     },
     "engines": {
         "node": ">=4.3.2"

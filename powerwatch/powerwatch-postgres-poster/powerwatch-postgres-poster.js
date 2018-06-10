@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-var particle_config = require('./particle-config.json'); 
 var timescale_config = require('./postgres-config.json'); 
 
 const { Pool }  = require('pg');
@@ -10,6 +9,17 @@ var powerwatch_parser = require('../powerwatch-parser');
 var particle = new Particle();
 var dgram = require('dgram');
 var server = dgram.createSocket({type: 'udp4', reuseAddr: true}).bind(5002);
+
+var command = require('commander');
+
+command.option('-c','--config', 'Particle configuration file.');
+
+var particle_config = null; 
+if(typeof command.config !== 'undefined') {
+    particle_config = command.config;
+} else {
+    particle_config = require('./particle-config.json'); 
+}
 
 const pg_pool = new  Pool( {
     user: timescale_config.username,
