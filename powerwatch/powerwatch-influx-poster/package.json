@@ -11,7 +11,7 @@
     ],
     "license": "Apache Version 2.0",
     "dependencies": {
-        "particle-api-js": "^6.4.3",
+        "particle-api-js": "^7.2.0",
         "influx-poster": "^1.1.0",
         "commander":""
     },
