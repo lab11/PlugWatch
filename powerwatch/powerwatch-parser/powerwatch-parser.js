@@ -247,7 +247,7 @@ function parse_packet(event) {
                     fields['gps_longitude'] = parseFloat(gps_fields[1]);
                 }
 
-                fields['gps_time_millis'] = parseInt(gps_subfields[1]);
+                fields['gps_time'] = parseInt(gps_subfields[1]);
                 fields['gps_satellites'] = parseInt(gps_subfields[2]);
             } else {
                 if(major_field_list[8] == '-1'){
