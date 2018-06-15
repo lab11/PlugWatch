@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import datetime
+from datetime import datetime
 import time
 import psycopg2
 import yaml
@@ -53,6 +53,13 @@ with open(args.filename) as survey:
         if(len(row[8]) > 0):
             gps_long = float(row[8])
 
+        #check to see if this devices has already been inserted based on the timestamp
+        cursor.execute('SELECT * from deployment where deployment_time = %s',(time,))
+        result = cursor.fetchone()
+        if(result != None):
+            print('Device {} already in deployment database - skipping'.format(result[0]))
+            continue
+
         core_id = None
         #check length of id
         while(core_id == None):
@@ -61,9 +68,12 @@ with open(args.filename) as survey:
                 print('Loooking up core ID {}'.format(device_id));
                 cursor.execute('SELECT * from devices where core_id = %s',(device_id,))
                 result = cursor.fetchone()
-                if(len(result) == 0):
-                    print('No exact core match - looking for partial matches');
-                    break;
+                if(result == None):
+                    print('No exact core match.');
+                    inp = raw_input('Enter user corrected core ID or shield ID: ')
+                    if(inp == 'skip'):
+                        break;
+                    device_id = inp
                 else:
                     print('Got match for core ID {} with shield ID {}'.format(result[0], result[1]));
                     core_id = result[0];
@@ -72,9 +82,12 @@ with open(args.filename) as survey:
                 print('Loooking up shield ID {}'.format(device_id));
                 cursor.execute('SELECT * from devices where shield_id = %s',(device_id,))
                 result = cursor.fetchone()
-                if(len(result) == 0):
-                    print('No exact shield match - looking for partial matches');
-                    break;
+                if(result == None):
+                    print('No exact shield match');
+                    inp = raw_input('Enter user corrected core ID or shield ID: ')
+                    if(inp == 'skip'):
+                        break;
+                    device_id = inp
                 else:
                     print('Got match for shield ID {} with core ID {}'.format(result[1],result[0]));
                     core_id = result[0];
@@ -95,6 +108,7 @@ with open(args.filename) as survey:
             elif(gps_lat != None and gps_long != None):
                 gps_final_lat = gps_lat
                 gps_final_long = gps_long
+
                 
             cursor.execute('INSERT into deployment (core_id, site, latitude, longitude, deployment_time, has_wit) VALUES (%s, %s, %s, %s, %s, %s)',
                                 (core_id, site, gps_final_lat, gps_final_long, time, wit))
