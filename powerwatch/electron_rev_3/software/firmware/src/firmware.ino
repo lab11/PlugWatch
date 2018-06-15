@@ -47,8 +47,8 @@
 //* Critical System Config
 //***********************************
 int version_num = 2; //hack
-PRODUCT_ID(7456); //US testbed
-int product_id = 7456;
+PRODUCT_ID(7009); //US testbed
+int product_id = 7009;
 PRODUCT_VERSION(25);
 int version_int = 25;
 SYSTEM_THREAD(ENABLED);
@@ -333,7 +333,7 @@ void setup() {
   digitalWrite(B5, HIGH);
   // GPS
   pinMode(D3, OUTPUT);
-  digitalWrite(B5, HIGH);
+  digitalWrite(D3, HIGH);
   // SD
   SD.PowerOff();
 
@@ -708,7 +708,7 @@ void loop() {
     }
 
     case SenseGPS: {
-      manageStateTimer(1000);
+      manageStateTimer(30000);
       LoopStatus result = gpsSubsystem.loop();
 
       //return result or error
