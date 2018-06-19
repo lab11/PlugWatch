@@ -1,0 +1,14 @@
+{
+    "name": "powerwatch-visualization",
+    "version": "0.0.1",
+    "description": "Visualize the powerwatch data",
+    "private": true,
+    "dependencies": {
+        "pg": "^7.3.0",
+        "pg-format": "",
+        "express":""
+    },
+    "engines": {
+        "node": ">=4.3.2"
+    }
+}
