@@ -6,7 +6,8 @@
     "dependencies": {
         "pg": "^7.3.0",
         "pg-format": "",
-        "express":""
+        "express":"",
+        "moment":""
     },
     "engines": {
         "node": ">=4.3.2"

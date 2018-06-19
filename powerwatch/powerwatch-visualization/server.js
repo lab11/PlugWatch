@@ -4,6 +4,8 @@ const { Pool }  = require('pg');
 var format      = require('pg-format');
 const express   = require('express');
 const app       = express();
+var moment      = require('moment');
+
 
 const pg_pool = new  Pool( {
     user: timescale_config.username,
@@ -23,7 +25,7 @@ app.get('/init', (req,resp) => {
     pg_pool.query("SELECT latitude, longitude, deployment_time from deployment", (err, res) => {
         if(err) {
             console.log('Initial query error:' + err)
-            resp.status(404).send('This is the wrong error code, but I can\'t access the database');
+            resp.status(500).send('Database query error');
         } else {
 
             var latitudes = [];
@@ -63,7 +65,58 @@ app.get('/init', (req,resp) => {
 });
 
 app.get('/getData', (req, resp) => {
-    console.log(req.query);
+    //First query the deployment table to get the list of core_id's and coordinates to base the power state on
+    
+    var geoJSON = {}
+    geoJSON.type = "FeatureCollection";
+    geoJSON.features = [];
+    var last_features = [];
+    pg_pool.query('SELECT core_id, latitude, longitude from deployment', (err, res) => {
+        if(err) {
+            console.log('Postgress error');
+            console.log(err);
+            resp.status(500).send('Database query error');
+        } else {
+            //okay we should iterate through the response
+            for(var i = 0; i < res.rows.length; i++) {
+                var feature = {};
+                feature.type = "Feature";
+                feature.geometry = {};
+                feature.geometry.type = "Point";
+                feature.geometry.coordinates = [res.rows[i].longitude,res.rows[i].latitude];
+                feature.properties = {};
+                feature.properties.time = new Date(req.query.start_time).getTime()/1000;
+                feature.properties.core_id = res.rows[i].core_id;
+                feature.properties.state = 'offline';
+                geoJSON.features.push(feature);
+            }
+
+            last_features = geoJSON.features;
+            console.log(last_features);
+
+            pg_pool.query('SELECT time, powerwatch.core_id, is_powered, state_of_charge from powerwatch inner join deployment on deployment.core_id=powerwatch.core_id where time >deployment.deployment_time AND time > $1 AND time < $2 ORDER BY time asc', [req.query.start_time, req.query.end_time], (err, res) => {
+                if(err) {
+                    console.log('Postgress error');
+                    console.log(err);
+                    resp.status(500).send('Database query error');
+                } else {
+                    //Iterate through each minute, updating each features state in the geojson blob based on the data from the query
+                    iTime = moment(new Date(req.query.start_time));
+                    end_datetime = moment(new Date(req.query.end_time));
+                    console.log(iTime);
+                    console.log(end_datetime);
+                    for(; iTime < end_datetime; iTime = iTime.add(1,'m')) {
+                        var i = 0;
+                        while(iTime < res.rows[i].time) {
+                             
+                            i++; 
+                        }
+                    }
+                }
+            });
+
+        }
+    });
 });
 
 app.use('/',express.static('public'));
