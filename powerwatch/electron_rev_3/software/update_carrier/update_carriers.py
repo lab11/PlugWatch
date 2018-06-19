@@ -49,17 +49,18 @@ for device in devices:
     result = cursor.fetchone()
     if(result != None):
         #we should insert the carrier name based on iccid
-        if(device['last_iccid'].find('89233') != -1):
-            #this is an mtn sim
-            print('Setting {} to mtn'.format(device['id']))
-            cursor.execute("UPDATE deployment set cellular_carrier='mtn' where core_id = %s",(device['id'],))
-        elif(device['last_iccid'].find('890126') != -1):
-            #this is a twilio sim
-            print('Setting {} to twilio'.format(device['id']))
-            cursor.execute("UPDATE deployment set cellular_carrier='twilio' where core_id = %s",(device['id'],))
-        else:
-            #what is this?
-            print('Unknown ICCID type - skipping');
+        if('last_iccid' in device):
+            if(device['last_iccid'].find('89233') != -1):
+                #this is an mtn sim
+                print('Setting {} to mtn'.format(device['id']))
+                cursor.execute("UPDATE deployment set cellular_carrier='mtn' where core_id = %s",(device['id'],))
+            elif(device['last_iccid'].find('890126') != -1):
+                #this is a twilio sim
+                print('Setting {} to twilio'.format(device['id']))
+                cursor.execute("UPDATE deployment set cellular_carrier='twilio' where core_id = %s",(device['id'],))
+            else:
+                #what is this?
+                print('Unknown ICCID type - skipping');
     else:
         print('Device has not been deployed');
 
