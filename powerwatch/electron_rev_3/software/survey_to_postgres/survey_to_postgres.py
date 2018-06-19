@@ -30,7 +30,7 @@ with open(args.filename) as survey:
         device_id = row[1]
         orig_id = device_id;
 
-        if(row[3] == '0'):
+        if(row[3] == 'Yes'):
             wit = False
         else:
             wit = True
@@ -44,14 +44,6 @@ with open(args.filename) as survey:
         gps_long_acc = None
         if(len(row[6]) > 0):
             gps_long_acc = float(row[6])
-
-        gps_lat = None
-        if(len(row[7]) > 0):
-            gps_lat = float(row[7])
-
-        gps_long = None
-        if(len(row[8]) > 0):
-            gps_long = float(row[8])
 
         #check to see if this devices has already been inserted based on the timestamp
         cursor.execute('SELECT * from deployment where deployment_time = %s',(time,))
