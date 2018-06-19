@@ -83,6 +83,8 @@ with open(args.filename) as survey:
                 else:
                     print('Got match for shield ID {} with core ID {}'.format(result[1],result[0]));
                     core_id = result[0];
+            elif(len(device_id) == 8 and device_id[-2:] == '1A'):
+                device_id = device_id + '0000';
             else:
                 #something else - ask the script runner to fix it
                 print('{} is neither shield ID nor core ID'.format(device_id));
