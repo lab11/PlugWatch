@@ -45,6 +45,8 @@ with open(args.filename) as survey:
         if(len(row[6]) > 0):
             gps_long_acc = float(row[6])
 
+        respondent_id = row[7];
+
         #check to see if this devices has already been inserted based on the timestamp
         cursor.execute('SELECT * from deployment where deployment_time = %s',(time,))
         result = cursor.fetchone()
@@ -104,8 +106,8 @@ with open(args.filename) as survey:
                 gps_final_long = gps_long
 
                 
-            cursor.execute('INSERT into deployment (core_id, site, latitude, longitude, deployment_time, has_wit) VALUES (%s, %s, %s, %s, %s, %s)',
-                                (core_id, site, gps_final_lat, gps_final_long, time, wit))
+            cursor.execute('INSERT into deployment (core_id, site, latitude, longitude, deployment_time, has_wit, respondent_id) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                                (core_id, site, gps_final_lat, gps_final_long, time, wit, respondent_id))
 
 connection.commit()
 cursor.close()
