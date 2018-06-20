@@ -172,10 +172,11 @@
             </div>
         </div>
         <input class='input_slider' id='slider' type='range' min='0' max='3600' step='1' value='0' />
-        <button type='button' class='round_button'><i class='material-icons'>fast_rewind</i></button>
-        <button type='button' class='round_button'><i class='material-icons'>play_arrow</i></button>
-        <button type='button' class='round_button'><i class='material-icons'>fast_forward</i></button>
-
+        <button type='button' class='round_button' title="1 Hour Backward" onclick="skip_back()"><i class='material-icons'>skip_previous</i></button>
+        <button type='button' class='round_button' title="1 Minute Backward" onclick="one_back()"><i class='material-icons'>fast_rewind</i></button>
+        <button id='play' type='button' class='round_button' title="Play" onclick="play()"><i class='material-icons'>play_arrow</i></button>
+        <button type='button' class='round_button' title="1 Minute Forward" onclick="one_forward()"><i class='material-icons'>fast_forward</i></button>
+        <button type='button' class='round_button' title="1 Hour Forward" onclick="skip_forward()"><i class='material-icons'>skip_next</i></button>
     </div>
     <div class='map-overlay-inner-lower'>
         <div id='legend' class='legend'>
@@ -258,20 +259,89 @@ xhttp.onreadystatechange = function() {
 xhttp.open("GET", 'init', true);
 xhttp.send();
 
+var current_minute = 0;
+var max_minute = 0;
 var s_time = null;
 var e_time = null;
 
 function filter_by_time(minute) {
+
     var filters = ['all',
                   ['<',['number',['get','first_minute']], minute],
                   ['>=',['number',['get','last_minute']], minute]];
 
     map.setFilter('power_circles', filters);
     
-
+    current_minute = minute;
     var timeText = moment(new Date(s_time)).add(minute, 'm').format('MM/DD/YYYY hh:mm'); 
     document.getElementById('current_time').innerHTML = timeText;
 }
+
+function filter_by_time_set(minute) {
+    if(minute > max_minute) {
+        minute = max_minute;
+        play_off();
+    } else if (minute < 0) {
+        minute = 0;
+    }
+
+    filter_by_time(minute);
+    document.getElementById('slider').value = minute;
+}
+
+document.onkeydown = function(e) {
+    e = e || window.event;
+    if(e.which == 39) {
+        one_forward();
+    } else if(e.which == 37) {
+        one_back();
+    }
+};
+
+var play_state = false;
+var data_valid = false;
+var play_interval = null;
+function play() {
+    if(play_state == false && data_valid == true) {
+        play_on();
+    } else {
+        play_off();
+    }
+}
+
+function play_off() {
+    play_state = false;
+    document.getElementById('play').innerHTML = "<i class='material-icons'>play_arrow</i>";
+    document.getElementById('play').title = "Play"
+    if(play_interval) {
+        clearInterval(play_interval);
+    }
+    play_interval = null;
+} 
+
+function play_on() {
+    play_state = true;
+    document.getElementById('play').innerHTML = "<i class='material-icons'>pause</i>";
+    document.getElementById('play').title = "Pause"
+    play_interval = setInterval(one_forward, 10);
+}
+
+function one_back() {
+    filter_by_time_set(current_minute - 1);
+}
+
+function skip_back() {
+    filter_by_time_set(current_minute - 60);
+}
+
+function one_forward() {
+    filter_by_time_set(current_minute + 1);
+}
+
+function skip_forward() {
+    filter_by_time_set(current_minute + 60);
+}
+
 
 function retrieve_data() {
     //get the start and end dates from the boxes
@@ -309,9 +379,11 @@ function retrieve_data() {
                     2, '#ff3300',
                     3, '#33cc33',
                 ];
-                power_circles_layer.paint['circle-radius'] = 4;
+                power_circles_layer.paint['circle-radius'] = 6;
+                power_circles_layer.paint['circle-opacity'] = 0.6;
                 map.addLayer(power_circles_layer);
                 
+                data_valid = true;
                 filter_by_time(0);
                 
                 s_moment = moment(new Date(s_time));
@@ -320,6 +392,7 @@ function retrieve_data() {
 
                 //set the slider to the correct number of minutes
                 document.getElementById('slider').max = minutes;
+                max_minute = minutes;
                 document.getElementById('slider').addEventListener('input', function(e) {
                     var minute = parseInt(e.target.value, 10);
                     filter_by_time(minute);
@@ -327,7 +400,7 @@ function retrieve_data() {
             }
         }
         xhttp.open("GET", 'getData?start_time='+start_time+'&end_time='+end_time, true);
-        xhttp.timeout = 300000;
+        xhttp.timeout = 3000000;
         xhttp.send();
     }
 }
