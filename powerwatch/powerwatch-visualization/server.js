@@ -58,7 +58,6 @@ app.get('/init', (req,resp) => {
             blob.longitudes = longitudes;
             blob.time_min = time_min;
             console.log(blob.time_min);
-            console.log(blob)
             resp.send(blob);
         }
     });
@@ -71,6 +70,7 @@ app.get('/getData', (req, resp) => {
     geoJSON.type = "FeatureCollection";
     geoJSON.features = [];
     var last_features = [];
+    var last_feature_dict = {};
     pg_pool.query('SELECT core_id, latitude, longitude from deployment', (err, res) => {
         if(err) {
             console.log('Postgress error');
@@ -86,15 +86,19 @@ app.get('/getData', (req, resp) => {
                 feature.geometry.coordinates = [res.rows[i].longitude,res.rows[i].latitude];
                 feature.properties = {};
                 feature.properties.time = new Date(req.query.start_time).getTime()/1000;
+                feature.properties.minute = 0;
                 feature.properties.core_id = res.rows[i].core_id;
-                feature.properties.state = 'offline';
+                feature.properties.state = 0;
+                feature.properties.last_battery = 0;
+                feature.properties.last_update = new Date(req.query.start_time).getTime()/1000;
+                last_feature_dict[res.rows[i].core_id] = i;
                 geoJSON.features.push(feature);
             }
 
-            last_features = geoJSON.features;
-            console.log(last_features);
+            last_features = JSON.parse(JSON.stringify(geoJSON.features));
+            console.log(last_features.length);
 
-            pg_pool.query('SELECT time, powerwatch.core_id, is_powered, state_of_charge from powerwatch inner join deployment on deployment.core_id=powerwatch.core_id where time >deployment.deployment_time AND time > $1 AND time < $2 ORDER BY time asc', [req.query.start_time, req.query.end_time], (err, res) => {
+            pg_pool.query('SELECT time, powerwatch.core_id, is_powered, state_of_charge from powerwatch inner join deployment on deployment.core_id=powerwatch.core_id where time >deployment.deployment_time AND time > $1 AND time < $2 ORDER BY time asc', [req.query.start_time + 'UTC', req.query.end_time + 'UTC'], (err, res) => {
                 if(err) {
                     console.log('Postgress error');
                     console.log(err);
@@ -105,13 +109,49 @@ app.get('/getData', (req, resp) => {
                     end_datetime = moment(new Date(req.query.end_time));
                     console.log(iTime);
                     console.log(end_datetime);
+                    var j = 0;
+                    var minutes = 0;
                     for(; iTime < end_datetime; iTime = iTime.add(1,'m')) {
-                        var i = 0;
-                        while(iTime < res.rows[i].time) {
-                             
-                            i++; 
+                        //console.log(iTime)
+                        //Iterate through all the points in this minute and 
+                        //update the state table
+                        //console.log('Updating data')
+                        while(res.rows[j].time < iTime) {
+                            var ind = last_feature_dict[res.rows[j].core_id];
+                            if(res.rows[j].is_powered == true) {
+                                last_features[ind].properties.state = 3;
+                            } else if (res.rows[j].is_powered == false) {
+                                last_features[ind].properties.state = 2;
+                            }
+
+                            last_features[ind].last_battery = res.rows[j].state_of_charge;
+                            last_features[ind].last_update = res.rows[j].time;
+                            j++; 
                         }
+
+                        // Update the time and check if any sensors have
+                        // passed the offline threshold
+                        // then push
+                        //console.log('Updating feature set')
+                        for(var k = 0; k < last_features.length; k++) {
+                            last_features[k].properties.time = iTime;
+                            last_features[k].properties.minute = minutes;
+                            //console.log(k);
+                            //console.log(last_features.length);
+                            if(moment.duration(iTime.diff(last_features[k].last_update)).asMinutes() >  20) {
+                                if(last_features[k].last_battery < 15) {
+                                    last_features[k].state = 1;
+                                } else {
+                                    last_features[k].state = 0;
+                                }
+                            }
+                            geoJSON.features.push(JSON.parse(JSON.stringify(last_features[k])));
+                        }
+                        minutes++;
                     }
+                    
+                    console.log('sending response');
+                    resp.send(geoJSON);
                 }
             });
 

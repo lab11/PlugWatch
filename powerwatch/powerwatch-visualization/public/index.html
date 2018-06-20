@@ -5,6 +5,7 @@
     <title>Powerwatch Visualization</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js'></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.css' rel='stylesheet' />
     <style>
@@ -94,7 +95,7 @@
     line-height: 40px;
     width: 23%;
     border-radius: 3px;
-    background: #cccccc;
+    background: #aaaaaa;
     text-align: center;
     float: left;
     margin-left: 3px;
@@ -238,16 +239,16 @@ xhttp.onreadystatechange = function() {
             }
             
             var Layer = {};
-            Layer.id = "Points";
-            Layer.type = "symbol";
+            Layer.id = "initial_oints";
+            Layer.type = "circle";
             Layer.source = {};
             Layer.source.type = "geojson";
             Layer.source.data = {};
             Layer.source.data.type = "FeatureCollection";
             Layer.source.data.features = Features;
-            Layer.layout = {};
-            Layer.layout['icon-image'] = "circle-11";
-            Layer.layout['icon-size'] = 1;
+            Layer.paint = {};
+            Layer.paint['circle-color'] = '#aaaaaa';
+            Layer.paint['circle-radius'] = 4;
             map.addLayer(Layer);
 
             document.getElementById('slider').addEventListener('input', function(e) {
@@ -260,10 +261,24 @@ xhttp.onreadystatechange = function() {
 xhttp.open("GET", 'init', true);
 xhttp.send();
 
+var s_time = null;
+var e_time = null;
+
+function filter_by_time(minute) {
+    var filters = ['==','minute',minute];
+    map.setFilter('power_circles', filters);
+    
+
+    var timeText = moment(new Date(s_time)).add(minute, 'm').format('MM/DD/YYYY hh:mm'); 
+    document.getElementById('current_time').innerHTML = timeText;
+}
+
 function retrieve_data() {
     //get the start and end dates from the boxes
     var start_time = document.getElementById('start_time').value;
+    s_time = start_time;
     var end_time = document.getElementById('end_time').value;
+    e_time = end_time;
     console.log(start_time);
     console.log(end_time);
     if(start_time != '' && end_time != '') {
@@ -271,7 +286,44 @@ function retrieve_data() {
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 var blob = JSON.parse(this.responseText);
-                console.log(blob)
+
+                // Okay we got back all the data from the backend
+                // Now add that as a data source to a mapbox layer
+                map.addSource('power_data', {
+                    'type':'geojson',
+                    'data': blob
+                });
+                
+                // Add the layer with color matching based on state
+                var power_circles_layer = {};
+                power_circles_layer.id = 'power_circles';
+                power_circles_layer.type = 'circle';
+                power_circles_layer.source = 'power_data';
+                power_circles_layer.paint = {};
+                power_circles_layer.paint['circle-color'] = [
+                    'interpolate',
+                    ['linear'],
+                    ['get', 'state'],
+                    0, '#aaaaaa',
+                    1, '#ff9999',
+                    2, '#ff3300',
+                    3, '#33cc33',
+                ];
+                power_circles_layer.paint['circle-radius'] = 4;
+                map.addLayer(power_circles_layer);
+                
+                filter_by_time(0);
+                
+                s_moment = moment(new Date(s_time));
+                e_moment = moment(new Date(e_time));
+                minutes = moment.duration(e_moment.diff(s_moment)).asMinutes(); 
+
+                //set the slider to the correct number of minutes
+                document.getElementById('slider').max = minutes;
+                document.getElementById('slider').addEventListener('input', function(e) {
+                    var minute = parseInt(e.target.value, 10);
+                    filter_by_time(minute);
+                });
             }
         }
         xhttp.open("GET", 'getData?start_time='+start_time+'&end_time='+end_time, true);
