@@ -249,11 +249,8 @@ xhttp.onreadystatechange = function() {
             Layer.paint = {};
             Layer.paint['circle-color'] = '#aaaaaa';
             Layer.paint['circle-radius'] = 4;
-            map.addLayer(Layer);
+            //map.addLayer(Layer);
 
-            document.getElementById('slider').addEventListener('input', function(e) {
-                var month = parseInt(e.target.value, 10);
-            });
 
         });
     }
@@ -265,7 +262,10 @@ var s_time = null;
 var e_time = null;
 
 function filter_by_time(minute) {
-    var filters = ['==','minute',minute];
+    var filters = ['all',
+                  ['<',['number',['get','first_minute']], minute],
+                  ['>=',['number',['get','last_minute']], minute]];
+
     map.setFilter('power_circles', filters);
     
 
@@ -303,7 +303,7 @@ function retrieve_data() {
                 power_circles_layer.paint['circle-color'] = [
                     'interpolate',
                     ['linear'],
-                    ['get', 'state'],
+                    ['number', ['get', 'state']],
                     0, '#aaaaaa',
                     1, '#ff9999',
                     2, '#ff3300',

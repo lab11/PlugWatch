@@ -86,10 +86,11 @@ app.get('/getData', (req, resp) => {
                 feature.geometry.coordinates = [res.rows[i].longitude,res.rows[i].latitude];
                 feature.properties = {};
                 feature.properties.time = new Date(req.query.start_time).getTime()/1000;
-                feature.properties.minute = 0;
+                feature.properties.first_minute = 0;
+                feature.properties.last_minute = 0;
                 feature.properties.core_id = res.rows[i].core_id;
                 feature.properties.state = 0;
-                feature.properties.last_battery = 0;
+                feature.properties.last_battery = 85;
                 feature.properties.last_update = new Date(req.query.start_time).getTime()/1000;
                 last_feature_dict[res.rows[i].core_id] = i;
                 geoJSON.features.push(feature);
@@ -118,14 +119,27 @@ app.get('/getData', (req, resp) => {
                         //console.log('Updating data')
                         while(res.rows[j].time < iTime) {
                             var ind = last_feature_dict[res.rows[j].core_id];
-                            if(res.rows[j].is_powered == true) {
+                            if(res.rows[j].is_powered == true && last_features[ind].properties.state != 3) {
+                                last_features[ind].properties.last_minute = minutes;
+                                geoJSON.features.push(JSON.parse(JSON.stringify(last_features[ind])));
                                 last_features[ind].properties.state = 3;
-                            } else if (res.rows[j].is_powered == false) {
+                                last_features[ind].properties.last_battery = res.rows[j].state_of_charge;
+                                last_features[ind].properties.last_update = res.rows[j].time;
+                                last_features[ind].properties.first_minute = minutes;
+                            } else if(res.rows[j].is_powered == true && last_features[ind].properties.state == 3) {
+                                last_features[ind].properties.last_update = res.rows[j].time;
+                                last_features[ind].properties.last_battery = res.rows[j].state_of_charge;
+                            } else if (res.rows[j].is_powered == false && last_features[ind].properties.state != 2) {
+                                last_features[ind].properties.last_minute = minutes;
+                                geoJSON.features.push(JSON.parse(JSON.stringify(last_features[ind])));
                                 last_features[ind].properties.state = 2;
+                                last_features[ind].properties.last_battery = res.rows[j].state_of_charge;
+                                last_features[ind].properties.last_update = res.rows[j].time;
+                                last_features[ind].properties.first_minute = minutes;
+                            } else if(res.rows[j].is_powered == false && last_features[ind].properties.state == 2) {
+                                last_features[ind].properties.last_update = res.rows[j].time;
+                                last_features[ind].properties.last_battery = res.rows[j].state_of_charge;
                             }
-
-                            last_features[ind].last_battery = res.rows[j].state_of_charge;
-                            last_features[ind].last_update = res.rows[j].time;
                             j++; 
                         }
 
@@ -134,23 +148,30 @@ app.get('/getData', (req, resp) => {
                         // then push
                         //console.log('Updating feature set')
                         for(var k = 0; k < last_features.length; k++) {
-                            last_features[k].properties.time = iTime;
-                            last_features[k].properties.minute = minutes;
-                            //console.log(k);
-                            //console.log(last_features.length);
-                            if(moment.duration(iTime.diff(last_features[k].last_update)).asMinutes() >  20) {
-                                if(last_features[k].last_battery < 15) {
-                                    last_features[k].state = 1;
+                            if(moment.duration(iTime.diff(last_features[k].properties.last_update)).asMinutes() >  20 && (last_features[k].properties.state != 0 || last_features[k].properties.state != 1)) {
+                                last_features[k].properties.last_minute = minutes;
+                                geoJSON.features.push(JSON.parse(JSON.stringify(last_features[k])));
+                                if(last_features[k].properties.last_battery < 15) {
+                                    last_features[k].properties.state = 1;
                                 } else {
-                                    last_features[k].state = 0;
+                                    last_features[k].properties.state = 0;
                                 }
+                                last_features[k].properties.last_update = iTime;
+                                last_features[k].properties.first_minute = minutes;
+                            } else if (moment.duration(iTime.diff(last_features[k].properties.last_update)).asMinutes() >  20) {
+                                last_features[k].properties.last_update = iTime;
                             }
-                            geoJSON.features.push(JSON.parse(JSON.stringify(last_features[k])));
                         }
                         minutes++;
                     }
+
+                    for(var k = 0; k < last_features.length; k++) {
+                        last_features[k].properties.last_minute = minutes;
+                        geoJSON.features.push(JSON.parse(JSON.stringify(last_features[k])));
+                    }
                     
                     console.log('sending response');
+                    console.log(geoJSON.features.slice(500,600));
                     resp.send(geoJSON);
                 }
             });
