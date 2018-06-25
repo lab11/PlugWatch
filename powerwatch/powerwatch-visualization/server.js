@@ -106,8 +106,8 @@ app.get('/getData', (req, resp) => {
                     resp.status(500).send('Database query error');
                 } else {
                     //Iterate through each minute, updating each features state in the geojson blob based on the data from the query
-                    iTime = moment(new Date(req.query.start_time));
-                    end_datetime = moment(new Date(req.query.end_time));
+                    iTime = moment.utc(req.query.start_time);
+                    end_datetime = moment.utc(req.query.end_time);
                     console.log(iTime);
                     console.log(end_datetime);
                     var j = 0;
