@@ -5,6 +5,7 @@ var format      = require('pg-format');
 const express   = require('express');
 const app       = express();
 var moment      = require('moment');
+var rand        = require('random-seed').create(0);
 
 
 const pg_pool = new  Pool( {
@@ -78,12 +79,17 @@ app.get('/getData', (req, resp) => {
             resp.status(500).send('Database query error');
         } else {
             //okay we should iterate through the response
+            long_dig = rand(20)-10;
+            lat_dig = rand(20)-10;
             for(var i = 0; i < res.rows.length; i++) {
                 var feature = {};
                 feature.type = "Feature";
                 feature.geometry = {};
                 feature.geometry.type = "Point";
-                feature.geometry.coordinates = [res.rows[i].longitude,res.rows[i].latitude];
+                // Randomize fourth digit of latitude/longitude
+                randomized_longitude = (res.rows[i].longitude/0.001)*0.001 + 0.0002*long_dig;
+                randomized_latitude = (res.rows[i].latitude/0.001)*0.001 + 0.0002*lat_dig;
+                feature.geometry.coordinates = [randomized_longitude,randomized_latitude];
                 feature.properties = {};
                 feature.properties.time = new Date(req.query.start_time).getTime()/1000;
                 feature.properties.first_minute = 0;
