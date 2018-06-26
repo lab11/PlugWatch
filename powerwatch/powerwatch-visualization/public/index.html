@@ -196,7 +196,7 @@ var xhttp;
 var map = null;
 var lats = null;
 var longs = null;
-var markers = [];
+var data_valid = false;
 
 xhttp=new XMLHttpRequest();
 xhttp.onreadystatechange = function() {
@@ -251,8 +251,28 @@ xhttp.onreadystatechange = function() {
             Layer.paint['circle-color'] = '#aaaaaa';
             Layer.paint['circle-radius'] = 4;
             //map.addLayer(Layer);
+        });
 
+        map.on('click', function (e) {
+            if(data_valid) {
+                var features = map.queryRenderedFeatures([[e.point.x-2, e.point.y-2],[e.point.x+2, e.point.y+2]], {layers: ['power_circles']})
 
+                if(features.length) {
+                    var state = features[0].properties.state;
+                    var core_id = features[0].properties.core_id;
+                    var last_battery = features[0].properties.last_battery;
+                    var last_update = moment(features[0].properties.last_update).format("MM/DD/YYYY HH:mm");
+                    var cellular_carrier = features[0].properties.cellular_carrier;
+                    var tooltip = new mapboxgl.Popup()
+                        .setLngLat(e.lngLat)
+                        .setHTML('<p> Core ID:' + core_id + '<br />' + 
+                                 'State: ' + state + '<br />' +
+                                 'Battery Percent: ' + last_battery + '<br />' +
+                                 'Cellular Carrier: ' + cellular_carrier + '<br />' +
+                                 'Last Update: ' + last_update + '</p>')
+                        .addTo(map);
+                }
+            }
         });
     }
 };
@@ -273,7 +293,7 @@ function filter_by_time(minute) {
     map.setFilter('power_circles', filters);
     
     current_minute = minute;
-    var timeText = moment(new Date(s_time)).add(minute, 'm').format('MM/DD/YYYY hh:mm'); 
+    var timeText = moment(new Date(s_time)).add(minute, 'm').format('MM/DD/YYYY HH:mm'); 
     document.getElementById('current_time').innerHTML = timeText;
 }
 
@@ -299,7 +319,6 @@ document.onkeydown = function(e) {
 };
 
 var play_state = false;
-var data_valid = false;
 var play_interval = null;
 function play() {
     if(play_state == false && data_valid == true) {

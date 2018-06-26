@@ -72,7 +72,7 @@ app.get('/getData', (req, resp) => {
     geoJSON.features = [];
     var last_features = [];
     var last_feature_dict = {};
-    pg_pool.query('SELECT core_id, latitude, longitude from deployment', (err, res) => {
+    pg_pool.query('SELECT core_id, latitude, longitude, cellular_carrier from deployment', (err, res) => {
         if(err) {
             console.log('Postgress error');
             console.log(err);
@@ -98,6 +98,7 @@ app.get('/getData', (req, resp) => {
                 feature.properties.state = 0;
                 feature.properties.last_battery = 85;
                 feature.properties.last_update = new Date(req.query.start_time).getTime()/1000;
+                feature.properties.cellular_carrier = res.rows[i].cellular_carrier;
                 last_feature_dict[res.rows[i].core_id] = i;
                 geoJSON.features.push(feature);
             }
