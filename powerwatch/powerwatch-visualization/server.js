@@ -6,7 +6,59 @@ const express   = require('express');
 const app       = express();
 var moment      = require('moment');
 var rand        = require('random-seed').create(0);
+var passport = require('passport');
+var Strategy = require('passport-google-oauth20').Strategy;
+var path = require('path');
+ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 
+
+// Configure the google strategy for use by Passport.
+//
+// OAuth 2.0-based strategies require a `verify` function which receives the
+// credential (`accessToken`) for accessing the google API on the user's
+// behalf, along with the user's profile.  The function must invoke `cb`
+// with a user object, which will be set at `req.user` in route handlers after
+// authentication.
+passport.use(new Strategy({
+    clientID: '256972206462-14lceghjprd7jpvqgfj2vkos25ieqrou.apps.googleusercontent.com',
+    clientSecret: 'PcZxvTn20SnO7Ud97x-Ha3Uv',
+    callbackURL: 'http://localhost:3000/login/google/return'
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    //user.findOrCreate({googleId: profile.id}, function(err, user) {
+    //});
+    console.log(cb);
+    return cb(null, profile);
+  }));
+
+// Configure Passport authenticated session persistence.
+//
+// In order to restore authentication state across HTTP requests, Passport needs
+// to serialize users into and deserialize users out of the session.  In a
+// production-quality application, this would typically be as simple as
+// supplying the user ID when serializing, and querying the user record by ID
+// from the database when deserializing.  However, due to the fact that this
+// example does not have a database, the complete google profile is serialized
+// and deserialized.
+passport.serializeUser(function(user, cb) {
+  cb(null, user);
+});
+
+passport.deserializeUser(function(obj, cb) {
+  cb(null, obj);
+});
+
+// Use application-level middleware for common functionality, including
+// logging, parsing, and session handling.
+app.use(require('morgan')('combined'));
+app.use(require('cookie-parser')());
+app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
+
+// Initialize Passport and restore authentication state, if any, from the
+// session.
+app.use(passport.initialize());
+app.use(passport.session());
 
 const pg_pool = new  Pool( {
     user: timescale_config.username,
@@ -20,8 +72,37 @@ const pg_pool = new  Pool( {
 console.log("Using timescale at " + timescale_config.host +
         ":" + timescale_config.port + "  db=" + timescale_config.database);
 
+function checkACLEmail(req, res) {
+    if(!req.isAuthenticated()) {
+        res.redirect('/login');
+        return false;
+    }
+
+    var fs = require('fs');
+    var user_list = fs.readFileSync("./acl").toString('utf-8');
+    console.log(user_list);
+    users = user_list.split("\n");
+
+    if(!req.user.emails) {
+        res.redirect('/login');
+        return false;
+    }
+
+    if(users.indexOf(req.user.emails[0].value) == -1) {
+        console.log('User not in list');
+        res.status(403).send("User not authorized for this application");
+        return false;
+    }
+
+    return true;
+}
+
 // Do a query of the deployments table so that we can load a map
-app.get('/init', (req,resp) => {
+app.get('/init', (req, resp, next) => {
+    if(!checkACLEmail(req, resp)) {
+        return;
+    }
+
     console.log('Received init request')
     pg_pool.query("SELECT latitude, longitude, deployment_time from deployment", (err, res) => {
         if(err) {
@@ -65,7 +146,11 @@ app.get('/init', (req,resp) => {
 });
 
 app.get('/getData', (req, resp) => {
+    if(!checkACLEmail(req, resp)) {
+        return;
+    }
     //First query the deployment table to get the list of core_id's and coordinates to base the power state on
+    console.log(req.isAuthenticated());
     
     var geoJSON = {}
     geoJSON.type = "FeatureCollection";
@@ -187,5 +272,25 @@ app.get('/getData', (req, resp) => {
     });
 });
 
-app.use('/',express.static('public'));
+app.get('/login', passport.authenticate('google', {scope: ['email']}));
+
+app.get('/login/google/return', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+
+  function(req, res) {
+    console.log('got google return');
+    res.redirect('/');
+  }
+);
+
+
+
+app.get('/',  function(req, res) {
+    if(!checkACLEmail(req, res)) {
+        return;
+    }
+
+    res.sendFile(path.join(__dirname+'/public/index.html'));
+});
+        
 app.listen(3000, () => console.log('Example app listening on port 3000!'))  

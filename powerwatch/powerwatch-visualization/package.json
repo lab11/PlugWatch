@@ -8,7 +8,14 @@
         "pg-format": "",
         "express":"",
         "moment":"",
-        "random-seed":""
+        "random-seed":"",
+        "passport":"",
+        "passport-google-oauth20":"",
+        "connect-ensure-login":"",
+        "body-parser":"",
+        "cookie-parser":"",
+        "express-session":"",
+        "morgan":""
     },
     "engines": {
         "node": ">=4.3.2"
