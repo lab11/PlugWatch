@@ -22,7 +22,7 @@ ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 passport.use(new Strategy({
     clientID: '256972206462-14lceghjprd7jpvqgfj2vkos25ieqrou.apps.googleusercontent.com',
     clientSecret: 'PcZxvTn20SnO7Ud97x-Ha3Uv',
-    callbackURL: 'http://localhost:3000/login/google/return'
+    callbackURL: '/login/google/return'
   },
   function(accessToken, refreshToken, user, cb) {
     var fs = require('fs');
