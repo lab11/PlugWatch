@@ -24,12 +24,22 @@ passport.use(new Strategy({
     clientSecret: 'PcZxvTn20SnO7Ud97x-Ha3Uv',
     callbackURL: 'http://localhost:3000/login/google/return'
   },
-  function(accessToken, refreshToken, profile, cb) {
-    //user.findOrCreate({googleId: profile.id}, function(err, user) {
-    //});
-    console.log(cb);
-    return cb(null, profile);
-  }));
+  function(accessToken, refreshToken, user, cb) {
+    var fs = require('fs');
+    var user_list = fs.readFileSync("./acl").toString('utf-8');
+    users = user_list.split("\n");
+
+    if(!user.emails) {
+        cb(null, false);
+    } else {
+        if(users.indexOf(user.emails[0].value) == -1) {
+            cb(null, false);
+        } else {
+            cb(null, user);
+        }
+    }
+  }
+));
 
 // Configure Passport authenticated session persistence.
 //
@@ -44,8 +54,8 @@ passport.serializeUser(function(user, cb) {
   cb(null, user);
 });
 
-passport.deserializeUser(function(obj, cb) {
-  cb(null, obj);
+passport.deserializeUser(function(user, cb) {
+  cb(null, user);
 });
 
 // Use application-level middleware for common functionality, including
@@ -72,34 +82,10 @@ const pg_pool = new  Pool( {
 console.log("Using timescale at " + timescale_config.host +
         ":" + timescale_config.port + "  db=" + timescale_config.database);
 
-function checkACLEmail(req, res) {
-    if(!req.isAuthenticated()) {
-        res.redirect('/login');
-        return false;
-    }
-
-    var fs = require('fs');
-    var user_list = fs.readFileSync("./acl").toString('utf-8');
-    console.log(user_list);
-    users = user_list.split("\n");
-
-    if(!req.user.emails) {
-        res.redirect('/login');
-        return false;
-    }
-
-    if(users.indexOf(req.user.emails[0].value) == -1) {
-        console.log('User not in list');
-        res.status(403).send("User not authorized for this application");
-        return false;
-    }
-
-    return true;
-}
-
 // Do a query of the deployments table so that we can load a map
 app.get('/init', (req, resp, next) => {
-    if(!checkACLEmail(req, resp)) {
+    if(!req.isAuthenticated()) {
+        res.redirect('/login');
         return;
     }
 
@@ -146,11 +132,10 @@ app.get('/init', (req, resp, next) => {
 });
 
 app.get('/getData', (req, resp) => {
-    if(!checkACLEmail(req, resp)) {
+    if(!req.isAuthenticated()) {
+        res.redirect('/login');
         return;
     }
-    //First query the deployment table to get the list of core_id's and coordinates to base the power state on
-    console.log(req.isAuthenticated());
     
     var geoJSON = {}
     geoJSON.type = "FeatureCollection";
@@ -286,7 +271,8 @@ app.get('/login/google/return',
 
 
 app.get('/',  function(req, res) {
-    if(!checkACLEmail(req, res)) {
+    if(!req.isAuthenticated()) {
+        res.redirect('/login');
         return;
     }
 
