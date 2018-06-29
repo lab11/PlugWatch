@@ -223,7 +223,8 @@ xhttp.onreadystatechange = function() {
         //set the correct times on the html objects
         var start_date = new Date(blob.time_min);
         console.log(start_date)
-        document.getElementById('start_time').value = start_date.toISOString().split('.')[0];
+        //document.getElementById('start_time').value = start_date.toISOString().split('.')[0];
+        document.getElementById('start_time').value = moment().subtract(2,"days").toISOString().split('.')[0];
         document.getElementById('end_time').value = new Date().toISOString().split('.')[0];
 
         var bounds = new mapboxgl.LngLatBounds(
@@ -256,7 +257,7 @@ xhttp.onreadystatechange = function() {
             }
             
             var Layer = {};
-            Layer.id = "initial_oints";
+            Layer.id = "initial_points";
             Layer.type = "circle";
             Layer.source = {};
             Layer.source.type = "geojson";
