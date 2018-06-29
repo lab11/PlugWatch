@@ -22,7 +22,7 @@ ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 passport.use(new Strategy({
     clientID: '256972206462-14lceghjprd7jpvqgfj2vkos25ieqrou.apps.googleusercontent.com',
     clientSecret: 'PcZxvTn20SnO7Ud97x-Ha3Uv',
-    callbackURL: '/login/google/return'
+    callbackURL: 'https://portal.grid.watch/login/google/return'
   },
   function(accessToken, refreshToken, user, cb) {
     var fs = require('fs');
@@ -85,7 +85,7 @@ console.log("Using timescale at " + timescale_config.host +
 // Do a query of the deployments table so that we can load a map
 app.get('/init', (req, resp, next) => {
     if(!req.isAuthenticated()) {
-        res.redirect('/login');
+        resp.redirect('/login');
         return;
     }
 
@@ -133,7 +133,7 @@ app.get('/init', (req, resp, next) => {
 
 app.get('/getData', (req, resp) => {
     if(!req.isAuthenticated()) {
-        res.redirect('/login');
+        resp.redirect('/login');
         return;
     }
     
@@ -279,4 +279,4 @@ app.get('/',  function(req, res) {
     res.sendFile(path.join(__dirname+'/public/index.html'));
 });
         
-app.listen(3000, () => console.log('Example app listening on port 3000!'))  
+app.listen(3765, 'localhost', () => console.log('Example app listening on port 3000!'))  
