@@ -159,6 +159,20 @@
     cursor: inherit;
 }
 
+.map-overlay .legend .low_voltage {
+    height: 40px;
+    line-height: 38px;
+    width: 23%;
+    border-radius: 3px;
+    background: #ffffff;
+    text-align: center;
+    float: left;
+    margin-left: 3px;
+    cursor: inherit;
+}
+
+
+
 body.waiting * {
     cursor: wait;
 }
@@ -195,8 +209,14 @@ body.waiting * {
         <button type='button' class='round_button' title="1 Hour Forward" onclick="skip_forward()"><i class='material-icons'>skip_next</i></button>
     </div>
     <div class='map-overlay-inner-lower'>
+        <div id='layer_selector' class='legend'>
+            <button type='button' id='low_voltage' class='low_voltage' onclick="low_voltage_toggle()"><span class='spanclass'>Low Voltage</span></button>
+        </div>
+    </div>
+    <div class='map-overlay-inner-lower'>
         <div id='legend' class='legend'>
-            <div class='powered'>Power</div><div class='not_powered'>No Power</div>
+            <div class='powered'>Power</div>
+            <div class='not_powered'>No Power</div>
             <div class='not_powered_offline'><span class='spanclass'>No Power Offline</span></div>
             <div class='offline'>Offline</div>
         </div>
@@ -241,8 +261,7 @@ xhttp.onreadystatechange = function() {
         lats = blob.latitudes;
         longs = blob.longitudes;
 
-        transformer_data = blob.transformer;
-        console.log(transformer_data);
+        low_voltage_data = blob.low_voltage;
 
         map.on("load", function() {
             //Generate the feature set
@@ -274,21 +293,22 @@ xhttp.onreadystatechange = function() {
 
             // Okay we got back all the data from the backend
             // Now add that as a data source to a mapbox layer
-            map.addSource('transformer_data', {
+            map.addSource('low_voltage_data', {
                 'type':'geojson',
-                'data': transformer_data
+                'data': low_voltage_data
             });
             
             // Add the layer with color matching based on state
-            var transformer_layer = {};
-            transformer_layer.id = 'transformers';
-            transformer_layer.type = 'line';
-            transformer_layer.source = 'transformer_data';
-            transformer_layer.paint = {};
-            //transformer_layer.paint['circle-color'] = '#aaaaaa';
-            transformer_layer.paint['line-width'] = 0.6;
-            transformer_layer.paint['line-opacity'] = 0.6;
-            map.addLayer(transformer_layer);
+            var low_voltage_layer = {};
+            low_voltage_layer.id = 'low_voltage';
+            low_voltage_layer.type = 'line';
+            low_voltage_layer.source = 'low_voltage_data';
+            low_voltage_layer.paint = {};
+            //low_voltage_layer.paint['circle-color'] = '#aaaaaa';
+            low_voltage_layer.paint['line-width'] = 0.6;
+            low_voltage_layer.paint['line-opacity'] = 0.6;
+            map.addLayer(low_voltage_layer);
+            map.setLayoutProperty('low_voltage','visibility','none');
 
         });
 
@@ -356,6 +376,19 @@ document.onkeydown = function(e) {
         one_back();
     }
 };
+
+var low_voltage = false;
+function low_voltage_toggle() {
+    if(low_voltage == false) {
+        low_voltage = true;
+        document.getElementById('low_voltage').style.background = '#aaaaaa';
+        map.setLayoutProperty('low_voltage','visibility','visible');
+    } else {
+        low_voltage = false;
+        document.getElementById('low_voltage').style.background = '#ffffff';
+        map.setLayoutProperty('low_voltage','visibility','none');
+    }
+}
 
 var play_state = false;
 var play_interval = null;

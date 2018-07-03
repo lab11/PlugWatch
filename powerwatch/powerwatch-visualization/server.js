@@ -126,11 +126,11 @@ app.get('/init', (req, resp, next) => {
             blob.longitudes = longitudes;
             blob.time_min = time_min;
             
-            //load the transformer data
+            //load the low_voltage data
             var fs = require('fs');
-            var transformer_data = fs.readFileSync("./achimota_lines.geojson").toString('utf-8');
-            var transformer_json = JSON.parse(transformer_data);
-            blob.transformer = transformer_json;
+            var low_voltage_data = fs.readFileSync("./achimota_lines.geojson").toString('utf-8');
+            var low_voltage_json = JSON.parse(low_voltage_data);
+            blob.low_voltage = low_voltage_json;
 
             console.log(blob.time_min);
             resp.send(blob);
