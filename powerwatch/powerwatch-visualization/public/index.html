@@ -241,6 +241,9 @@ xhttp.onreadystatechange = function() {
         lats = blob.latitudes;
         longs = blob.longitudes;
 
+        transformer_data = blob.transformer;
+        console.log(transformer_data);
+
         map.on("load", function() {
             //Generate the feature set
             var Features = [];
@@ -268,6 +271,25 @@ xhttp.onreadystatechange = function() {
             Layer.paint['circle-color'] = '#aaaaaa';
             Layer.paint['circle-radius'] = 4;
             //map.addLayer(Layer);
+
+            // Okay we got back all the data from the backend
+            // Now add that as a data source to a mapbox layer
+            map.addSource('transformer_data', {
+                'type':'geojson',
+                'data': transformer_data
+            });
+            
+            // Add the layer with color matching based on state
+            var transformer_layer = {};
+            transformer_layer.id = 'transformers';
+            transformer_layer.type = 'line';
+            transformer_layer.source = 'transformer_data';
+            transformer_layer.paint = {};
+            //transformer_layer.paint['circle-color'] = '#aaaaaa';
+            transformer_layer.paint['line-width'] = 0.6;
+            transformer_layer.paint['line-opacity'] = 0.6;
+            map.addLayer(transformer_layer);
+
         });
 
         map.on('click', function (e) {
@@ -392,6 +414,7 @@ function retrieve_data() {
         xhttp=new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
+
                 document.body.style.cursor = 'default';
                 var blob = JSON.parse(this.responseText);
 
@@ -418,7 +441,7 @@ function retrieve_data() {
                     3, '#33cc33',
                 ];
                 power_circles_layer.paint['circle-radius'] = 6;
-                power_circles_layer.paint['circle-opacity'] = 0.6;
+                power_circles_layer.paint['circle-opacity'] = 0.7;
                 map.addLayer(power_circles_layer);
                 
                 data_valid = true;

@@ -125,6 +125,13 @@ app.get('/init', (req, resp, next) => {
             blob.latitudes = latitudes;
             blob.longitudes = longitudes;
             blob.time_min = time_min;
+            
+            //load the transformer data
+            var fs = require('fs');
+            var transformer_data = fs.readFileSync("./achimota_lines.geojson").toString('utf-8');
+            var transformer_json = JSON.parse(transformer_data);
+            blob.transformer = transformer_json;
+
             console.log(blob.time_min);
             resp.send(blob);
         }
@@ -279,4 +286,4 @@ app.get('/',  function(req, res) {
     res.sendFile(path.join(__dirname+'/public/index.html'));
 });
         
-app.listen(3765, 'localhost', () => console.log('Example app listening on port 3000!'))  
+app.listen(3765, 'localhost', () => console.log('Example app listening on port 3765!'))  
