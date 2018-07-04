@@ -3,7 +3,7 @@
 <eagle version="9.0.1">
 <drawing>
 <settings>
-<setting alwaysvectorfont="yes"/>
+<setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="100" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="10" altunitdist="mil" altunit="mil"/>
@@ -4621,14 +4621,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <element name="TP17" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="-12.7" y="15.24">
 <attribute name="DIGIKEY" value="5001K-ND" x="-12.7" y="15.24" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
-<element name="Q3" library="fets" package="SOT23-3" value="MOSFET-NCHANNELSMD" x="-33.02" y="-5.08"/>
-<element name="Q4" library="fets" package="SOT23-3" value="NX3008PBK" x="-38.1" y="-5.08">
-<attribute name="DIGIKEY" value="568-10499-1-ND" x="-38.1" y="-5.08" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
-<attribute name="MANUFACTURER" value="Nexperia" x="-38.1" y="-5.08" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
-<attribute name="MOUSER" value="771-NX3008PBK,215" x="-38.1" y="-5.08" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
-<attribute name="MPN" value="NX3008PBK,215" x="-38.1" y="-5.08" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
-<attribute name="NEWARK" value="74T4665" x="-38.1" y="-5.08" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
-</element>
 </elements>
 <signals>
 <signal name="!GPS_RESET">
@@ -4803,7 +4795,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="C2" pad="-"/>
 <contactref element="C7" pad="2"/>
 <contactref element="C17" pad="2"/>
-<contactref element="Q3" pad="2"/>
+<contactref element="U3" pad="V-"/>
 <wire x1="35.56" y1="73.66" x2="37.084" y2="83.567" width="0" layer="19" extent="1-1"/>
 <wire x1="34.16" y1="73.41" x2="35.56" y2="73.66" width="0" layer="19" extent="1-1"/>
 <wire x1="26.162" y1="70.104" x2="34.16" y2="73.41" width="0" layer="19" extent="1-1"/>
@@ -4829,7 +4821,8 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="23.876" y1="64.84493125" x2="24.892" y2="65.786" width="0" layer="19" extent="16-16"/>
 <wire x1="21.768" y1="67.986" x2="23.114" y2="68.58" width="0" layer="19" extent="16-16"/>
 <wire x1="22.298" y1="59.274" x2="23.876" y2="64.84493125" width="0" layer="19" extent="1-16"/>
-<wire x1="18.43" y1="50.8" x2="22.298" y2="59.274" width="0" layer="19" extent="1-1"/>
+<wire x1="22.352" y1="52.324" x2="22.298" y2="59.274" width="0" layer="19" extent="1-1"/>
+<wire x1="18.43" y1="50.8" x2="22.352" y2="52.324" width="0" layer="19" extent="1-1"/>
 <wire x1="17.28" y1="48.26" x2="18.43" y2="50.8" width="0" layer="19" extent="1-1"/>
 <wire x1="14.69" y1="43.18" x2="17.28" y2="48.26" width="0" layer="19" extent="1-1"/>
 <wire x1="18.43" y1="40.64" x2="14.69" y2="43.18" width="0" layer="19" extent="1-1"/>
@@ -4897,7 +4890,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="16.79" y1="10.16" x2="25.4" y2="10.16" width="0" layer="19" extent="1-1"/>
 <wire x1="14.25" y1="7.62" x2="16.79" y2="10.16" width="0" layer="19" extent="1-1"/>
 <wire x1="-12.7" y1="28.194" x2="11.26" y2="27.94" width="0" layer="19" extent="1-1"/>
-<wire x1="-32.07" y1="-6.08" x2="-12.7" y2="28.194" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="GPS_PWR_EN">
 <contactref element="ASSY1" pad="D3"/>
@@ -5396,20 +5388,13 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="ASSY1" pad="VIN"/>
 <contactref element="R5" pad="1"/>
 <contactref element="R36" pad="1"/>
-<contactref element="Q4" pad="3"/>
-<wire x1="35.12693125" y1="60.96" x2="37.66693125" y2="60.96" width="0" layer="19" extent="1-1"/>
-<wire x1="48.6918" y1="38.0492" x2="37.66693125" y2="60.96" width="0" layer="19" extent="1-1"/>
-<wire x1="25.4" y1="5.08" x2="48.6918" y2="38.0492" width="0" layer="19" extent="1-1"/>
-<wire x1="13.69" y1="10.16" x2="25.4" y2="5.08" width="0" layer="19" extent="1-1"/>
-<wire x1="11.15" y1="7.62" x2="13.69" y2="10.16" width="0" layer="19" extent="1-1"/>
-<wire x1="-38.1" y1="-3.98" x2="11.15" y2="7.62" width="0" layer="19" extent="1-1"/>
-</signal>
-<signal name="N$32">
-<contactref element="Q3" pad="1"/>
 <contactref element="U3" pad="V+"/>
-<contactref element="Q4" pad="2"/>
-<wire x1="-33.97" y1="-6.08" x2="22.352" y2="47.244" width="0" layer="19" extent="1-1"/>
-<wire x1="-37.15" y1="-6.08" x2="-33.97" y2="-6.08" width="0" layer="19" extent="1-1"/>
+<wire x1="35.12693125" y1="60.96" x2="37.66693125" y2="60.96" width="0" layer="19" extent="1-1"/>
+<wire x1="22.352" y1="47.244" x2="35.12693125" y2="60.96" width="0" layer="19" extent="1-1"/>
+<wire x1="48.6918" y1="38.0492" x2="37.66693125" y2="60.96" width="0" layer="19" extent="1-1"/>
+<wire x1="13.69" y1="10.16" x2="22.352" y2="47.244" width="0" layer="19" extent="1-1"/>
+<wire x1="11.15" y1="7.62" x2="13.69" y2="10.16" width="0" layer="19" extent="1-1"/>
+<wire x1="25.4" y1="5.08" x2="13.69" y2="10.16" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$38">
 <contactref element="AC/L" pad="TESTPOINT"/>
@@ -5607,13 +5592,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="TP8" pad="TESTPOINT"/>
 <wire x1="41.07306875" y1="63.5" x2="-12.7" y2="22.86" width="0" layer="19" extent="1-1"/>
 <wire x1="30.9118" y1="53.2892" x2="41.07306875" y2="63.5" width="0" layer="19" extent="1-1"/>
-</signal>
-<signal name="N$8">
-<contactref element="U3" pad="V-"/>
-<contactref element="Q3" pad="3"/>
-<contactref element="Q4" pad="1"/>
-<wire x1="-33.02" y1="-3.98" x2="22.352" y2="52.324" width="0" layer="19" extent="1-1"/>
-<wire x1="-39.05" y1="-6.08" x2="-33.02" y2="-3.98" width="0" layer="19" extent="1-1"/>
 </signal>
 </signals>
 </board>

@@ -3,7 +3,7 @@
 <eagle version="9.0.1">
 <drawing>
 <settings>
-<setting alwaysvectorfont="yes"/>
+<setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.05" altunitdist="inch" altunit="inch"/>
@@ -2613,139 +2613,6 @@ CONN-08352</description>
 <smd name="3" x="0" y="1.1" dx="0.8" dy="0.9" layer="1"/>
 <text x="0" y="1.778" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
 </package>
-<package name="DPAK">
-<wire x1="3.2766" y1="2.4654" x2="3.277" y2="-3.729" width="0.2032" layer="21"/>
-<wire x1="3.277" y1="-3.729" x2="-3.277" y2="-3.729" width="0.2032" layer="21"/>
-<wire x1="-3.277" y1="-3.729" x2="-3.2766" y2="2.4654" width="0.2032" layer="21"/>
-<wire x1="-3.277" y1="2.465" x2="3.2774" y2="2.4646" width="0.2032" layer="51"/>
-<wire x1="-2.5654" y1="2.567" x2="-2.5654" y2="3.2782" width="0.2032" layer="51"/>
-<wire x1="-2.5654" y1="3.2782" x2="-2.1082" y2="3.7354" width="0.2032" layer="51"/>
-<wire x1="-2.1082" y1="3.7354" x2="2.1082" y2="3.7354" width="0.2032" layer="51"/>
-<wire x1="2.1082" y1="3.7354" x2="2.5654" y2="3.2782" width="0.2032" layer="51"/>
-<wire x1="2.5654" y1="3.2782" x2="2.5654" y2="2.567" width="0.2032" layer="51"/>
-<wire x1="2.5654" y1="2.567" x2="-2.5654" y2="2.567" width="0.2032" layer="51"/>
-<rectangle x1="-2.7178" y1="-6.7262" x2="-1.8542" y2="-3.8306" layer="51"/>
-<rectangle x1="1.8542" y1="-6.7262" x2="2.7178" y2="-3.8306" layer="51"/>
-<rectangle x1="-0.4318" y1="-4.5926" x2="0.4318" y2="-3.8306" layer="21"/>
-<smd name="1" x="-2.28" y="-5.31" dx="1.6" dy="3" layer="1"/>
-<smd name="3" x="2.28" y="-5.31" dx="1.6" dy="3" layer="1"/>
-<smd name="4" x="0" y="1.588" dx="4.826" dy="5.715" layer="1"/>
-<text x="-3.683" y="-3.702" size="0.4064" layer="25" rot="R90">&gt;NAME</text>
-<text x="3.937" y="-3.702" size="0.4064" layer="27" rot="R90">&gt;VALUE</text>
-<polygon width="0.1998" layer="51">
-<vertex x="-2.5654" y="2.567"/>
-<vertex x="-2.5654" y="3.2782"/>
-<vertex x="-2.1082" y="3.7354"/>
-<vertex x="2.1082" y="3.7354"/>
-<vertex x="2.5654" y="3.2782"/>
-<vertex x="2.5654" y="2.567"/>
-</polygon>
-</package>
-<package name="TO-92">
-<description>&lt;b&gt;TO 92&lt;/b&gt;</description>
-<wire x1="-0.7863" y1="2.5485" x2="-2.0946" y2="-1.651" width="0.2032" layer="21" curve="111.098962"/>
-<wire x1="2.0945" y1="-1.651" x2="0.7863" y2="2.548396875" width="0.2032" layer="21" curve="111.099507"/>
-<wire x1="-2.0945" y1="-1.651" x2="2.0945" y2="-1.651" width="0.2032" layer="21"/>
-<wire x1="-2.6549" y1="-0.254" x2="-2.2537" y2="-0.254" width="0.2032" layer="21"/>
-<wire x1="-0.2863" y1="-0.254" x2="0.2863" y2="-0.254" width="0.2032" layer="21"/>
-<wire x1="2.2537" y1="-0.254" x2="2.6549" y2="-0.254" width="0.2032" layer="21"/>
-<pad name="1" x="-1.27" y="0" drill="0.8128" diameter="1.8796"/>
-<pad name="2" x="0" y="1.905" drill="0.8128" diameter="1.8796"/>
-<pad name="3" x="1.27" y="0" drill="0.8128" diameter="1.8796"/>
-<text x="3.175" y="0.635" size="0.4064" layer="25" ratio="10">&gt;NAME</text>
-<text x="3.175" y="-1.27" size="0.4064" layer="27" ratio="10">&gt;VALUE</text>
-</package>
-<package name="TO220V">
-<description>&lt;b&gt;TO 220 Vertical&lt;/b&gt; Package works with various parts including N-Channel MOSFET SparkFun SKU: COM-10213</description>
-<wire x1="-5.08" y1="2.032" x2="-5.08" y2="-0.381" width="0.2032" layer="21"/>
-<wire x1="5.08" y1="2.032" x2="5.08" y2="-0.381" width="0.2032" layer="21"/>
-<wire x1="5.08" y1="2.032" x2="-5.08" y2="2.032" width="0.2032" layer="21"/>
-<wire x1="-5.08" y1="2.032" x2="-5.08" y2="3.048" width="0.2032" layer="21"/>
-<wire x1="-5.08" y1="3.048" x2="5.08" y2="3.048" width="0.2032" layer="21"/>
-<wire x1="5.08" y1="3.048" x2="5.08" y2="2.032" width="0.2032" layer="21"/>
-<wire x1="-5.08" y1="-0.381" x2="-4.191" y2="-1.27" width="0.2032" layer="21" curve="92.798868"/>
-<wire x1="4.191" y1="-1.27" x2="5.08" y2="-0.381" width="0.2032" layer="21" curve="92.798868"/>
-<wire x1="-4.191" y1="-1.27" x2="-3.81" y2="-1.27" width="0.2032" layer="21"/>
-<wire x1="4.191" y1="-1.27" x2="3.81" y2="-1.27" width="0.2032" layer="21"/>
-<rectangle x1="-5.08" y1="2.032" x2="5.08" y2="3.048" layer="21"/>
-<pad name="1" x="-2.54" y="0" drill="1.016" shape="long" rot="R90"/>
-<pad name="2" x="0" y="0" drill="1.016" shape="long" rot="R90"/>
-<pad name="3" x="2.54" y="0" drill="1.016" shape="long" rot="R90"/>
-<text x="-2.794" y="3.429" size="1.27" layer="25" ratio="10">&gt;NAME</text>
-<text x="-3.302" y="-3.302" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
-</package>
-<package name="SOT323">
-<wire x1="1.1224" y1="0.6604" x2="1.1224" y2="-0.6604" width="0.1524" layer="51"/>
-<wire x1="1.1224" y1="-0.6604" x2="-1.1224" y2="-0.6604" width="0.1524" layer="51"/>
-<wire x1="-1.1224" y1="-0.6604" x2="-1.1224" y2="0.6604" width="0.1524" layer="51"/>
-<wire x1="-1.1224" y1="0.6604" x2="1.1224" y2="0.6604" width="0.1524" layer="51"/>
-<wire x1="-0.8" y1="0.7" x2="-1.1" y2="0.7" width="0.2032" layer="21"/>
-<wire x1="-1.1" y1="0.7" x2="-1.1" y2="-0.1" width="0.2032" layer="21"/>
-<wire x1="0.8" y1="0.7" x2="1.1" y2="0.7" width="0.2032" layer="21"/>
-<wire x1="1.1" y1="0.7" x2="1.1" y2="-0.1" width="0.2032" layer="21"/>
-<smd name="1" x="-0.65" y="-0.925" dx="0.7" dy="0.7" layer="1"/>
-<smd name="2" x="0.65" y="-0.925" dx="0.7" dy="0.7" layer="1"/>
-<smd name="3" x="0" y="0.925" dx="0.7" dy="0.7" layer="1"/>
-<text x="-1.1255" y="1.878" size="0.4064" layer="25">&gt;NAME</text>
-<text x="-1.116" y="1.3095" size="0.4064" layer="27">&gt;VALUE</text>
-</package>
-<package name="POWERPAK1212-8">
-<description>Vishay PowerPAK 1212-8 single device package&lt;br&gt;
-High-power, low thermal resistance package.</description>
-<smd name="S3" x="-1.4224" y="-0.3302" dx="0.9906" dy="0.4064" layer="1"/>
-<smd name="S2" x="-1.4224" y="0.3302" dx="0.9906" dy="0.4064" layer="1"/>
-<smd name="S1" x="-1.4224" y="0.9906" dx="0.9906" dy="0.4064" layer="1"/>
-<smd name="G" x="-1.4224" y="-0.9906" dx="0.9906" dy="0.4064" layer="1"/>
-<smd name="D2" x="1.5494" y="0.3302" dx="0.762" dy="0.4064" layer="1"/>
-<smd name="D1" x="1.5494" y="0.9906" dx="0.762" dy="0.4064" layer="1"/>
-<smd name="D3" x="1.5494" y="-0.3302" dx="0.762" dy="0.4064" layer="1"/>
-<smd name="D4" x="1.5494" y="-0.9906" dx="0.762" dy="0.4064" layer="1"/>
-<smd name="DPAD" x="0.5842" y="0" dx="1.7272" dy="2.2352" layer="1"/>
-<wire x1="-1.5" y1="1.5" x2="1.5" y2="1.5" width="0.127" layer="21"/>
-<wire x1="1.5" y1="1.5" x2="1.5" y2="1.35" width="0.127" layer="21"/>
-<wire x1="-1.5" y1="1.5" x2="-1.5" y2="1.4" width="0.127" layer="21"/>
-<wire x1="-1.5" y1="-1.5" x2="1.5" y2="-1.5" width="0.127" layer="21"/>
-<wire x1="1.5" y1="-1.5" x2="1.5" y2="-1.35" width="0.127" layer="21"/>
-<wire x1="-1.5" y1="-1.5" x2="-1.5" y2="-1.35" width="0.127" layer="21"/>
-<text x="-1.143" y="0.508" size="0.4064" layer="27">&gt;VALUE</text>
-<text x="-1.143" y="-0.381" size="0.4064" layer="25">&gt;NAME</text>
-</package>
-<package name="TUMT3">
-<description>TUMT3 package</description>
-<smd name="3" x="0" y="0.85" dx="0.4" dy="0.5" layer="1"/>
-<smd name="2" x="0.65" y="-0.85" dx="0.4" dy="0.5" layer="1"/>
-<smd name="1" x="-0.65" y="-0.85" dx="0.4" dy="0.5" layer="1"/>
-<wire x1="-1" y1="0.85" x2="1" y2="0.85" width="0.127" layer="21"/>
-<wire x1="1" y1="0.85" x2="1" y2="-0.85" width="0.127" layer="21"/>
-<wire x1="1" y1="-0.85" x2="-1" y2="-0.85" width="0.127" layer="21"/>
-<wire x1="-1" y1="-0.85" x2="-1" y2="0.85" width="0.127" layer="21"/>
-<text x="0" y="1.27" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
-<text x="0" y="-2.095" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center">&gt;VALUE</text>
-</package>
-<package name="XFDFN-3">
-<smd name="G" x="-0.35" y="0.215" dx="0.4" dy="0.25" layer="1"/>
-<smd name="D" x="0.35" y="0" dx="0.4" dy="0.7" layer="1"/>
-<smd name="S" x="-0.35" y="-0.215" dx="0.4" dy="0.25" layer="1"/>
-<wire x1="-0.55" y1="0.43" x2="0.55" y2="0.43" width="0.127" layer="21"/>
-<wire x1="0.55" y1="-0.43" x2="-0.55" y2="-0.43" width="0.127" layer="21"/>
-<text x="0" y="0.5" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
-<text x="0" y="-1.5" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center">&gt;VALUE</text>
-</package>
-<package name="SOT-223">
-<smd name="1" x="-2.3" y="-3.15" dx="0.9" dy="1.8" layer="1"/>
-<smd name="2" x="0" y="-3.15" dx="0.9" dy="1.8" layer="1"/>
-<smd name="3" x="2.3" y="-3.15" dx="0.9" dy="1.8" layer="1"/>
-<smd name="4" x="0" y="3.15" dx="3.5" dy="1.8" layer="1"/>
-<wire x1="-3.25" y1="1.75" x2="-3.25" y2="-1.75" width="0.127" layer="21"/>
-<wire x1="-3.25" y1="-1.75" x2="3.25" y2="-1.75" width="0.127" layer="21"/>
-<wire x1="3.25" y1="-1.75" x2="3.25" y2="1.75" width="0.127" layer="21"/>
-<wire x1="3.25" y1="1.75" x2="-3.25" y2="1.75" width="0.127" layer="21"/>
-<rectangle x1="-2.65" y1="-3.5" x2="-1.95" y2="-1.75" layer="51"/>
-<rectangle x1="-0.35" y1="-3.5" x2="0.35" y2="-1.75" layer="51"/>
-<rectangle x1="1.95" y1="-3.5" x2="2.65" y2="-1.75" layer="51"/>
-<rectangle x1="-1.5" y1="1.75" x2="1.5" y2="3.5" layer="51"/>
-<text x="0" y="4.6" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
-</package>
 </packages>
 <symbols>
 <symbol name="MOSFET-P">
@@ -2788,47 +2655,6 @@ High-power, low thermal resistance package.</description>
 <wire x1="2.54" y1="-1.905" x2="2.54" y2="-0.508" width="0.1524" layer="94"/>
 <wire x1="2.54" y1="-0.508" x2="2.54" y2="1.905" width="0.1524" layer="94"/>
 </symbol>
-<symbol name="MOSFET-NCHANNEL-1">
-<circle x="0" y="-1.905" radius="0.127" width="0.4064" layer="94"/>
-<circle x="0" y="1.905" radius="0.127" width="0.4064" layer="94"/>
-<rectangle x1="-2.794" y1="-2.54" x2="-2.032" y2="-1.27" layer="94"/>
-<rectangle x1="-2.794" y1="1.27" x2="-2.032" y2="2.54" layer="94"/>
-<rectangle x1="-2.794" y1="-0.889" x2="-2.032" y2="0.889" layer="94"/>
-<wire x1="-3.6576" y1="2.413" x2="-3.6576" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="0" y1="1.905" x2="-2.0066" y2="1.905" width="0.1524" layer="94"/>
-<wire x1="0" y1="0" x2="0" y2="-1.905" width="0.1524" layer="94"/>
-<wire x1="-2.032" y1="-1.905" x2="0" y2="-1.905" width="0.1524" layer="94"/>
-<wire x1="0" y1="2.54" x2="0" y2="1.905" width="0.1524" layer="94"/>
-<wire x1="0" y1="1.905" x2="2.54" y2="1.905" width="0.1524" layer="94"/>
-<wire x1="2.54" y1="-1.905" x2="0" y2="-1.905" width="0.1524" layer="94"/>
-<wire x1="0" y1="-1.905" x2="0" y2="-2.54" width="0.1524" layer="94"/>
-<wire x1="-3.81" y1="0" x2="-5.08" y2="0" width="0.1524" layer="94"/>
-<wire x1="-2.032" y1="0" x2="-0.762" y2="-0.508" width="0.1524" layer="94"/>
-<wire x1="-0.762" y1="-0.508" x2="-0.762" y2="0.508" width="0.1524" layer="94"/>
-<wire x1="-0.762" y1="0.508" x2="-2.032" y2="0" width="0.1524" layer="94"/>
-<wire x1="-0.889" y1="0" x2="0" y2="0" width="0.1524" layer="94"/>
-<wire x1="-0.889" y1="0.254" x2="-1.778" y2="0" width="0.3048" layer="94"/>
-<wire x1="-1.778" y1="0" x2="-0.889" y2="-0.254" width="0.3048" layer="94"/>
-<wire x1="-0.889" y1="-0.254" x2="-0.889" y2="0" width="0.3048" layer="94"/>
-<wire x1="-0.889" y1="0" x2="-1.143" y2="0" width="0.3048" layer="94"/>
-<wire x1="2.54" y1="1.905" x2="2.54" y2="0.762" width="0.1524" layer="94"/>
-<wire x1="2.54" y1="0.762" x2="2.54" y2="-1.905" width="0.1524" layer="94"/>
-<wire x1="2.54" y1="0.762" x2="1.905" y2="-0.635" width="0.1524" layer="94"/>
-<wire x1="1.905" y1="-0.635" x2="3.175" y2="-0.635" width="0.1524" layer="94"/>
-<wire x1="3.175" y1="-0.635" x2="2.54" y2="0.762" width="0.1524" layer="94"/>
-<wire x1="1.905" y1="0.762" x2="2.54" y2="0.762" width="0.1524" layer="94"/>
-<wire x1="2.54" y1="0.762" x2="3.175" y2="0.762" width="0.1524" layer="94"/>
-<wire x1="3.175" y1="0.762" x2="3.429" y2="1.016" width="0.1524" layer="94"/>
-<wire x1="1.905" y1="0.762" x2="1.651" y2="0.508" width="0.1524" layer="94"/>
-<pin name="D" x="0" y="5.08" visible="off" length="short" direction="pas" rot="R270"/>
-<pin name="G" x="-7.62" y="0" visible="off" length="short" direction="pas"/>
-<pin name="S" x="0" y="-5.08" visible="off" length="short" direction="pas" rot="R90"/>
-<text x="5.08" y="2.54" size="1.778" layer="95">&gt;NAME</text>
-<text x="5.08" y="0" size="1.778" layer="96">&gt;VALUE</text>
-<text x="-1.27" y="2.54" size="0.8128" layer="93">D</text>
-<text x="-1.27" y="-3.556" size="0.8128" layer="93">S</text>
-<text x="-5.08" y="-1.27" size="0.8128" layer="93">G</text>
-</symbol>
 </symbols>
 <devicesets>
 <deviceset name="SI223DDS" prefix="Q">
@@ -2848,132 +2674,6 @@ High-power, low thermal resistance package.</description>
 <attribute name="DIGIKEY" value="SI2333DDS-T1-GE3CT-ND" constant="no"/>
 <attribute name="MANUFACTURER" value="Vishay Siliconix" constant="no"/>
 <attribute name="MPN" value="SI2333DDS-T1-GE3" constant="no"/>
-</technology>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="MOSFET-NCHANNEL" prefix="Q">
-<description>Generic NMOS footprint</description>
-<gates>
-<gate name="G$1" symbol="MOSFET-NCHANNEL-1" x="0" y="0"/>
-</gates>
-<devices>
-<device name="FDD8580" package="DPAK">
-<connects>
-<connect gate="G$1" pin="D" pad="4"/>
-<connect gate="G$1" pin="G" pad="1"/>
-<connect gate="G$1" pin="S" pad="3"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="PTH" package="TO-92">
-<connects>
-<connect gate="G$1" pin="D" pad="1"/>
-<connect gate="G$1" pin="G" pad="3"/>
-<connect gate="G$1" pin="S" pad="2"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="PTH2" package="TO220V">
-<connects>
-<connect gate="G$1" pin="D" pad="2"/>
-<connect gate="G$1" pin="G" pad="1"/>
-<connect gate="G$1" pin="S" pad="3"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="SMD" package="SOT23-3">
-<connects>
-<connect gate="G$1" pin="D" pad="3"/>
-<connect gate="G$1" pin="G" pad="1"/>
-<connect gate="G$1" pin="S" pad="2"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="SOT323" package="SOT323">
-<connects>
-<connect gate="G$1" pin="D" pad="3"/>
-<connect gate="G$1" pin="G" pad="1"/>
-<connect gate="G$1" pin="S" pad="2"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="SI7820DN" package="POWERPAK1212-8">
-<connects>
-<connect gate="G$1" pin="D" pad="D1 D2 D3 D4 DPAD"/>
-<connect gate="G$1" pin="G" pad="G"/>
-<connect gate="G$1" pin="S" pad="S1 S2 S3"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="TUMT3" package="TUMT3">
-<connects>
-<connect gate="G$1" pin="D" pad="3"/>
-<connect gate="G$1" pin="G" pad="1"/>
-<connect gate="G$1" pin="S" pad="2"/>
-</connects>
-<technologies>
-<technology name="">
-<attribute name="DIGIKEY" value="RUF015N02TLCT-ND" constant="no"/>
-</technology>
-</technologies>
-</device>
-<device name="XFDN-3" package="XFDFN-3">
-<connects>
-<connect gate="G$1" pin="D" pad="D"/>
-<connect gate="G$1" pin="G" pad="G"/>
-<connect gate="G$1" pin="S" pad="S"/>
-</connects>
-<technologies>
-<technology name="">
-<attribute name="DIGIKEY" value="DMN2400UFB4-7DICT-ND" constant="no"/>
-</technology>
-</technologies>
-</device>
-<device name="-SOT-223" package="SOT-223">
-<connects>
-<connect gate="G$1" pin="D" pad="2 4"/>
-<connect gate="G$1" pin="G" pad="1"/>
-<connect gate="G$1" pin="S" pad="3"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="NX3008PBK" prefix="Q">
-<description>MOSFET - P Channel</description>
-<gates>
-<gate name="G$1" symbol="MOSFET-P" x="0" y="0"/>
-</gates>
-<devices>
-<device name="" package="SOT23-3">
-<connects>
-<connect gate="G$1" pin="D" pad="3"/>
-<connect gate="G$1" pin="G" pad="1"/>
-<connect gate="G$1" pin="S" pad="2"/>
-</connects>
-<technologies>
-<technology name="">
-<attribute name="DIGIKEY" value="568-10499-1-ND" constant="no"/>
-<attribute name="MANUFACTURER" value="Nexperia" constant="no"/>
-<attribute name="MOUSER" value="771-NX3008PBK,215" constant="no"/>
-<attribute name="MPN" value="NX3008PBK,215" constant="no"/>
-<attribute name="NEWARK" value="74T4665" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -17033,18 +16733,12 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <part name="TP15" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP16" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP17" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
-<part name="Q3" library="fets" deviceset="MOSFET-NCHANNEL" device="SMD"/>
-<part name="Q4" library="fets" deviceset="NX3008PBK" device=""/>
 </parts>
 <sheets>
 <sheet>
 <description>AC input, voltage sensing, AC/DC</description>
 <plain>
 <text x="167.64" y="177.8" size="1.016" layer="98" align="bottom-center">The peak power is 2A * 600uS = ~4.5mJ. We are adding 8mJ of energy buffer to be safe. 8mJ of energy with a 5V to 4V swing is about 2mF</text>
-<text x="157.48" y="132.08" size="1.016" layer="98" align="bottom-center">This mosfet should turn on when
- power is supplied by the circuit
- - otherwise we float GND for
- capacitance measurement.</text>
 <text x="53.34" y="177.8" size="1.016" layer="98" align="bottom-center">This will protect the sampling circuit against surges</text>
 <text x="30.48" y="86.36" size="1.778" layer="97">Output voltage:</text>
 <text x="30.48" y="83.82" size="1.778" layer="97">-(RF/RI)*VTEST + VCC/2</text>
@@ -17056,7 +16750,7 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
  The schottkey has Vf &lt; 0.3 which is less than the internal diodes on most MCUs.</text>
 <text x="55.88" y="33.02" size="1.016" layer="98" align="bottom-center">This circuit handles up to 340V with a 3.3V reference.</text>
 <text x="137.16" y="33.02" size="1.016" layer="98" align="bottom-center">This circuit handles up to 340V with a 3.3V reference.</text>
-<text x="66.04" y="137.16" size="1.016" layer="98" align="bottom-center">We use a seperate AC Measure pin so that we can more directly sense the perturbation by the digital output. 
+<text x="66.04" y="139.7" size="1.016" layer="98" align="bottom-center">We use a seperate AC Measure pin so that we can more directly sense the perturbation by the digital output. 
 The full-scale voltage sensing circuit (below) could also be used, but would only sense &lt;1% of its dynamic range.</text>
 </plain>
 <instances>
@@ -17065,7 +16759,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <instance part="U3" gate="G$1" x="116.84" y="165.1"/>
 <instance part="AC/L" gate="G$1" x="35.56" y="170.18"/>
 <instance part="AC/N" gate="G$1" x="35.56" y="147.32"/>
-<instance part="SUPPLY1" gate="1" x="142.24" y="134.62"/>
+<instance part="SUPPLY1" gate="1" x="142.24" y="147.32"/>
 <instance part="C2" gate="G$1" x="152.4" y="162.56"/>
 <instance part="C7" gate="G$1" x="165.1" y="162.56"/>
 <instance part="C17" gate="G$1" x="177.8" y="162.56"/>
@@ -17075,8 +16769,8 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="DIGIKEY" x="53.34" y="132.08" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
 <instance part="SUPPLY2" gate="1" x="71.12" y="99.06"/>
-<instance part="R21" gate="G$1" x="93.98" y="132.08" rot="R270">
-<attribute name="DIGIKEY" x="93.98" y="132.08" size="1.27" layer="96" rot="R270" display="off"/>
+<instance part="R21" gate="G$1" x="93.98" y="134.62" rot="R270">
+<attribute name="DIGIKEY" x="93.98" y="134.62" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
 <instance part="U5" gate="G$1" x="63.5" y="60.96"/>
 <instance part="RF" gate="G$1" x="60.96" y="40.64">
@@ -17128,8 +16822,8 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="MANUFACTURER" x="43.18" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MPN" x="43.18" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 </instance>
-<instance part="R31" gate="G$1" x="83.82" y="132.08" rot="R270">
-<attribute name="DIGIKEY" x="83.82" y="132.08" size="1.27" layer="96" rot="R270" display="off"/>
+<instance part="R31" gate="G$1" x="83.82" y="134.62" rot="R270">
+<attribute name="DIGIKEY" x="83.82" y="134.62" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
 <instance part="D8" gate="G$1" x="35.56" y="116.84" rot="R90">
 <attribute name="DIGIKEY" x="35.56" y="116.84" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
@@ -17165,12 +16859,6 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="DIGIKEY" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MPN" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
-</instance>
-<instance part="Q3" gate="G$1" x="142.24" y="147.32" smashed="yes">
-<attribute name="NAME" x="147.32" y="149.86" size="1.778" layer="95"/>
-</instance>
-<instance part="Q4" gate="G$1" x="139.7" y="170.18" smashed="yes" rot="MR90">
-<attribute name="NAME" x="142.24" y="175.26" size="1.778" layer="95" rot="MR90"/>
 </instance>
 </instances>
 <busses>
@@ -17216,11 +16904,11 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <wire x1="60.96" y1="154.94" x2="60.96" y2="147.32" width="0.1524" layer="91"/>
 <junction x="60.96" y="147.32"/>
 <pinref part="R21" gate="G$1" pin="1"/>
-<wire x1="93.98" y1="137.16" x2="93.98" y2="147.32" width="0.1524" layer="91"/>
+<wire x1="93.98" y1="139.7" x2="93.98" y2="147.32" width="0.1524" layer="91"/>
 <junction x="93.98" y="147.32"/>
 <label x="76.2" y="147.32" size="1.016" layer="95" rot="R90" xref="yes"/>
 <pinref part="R31" gate="G$1" pin="1"/>
-<wire x1="83.82" y1="137.16" x2="83.82" y2="147.32" width="0.1524" layer="91"/>
+<wire x1="83.82" y1="139.7" x2="83.82" y2="147.32" width="0.1524" layer="91"/>
 <junction x="83.82" y="147.32"/>
 </segment>
 <segment>
@@ -17243,31 +16931,12 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <pinref part="C2" gate="G$1" pin="+"/>
 <pinref part="C7" gate="G$1" pin="1"/>
 <pinref part="C17" gate="G$1" pin="1"/>
-<pinref part="Q4" gate="G$1" pin="D"/>
-<wire x1="144.78" y1="170.18" x2="152.4" y2="170.18" width="0.1524" layer="91"/>
 <junction x="152.4" y="170.18"/>
+<pinref part="U3" gate="G$1" pin="V+"/>
+<wire x1="129.54" y1="170.18" x2="152.4" y2="170.18" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="GND" class="0">
-<segment>
-<pinref part="SUPPLY1" gate="1" pin="GND"/>
-<wire x1="142.24" y1="137.16" x2="142.24" y2="139.7" width="0.1524" layer="91"/>
-<wire x1="152.4" y1="157.48" x2="152.4" y2="152.4" width="0.1524" layer="91"/>
-<wire x1="165.1" y1="157.48" x2="165.1" y2="152.4" width="0.1524" layer="91"/>
-<wire x1="165.1" y1="152.4" x2="152.4" y2="152.4" width="0.1524" layer="91"/>
-<wire x1="177.8" y1="157.48" x2="177.8" y2="152.4" width="0.1524" layer="91"/>
-<wire x1="177.8" y1="152.4" x2="165.1" y2="152.4" width="0.1524" layer="91"/>
-<junction x="165.1" y="152.4"/>
-<pinref part="C2" gate="G$1" pin="-"/>
-<pinref part="C7" gate="G$1" pin="2"/>
-<pinref part="C17" gate="G$1" pin="2"/>
-<wire x1="152.4" y1="152.4" x2="152.4" y2="139.7" width="0.1524" layer="91"/>
-<junction x="152.4" y="152.4"/>
-<wire x1="152.4" y1="139.7" x2="142.24" y2="139.7" width="0.1524" layer="91"/>
-<junction x="142.24" y="139.7"/>
-<pinref part="Q3" gate="G$1" pin="S"/>
-<wire x1="142.24" y1="139.7" x2="142.24" y2="142.24" width="0.1524" layer="91"/>
-</segment>
 <segment>
 <pinref part="SUPPLY2" gate="1" pin="GND"/>
 <wire x1="71.12" y1="109.22" x2="71.12" y2="101.6" width="0.1524" layer="91"/>
@@ -17347,17 +17016,24 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <wire x1="142.24" y1="53.34" x2="142.24" y2="50.8" width="0.1524" layer="91"/>
 <pinref part="SUPPLY10" gate="1" pin="GND"/>
 </segment>
-</net>
-<net name="N$32" class="0">
 <segment>
-<pinref part="Q3" gate="G$1" pin="G"/>
-<wire x1="134.62" y1="147.32" x2="132.08" y2="147.32" width="0.1524" layer="91"/>
-<pinref part="U3" gate="G$1" pin="V+"/>
-<wire x1="129.54" y1="170.18" x2="132.08" y2="170.18" width="0.1524" layer="91"/>
-<wire x1="132.08" y1="147.32" x2="132.08" y2="170.18" width="0.1524" layer="91"/>
-<pinref part="Q4" gate="G$1" pin="S"/>
-<wire x1="132.08" y1="170.18" x2="134.62" y2="170.18" width="0.1524" layer="91"/>
-<junction x="132.08" y="170.18"/>
+<wire x1="152.4" y1="157.48" x2="152.4" y2="152.4" width="0.1524" layer="91"/>
+<wire x1="165.1" y1="157.48" x2="165.1" y2="152.4" width="0.1524" layer="91"/>
+<wire x1="165.1" y1="152.4" x2="152.4" y2="152.4" width="0.1524" layer="91"/>
+<wire x1="177.8" y1="157.48" x2="177.8" y2="152.4" width="0.1524" layer="91"/>
+<wire x1="177.8" y1="152.4" x2="165.1" y2="152.4" width="0.1524" layer="91"/>
+<junction x="165.1" y="152.4"/>
+<pinref part="C2" gate="G$1" pin="-"/>
+<pinref part="C7" gate="G$1" pin="2"/>
+<pinref part="C17" gate="G$1" pin="2"/>
+<junction x="152.4" y="152.4"/>
+<pinref part="U3" gate="G$1" pin="V-"/>
+<wire x1="129.54" y1="160.02" x2="142.24" y2="160.02" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="152.4" x2="142.24" y2="160.02" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="152.4" x2="152.4" y2="152.4" width="0.1524" layer="91"/>
+<pinref part="SUPPLY1" gate="1" pin="GND"/>
+<wire x1="142.24" y1="149.86" x2="142.24" y2="152.4" width="0.1524" layer="91"/>
+<junction x="142.24" y="152.4"/>
 </segment>
 </net>
 <net name="N$38" class="0">
@@ -17386,7 +17062,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <segment>
 <pinref part="R21" gate="G$1" pin="2"/>
 <wire x1="93.98" y1="124.46" x2="93.98" y2="127" width="0.1524" layer="91"/>
-<wire x1="93.98" y1="127" x2="93.98" y2="129.54" width="0.1524" layer="91"/>
+<wire x1="93.98" y1="127" x2="93.98" y2="132.08" width="0.1524" layer="91"/>
 <wire x1="93.98" y1="127" x2="96.52" y2="127" width="0.1524" layer="91"/>
 <junction x="93.98" y="127"/>
 <label x="96.52" y="127" size="1.016" layer="95" xref="yes"/>
@@ -17517,28 +17193,16 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <net name="AC/N-MEASURE" class="0">
 <segment>
 <pinref part="R31" gate="G$1" pin="2"/>
-<wire x1="83.82" y1="129.54" x2="83.82" y2="127" width="0.1524" layer="91"/>
-<wire x1="83.82" y1="127" x2="83.82" y2="124.46" width="0.1524" layer="91"/>
-<wire x1="83.82" y1="127" x2="81.28" y2="127" width="0.1524" layer="91"/>
-<junction x="83.82" y="127"/>
-<label x="81.28" y="127" size="1.016" layer="95" rot="R180" xref="yes"/>
+<wire x1="83.82" y1="132.08" x2="83.82" y2="129.54" width="0.1524" layer="91"/>
+<wire x1="83.82" y1="129.54" x2="83.82" y2="124.46" width="0.1524" layer="91"/>
+<wire x1="83.82" y1="129.54" x2="81.28" y2="129.54" width="0.1524" layer="91"/>
+<junction x="83.82" y="129.54"/>
+<label x="81.28" y="129.54" size="1.016" layer="95" rot="R180" xref="yes"/>
 <wire x1="76.2" y1="121.92" x2="76.2" y2="124.46" width="0.1524" layer="91"/>
 <wire x1="76.2" y1="124.46" x2="83.82" y2="124.46" width="0.1524" layer="91"/>
 <pinref part="D10" gate="G$1" pin="CATHODE"/>
 <pinref part="D5" gate="G$1" pin="CATHODE"/>
 <junction x="83.82" y="124.46"/>
-</segment>
-</net>
-<net name="N$8" class="0">
-<segment>
-<pinref part="U3" gate="G$1" pin="V-"/>
-<wire x1="129.54" y1="160.02" x2="139.7" y2="160.02" width="0.1524" layer="91"/>
-<pinref part="Q3" gate="G$1" pin="D"/>
-<wire x1="139.7" y1="160.02" x2="142.24" y2="160.02" width="0.1524" layer="91"/>
-<wire x1="142.24" y1="152.4" x2="142.24" y2="160.02" width="0.1524" layer="91"/>
-<pinref part="Q4" gate="G$1" pin="G"/>
-<wire x1="139.7" y1="162.56" x2="139.7" y2="160.02" width="0.1524" layer="91"/>
-<junction x="139.7" y="160.02"/>
 </segment>
 </net>
 </nets>
