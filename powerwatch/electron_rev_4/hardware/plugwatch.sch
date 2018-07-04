@@ -576,6 +576,24 @@ https://www.vishay.com/docs/72821/72821.pdf</description>
 <circle x="-1.15" y="1.15" radius="0.070709375" width="0.127" layer="21"/>
 <text x="0" y="1.27" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
 </package>
+<package name="SC70">
+<wire x1="1" y1="0.625" x2="1" y2="-0.625" width="0.127" layer="51"/>
+<wire x1="-1" y1="-0.625" x2="-1" y2="0.625" width="0.127" layer="51"/>
+<wire x1="-1" y1="-0.625" x2="1" y2="-0.625" width="0.127" layer="51"/>
+<wire x1="-1" y1="0.625" x2="1" y2="0.625" width="0.127" layer="51"/>
+<smd name="1" x="-0.65" y="-1.1" dx="0.4" dy="0.9" layer="1" cream="no"/>
+<smd name="2" x="0" y="-1.1" dx="0.4" dy="0.9" layer="1" cream="no"/>
+<smd name="3" x="0.65" y="-1.1" dx="0.4" dy="0.9" layer="1" cream="no"/>
+<smd name="4" x="0.65" y="1.1" dx="0.4" dy="0.9" layer="1" cream="no"/>
+<smd name="5" x="-0.65" y="1.1" dx="0.4" dy="0.9" layer="1" cream="no"/>
+<text x="0" y="1.651" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
+<text x="-0.762" y="-2.794" size="1.016" layer="27" font="vector" ratio="12">&gt;VALUE</text>
+<rectangle x1="-0.85" y1="0.45" x2="-0.45" y2="1.2" layer="31"/>
+<rectangle x1="0.45" y1="0.45" x2="0.85" y2="1.2" layer="31"/>
+<rectangle x1="-0.8382" y1="-1.1684" x2="-0.508" y2="-0.4826" layer="31"/>
+<rectangle x1="-0.1651" y1="-1.1684" x2="0.1651" y2="-0.4826" layer="31"/>
+<rectangle x1="0.508" y1="-1.1684" x2="0.8382" y2="-0.4826" layer="31"/>
+</package>
 </packages>
 <symbols>
 <symbol name="SWITCH_HIGH_SIDE">
@@ -689,6 +707,18 @@ https://www.vishay.com/docs/72821/72821.pdf</description>
 <pin name="VDD_IO" x="-2.54" y="17.78" length="short"/>
 <text x="0" y="23.368" size="1.778" layer="95">&gt;NAME</text>
 <text x="0" y="0" size="1.778" layer="96">&gt;VALUE</text>
+</symbol>
+<symbol name="SN74AUP1T14DCKR">
+<wire x1="-2.54" y1="5.08" x2="7.62" y2="0" width="0.254" layer="94"/>
+<wire x1="7.62" y1="0" x2="-2.54" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="-2.54" y1="-5.08" x2="-2.54" y2="5.08" width="0.254" layer="94"/>
+<pin name="VCC" x="-5.08" y="2.54" length="short"/>
+<pin name="A" x="-5.08" y="0" length="short"/>
+<pin name="Y" x="12.7" y="0" visible="off" length="short" rot="R180"/>
+<pin name="GND" x="-5.08" y="-2.54" length="short"/>
+<text x="-2.54" y="6.35" size="1.778" layer="95">&gt;NAME</text>
+<text x="-2.54" y="-7.62" size="1.778" layer="95">&gt;VALUE</text>
+<circle x="8.89" y="0" radius="1.27" width="0.254" layer="94"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -825,6 +855,28 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 <attribute name="MANUFACTURER" value="STMicroelectronics" constant="no"/>
 <attribute name="MOUSER" value="511-LIS2DW12TR" constant="no"/>
 <attribute name="MPN" value="LIS2DW12TR" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="SN74AUP1T14DCKR" prefix="U">
+<description>LOW POWER, 1.8/2.5/3.3-V INPUT, 3.3-V CMOS OUTPUT, SINGLE
+SCHMITT-TRIGGER INVERTER GATE</description>
+<gates>
+<gate name="G$1" symbol="SN74AUP1T14DCKR" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="SC70">
+<connects>
+<connect gate="G$1" pin="A" pad="2"/>
+<connect gate="G$1" pin="GND" pad="3"/>
+<connect gate="G$1" pin="VCC" pad="5"/>
+<connect gate="G$1" pin="Y" pad="4"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="DIGIKEY" value="296-27392-1-ND" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -16733,6 +16785,16 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <part name="TP15" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP16" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP17" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="R1" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
+<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
+<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
+<attribute name="MPN" value="RMCF0402FT150R"/>
+</part>
+<part name="U11" library="chips" deviceset="SN74AUP1T14DCKR" device="" value="SN74AHC1G04DCKR">
+<attribute name="DIGIKEY" value="296-1090-1-ND"/>
+</part>
+<part name="GND3" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -17215,7 +17277,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 Add jumper incase reverse diode voltage 
 drop doesn't work as expected 
 with the charging circuit</text>
-<text x="203.2" y="175.26" size="1.778" layer="98" align="bottom-center">Use jumper cable from 
+<text x="241.3" y="170.18" size="1.778" layer="98" align="bottom-center">Use jumper cable from 
 board to particle</text>
 <text x="172.72" y="116.84" size="1.778" layer="98" align="bottom-center">Voltage supervisor.
 MR is the voltage input.
@@ -17238,7 +17300,7 @@ nothing will be able to read these anyways.</text>
 <instance part="FRAME6" gate="G$1" x="0" y="0"/>
 <instance part="FRAME6" gate="G$2" x="152.4" y="0"/>
 <instance part="J3" gate="G$1" x="55.88" y="162.56" rot="R90"/>
-<instance part="J4" gate="G$1" x="198.12" y="162.56" rot="MR90"/>
+<instance part="J4" gate="G$1" x="233.68" y="162.56" rot="MR90"/>
 <instance part="GND13" gate="1" x="66.04" y="154.94"/>
 <instance part="R24" gate="G$1" x="139.7" y="147.32" rot="R270">
 <attribute name="DIGIKEY" x="139.7" y="147.32" size="1.27" layer="96" rot="R270" display="off"/>
@@ -17246,11 +17308,11 @@ nothing will be able to read these anyways.</text>
 <instance part="R27" gate="G$1" x="139.7" y="124.46" rot="R270">
 <attribute name="DIGIKEY" x="139.7" y="124.46" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
-<instance part="Q1" gate="G$1" x="167.64" y="165.1" smashed="yes" rot="MR90">
-<attribute name="NAME" x="175.26" y="160.02" size="1.778" layer="95" rot="MR0"/>
+<instance part="Q1" gate="G$1" x="210.82" y="165.1" smashed="yes" rot="MR90">
+<attribute name="NAME" x="218.44" y="160.02" size="1.778" layer="95" rot="MR0"/>
 </instance>
-<instance part="GND39" gate="1" x="190.5" y="154.94"/>
-<instance part="SJ1" gate="1" x="167.64" y="175.26"/>
+<instance part="GND39" gate="1" x="226.06" y="154.94"/>
+<instance part="SJ1" gate="1" x="210.82" y="175.26"/>
 <instance part="U16" gate="G$1" x="106.68" y="139.7"/>
 <instance part="GND42" gate="1" x="86.36" y="116.84"/>
 <instance part="C24" gate="G$1" x="71.12" y="137.16"/>
@@ -17287,6 +17349,11 @@ nothing will be able to read these anyways.</text>
 <instance part="R6" gate="G$1" x="101.6" y="53.34" rot="R270">
 <attribute name="DIGIKEY" x="101.6" y="53.34" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
+<instance part="R1" gate="G$1" x="149.86" y="147.32" rot="R270">
+<attribute name="DIGIKEY" x="149.86" y="147.32" size="1.27" layer="96" rot="R270" display="off"/>
+</instance>
+<instance part="U11" gate="G$1" x="185.42" y="152.4"/>
+<instance part="GND3" gate="1" x="175.26" y="144.78"/>
 </instances>
 <busses>
 </busses>
@@ -17300,9 +17367,9 @@ nothing will be able to read these anyways.</text>
 </segment>
 <segment>
 <pinref part="J4" gate="G$1" pin="-"/>
-<wire x1="193.04" y1="162.56" x2="190.5" y2="162.56" width="0.1524" layer="91"/>
+<wire x1="228.6" y1="162.56" x2="226.06" y2="162.56" width="0.1524" layer="91"/>
 <pinref part="GND39" gate="1" pin="GND"/>
-<wire x1="190.5" y1="162.56" x2="190.5" y2="157.48" width="0.1524" layer="91"/>
+<wire x1="226.06" y1="162.56" x2="226.06" y2="157.48" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="GND42" gate="1" pin="GND"/>
@@ -17358,18 +17425,26 @@ nothing will be able to read these anyways.</text>
 <wire x1="190.5" y1="40.64" x2="160.02" y2="40.64" width="0.1524" layer="91"/>
 <junction x="160.02" y="40.64"/>
 </segment>
+<segment>
+<pinref part="U11" gate="G$1" pin="GND"/>
+<wire x1="180.34" y1="149.86" x2="175.26" y2="149.86" width="0.1524" layer="91"/>
+<pinref part="GND3" gate="1" pin="GND"/>
+<wire x1="175.26" y1="149.86" x2="175.26" y2="147.32" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="N$23" class="0">
 <segment>
 <pinref part="J3" gate="G$1" pin="+"/>
 <pinref part="Q1" gate="G$1" pin="S"/>
 <wire x1="60.96" y1="165.1" x2="132.08" y2="165.1" width="0.1524" layer="91"/>
-<wire x1="132.08" y1="165.1" x2="154.94" y2="165.1" width="0.1524" layer="91"/>
-<wire x1="154.94" y1="165.1" x2="162.56" y2="165.1" width="0.1524" layer="91"/>
-<wire x1="154.94" y1="165.1" x2="154.94" y2="175.26" width="0.1524" layer="91"/>
-<junction x="154.94" y="165.1"/>
+<wire x1="132.08" y1="165.1" x2="149.86" y2="165.1" width="0.1524" layer="91"/>
+<wire x1="149.86" y1="165.1" x2="177.8" y2="165.1" width="0.1524" layer="91"/>
+<wire x1="177.8" y1="165.1" x2="200.66" y2="165.1" width="0.1524" layer="91"/>
+<wire x1="200.66" y1="165.1" x2="205.74" y2="165.1" width="0.1524" layer="91"/>
+<wire x1="200.66" y1="165.1" x2="200.66" y2="175.26" width="0.1524" layer="91"/>
+<junction x="200.66" y="165.1"/>
 <pinref part="SJ1" gate="1" pin="1"/>
-<wire x1="154.94" y1="175.26" x2="162.56" y2="175.26" width="0.1524" layer="91"/>
+<wire x1="200.66" y1="175.26" x2="205.74" y2="175.26" width="0.1524" layer="91"/>
 <pinref part="U16" gate="G$1" pin="VCC"/>
 <wire x1="124.46" y1="147.32" x2="132.08" y2="147.32" width="0.1524" layer="91"/>
 <wire x1="132.08" y1="147.32" x2="132.08" y2="157.48" width="0.1524" layer="91"/>
@@ -17383,29 +17458,41 @@ nothing will be able to read these anyways.</text>
 <wire x1="124.46" y1="127" x2="132.08" y2="127" width="0.1524" layer="91"/>
 <wire x1="132.08" y1="127" x2="132.08" y2="147.32" width="0.1524" layer="91"/>
 <junction x="132.08" y="147.32"/>
+<pinref part="R1" gate="G$1" pin="1"/>
+<wire x1="149.86" y1="152.4" x2="149.86" y2="165.1" width="0.1524" layer="91"/>
+<junction x="149.86" y="165.1"/>
+<pinref part="U11" gate="G$1" pin="VCC"/>
+<wire x1="180.34" y1="154.94" x2="177.8" y2="154.94" width="0.1524" layer="91"/>
+<wire x1="177.8" y1="154.94" x2="177.8" y2="165.1" width="0.1524" layer="91"/>
+<junction x="177.8" y="165.1"/>
 </segment>
 </net>
 <net name="!EXTERNAL_RST" class="0">
 <segment>
-<wire x1="124.46" y1="139.7" x2="167.64" y2="139.7" width="0.1524" layer="91"/>
-<pinref part="Q1" gate="G$1" pin="G"/>
-<wire x1="167.64" y1="139.7" x2="167.64" y2="157.48" width="0.1524" layer="91"/>
-<wire x1="167.64" y1="139.7" x2="175.26" y2="139.7" width="0.1524" layer="91"/>
-<junction x="167.64" y="139.7"/>
-<label x="175.26" y="139.7" size="1.778" layer="95" xref="yes"/>
+<wire x1="124.46" y1="139.7" x2="149.86" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="149.86" y1="139.7" x2="165.1" y2="139.7" width="0.1524" layer="91"/>
+<label x="220.98" y="139.7" size="1.778" layer="95" xref="yes"/>
 <pinref part="U16" gate="G$1" pin="!RESET"/>
+<pinref part="R1" gate="G$1" pin="2"/>
+<wire x1="165.1" y1="139.7" x2="220.98" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="149.86" y1="144.78" x2="149.86" y2="139.7" width="0.1524" layer="91"/>
+<junction x="149.86" y="139.7"/>
+<pinref part="U11" gate="G$1" pin="A"/>
+<wire x1="180.34" y1="152.4" x2="165.1" y2="152.4" width="0.1524" layer="91"/>
+<wire x1="165.1" y1="152.4" x2="165.1" y2="139.7" width="0.1524" layer="91"/>
+<junction x="165.1" y="139.7"/>
 </segment>
 </net>
 <net name="N$35" class="0">
 <segment>
 <pinref part="Q1" gate="G$1" pin="D"/>
 <pinref part="J4" gate="G$1" pin="+"/>
-<wire x1="172.72" y1="165.1" x2="180.34" y2="165.1" width="0.1524" layer="91"/>
+<wire x1="215.9" y1="165.1" x2="223.52" y2="165.1" width="0.1524" layer="91"/>
 <pinref part="SJ1" gate="1" pin="2"/>
-<wire x1="180.34" y1="165.1" x2="193.04" y2="165.1" width="0.1524" layer="91"/>
-<wire x1="172.72" y1="175.26" x2="180.34" y2="175.26" width="0.1524" layer="91"/>
-<wire x1="180.34" y1="175.26" x2="180.34" y2="165.1" width="0.1524" layer="91"/>
-<junction x="180.34" y="165.1"/>
+<wire x1="223.52" y1="165.1" x2="228.6" y2="165.1" width="0.1524" layer="91"/>
+<wire x1="215.9" y1="175.26" x2="223.52" y2="175.26" width="0.1524" layer="91"/>
+<wire x1="223.52" y1="175.26" x2="223.52" y2="165.1" width="0.1524" layer="91"/>
+<junction x="223.52" y="165.1"/>
 </segment>
 </net>
 <net name="N$31" class="0">
@@ -17597,6 +17684,14 @@ nothing will be able to read these anyways.</text>
 <wire x1="200.66" y1="68.58" x2="200.66" y2="66.04" width="0.1524" layer="91"/>
 <junction x="200.66" y="66.04"/>
 <label x="213.36" y="66.04" size="1.016" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="N$9" class="0">
+<segment>
+<pinref part="U11" gate="G$1" pin="Y"/>
+<wire x1="198.12" y1="152.4" x2="210.82" y2="152.4" width="0.1524" layer="91"/>
+<pinref part="Q1" gate="G$1" pin="G"/>
+<wire x1="210.82" y1="152.4" x2="210.82" y2="157.48" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>

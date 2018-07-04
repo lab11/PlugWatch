@@ -419,6 +419,24 @@ https://www.vishay.com/docs/72821/72821.pdf</description>
 <circle x="-1.15" y="1.15" radius="0.070709375" width="0.127" layer="21"/>
 <text x="0" y="1.27" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
 </package>
+<package name="SC70">
+<wire x1="1" y1="0.625" x2="1" y2="-0.625" width="0.127" layer="51"/>
+<wire x1="-1" y1="-0.625" x2="-1" y2="0.625" width="0.127" layer="51"/>
+<wire x1="-1" y1="-0.625" x2="1" y2="-0.625" width="0.127" layer="51"/>
+<wire x1="-1" y1="0.625" x2="1" y2="0.625" width="0.127" layer="51"/>
+<smd name="1" x="-0.65" y="-1.1" dx="0.4" dy="0.9" layer="1" cream="no"/>
+<smd name="2" x="0" y="-1.1" dx="0.4" dy="0.9" layer="1" cream="no"/>
+<smd name="3" x="0.65" y="-1.1" dx="0.4" dy="0.9" layer="1" cream="no"/>
+<smd name="4" x="0.65" y="1.1" dx="0.4" dy="0.9" layer="1" cream="no"/>
+<smd name="5" x="-0.65" y="1.1" dx="0.4" dy="0.9" layer="1" cream="no"/>
+<text x="0" y="1.651" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
+<text x="-0.762" y="-2.794" size="1.016" layer="27" font="vector" ratio="12">&gt;VALUE</text>
+<rectangle x1="-0.85" y1="0.45" x2="-0.45" y2="1.2" layer="31"/>
+<rectangle x1="0.45" y1="0.45" x2="0.85" y2="1.2" layer="31"/>
+<rectangle x1="-0.8382" y1="-1.1684" x2="-0.508" y2="-0.4826" layer="31"/>
+<rectangle x1="-0.1651" y1="-1.1684" x2="0.1651" y2="-0.4826" layer="31"/>
+<rectangle x1="0.508" y1="-1.1684" x2="0.8382" y2="-0.4826" layer="31"/>
+</package>
 </packages>
 </library>
 <library name="connector">
@@ -4621,6 +4639,15 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <element name="TP17" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="-12.7" y="15.24">
 <attribute name="DIGIKEY" value="5001K-ND" x="-12.7" y="15.24" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
+<element name="R1" library="passives" package="0402_RES" value="10k" x="-25.4" y="-10.16">
+<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402" x="-25.4" y="-10.16" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND" x="-25.4" y="-10.16" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics" x="-25.4" y="-10.16" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<attribute name="MPN" value="RMCF0402FT150R" x="-25.4" y="-10.16" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+</element>
+<element name="U11" library="chips" package="SC70" value="SN74AHC1G04DCKR" x="-25.4" y="-15.24">
+<attribute name="DIGIKEY" value="296-1090-1-ND" x="-25.4" y="-15.24" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+</element>
 </elements>
 <signals>
 <signal name="!GPS_RESET">
@@ -4796,6 +4823,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="C7" pad="2"/>
 <contactref element="C17" pad="2"/>
 <contactref element="U3" pad="V-"/>
+<contactref element="U11" pad="3"/>
 <wire x1="35.56" y1="73.66" x2="37.084" y2="83.567" width="0" layer="19" extent="1-1"/>
 <wire x1="34.16" y1="73.41" x2="35.56" y2="73.66" width="0" layer="19" extent="1-1"/>
 <wire x1="26.162" y1="70.104" x2="34.16" y2="73.41" width="0" layer="19" extent="1-1"/>
@@ -4890,6 +4918,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="16.79" y1="10.16" x2="25.4" y2="10.16" width="0" layer="19" extent="1-1"/>
 <wire x1="14.25" y1="7.62" x2="16.79" y2="10.16" width="0" layer="19" extent="1-1"/>
 <wire x1="-12.7" y1="28.194" x2="11.26" y2="27.94" width="0" layer="19" extent="1-1"/>
+<wire x1="-24.75" y1="-16.34" x2="14.25" y2="7.62" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="GPS_PWR_EN">
 <contactref element="ASSY1" pad="D3"/>
@@ -5301,20 +5330,26 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="U16" pad="8"/>
 <contactref element="R24" pad="1"/>
 <contactref element="U16" pad="5"/>
+<contactref element="R1" pad="1"/>
+<contactref element="U11" pad="5"/>
 <wire x1="19.88693125" y1="88.9" x2="26.56" y2="82.28" width="0" layer="19" extent="1-1"/>
 <wire x1="18.755" y1="90.07" x2="19.88693125" y2="88.9" width="0" layer="19" extent="1-1"/>
 <wire x1="16.805" y1="90.07" x2="18.755" y2="90.07" width="0" layer="19" extent="1-1"/>
-<wire x1="11.43" y1="88.9" x2="19.88693125" y2="88.9" width="0" layer="19" extent="1-1"/>
+<wire x1="11.43" y1="88.9" x2="16.805" y2="90.07" width="0" layer="19" extent="1-1"/>
 <wire x1="23.81" y1="29.48" x2="26.56" y2="82.28" width="0" layer="19" extent="1-1"/>
+<wire x1="-25.83306875" y1="-10.16" x2="23.81" y2="29.48" width="0" layer="19" extent="1-1"/>
+<wire x1="-26.05" y1="-14.14" x2="-25.83306875" y2="-10.16" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="!EXTERNAL_RST">
-<contactref element="Q1" pad="1"/>
 <contactref element="ASSY1" pad="RST"/>
 <contactref element="U16" pad="7"/>
 <contactref element="TP17" pad="TESTPOINT"/>
-<wire x1="17.455" y1="90.07" x2="-12.7" y2="15.24" width="0" layer="19" extent="1-1"/>
+<contactref element="R1" pad="2"/>
+<contactref element="U11" pad="2"/>
 <wire x1="30.9118" y1="40.5892" x2="17.455" y2="90.07" width="0" layer="19" extent="1-1"/>
-<wire x1="21.91" y1="29.48" x2="30.9118" y2="40.5892" width="0" layer="19" extent="1-1"/>
+<wire x1="-12.7" y1="15.24" x2="30.9118" y2="40.5892" width="0" layer="19" extent="1-1"/>
+<wire x1="-24.96693125" y1="-10.16" x2="-12.7" y2="15.24" width="0" layer="19" extent="1-1"/>
+<wire x1="-25.4" y1="-16.34" x2="-24.96693125" y2="-10.16" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$35">
 <contactref element="Q1" pad="3"/>
@@ -5592,6 +5627,11 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="TP8" pad="TESTPOINT"/>
 <wire x1="41.07306875" y1="63.5" x2="-12.7" y2="22.86" width="0" layer="19" extent="1-1"/>
 <wire x1="30.9118" y1="53.2892" x2="41.07306875" y2="63.5" width="0" layer="19" extent="1-1"/>
+</signal>
+<signal name="N$9">
+<contactref element="U11" pad="4"/>
+<contactref element="Q1" pad="1"/>
+<wire x1="-24.75" y1="-14.14" x2="21.91" y2="29.48" width="0" layer="19" extent="1-1"/>
 </signal>
 </signals>
 </board>
