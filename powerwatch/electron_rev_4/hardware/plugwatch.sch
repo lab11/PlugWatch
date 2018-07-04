@@ -17039,6 +17039,7 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <text x="137.16" y="33.02" size="1.016" layer="98" align="bottom-center">This circuit handles up to 340V with a 3.3V reference.</text>
 <text x="66.04" y="137.16" size="1.016" layer="98" align="bottom-center">We use a seperate AC Measure pin so that we can more directly sense the perturbation by the digital output. 
 The full-scale voltage sensing circuit (below) could also be used, but would only sense &lt;1% of its dynamic range.</text>
+<text x="154.94" y="147.32" size="1.27" layer="98" align="bottom-center">Note that source is connected to V-...I am a bit unsure if this correct for the perturb circuit.</text>
 </plain>
 <instances>
 <instance part="FRAME5" gate="G$1" x="0" y="0"/>
@@ -17050,7 +17051,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <instance part="C2" gate="G$1" x="152.4" y="162.56"/>
 <instance part="C7" gate="G$1" x="165.1" y="162.56"/>
 <instance part="C17" gate="G$1" x="177.8" y="162.56"/>
-<instance part="Q2" gate="G$1" x="142.24" y="144.78"/>
+<instance part="Q2" gate="G$1" x="142.24" y="144.78" rot="MR180"/>
 <instance part="R1" gate="G$1" x="132.08" y="149.86" rot="R270">
 <attribute name="DIGIKEY" x="132.08" y="149.86" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
@@ -17231,32 +17232,25 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <junction x="132.08" y="170.18"/>
 </segment>
 </net>
-<net name="N$9" class="0">
+<net name="GND" class="0">
 <segment>
-<pinref part="U3" gate="G$1" pin="V-"/>
-<wire x1="129.54" y1="160.02" x2="142.24" y2="160.02" width="0.1524" layer="91"/>
-<wire x1="142.24" y1="160.02" x2="142.24" y2="152.4" width="0.1524" layer="91"/>
+<pinref part="SUPPLY1" gate="1" pin="GND"/>
+<wire x1="142.24" y1="129.54" x2="142.24" y2="137.16" width="0.1524" layer="91"/>
 <wire x1="152.4" y1="157.48" x2="152.4" y2="152.4" width="0.1524" layer="91"/>
-<wire x1="152.4" y1="152.4" x2="142.24" y2="152.4" width="0.1524" layer="91"/>
 <wire x1="165.1" y1="157.48" x2="165.1" y2="152.4" width="0.1524" layer="91"/>
 <wire x1="165.1" y1="152.4" x2="152.4" y2="152.4" width="0.1524" layer="91"/>
-<junction x="152.4" y="152.4"/>
 <wire x1="177.8" y1="157.48" x2="177.8" y2="152.4" width="0.1524" layer="91"/>
 <wire x1="177.8" y1="152.4" x2="165.1" y2="152.4" width="0.1524" layer="91"/>
 <junction x="165.1" y="152.4"/>
 <pinref part="C2" gate="G$1" pin="-"/>
 <pinref part="C7" gate="G$1" pin="2"/>
 <pinref part="C17" gate="G$1" pin="2"/>
+<wire x1="152.4" y1="152.4" x2="152.4" y2="137.16" width="0.1524" layer="91"/>
+<junction x="152.4" y="152.4"/>
+<wire x1="152.4" y1="137.16" x2="142.24" y2="137.16" width="0.1524" layer="91"/>
 <pinref part="Q2" gate="G$1" pin="D"/>
-<wire x1="142.24" y1="149.86" x2="142.24" y2="152.4" width="0.1524" layer="91"/>
-<junction x="142.24" y="152.4"/>
-</segment>
-</net>
-<net name="GND" class="0">
-<segment>
-<pinref part="SUPPLY1" gate="1" pin="GND"/>
-<pinref part="Q2" gate="G$1" pin="S"/>
-<wire x1="142.24" y1="129.54" x2="142.24" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="139.7" x2="142.24" y2="137.16" width="0.1524" layer="91"/>
+<junction x="142.24" y="137.16"/>
 </segment>
 <segment>
 <pinref part="SUPPLY2" gate="1" pin="GND"/>
@@ -17340,10 +17334,10 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 </net>
 <net name="N$32" class="0">
 <segment>
-<pinref part="Q2" gate="G$1" pin="G"/>
-<wire x1="134.62" y1="144.78" x2="132.08" y2="144.78" width="0.1524" layer="91"/>
 <pinref part="R1" gate="G$1" pin="2"/>
 <wire x1="132.08" y1="144.78" x2="132.08" y2="147.32" width="0.1524" layer="91"/>
+<pinref part="Q2" gate="G$1" pin="G"/>
+<wire x1="132.08" y1="144.78" x2="134.62" y2="144.78" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$38" class="0">
@@ -17513,6 +17507,14 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <pinref part="D10" gate="G$1" pin="CATHODE"/>
 <pinref part="D5" gate="G$1" pin="CATHODE"/>
 <junction x="83.82" y="124.46"/>
+</segment>
+</net>
+<net name="N$8" class="0">
+<segment>
+<pinref part="U3" gate="G$1" pin="V-"/>
+<wire x1="129.54" y1="160.02" x2="142.24" y2="160.02" width="0.1524" layer="91"/>
+<pinref part="Q2" gate="G$1" pin="S"/>
+<wire x1="142.24" y1="149.86" x2="142.24" y2="160.02" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
