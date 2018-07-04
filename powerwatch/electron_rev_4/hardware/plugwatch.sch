@@ -2955,6 +2955,30 @@ High-power, low thermal resistance package.</description>
 </device>
 </devices>
 </deviceset>
+<deviceset name="NX3008PBK" prefix="Q">
+<description>MOSFET - P Channel</description>
+<gates>
+<gate name="G$1" symbol="MOSFET-P" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="SOT23-3">
+<connects>
+<connect gate="G$1" pin="D" pad="3"/>
+<connect gate="G$1" pin="G" pad="1"/>
+<connect gate="G$1" pin="S" pad="2"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="DIGIKEY" value="568-10499-1-ND" constant="no"/>
+<attribute name="MANUFACTURER" value="Nexperia" constant="no"/>
+<attribute name="MOUSER" value="771-NX3008PBK,215" constant="no"/>
+<attribute name="MPN" value="NX3008PBK,215" constant="no"/>
+<attribute name="NEWARK" value="74T4665" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
 </devicesets>
 </library>
 <library name="jumper" urn="urn:adsk.eagle:library:252">
@@ -16800,13 +16824,6 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <part name="C2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-US" device="E5-13" package3d_urn="urn:adsk.eagle:package:23375/1" value="2000uF"/>
 <part name="C7" library="passives" deviceset="CAPACITOR" device="1210_CAP" value="100uF"/>
 <part name="C17" library="passives" deviceset="CAPACITOR" device="1210_CAP" value="100uF"/>
-<part name="Q2" library="fets" deviceset="MOSFET-NCHANNEL" device="SMD"/>
-<part name="R1" library="passives" deviceset="RESISTOR" device="0402_RES" value="100">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
-</part>
 <part name="R7" library="varistor" library_urn="urn:adsk.eagle:library:410" deviceset="S14K385" device="" package3d_urn="urn:adsk.eagle:package:30572/1"/>
 <part name="F1" library="powerwatch" deviceset="MICRO_FUSE" device="500MA_350VAC" value="300VAC - 500ma"/>
 <part name="R8" library="passives" deviceset="RESISTOR" device="0402_RES" value="750k">
@@ -17016,6 +17033,8 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <part name="TP15" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP16" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP17" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="Q3" library="fets" deviceset="MOSFET-NCHANNEL" device="SMD"/>
+<part name="Q4" library="fets" deviceset="NX3008PBK" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -17039,7 +17058,6 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <text x="137.16" y="33.02" size="1.016" layer="98" align="bottom-center">This circuit handles up to 340V with a 3.3V reference.</text>
 <text x="66.04" y="137.16" size="1.016" layer="98" align="bottom-center">We use a seperate AC Measure pin so that we can more directly sense the perturbation by the digital output. 
 The full-scale voltage sensing circuit (below) could also be used, but would only sense &lt;1% of its dynamic range.</text>
-<text x="154.94" y="147.32" size="1.27" layer="98" align="bottom-center">Note that source is connected to V-...I am a bit unsure if this correct for the perturb circuit.</text>
 </plain>
 <instances>
 <instance part="FRAME5" gate="G$1" x="0" y="0"/>
@@ -17047,14 +17065,10 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <instance part="U3" gate="G$1" x="116.84" y="165.1"/>
 <instance part="AC/L" gate="G$1" x="35.56" y="170.18"/>
 <instance part="AC/N" gate="G$1" x="35.56" y="147.32"/>
-<instance part="SUPPLY1" gate="1" x="142.24" y="127"/>
+<instance part="SUPPLY1" gate="1" x="142.24" y="134.62"/>
 <instance part="C2" gate="G$1" x="152.4" y="162.56"/>
 <instance part="C7" gate="G$1" x="165.1" y="162.56"/>
 <instance part="C17" gate="G$1" x="177.8" y="162.56"/>
-<instance part="Q2" gate="G$1" x="142.24" y="144.78" rot="MR180"/>
-<instance part="R1" gate="G$1" x="132.08" y="149.86" rot="R270">
-<attribute name="DIGIKEY" x="132.08" y="149.86" size="1.27" layer="96" rot="R270" display="off"/>
-</instance>
 <instance part="R7" gate="G$1" x="60.96" y="160.02" rot="R270"/>
 <instance part="F1" gate="G$1" x="48.26" y="170.18"/>
 <instance part="R8" gate="G$1" x="53.34" y="132.08" rot="R270">
@@ -17152,6 +17166,12 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="MANUFACTURER" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MPN" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 </instance>
+<instance part="Q3" gate="G$1" x="142.24" y="147.32" smashed="yes">
+<attribute name="NAME" x="147.32" y="149.86" size="1.778" layer="95"/>
+</instance>
+<instance part="Q4" gate="G$1" x="139.7" y="170.18" smashed="yes" rot="MR90">
+<attribute name="NAME" x="142.24" y="175.26" size="1.778" layer="95" rot="MR90"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -17211,15 +17231,11 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 </net>
 <net name="5V" class="0">
 <segment>
-<pinref part="U3" gate="G$1" pin="V+"/>
-<wire x1="129.54" y1="170.18" x2="132.08" y2="170.18" width="0.1524" layer="91"/>
 <label x="193.04" y="170.18" size="1.016" layer="95" xref="yes"/>
-<wire x1="132.08" y1="170.18" x2="152.4" y2="170.18" width="0.1524" layer="91"/>
 <wire x1="152.4" y1="170.18" x2="165.1" y2="170.18" width="0.1524" layer="91"/>
 <wire x1="165.1" y1="170.18" x2="177.8" y2="170.18" width="0.1524" layer="91"/>
 <wire x1="177.8" y1="170.18" x2="193.04" y2="170.18" width="0.1524" layer="91"/>
 <wire x1="152.4" y1="165.1" x2="152.4" y2="170.18" width="0.1524" layer="91"/>
-<junction x="152.4" y="170.18"/>
 <wire x1="165.1" y1="165.1" x2="165.1" y2="170.18" width="0.1524" layer="91"/>
 <junction x="165.1" y="170.18"/>
 <wire x1="177.8" y1="165.1" x2="177.8" y2="170.18" width="0.1524" layer="91"/>
@@ -17227,15 +17243,15 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <pinref part="C2" gate="G$1" pin="+"/>
 <pinref part="C7" gate="G$1" pin="1"/>
 <pinref part="C17" gate="G$1" pin="1"/>
-<pinref part="R1" gate="G$1" pin="1"/>
-<wire x1="132.08" y1="154.94" x2="132.08" y2="170.18" width="0.1524" layer="91"/>
-<junction x="132.08" y="170.18"/>
+<pinref part="Q4" gate="G$1" pin="D"/>
+<wire x1="144.78" y1="170.18" x2="152.4" y2="170.18" width="0.1524" layer="91"/>
+<junction x="152.4" y="170.18"/>
 </segment>
 </net>
 <net name="GND" class="0">
 <segment>
 <pinref part="SUPPLY1" gate="1" pin="GND"/>
-<wire x1="142.24" y1="129.54" x2="142.24" y2="137.16" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="137.16" x2="142.24" y2="139.7" width="0.1524" layer="91"/>
 <wire x1="152.4" y1="157.48" x2="152.4" y2="152.4" width="0.1524" layer="91"/>
 <wire x1="165.1" y1="157.48" x2="165.1" y2="152.4" width="0.1524" layer="91"/>
 <wire x1="165.1" y1="152.4" x2="152.4" y2="152.4" width="0.1524" layer="91"/>
@@ -17245,12 +17261,12 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <pinref part="C2" gate="G$1" pin="-"/>
 <pinref part="C7" gate="G$1" pin="2"/>
 <pinref part="C17" gate="G$1" pin="2"/>
-<wire x1="152.4" y1="152.4" x2="152.4" y2="137.16" width="0.1524" layer="91"/>
+<wire x1="152.4" y1="152.4" x2="152.4" y2="139.7" width="0.1524" layer="91"/>
 <junction x="152.4" y="152.4"/>
-<wire x1="152.4" y1="137.16" x2="142.24" y2="137.16" width="0.1524" layer="91"/>
-<pinref part="Q2" gate="G$1" pin="D"/>
-<wire x1="142.24" y1="139.7" x2="142.24" y2="137.16" width="0.1524" layer="91"/>
-<junction x="142.24" y="137.16"/>
+<wire x1="152.4" y1="139.7" x2="142.24" y2="139.7" width="0.1524" layer="91"/>
+<junction x="142.24" y="139.7"/>
+<pinref part="Q3" gate="G$1" pin="S"/>
+<wire x1="142.24" y1="139.7" x2="142.24" y2="142.24" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="SUPPLY2" gate="1" pin="GND"/>
@@ -17334,10 +17350,14 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 </net>
 <net name="N$32" class="0">
 <segment>
-<pinref part="R1" gate="G$1" pin="2"/>
-<wire x1="132.08" y1="144.78" x2="132.08" y2="147.32" width="0.1524" layer="91"/>
-<pinref part="Q2" gate="G$1" pin="G"/>
-<wire x1="132.08" y1="144.78" x2="134.62" y2="144.78" width="0.1524" layer="91"/>
+<pinref part="Q3" gate="G$1" pin="G"/>
+<wire x1="134.62" y1="147.32" x2="132.08" y2="147.32" width="0.1524" layer="91"/>
+<pinref part="U3" gate="G$1" pin="V+"/>
+<wire x1="129.54" y1="170.18" x2="132.08" y2="170.18" width="0.1524" layer="91"/>
+<wire x1="132.08" y1="147.32" x2="132.08" y2="170.18" width="0.1524" layer="91"/>
+<pinref part="Q4" gate="G$1" pin="S"/>
+<wire x1="132.08" y1="170.18" x2="134.62" y2="170.18" width="0.1524" layer="91"/>
+<junction x="132.08" y="170.18"/>
 </segment>
 </net>
 <net name="N$38" class="0">
@@ -17512,9 +17532,13 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <net name="N$8" class="0">
 <segment>
 <pinref part="U3" gate="G$1" pin="V-"/>
-<wire x1="129.54" y1="160.02" x2="142.24" y2="160.02" width="0.1524" layer="91"/>
-<pinref part="Q2" gate="G$1" pin="S"/>
-<wire x1="142.24" y1="149.86" x2="142.24" y2="160.02" width="0.1524" layer="91"/>
+<wire x1="129.54" y1="160.02" x2="139.7" y2="160.02" width="0.1524" layer="91"/>
+<pinref part="Q3" gate="G$1" pin="D"/>
+<wire x1="139.7" y1="160.02" x2="142.24" y2="160.02" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="152.4" x2="142.24" y2="160.02" width="0.1524" layer="91"/>
+<pinref part="Q4" gate="G$1" pin="G"/>
+<wire x1="139.7" y1="162.56" x2="139.7" y2="160.02" width="0.1524" layer="91"/>
+<junction x="139.7" y="160.02"/>
 </segment>
 </net>
 </nets>
