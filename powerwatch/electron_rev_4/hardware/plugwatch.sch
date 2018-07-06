@@ -12555,6 +12555,7 @@ Block, Siemens and generic&lt;p&gt;
 <wire x1="3" y1="1" x2="3" y2="-1" width="0.254" layer="21"/>
 <wire x1="3" y1="-1" x2="-1" y2="-1" width="0.254" layer="21"/>
 <wire x1="-1" y1="-1" x2="-1" y2="1" width="0.254" layer="21"/>
+<text x="0" y="2.54" size="0.889" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
 </package>
 </packages>
 <symbols>
