@@ -3,7 +3,7 @@
 <eagle version="9.0.1">
 <drawing>
 <settings>
-<setting alwaysvectorfont="no"/>
+<setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="10" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="10" altunitdist="mil" altunit="mil"/>
@@ -3082,77 +3082,77 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="NAME" x="22.987" y="66.929" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center"/>
 <attribute name="VALUE" x="22.987" y="65.151" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP12" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="13.208" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="13.208" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="13.208" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP12" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="14.986" y="88.646" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="14.986" y="88.646" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="14.986" y="86.106" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP13" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="10.668" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="10.668" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="10.668" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP13" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="17.526" y="88.646" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="17.526" y="88.646" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="17.526" y="86.106" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP14" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="8.128" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="8.128" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="8.128" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP14" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="17.526" y="86.106" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="17.526" y="86.106" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="17.526" y="83.566" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP18" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="36.195" y="104.775" smashed="yes" rot="R270">
-<attribute name="DIGIKEY" value="5001K-ND" x="36.195" y="104.775" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="33.655" y="104.775" size="1.016" layer="27" font="vector" ratio="12" rot="R270" align="bottom-center"/>
+<element name="TP18" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="45.466" y="88.646" smashed="yes" rot="R270">
+<attribute name="DIGIKEY" value="5001K-ND" x="45.466" y="88.646" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="42.926" y="88.646" size="1.016" layer="27" font="vector" ratio="12" rot="R270" align="bottom-center"/>
 </element>
-<element name="TP19" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="18.288" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="18.288" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="18.288" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP19" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="27.686" y="86.106" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="27.686" y="86.106" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="27.686" y="83.566" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP1" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="23.876" y="111.887" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="23.876" y="111.887" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="23.876" y="109.347" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP1" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="42.926" y="88.646" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="42.926" y="88.646" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="42.926" y="86.106" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP20" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="25.908" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="25.908" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="25.908" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP20" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="27.686" y="88.646" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="27.686" y="88.646" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="27.686" y="86.106" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP21" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="28.448" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="28.448" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="28.448" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP21" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="25.146" y="86.106" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="25.146" y="86.106" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="25.146" y="83.566" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP22" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="33.528" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="33.528" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="33.528" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP22" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="40.386" y="88.646" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="40.386" y="88.646" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="40.386" y="86.106" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP23" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="38.608" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="38.608" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="38.608" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP23" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="40.386" y="86.106" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="40.386" y="86.106" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="40.386" y="83.566" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP24" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="41.148" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="41.148" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="41.148" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP24" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="30.226" y="88.646" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="30.226" y="88.646" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="30.226" y="86.106" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP26" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="31.75" y="108.077" smashed="yes" rot="R270">
-<attribute name="DIGIKEY" value="5001K-ND" x="31.75" y="108.077" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="29.21" y="108.077" size="1.016" layer="27" font="vector" ratio="12" rot="R270" align="bottom-center"/>
+<element name="TP26" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="45.466" y="86.106" smashed="yes" rot="R270">
+<attribute name="DIGIKEY" value="5001K-ND" x="45.466" y="86.106" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="42.926" y="86.106" size="1.016" layer="27" font="vector" ratio="12" rot="R270" align="bottom-center"/>
 </element>
-<element name="TP28" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="5.588" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="5.588" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="5.588" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP28" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="14.986" y="86.106" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="14.986" y="86.106" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="14.986" y="83.566" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP2" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="46.228" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="46.228" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="46.228" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP2" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="42.926" y="86.106" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="42.926" y="86.106" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="42.926" y="83.566" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP3" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="7.62" y="105.918" smashed="yes" rot="MR0">
-<attribute name="DIGIKEY" value="5001K-ND" x="7.62" y="105.918" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="7.62" y="103.378" size="1.016" layer="28" font="vector" ratio="12" rot="MR0" align="bottom-center"/>
+<element name="TP3" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="32.766" y="88.646" smashed="yes" rot="MR0">
+<attribute name="DIGIKEY" value="5001K-ND" x="32.766" y="88.646" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="32.766" y="86.106" size="1.016" layer="28" font="vector" ratio="12" rot="MR0" align="bottom-center"/>
 </element>
-<element name="TP4" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="30.48" y="103.378" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="30.48" y="103.378" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="30.48" y="100.838" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP4" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="35.306" y="88.646" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="35.306" y="88.646" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="35.306" y="86.106" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP5" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="25.146" y="108.839" smashed="yes" rot="MR0">
-<attribute name="DIGIKEY" value="5001K-ND" x="25.146" y="108.839" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="25.146" y="106.299" size="1.016" layer="28" font="vector" ratio="12" rot="MR0" align="bottom-center"/>
+<element name="TP5" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="35.306" y="86.106" smashed="yes" rot="MR0">
+<attribute name="DIGIKEY" value="5001K-ND" x="35.306" y="86.106" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="35.306" y="83.566" size="1.016" layer="28" font="vector" ratio="12" rot="MR0" align="bottom-center"/>
 </element>
-<element name="TP6" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="36.068" y="88.392" smashed="yes">
-<attribute name="DIGIKEY" value="5001K-ND" x="36.068" y="88.392" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="36.068" y="85.852" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
+<element name="TP6" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="30.226" y="86.106" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="30.226" y="86.106" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="30.226" y="83.566" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
 <element name="U$3" library="logos" package="UCB_CAL_200MIL" value="" x="55.372" y="-6.604" smashed="yes"/>
 <element name="U10" library="chips" package="TSOT23-6" value="SIP32510" x="37.465" y="54.229" smashed="yes">
@@ -3409,17 +3409,17 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="MANUFACTURER" value="Stackpole Electronics" x="5.588" y="73.914" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 <attribute name="MPN" value="RMCF0402FT150R" x="5.588" y="73.914" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
-<element name="R35" library="passives" package="0402_RES" value="66.5" x="36.195" y="84.455" rot="R180">
-<attribute name="DESCRIPTION" value="RES SMD 1K OHM 1% 1/16W 0402" x="36.195" y="84.455" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND" x="36.195" y="84.455" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics" x="36.195" y="84.455" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MPN" value="RMCF0402FT1K00" x="36.195" y="84.455" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<element name="R35" library="passives" package="0402_RES" value="66.5" x="30.353" y="79.629" rot="R180">
+<attribute name="DESCRIPTION" value="RES SMD 1K OHM 1% 1/16W 0402" x="30.353" y="79.629" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND" x="30.353" y="79.629" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics" x="30.353" y="79.629" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MPN" value="RMCF0402FT1K00" x="30.353" y="79.629" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
 </element>
-<element name="R36" library="passives" package="0402_RES" value="34k" x="38.227" y="84.455" rot="R180">
-<attribute name="DESCRIPTION" value="RES SMD 1K OHM 1% 1/16W 0402" x="38.227" y="84.455" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND" x="38.227" y="84.455" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics" x="38.227" y="84.455" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MPN" value="RMCF0402FT1K00" x="38.227" y="84.455" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<element name="R36" library="passives" package="0402_RES" value="34k" x="32.639" y="79.629" rot="R180">
+<attribute name="DESCRIPTION" value="RES SMD 1K OHM 1% 1/16W 0402" x="32.639" y="79.629" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND" x="32.639" y="79.629" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics" x="32.639" y="79.629" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MPN" value="RMCF0402FT1K00" x="32.639" y="79.629" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
 </element>
 <element name="U6" library="chips" package="LGA-12" value="LIS2DW12" x="21.336" y="69.85" rot="R90">
 <attribute name="MANUFACTURER" value="STMicroelectronics" x="21.336" y="69.85" size="1.778" layer="27" font="vector" ratio="12" rot="R90" display="off"/>
@@ -3455,29 +3455,29 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="MANUFACTURER" value="Stackpole Electronics" x="18.288" y="70.739" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
 <attribute name="MPN" value="RMCF0402FT10K0" x="18.288" y="70.739" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
 </element>
-<element name="TP7" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="32.131" y="111.125">
-<attribute name="DIGIKEY" value="5001K-ND" x="32.131" y="111.125" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<element name="TP7" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="32.766" y="86.106">
+<attribute name="DIGIKEY" value="5001K-ND" x="32.766" y="86.106" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
-<element name="TP8" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="24.638" y="106.553">
-<attribute name="DIGIKEY" value="5001K-ND" x="24.638" y="106.553" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<element name="TP8" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="25.146" y="88.646">
+<attribute name="DIGIKEY" value="5001K-ND" x="25.146" y="88.646" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
-<element name="TP9" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="41.275" y="103.378">
-<attribute name="DIGIKEY" value="5001K-ND" x="41.275" y="103.378" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<element name="TP9" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="22.606" y="88.646">
+<attribute name="DIGIKEY" value="5001K-ND" x="22.606" y="88.646" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
-<element name="TP10" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="30.988" y="88.392">
-<attribute name="DIGIKEY" value="5001K-ND" x="30.988" y="88.392" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<element name="TP10" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="22.606" y="86.106">
+<attribute name="DIGIKEY" value="5001K-ND" x="22.606" y="86.106" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
-<element name="TP11" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="43.688" y="88.392">
-<attribute name="DIGIKEY" value="5001K-ND" x="43.688" y="88.392" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<element name="TP11" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="37.846" y="86.106">
+<attribute name="DIGIKEY" value="5001K-ND" x="37.846" y="86.106" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
-<element name="TP15" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="23.368" y="88.392">
-<attribute name="DIGIKEY" value="5001K-ND" x="23.368" y="88.392" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<element name="TP15" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="37.846" y="88.646">
+<attribute name="DIGIKEY" value="5001K-ND" x="37.846" y="88.646" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
-<element name="TP16" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="15.748" y="88.392">
-<attribute name="DIGIKEY" value="5001K-ND" x="15.748" y="88.392" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<element name="TP16" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="20.066" y="86.106">
+<attribute name="DIGIKEY" value="5001K-ND" x="20.066" y="86.106" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
-<element name="TP17" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="20.828" y="88.392">
-<attribute name="DIGIKEY" value="5001K-ND" x="20.828" y="88.392" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<element name="TP17" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="20.066" y="88.646">
+<attribute name="DIGIKEY" value="5001K-ND" x="20.066" y="88.646" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
 <element name="R1" library="passives" package="0402_RES" value="10k" x="29.972" y="60.198" rot="R90">
 <attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402" x="29.972" y="60.198" size="1.778" layer="27" font="vector" ratio="12" rot="R90" display="off"/>
@@ -3490,6 +3490,24 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="DIGIKEY" value="490-7763-1-ND" x="15.24" y="72.644" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
 <attribute name="MANUFACTURER" value="Murata" x="15.24" y="72.644" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
 <attribute name="MPN" value="GRM155R71H103JA88D" x="15.24" y="72.644" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+</element>
+<element name="TP25" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="12.446" y="86.106">
+<attribute name="DIGIKEY" value="5001K-ND" x="12.446" y="86.106" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+</element>
+<element name="TP27" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="9.906" y="88.646">
+<attribute name="DIGIKEY" value="5001K-ND" x="9.906" y="88.646" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+</element>
+<element name="TP29" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="9.906" y="86.106">
+<attribute name="DIGIKEY" value="5001K-ND" x="9.906" y="86.106" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+</element>
+<element name="TP30" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="7.366" y="88.646">
+<attribute name="DIGIKEY" value="5001K-ND" x="7.366" y="88.646" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+</element>
+<element name="TP31" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="7.366" y="86.106">
+<attribute name="DIGIKEY" value="5001K-ND" x="7.366" y="86.106" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+</element>
+<element name="TP32" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="12.446" y="88.646">
+<attribute name="DIGIKEY" value="5001K-ND" x="12.446" y="88.646" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
 </element>
 </elements>
 <signals>
@@ -3504,7 +3522,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="21.717" y1="54.61" x2="12.319" y2="62.992" width="0.2032" layer="16"/>
 <wire x1="12.319" y1="62.992" x2="12.3698" y2="63.0428" width="0.2032" layer="16"/>
 <wire x1="12.3698" y1="63.0428" x2="12.3698" y2="64.5668" width="0.2032" layer="16"/>
-<wire x1="33.782" y1="54.61" x2="38.608" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="33.782" y1="54.61" x2="40.386" y2="86.106" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="!SD_CS">
 <contactref element="ASSY1" pad="A2"/>
@@ -3513,12 +3531,15 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="TP6" pad="TESTPOINT"/>
 <wire x1="34.009" y1="75.252" x2="31.25793125" y2="75.252" width="0.2032" layer="1"/>
 <wire x1="31.25793125" y1="75.252" x2="31.242" y2="75.23606875" width="0.2032" layer="1"/>
-<wire x1="25.0698" y1="82.3468" x2="25.0698" y2="76.4032" width="0.2032" layer="16"/>
-<wire x1="25.0698" y1="76.4032" x2="26.162" y2="75.311" width="0.2032" layer="16"/>
-<via x="26.162" y="75.311" extent="1-16" drill="0.3048"/>
-<wire x1="26.162" y1="75.311" x2="31.16706875" y2="75.311" width="0.2032" layer="1"/>
+<wire x1="25.0698" y1="82.3468" x2="25.0698" y2="75.3872" width="0.2032" layer="16"/>
+<wire x1="25.0698" y1="75.3872" x2="25.146" y2="75.311" width="0.2032" layer="16"/>
+<via x="25.146" y="75.311" extent="1-16" drill="0.3048"/>
+<wire x1="25.146" y1="75.311" x2="31.16706875" y2="75.311" width="0.2032" layer="1"/>
 <wire x1="31.16706875" y1="75.311" x2="31.242" y2="75.23606875" width="0.2032" layer="1"/>
-<wire x1="25.0698" y1="82.3468" x2="36.068" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="25.0698" y1="82.3468" x2="25.0698" y2="83.2358" width="0.2032" layer="2"/>
+<wire x1="25.0698" y1="83.2358" x2="25.908" y2="84.074" width="0.2032" layer="2"/>
+<wire x1="25.908" y1="84.074" x2="28.194" y2="84.074" width="0.2032" layer="2"/>
+<wire x1="28.194" y1="84.074" x2="30.226" y2="86.106" width="0.2032" layer="2"/>
 </signal>
 <signal name="!SD_DETECT">
 <contactref element="ASSY1" pad="D6"/>
@@ -3535,7 +3556,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="36.576" y1="65.913" x2="42.545" y2="65.913" width="0.2032" layer="16"/>
 <wire x1="44.509" y1="66.752" x2="43.384" y2="66.752" width="0.2032" layer="1"/>
 <wire x1="43.384" y1="66.752" x2="43.307" y2="66.675" width="0.2032" layer="1"/>
-<wire x1="43.384" y1="66.752" x2="41.148" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="31.242" y1="68.01993125" x2="30.226" y2="88.646" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="ANT">
 <contactref element="A2" pad="0"/>
@@ -3643,12 +3664,11 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <via x="38.1" y="48.641" extent="1-16" drill="0.3048"/>
 <via x="52.197" y="61.849" extent="1-16" drill="0.3048"/>
 <via x="51.562" y="63.119" extent="1-16" drill="0.3048"/>
-<wire x1="35.76193125" y1="84.455" x2="31.75" y2="108.077" width="0" layer="19" extent="1-1"/>
-<wire x1="22.4742" y1="44.304" x2="21.8742" y2="45.104" width="0" layer="19" extent="1-1"/>
-<wire x1="6.604" y1="70.485" x2="7.79906875" y2="72.898" width="0" layer="19" extent="1-1"/>
+<via x="1.524" y="11.938" extent="1-16" drill="0.3048"/>
+<via x="5.08" y="9.652" extent="1-16" drill="0.3048"/>
 <wire x1="6.854" y1="69.085" x2="6.604" y2="70.485" width="0" layer="19" extent="1-1"/>
 <wire x1="5.53593125" y1="67.691" x2="6.854" y2="69.085" width="0" layer="19" extent="1-1"/>
-<wire x1="2.36093125" y1="11.938" x2="4.125" y2="9.652" width="0" layer="19" extent="1-1"/>
+<wire x1="22.4742" y1="44.304" x2="21.8742" y2="45.104" width="0" layer="19" extent="1-1"/>
 <wire x1="10.795" y1="68.78193125" x2="6.854" y2="69.085" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="GPS_PWR_EN">
@@ -3664,7 +3684,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="39.116" y1="60.071" x2="39.116" y2="53.16093125" width="0.2032" layer="1"/>
 <wire x1="27.6098" y1="64.5668" x2="29.3116" y2="62.865" width="0.2032" layer="1"/>
 <wire x1="29.3116" y1="62.865" x2="36.322" y2="62.865" width="0.2032" layer="1"/>
-<wire x1="27.6098" y1="64.5668" x2="33.528" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="36.322" y1="62.865" x2="40.386" y2="88.646" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="GPS_RF_IN">
 <contactref element="U2" pad="4"/>
@@ -3686,7 +3706,9 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="44.196" y1="57.531" x2="44.196" y2="81.0006" width="0.2032" layer="15"/>
 <wire x1="44.196" y1="81.0006" x2="42.8498" y2="82.3468" width="0.2032" layer="15"/>
 <wire x1="42.037" y1="48.641" x2="42.037" y2="57.023" width="0.2032" layer="1"/>
-<wire x1="42.8498" y1="82.3468" x2="23.876" y2="111.887" width="0" layer="19" extent="1-1"/>
+<wire x1="42.8498" y1="82.3468" x2="44.196" y2="83.693" width="0.2032" layer="15"/>
+<wire x1="44.196" y1="87.376" x2="42.926" y2="88.646" width="0.2032" layer="15"/>
+<wire x1="44.196" y1="83.693" x2="44.196" y2="87.376" width="0.2032" layer="15"/>
 </signal>
 <signal name="GPS_TXD">
 <contactref element="ASSY1" pad="RX"/>
@@ -3700,7 +3722,8 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="43.18" y1="62.103" x2="41.656" y2="63.627" width="0.2032" layer="15"/>
 <wire x1="41.656" y1="63.627" x2="41.656" y2="81.0006" width="0.2032" layer="15"/>
 <wire x1="41.656" y1="81.0006" x2="40.3098" y2="82.3468" width="0.2032" layer="15"/>
-<wire x1="40.3098" y1="82.3468" x2="46.228" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="40.3098" y1="82.3468" x2="42.926" y2="84.963" width="0.2032" layer="15"/>
+<wire x1="42.926" y1="84.963" x2="42.926" y2="86.106" width="0.2032" layer="15"/>
 </signal>
 <signal name="GPS_VCC">
 <contactref element="C12" pad="2"/>
@@ -3820,13 +3843,13 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="9.8298" y1="66.3448" x2="10.16" y2="66.675" width="0.254" layer="1"/>
 <wire x1="10.16" y1="66.675" x2="10.287" y2="66.675" width="0.254" layer="1"/>
 <via x="10.287" y="66.675" extent="1-16" drill="0.3048"/>
-<wire x1="10.287" y1="66.675" x2="23.368" y2="66.675" width="0.254" layer="2"/>
-<wire x1="23.368" y1="66.675" x2="30.226" y2="73.533" width="0.254" layer="2"/>
-<wire x1="30.226" y1="73.533" x2="30.226" y2="74.422" width="0.254" layer="2"/>
+<wire x1="10.287" y1="66.675" x2="23.368" y2="66.675" width="0.254" layer="15"/>
+<wire x1="23.368" y1="66.675" x2="30.226" y2="73.533" width="0.254" layer="15"/>
+<wire x1="30.226" y1="73.533" x2="30.226" y2="74.422" width="0.254" layer="15"/>
 <via x="30.226" y="74.422" extent="1-16" drill="0.3048"/>
 <wire x1="30.226" y1="74.422" x2="28.90646875" y2="74.422" width="0.254" layer="1"/>
 <wire x1="28.90646875" y1="74.422" x2="28.85566875" y2="74.4728" width="0.254" layer="1"/>
-<wire x1="30.226" y1="74.422" x2="32.131" y2="111.125" width="0" layer="19" extent="1-1"/>
+<wire x1="30.226" y1="74.422" x2="32.766" y2="86.106" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="SD_MISO">
 <contactref element="ASSY1" pad="A4"/>
@@ -3846,7 +3869,11 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="30.1752" y1="82.3468" x2="30.1498" y2="82.3468" width="0.2032" layer="16"/>
 <wire x1="19.177" y1="78.613" x2="26.416" y2="78.613" width="0.2032" layer="1"/>
 <wire x1="26.416" y1="78.613" x2="30.1498" y2="82.3468" width="0.2032" layer="1"/>
-<wire x1="30.1752" y1="82.3468" x2="30.48" y2="103.378" width="0" layer="19" extent="16-16"/>
+<wire x1="30.1498" y1="82.3468" x2="31.877" y2="84.074" width="0.2032" layer="15"/>
+<wire x1="31.877" y1="84.074" x2="33.528" y2="84.074" width="0.2032" layer="15"/>
+<wire x1="33.528" y1="84.074" x2="34.036" y2="84.582" width="0.2032" layer="15"/>
+<wire x1="34.036" y1="87.376" x2="35.306" y2="88.646" width="0.2032" layer="15"/>
+<wire x1="34.036" y1="84.582" x2="34.036" y2="87.376" width="0.2032" layer="15"/>
 </signal>
 <signal name="SD_MOSI">
 <contactref element="ASSY1" pad="A5"/>
@@ -3864,10 +3891,13 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="34.009" y1="74.152" x2="32.7992" y2="74.152" width="0.2032" layer="1"/>
 <wire x1="32.7992" y1="74.152" x2="32.258" y2="74.6932" width="0.2032" layer="1"/>
 <wire x1="32.258" y1="73.71206875" x2="32.258" y2="74.6932" width="0.2032" layer="1"/>
-<wire x1="26.416" y1="81.153" x2="26.416" y2="83.5152" width="0.2032" layer="1"/>
-<wire x1="26.416" y1="83.5152" x2="31.5214" y2="83.5152" width="0.2032" layer="1"/>
+<wire x1="26.416" y1="81.153" x2="26.416" y2="83.312" width="0.2032" layer="1"/>
+<wire x1="26.416" y1="83.312" x2="26.6192" y2="83.5152" width="0.2032" layer="1"/>
+<wire x1="26.6192" y1="83.5152" x2="31.5214" y2="83.5152" width="0.2032" layer="1"/>
 <wire x1="31.5214" y1="83.5152" x2="32.6898" y2="82.3468" width="0.2032" layer="1"/>
-<wire x1="18.542" y1="79.502" x2="7.62" y2="105.918" width="0" layer="19" extent="1-1"/>
+<wire x1="32.766" y1="88.646" x2="34.036" y2="87.376" width="0.2032" layer="16"/>
+<wire x1="34.036" y1="83.693" x2="32.6898" y2="82.3468" width="0.2032" layer="16"/>
+<wire x1="34.036" y1="87.376" x2="34.036" y2="83.693" width="0.2032" layer="16"/>
 </signal>
 <signal name="SD_SCLK">
 <contactref element="ASSY1" pad="A3"/>
@@ -3886,7 +3916,9 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="32.512" y1="71.755" x2="31.242" y2="73.025" width="0.254" layer="15"/>
 <wire x1="31.242" y1="78.7146" x2="27.6098" y2="82.3468" width="0.254" layer="15"/>
 <wire x1="31.242" y1="73.025" x2="31.242" y2="78.7146" width="0.254" layer="15"/>
-<wire x1="27.6098" y1="82.3468" x2="25.146" y2="108.839" width="0" layer="19" extent="1-15"/>
+<wire x1="35.306" y1="86.106" x2="33.274" y2="84.074" width="0.2032" layer="2"/>
+<wire x1="29.337" y1="84.074" x2="27.6098" y2="82.3468" width="0.2032" layer="2"/>
+<wire x1="33.274" y1="84.074" x2="29.337" y2="84.074" width="0.2032" layer="2"/>
 </signal>
 <signal name="SENSORS_SCL">
 <contactref element="ASSY1" pad="D1"/>
@@ -3898,7 +3930,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="22.55393125" y1="66.548" x2="21.336" y2="66.548" width="0.254" layer="1"/>
 <wire x1="20.586" y1="69.1" x2="20.586" y2="67.298" width="0.254" layer="1"/>
 <wire x1="20.586" y1="67.298" x2="21.336" y2="66.548" width="0.254" layer="1"/>
-<wire x1="20.586" y1="69.1" x2="25.908" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="20.586" y1="69.1" x2="27.686" y2="88.646" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="SENSORS_SDA">
 <contactref element="ASSY1" pad="D0"/>
@@ -3912,7 +3944,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="20.1168" y1="64.5668" x2="19.9898" y2="64.5668" width="0.254" layer="16"/>
 <wire x1="23.114" y1="68.072" x2="23.622" y2="68.072" width="0.254" layer="1"/>
 <wire x1="22.086" y1="69.1" x2="23.114" y2="68.072" width="0.254" layer="1"/>
-<wire x1="22.086" y1="69.1" x2="18.288" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="22.086" y1="69.1" x2="27.686" y2="86.106" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="VCC">
 <contactref element="ASSY1" pad="3V3"/>
@@ -4049,11 +4081,11 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="19.05" y1="69.723" x2="17.526" y2="69.723" width="0.2032" layer="15"/>
 <wire x1="19.12493125" y1="67.25793125" x2="19.685" y2="67.818" width="0.2032" layer="1"/>
 <wire x1="19.685" y1="69.088" x2="19.05" y2="69.723" width="0.2032" layer="15"/>
-<wire x1="11.938" y1="68.707" x2="11.938" y2="72.263" width="0.635" layer="15"/>
-<wire x1="11.938" y1="72.263" x2="13.97" y2="74.295" width="0.635" layer="15"/>
-<wire x1="13.97" y1="74.295" x2="16.891" y2="74.295" width="0.635" layer="15"/>
-<wire x1="16.891" y1="74.295" x2="23.241" y2="74.295" width="0.635" layer="15"/>
-<wire x1="23.241" y1="74.295" x2="27.94" y2="69.596" width="0.635" layer="15"/>
+<wire x1="11.938" y1="68.707" x2="11.938" y2="72.263" width="0.635" layer="16"/>
+<wire x1="11.938" y1="72.263" x2="13.97" y2="74.295" width="0.635" layer="16"/>
+<wire x1="13.97" y1="74.295" x2="16.891" y2="74.295" width="0.635" layer="16"/>
+<wire x1="16.891" y1="74.295" x2="23.241" y2="74.295" width="0.635" layer="16"/>
+<wire x1="23.241" y1="74.295" x2="27.94" y2="69.596" width="0.635" layer="16"/>
 <wire x1="2.794" y1="32.639" x2="2.794" y2="66.167" width="0.635" layer="16"/>
 <wire x1="2.794" y1="66.167" x2="3.556" y2="66.929" width="0.635" layer="16"/>
 <wire x1="3.556" y1="66.929" x2="4.445" y2="66.929" width="0.635" layer="16"/>
@@ -4061,9 +4093,13 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="8.509" y1="66.929" x2="10.287" y2="68.707" width="0.635" layer="16"/>
 <wire x1="10.287" y1="68.707" x2="11.938" y2="68.707" width="0.635" layer="16"/>
 <wire x1="4.445" y1="72.009" x2="4.445" y2="66.929" width="0.254" layer="16"/>
-<wire x1="16.891" y1="74.295" x2="16.891" y2="72.898" width="0.635" layer="15"/>
-<wire x1="16.891" y1="72.898" x2="17.018" y2="72.771" width="0.635" layer="15"/>
-<wire x1="23.241" y1="74.295" x2="36.195" y2="104.775" width="0" layer="19" extent="1-15"/>
+<wire x1="16.891" y1="74.295" x2="16.891" y2="72.898" width="0.635" layer="16"/>
+<wire x1="16.891" y1="72.898" x2="17.018" y2="72.771" width="0.635" layer="16"/>
+<wire x1="45.466" y1="88.646" x2="46.99" y2="87.122" width="0.2032" layer="15"/>
+<wire x1="46.99" y1="84.328" x2="46.482" y2="83.82" width="0.2032" layer="15"/>
+<wire x1="46.482" y1="83.82" x2="46.482" y2="66.0146" width="0.2032" layer="15"/>
+<wire x1="46.482" y1="66.0146" x2="47.9298" y2="64.5668" width="0.2032" layer="15"/>
+<wire x1="46.99" y1="87.122" x2="46.99" y2="84.328" width="0.2032" layer="15"/>
 </signal>
 <signal name="VCC_RF">
 <contactref element="C11" pad="2"/>
@@ -4096,11 +4132,16 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="50.734" y1="60.21475" x2="50.734" y2="61.275" width="0.2032" layer="1"/>
 <wire x1="50.734" y1="61.275" x2="52.197" y2="62.738" width="0.2032" layer="1"/>
 <wire x1="52.197" y1="62.738" x2="52.197" y2="81.28" width="0.2032" layer="1"/>
-<wire x1="52.197" y1="81.28" x2="48.387" y2="85.09" width="0.2032" layer="1"/>
-<wire x1="48.387" y1="85.09" x2="8.509" y2="85.09" width="0.2032" layer="1"/>
-<wire x1="8.509" y1="85.09" x2="7.2898" y2="83.8708" width="0.2032" layer="1"/>
-<wire x1="7.2898" y1="83.8708" x2="7.2898" y2="82.3468" width="0.2032" layer="1"/>
-<wire x1="8.509" y1="85.09" x2="13.208" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="52.197" y1="81.28" x2="49.403" y2="84.074" width="0.2032" layer="1"/>
+<wire x1="49.403" y1="84.074" x2="8.509" y2="84.074" width="0.2032" layer="1"/>
+<wire x1="8.509" y1="84.074" x2="7.2898" y2="82.8548" width="0.2032" layer="1"/>
+<wire x1="7.2898" y1="82.8548" x2="7.2898" y2="82.3468" width="0.2032" layer="1"/>
+<wire x1="7.2898" y1="82.3468" x2="7.2898" y2="82.9818" width="0.2032" layer="2"/>
+<wire x1="7.2898" y1="82.9818" x2="8.636" y2="84.328" width="0.2032" layer="2"/>
+<wire x1="8.636" y1="84.328" x2="8.636" y2="86.868" width="0.2032" layer="2"/>
+<wire x1="8.636" y1="86.868" x2="9.144" y2="87.376" width="0.2032" layer="2"/>
+<wire x1="9.144" y1="87.376" x2="13.716" y2="87.376" width="0.2032" layer="2"/>
+<wire x1="13.716" y1="87.376" x2="14.986" y2="88.646" width="0.2032" layer="2"/>
 </signal>
 <signal name="WIFI_RXD">
 <contactref element="ASSY1" pad="C1"/>
@@ -4111,7 +4152,11 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="46.482" y1="62.484" x2="47.625" y2="61.341" width="0.2032" layer="2"/>
 <wire x1="47.625" y1="58.928" x2="48.387" y2="58.166" width="0.2032" layer="2"/>
 <wire x1="47.625" y1="61.341" x2="47.625" y2="58.928" width="0.2032" layer="2"/>
-<wire x1="7.2898" y1="64.5668" x2="8.128" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="17.526" y1="86.106" x2="17.526" y2="84.582" width="0.2032" layer="2"/>
+<wire x1="17.526" y1="84.582" x2="16.256" y2="83.312" width="0.2032" layer="2"/>
+<wire x1="16.256" y1="83.312" x2="16.256" y2="81.026" width="0.2032" layer="2"/>
+<wire x1="7.2898" y1="72.0598" x2="7.2898" y2="64.5668" width="0.2032" layer="2"/>
+<wire x1="16.256" y1="81.026" x2="7.2898" y2="72.0598" width="0.2032" layer="2"/>
 </signal>
 <signal name="WIFI_TXD">
 <contactref element="ASSY1" pad="C0"/>
@@ -4126,7 +4171,15 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="48.895" y1="56.896" x2="49.657" y2="56.134" width="0.2032" layer="2"/>
 <wire x1="49.657" y1="51.816" x2="50.927" y2="50.546" width="0.2032" layer="2"/>
 <wire x1="49.657" y1="56.134" x2="49.657" y2="51.816" width="0.2032" layer="2"/>
-<wire x1="4.7498" y1="64.5668" x2="10.668" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="4.7498" y1="64.5668" x2="4.7498" y2="70.7898" width="0.2032" layer="2"/>
+<wire x1="4.7498" y1="70.7898" x2="13.716" y2="79.756" width="0.2032" layer="2"/>
+<wire x1="13.716" y1="79.756" x2="13.716" y2="82.804" width="0.2032" layer="2"/>
+<wire x1="13.716" y1="82.804" x2="13.716" y2="83.312" width="0.2032" layer="2"/>
+<wire x1="13.716" y1="83.312" x2="14.478" y2="84.074" width="0.2032" layer="2"/>
+<wire x1="14.478" y1="84.074" x2="15.24" y2="84.074" width="0.2032" layer="2"/>
+<wire x1="15.24" y1="84.074" x2="16.256" y2="85.09" width="0.2032" layer="2"/>
+<wire x1="16.256" y1="87.376" x2="17.526" y2="88.646" width="0.2032" layer="2"/>
+<wire x1="16.256" y1="85.09" x2="16.256" y2="87.376" width="0.2032" layer="2"/>
 </signal>
 <signal name="SERIAL_NUM">
 <contactref element="ASSY1" pad="B0"/>
@@ -4137,7 +4190,10 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="3.048" y1="82.09406875" x2="2.84606875" y2="82.296" width="0.2032" layer="1"/>
 <wire x1="2.84606875" y1="82.296" x2="4.699" y2="82.296" width="0.2032" layer="1"/>
 <wire x1="4.699" y1="82.296" x2="4.7498" y2="82.3468" width="0.2032" layer="1"/>
-<wire x1="4.7498" y1="82.3468" x2="5.588" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="4.7498" y1="82.3468" x2="6.7818" y2="84.3788" width="0.2032" layer="1"/>
+<wire x1="6.7818" y1="84.3788" x2="13.462" y2="84.3788" width="0.2032" layer="1"/>
+<wire x1="13.462" y1="84.3788" x2="14.986" y2="85.9028" width="0.2032" layer="1"/>
+<wire x1="14.986" y1="85.9028" x2="14.986" y2="86.106" width="0.2032" layer="1"/>
 </signal>
 <signal name="N$23">
 <contactref element="J3" pad="2"/>
@@ -4174,7 +4230,12 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="28.62706875" y1="60.63106875" x2="28.448" y2="60.452" width="0.2032" layer="1"/>
 <wire x1="45.3898" y1="64.5668" x2="41.275" y2="60.452" width="0.2032" layer="16"/>
 <wire x1="41.275" y1="60.452" x2="28.448" y2="60.452" width="0.2032" layer="16"/>
-<wire x1="28.62706875" y1="60.63106875" x2="20.828" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="20.066" y1="88.646" x2="21.336" y2="87.376" width="0.2032" layer="2"/>
+<wire x1="21.336" y1="71.882" x2="26.416" y2="66.802" width="0.2032" layer="2"/>
+<via x="26.416" y="66.802" extent="1-16" drill="0.3048"/>
+<wire x1="26.416" y1="66.802" x2="26.416" y2="62.484" width="0.2032" layer="16"/>
+<wire x1="26.416" y1="62.484" x2="28.448" y2="60.452" width="0.2032" layer="16"/>
+<wire x1="21.336" y1="87.376" x2="21.336" y2="71.882" width="0.2032" layer="2"/>
 </signal>
 <signal name="N$31">
 <contactref element="R24" pad="2"/>
@@ -4210,8 +4271,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="12.827" y1="68.072" x2="12.954" y2="68.072" width="0.2032" layer="1"/>
 <wire x1="12.954" y1="68.072" x2="12.954" y2="71.755" width="0.2032" layer="1"/>
 <wire x1="12.954" y1="71.755" x2="19.304" y2="78.105" width="0.2032" layer="1"/>
-<wire x1="19.304" y1="78.105" x2="30.988" y2="78.105" width="0.2032" layer="1"/>
-<wire x1="30.988" y1="78.105" x2="35.2298" y2="82.3468" width="0.2032" layer="1"/>
 <wire x1="31.469" y1="61.285" x2="22.55" y2="61.285" width="0.2032" layer="1"/>
 <wire x1="22.55" y1="61.285" x2="21.844" y2="60.579" width="0.2032" layer="1"/>
 <wire x1="21.844" y1="60.579" x2="17.145" y2="60.579" width="0.2032" layer="1"/>
@@ -4222,7 +4281,18 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="13.589" y1="67.437" x2="12.954" y2="68.072" width="0.2032" layer="1"/>
 <wire x1="16.637" y1="62.103" x2="15.621" y2="63.119" width="0.2032" layer="1"/>
 <wire x1="13.589" y1="63.881" x2="13.589" y2="67.437" width="0.2032" layer="1"/>
-<wire x1="19.304" y1="78.105" x2="15.748" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="19.304" y1="78.105" x2="19.812" y2="78.105" width="0.2032" layer="1"/>
+<wire x1="19.812" y1="78.105" x2="26.289" y2="78.105" width="0.2032" layer="1"/>
+<wire x1="26.289" y1="78.105" x2="26.67" y2="77.724" width="0.2032" layer="1"/>
+<via x="26.67" y="77.724" extent="1-16" drill="0.3048"/>
+<wire x1="26.67" y1="77.724" x2="30.607" y2="77.724" width="0.2032" layer="2"/>
+<wire x1="30.607" y1="77.724" x2="35.2298" y2="82.3468" width="0.2032" layer="2"/>
+<wire x1="20.066" y1="86.106" x2="18.796" y2="84.836" width="0.2032" layer="2"/>
+<wire x1="18.796" y1="77.724" x2="19.558" y2="76.962" width="0.2032" layer="2"/>
+<wire x1="19.558" y1="76.962" x2="19.812" y2="76.962" width="0.2032" layer="2"/>
+<via x="19.812" y="76.962" extent="1-16" drill="0.3048"/>
+<wire x1="19.812" y1="76.962" x2="19.812" y2="78.105" width="0.2032" layer="1"/>
+<wire x1="18.796" y1="84.836" x2="18.796" y2="77.724" width="0.2032" layer="2"/>
 </signal>
 <signal name="N$6">
 </signal>
@@ -4265,10 +4335,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="ASSY1" pad="VIN"/>
 <contactref element="R5" pad="1"/>
 <contactref element="R36" pad="1"/>
-<wire x1="38.66006875" y1="84.455" x2="40.005" y2="84.455" width="0.2032" layer="1"/>
-<wire x1="40.005" y1="84.455" x2="47.117" y2="84.455" width="0.2032" layer="1"/>
-<wire x1="47.9298" y1="83.6422" x2="47.9298" y2="82.3468" width="0.2032" layer="1"/>
-<wire x1="47.117" y1="84.455" x2="47.9298" y2="83.6422" width="0.2032" layer="1"/>
 <contactref element="C2" pad="+"/>
 <contactref element="C7" pad="1"/>
 <contactref element="C17" pad="1"/>
@@ -4280,14 +4346,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="45.72" y1="59.436" x2="45.72" y2="49.276" width="2.032" layer="16"/>
 <wire x1="51.181" y1="43.815" x2="51.181" y2="39.116" width="2.032" layer="16"/>
 <wire x1="45.72" y1="49.276" x2="51.181" y2="43.815" width="2.032" layer="16"/>
-<wire x1="7.79906875" y1="73.914" x2="8.509" y2="74.62393125" width="0.2032" layer="1"/>
-<wire x1="8.509" y1="74.62393125" x2="8.509" y2="82.931" width="0.2032" layer="1"/>
-<wire x1="8.509" y1="82.931" x2="9.652" y2="84.074" width="0.2032" layer="1"/>
-<wire x1="9.652" y1="84.074" x2="34.163" y2="84.074" width="0.2032" layer="1"/>
-<via x="34.163" y="84.074" extent="1-16" drill="0.3048"/>
-<via x="40.005" y="84.455" extent="1-16" drill="0.3048"/>
-<wire x1="34.163" y1="84.074" x2="39.624" y2="84.074" width="0.2032" layer="16"/>
-<wire x1="39.624" y1="84.074" x2="40.005" y2="84.455" width="0.2032" layer="16"/>
 <wire x1="47.879" y1="39.624" x2="50.673" y2="39.624" width="1.27" layer="16"/>
 <wire x1="50.673" y1="39.624" x2="51.181" y2="39.116" width="1.27" layer="16"/>
 <wire x1="38.227" y1="3.683" x2="51.181" y2="16.637" width="2.032" layer="16"/>
@@ -4298,6 +4356,22 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <via x="51.181" y="30.353" extent="1-16" drill="1.016"/>
 <wire x1="48.286" y1="26.924" x2="51.181" y2="26.924" width="1.524" layer="1"/>
 <via x="51.181" y="26.924" extent="1-16" drill="1.016"/>
+<wire x1="33.07206875" y1="79.629" x2="33.274" y2="79.629" width="0.2032" layer="1"/>
+<wire x1="33.274" y1="79.629" x2="36.195" y2="79.629" width="0.2032" layer="1"/>
+<wire x1="36.195" y1="79.629" x2="37.592" y2="81.026" width="0.2032" layer="1"/>
+<wire x1="37.592" y1="81.026" x2="46.609" y2="81.026" width="0.2032" layer="1"/>
+<wire x1="46.609" y1="81.026" x2="47.9298" y2="82.3468" width="0.2032" layer="1"/>
+<wire x1="7.79906875" y1="73.914" x2="9.398" y2="73.914" width="0.2032" layer="1"/>
+<wire x1="9.398" y1="73.914" x2="10.922" y2="75.438" width="0.2032" layer="1"/>
+<wire x1="16.256" y1="78.232" x2="16.256" y2="78.74" width="0.2032" layer="1"/>
+<via x="16.256" y="78.74" extent="1-16" drill="0.3048"/>
+<wire x1="16.256" y1="78.74" x2="27.178" y2="78.74" width="0.2032" layer="15"/>
+<wire x1="27.178" y1="78.74" x2="27.432" y2="78.486" width="0.2032" layer="15"/>
+<via x="27.432" y="78.486" extent="1-16" drill="0.3048"/>
+<wire x1="27.432" y1="78.486" x2="32.131" y2="78.486" width="0.2032" layer="1"/>
+<wire x1="32.131" y1="78.486" x2="33.274" y2="79.629" width="0.2032" layer="1"/>
+<wire x1="10.922" y1="75.438" x2="13.462" y2="75.438" width="0.2032" layer="1"/>
+<wire x1="13.462" y1="75.438" x2="16.256" y2="78.232" width="0.2032" layer="1"/>
 </signal>
 <signal name="N$38">
 <contactref element="AC/L" pad="TESTPOINT"/>
@@ -4322,6 +4396,10 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="3.175" y1="80.01" x2="17.653" y2="80.01" width="0.254" layer="15"/>
 <wire x1="17.653" y1="80.01" x2="19.9898" y2="82.3468" width="0.254" layer="15"/>
 <wire x1="2.159" y1="34.544" x2="2.159" y2="78.994" width="0.254" layer="15"/>
+<contactref element="TP25" pad="TESTPOINT"/>
+<wire x1="19.9898" y1="82.3468" x2="17.4498" y2="84.8868" width="0.2032" layer="15"/>
+<wire x1="13.6652" y1="84.8868" x2="12.446" y2="86.106" width="0.2032" layer="15"/>
+<wire x1="17.4498" y1="84.8868" x2="13.6652" y2="84.8868" width="0.2032" layer="15"/>
 </signal>
 <signal name="AC/N-PERTURB">
 <contactref element="R21" pad="2"/>
@@ -4341,6 +4419,12 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="3.937" y1="79.502" x2="19.685" y2="79.502" width="0.254" layer="15"/>
 <wire x1="19.685" y1="79.502" x2="22.5298" y2="82.3468" width="0.254" layer="15"/>
 <wire x1="2.667" y1="34.671" x2="2.667" y2="78.232" width="0.254" layer="15"/>
+<contactref element="TP32" pad="TESTPOINT"/>
+<wire x1="22.5298" y1="82.3468" x2="20.2946" y2="84.582" width="0.2032" layer="16"/>
+<wire x1="14.224" y1="84.582" x2="13.716" y2="85.09" width="0.2032" layer="16"/>
+<wire x1="13.716" y1="85.09" x2="13.716" y2="87.376" width="0.2032" layer="16"/>
+<wire x1="13.716" y1="87.376" x2="12.446" y2="88.646" width="0.2032" layer="16"/>
+<wire x1="20.2946" y1="84.582" x2="14.224" y2="84.582" width="0.2032" layer="16"/>
 </signal>
 <signal name="N$42">
 <contactref element="R23" pad="2"/>
@@ -4368,6 +4452,11 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="1.27" y1="79.248" x2="2.667" y2="80.645" width="0.254" layer="2"/>
 <wire x1="2.667" y1="80.645" x2="8.128" y2="80.645" width="0.254" layer="2"/>
 <wire x1="8.128" y1="80.645" x2="9.8298" y2="82.3468" width="0.254" layer="2"/>
+<contactref element="TP30" pad="TESTPOINT"/>
+<wire x1="9.8298" y1="82.3468" x2="9.8298" y2="83.6422" width="0.2032" layer="16"/>
+<wire x1="9.8298" y1="83.6422" x2="8.636" y2="84.836" width="0.2032" layer="16"/>
+<wire x1="8.636" y1="84.836" x2="8.636" y2="87.376" width="0.2032" layer="16"/>
+<wire x1="8.636" y1="87.376" x2="7.366" y2="88.646" width="0.2032" layer="16"/>
 </signal>
 <signal name="N$43">
 <contactref element="RI1" pad="2"/>
@@ -4418,9 +4507,12 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <via x="1.016" y="33.909" extent="1-16" drill="0.3048"/>
 <wire x1="4.953" y1="32.639" x2="3.683" y2="33.909" width="0.254" layer="1"/>
 <wire x1="1.016" y1="82.931" x2="2.286" y2="84.201" width="0.254" layer="15"/>
-<wire x1="2.286" y1="84.201" x2="12.9286" y2="84.201" width="0.254" layer="15"/>
+<wire x1="2.286" y1="84.201" x2="7.366" y2="84.201" width="0.254" layer="15"/>
+<wire x1="7.366" y1="84.201" x2="12.9286" y2="84.201" width="0.254" layer="15"/>
 <wire x1="12.9286" y1="84.201" x2="14.9098" y2="82.3468" width="0.254" layer="15"/>
 <wire x1="1.016" y1="33.909" x2="1.016" y2="82.931" width="0.254" layer="15"/>
+<contactref element="TP31" pad="TESTPOINT"/>
+<wire x1="7.366" y1="86.106" x2="7.366" y2="84.201" width="0.2032" layer="15"/>
 </signal>
 <signal name="AC/L-MEASURE">
 <contactref element="D6" pad="P$1"/>
@@ -4439,6 +4531,11 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="1.778" y1="27.432" x2="1.778" y2="34.29" width="0.254" layer="15"/>
 <wire x1="1.778" y1="34.29" x2="1.651" y2="34.417" width="0.254" layer="15"/>
 <wire x1="1.651" y1="34.417" x2="1.651" y2="79.883" width="0.254" layer="15"/>
+<contactref element="TP29" pad="TESTPOINT"/>
+<wire x1="17.4498" y1="82.3468" x2="15.2146" y2="84.582" width="0.2032" layer="15"/>
+<wire x1="15.2146" y1="84.582" x2="10.922" y2="84.582" width="0.2032" layer="15"/>
+<wire x1="10.922" y1="84.582" x2="9.906" y2="85.598" width="0.2032" layer="15"/>
+<wire x1="9.906" y1="85.598" x2="9.906" y2="86.106" width="0.2032" layer="15"/>
 </signal>
 <signal name="AC/N-MEASURE">
 <contactref element="R31" pad="2"/>
@@ -4460,6 +4557,11 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="3.937" y1="80.01" x2="10.287" y2="80.01" width="0.254" layer="2"/>
 <wire x1="10.287" y1="80.01" x2="12.3698" y2="82.0928" width="0.254" layer="2"/>
 <wire x1="12.3698" y1="82.0928" x2="12.3698" y2="82.3468" width="0.254" layer="2"/>
+<contactref element="TP27" pad="TESTPOINT"/>
+<wire x1="12.3698" y1="82.3468" x2="12.3698" y2="83.6422" width="0.2032" layer="16"/>
+<wire x1="12.3698" y1="83.6422" x2="11.176" y2="84.836" width="0.2032" layer="16"/>
+<wire x1="11.176" y1="84.836" x2="11.176" y2="87.376" width="0.2032" layer="16"/>
+<wire x1="11.176" y1="87.376" x2="9.906" y2="88.646" width="0.2032" layer="16"/>
 </signal>
 <signal name="N$4">
 <contactref element="B2" pad="+"/>
@@ -4491,10 +4593,9 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="4.191" y1="72.644" x2="3.50393125" y2="73.33106875" width="0.254" layer="1"/>
 <wire x1="3.50393125" y1="73.33106875" x2="3.50393125" y2="73.914" width="0.254" layer="1"/>
 <wire x1="5.854" y1="71.835" x2="5.045" y2="72.644" width="0.254" layer="1"/>
-<wire x1="17.4498" y1="64.5668" x2="17.4498" y2="65.1002" width="0.254" layer="16"/>
-<wire x1="17.4498" y1="65.1002" x2="11.303" y2="71.247" width="0.254" layer="16"/>
-<wire x1="11.303" y1="71.247" x2="11.303" y2="74.676" width="0.254" layer="16"/>
-<via x="11.303" y="74.676" extent="1-16" drill="0.3048"/>
+<wire x1="17.4498" y1="64.5668" x2="17.4498" y2="65.1002" width="0.254" layer="2"/>
+<wire x1="17.4498" y1="65.1002" x2="11.303" y2="71.247" width="0.254" layer="2"/>
+<wire x1="11.303" y1="71.247" x2="11.303" y2="74.676" width="0.254" layer="2"/>
 <wire x1="11.303" y1="74.676" x2="9.525" y2="76.454" width="0.254" layer="15"/>
 <wire x1="9.525" y1="76.454" x2="5.715" y2="76.454" width="0.254" layer="15"/>
 <wire x1="5.715" y1="76.454" x2="5.207" y2="76.454" width="0.2032" layer="15"/>
@@ -4504,7 +4605,8 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <via x="3.5052" y="74.8792" extent="1-16" drill="0.3048"/>
 <wire x1="3.5052" y1="74.8792" x2="3.5052" y2="73.91526875" width="0.2032" layer="1"/>
 <wire x1="3.5052" y1="73.91526875" x2="3.50393125" y2="73.914" width="0.2032" layer="1"/>
-<wire x1="17.4498" y1="65.1002" x2="43.688" y2="88.392" width="0" layer="19" extent="16-16"/>
+<via x="11.303" y="74.676" extent="1-16" drill="0.3048"/>
+<wire x1="11.303" y1="74.676" x2="37.846" y2="86.106" width="0" layer="19" extent="1-2"/>
 </signal>
 <signal name="N$13">
 <contactref element="C3" pad="1"/>
@@ -4543,33 +4645,49 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="TP15" pad="TESTPOINT"/>
 <wire x1="6.354" y1="71.835" x2="6.354" y2="73.58106875" width="0.254" layer="1"/>
 <wire x1="6.354" y1="73.58106875" x2="6.02106875" y2="73.914" width="0.254" layer="1"/>
-<wire x1="37.7698" y1="64.5668" x2="37.7698" y2="65.1002" width="0.2032" layer="2"/>
-<wire x1="37.7698" y1="65.1002" x2="36.957" y2="65.913" width="0.2032" layer="2"/>
-<wire x1="36.957" y1="65.913" x2="8.509" y2="65.913" width="0.2032" layer="2"/>
-<wire x1="8.509" y1="65.913" x2="6.35" y2="68.072" width="0.2032" layer="2"/>
-<wire x1="6.35" y1="68.072" x2="6.35" y2="75.184" width="0.2032" layer="2"/>
-<wire x1="6.35" y1="75.184" x2="6.223" y2="75.184" width="0.2032" layer="2"/>
-<wire x1="6.223" y1="75.184" x2="6.096" y2="75.311" width="0.2032" layer="2"/>
+<wire x1="37.7698" y1="64.5668" x2="37.7698" y2="65.1002" width="0.2032" layer="15"/>
+<wire x1="37.7698" y1="65.1002" x2="36.957" y2="65.913" width="0.2032" layer="15"/>
+<wire x1="36.957" y1="65.913" x2="8.509" y2="65.913" width="0.2032" layer="15"/>
+<wire x1="8.509" y1="65.913" x2="6.35" y2="68.072" width="0.2032" layer="15"/>
+<wire x1="6.35" y1="68.072" x2="6.35" y2="75.184" width="0.2032" layer="15"/>
+<wire x1="6.35" y1="75.184" x2="6.223" y2="75.184" width="0.2032" layer="15"/>
+<wire x1="6.223" y1="75.184" x2="6.096" y2="75.311" width="0.2032" layer="15"/>
 <via x="6.096" y="75.311" extent="1-16" drill="0.3048"/>
 <wire x1="6.096" y1="75.311" x2="6.02106875" y2="75.23606875" width="0.2032" layer="1"/>
 <wire x1="6.02106875" y1="75.23606875" x2="6.02106875" y2="73.914" width="0.2032" layer="1"/>
-<wire x1="6.35" y1="75.184" x2="23.368" y2="88.392" width="0" layer="19" extent="1-2"/>
+<wire x1="36.957" y1="65.913" x2="37.846" y2="88.646" width="0" layer="19" extent="1-15"/>
 </signal>
 <signal name="N$10">
 <contactref element="ASSY1" pad="WKP"/>
 <contactref element="R35" pad="1"/>
 <contactref element="R36" pad="2"/>
-<wire x1="37.7698" y1="82.3468" x2="37.7698" y2="84.43086875" width="0.2032" layer="1"/>
-<wire x1="37.7698" y1="84.43086875" x2="37.79393125" y2="84.455" width="0.2032" layer="1"/>
-<wire x1="37.79393125" y1="84.455" x2="36.62806875" y2="84.455" width="0.2032" layer="1"/>
+<wire x1="30.78606875" y1="79.629" x2="32.20593125" y2="79.629" width="0.2032" layer="1"/>
+<wire x1="37.7698" y1="82.3468" x2="35.941" y2="80.518" width="0.2032" layer="1"/>
+<wire x1="35.941" y1="80.518" x2="33.02" y2="80.518" width="0.2032" layer="1"/>
+<wire x1="33.02" y1="80.518" x2="32.20593125" y2="79.70393125" width="0.2032" layer="1"/>
+<wire x1="32.20593125" y1="79.70393125" x2="32.20593125" y2="79.629" width="0.2032" layer="1"/>
 </signal>
 <signal name="ACCEL_INT">
 <contactref element="U6" pad="12"/>
 <contactref element="TP21" pad="TESTPOINT"/>
 <contactref element="ASSY1" pad="C4"/>
 <wire x1="20.586" y1="69.6" x2="19.943" y2="69.6" width="0.254" layer="1"/>
-<wire x1="19.943" y1="69.6" x2="14.9098" y2="64.5668" width="0.254" layer="1"/>
-<wire x1="20.586" y1="69.6" x2="28.448" y2="88.392" width="0" layer="19" extent="1-1"/>
+<wire x1="19.943" y1="69.6" x2="16.9545" y2="66.6115" width="0.254" layer="1"/>
+<wire x1="16.9545" y1="66.6115" x2="14.9098" y2="64.5668" width="0.254" layer="1"/>
+<wire x1="25.146" y1="86.106" x2="25.146" y2="84.582" width="0.2032" layer="15"/>
+<wire x1="25.146" y1="84.582" x2="26.416" y2="83.312" width="0.2032" layer="15"/>
+<wire x1="26.416" y1="83.312" x2="26.416" y2="81.026" width="0.2032" layer="15"/>
+<wire x1="26.416" y1="81.026" x2="28.194" y2="79.248" width="0.2032" layer="15"/>
+<wire x1="28.194" y1="79.248" x2="28.194" y2="77.724" width="0.2032" layer="15"/>
+<wire x1="26.67" y1="76.2" x2="18.542" y2="76.2" width="0.2032" layer="15"/>
+<wire x1="18.542" y1="76.2" x2="16.256" y2="73.914" width="0.2032" layer="15"/>
+<wire x1="16.256" y1="67.818" x2="16.51" y2="67.564" width="0.2032" layer="15"/>
+<wire x1="16.51" y1="67.564" x2="16.256" y2="67.564" width="0.2032" layer="15"/>
+<via x="16.256" y="67.564" extent="1-16" drill="0.3048"/>
+<wire x1="16.256" y1="67.564" x2="16.9545" y2="66.8655" width="0.2032" layer="1"/>
+<wire x1="16.9545" y1="66.8655" x2="16.9545" y2="66.6115" width="0.2032" layer="1"/>
+<wire x1="28.194" y1="77.724" x2="26.67" y2="76.2" width="0.2032" layer="15"/>
+<wire x1="16.256" y1="73.914" x2="16.256" y2="67.818" width="0.2032" layer="15"/>
 </signal>
 <signal name="N$3">
 <contactref element="U7" pad="1"/>
@@ -4598,17 +4716,35 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="18.161" y1="68.707" x2="27.305" y2="68.707" width="0.254" layer="16"/>
 <wire x1="30.1498" y1="65.8622" x2="30.1498" y2="64.5668" width="0.254" layer="16"/>
 <wire x1="27.305" y1="68.707" x2="30.1498" y2="65.8622" width="0.254" layer="16"/>
-<wire x1="27.305" y1="68.707" x2="30.988" y2="88.392" width="0" layer="19" extent="16-16"/>
+<wire x1="18.161" y1="68.707" x2="18.161" y2="74.803" width="0.2032" layer="2"/>
+<wire x1="18.161" y1="74.803" x2="18.796" y2="75.438" width="0.2032" layer="2"/>
+<wire x1="18.796" y1="75.438" x2="20.32" y2="75.438" width="0.2032" layer="2"/>
+<via x="20.32" y="75.438" extent="1-16" drill="0.3048"/>
+<wire x1="20.32" y1="75.438" x2="22.352" y2="75.438" width="0.2032" layer="1"/>
+<via x="22.352" y="75.438" extent="1-16" drill="0.3048"/>
+<wire x1="22.352" y1="75.438" x2="22.352" y2="79.502" width="0.2032" layer="2"/>
+<wire x1="22.352" y1="79.502" x2="23.876" y2="81.026" width="0.2032" layer="2"/>
+<wire x1="23.876" y1="81.026" x2="23.876" y2="84.836" width="0.2032" layer="2"/>
+<wire x1="23.876" y1="84.836" x2="22.606" y2="86.106" width="0.2032" layer="2"/>
 </signal>
 <signal name="MIC_DATA">
 <contactref element="R26" pad="1"/>
 <contactref element="ASSY1" pad="D2"/>
 <contactref element="TP9" pad="TESTPOINT"/>
-<wire x1="22.606" y1="72.517" x2="25.0698" y2="70.0532" width="0.254" layer="1"/>
+<wire x1="22.606" y1="72.517" x2="23.9395" y2="71.1835" width="0.254" layer="1"/>
+<wire x1="23.9395" y1="71.1835" x2="25.0698" y2="70.0532" width="0.254" layer="1"/>
 <wire x1="25.0698" y1="70.0532" x2="25.0698" y2="64.5668" width="0.254" layer="1"/>
 <wire x1="20.49906875" y1="72.517" x2="22.606" y2="72.517" width="0.254" layer="1"/>
 <wire x1="18.72106875" y1="70.739" x2="20.49906875" y2="72.517" width="0.254" layer="1"/>
-<wire x1="22.606" y1="72.517" x2="41.275" y2="103.378" width="0" layer="19" extent="1-1"/>
+<wire x1="22.606" y1="88.646" x2="23.876" y2="87.376" width="0.2032" layer="16"/>
+<wire x1="23.876" y1="87.376" x2="23.876" y2="75.438" width="0.2032" layer="16"/>
+<via x="23.876" y="75.438" extent="1-16" drill="0.3048"/>
+<wire x1="23.876" y1="75.438" x2="23.876" y2="71.882" width="0.2032" layer="2"/>
+<wire x1="23.876" y1="71.882" x2="23.114" y2="71.12" width="0.2032" layer="2"/>
+<wire x1="23.114" y1="71.12" x2="23.368" y2="70.866" width="0.2032" layer="2"/>
+<via x="23.368" y="70.866" extent="1-16" drill="0.3048"/>
+<wire x1="23.368" y1="70.866" x2="23.622" y2="70.866" width="0.2032" layer="1"/>
+<wire x1="23.622" y1="70.866" x2="23.9395" y2="71.1835" width="0.2032" layer="1"/>
 </signal>
 <signal name="MIC_WS">
 <contactref element="ASSY1" pad="D5"/>
@@ -4619,8 +4755,16 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="32.6898" y1="64.5668" x2="30.8356" y2="66.421" width="0.2032" layer="1"/>
 <wire x1="22.987" y1="73.025" x2="19.1541375" y2="73.025" width="0.2032" layer="1"/>
 <wire x1="30.8356" y1="66.421" x2="29.591" y2="66.421" width="0.2032" layer="1"/>
-<wire x1="29.591" y1="66.421" x2="22.987" y2="73.025" width="0.2032" layer="1"/>
-<wire x1="22.987" y1="73.025" x2="24.638" y2="106.553" width="0" layer="19" extent="1-1"/>
+<wire x1="29.591" y1="66.421" x2="23.368" y2="72.644" width="0.2032" layer="1"/>
+<wire x1="23.368" y1="72.644" x2="22.987" y2="73.025" width="0.2032" layer="1"/>
+<wire x1="25.146" y1="88.646" x2="26.416" y2="87.376" width="0.2032" layer="16"/>
+<wire x1="26.416" y1="79.248" x2="25.908" y2="78.74" width="0.2032" layer="16"/>
+<wire x1="25.908" y1="78.74" x2="25.908" y2="74.93" width="0.2032" layer="16"/>
+<wire x1="25.908" y1="74.93" x2="25.146" y2="74.168" width="0.2032" layer="16"/>
+<via x="25.146" y="74.168" extent="1-16" drill="0.3048"/>
+<wire x1="25.146" y1="74.168" x2="23.622" y2="72.644" width="0.2032" layer="1"/>
+<wire x1="23.622" y1="72.644" x2="23.368" y2="72.644" width="0.2032" layer="1"/>
+<wire x1="26.416" y1="87.376" x2="26.416" y2="79.248" width="0.2032" layer="16"/>
 </signal>
 <signal name="N$7">
 <polygon width="0.1524" layer="1" pour="cutout" isolate="0.3048">

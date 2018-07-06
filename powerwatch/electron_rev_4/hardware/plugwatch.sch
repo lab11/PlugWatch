@@ -3,7 +3,7 @@
 <eagle version="9.0.1">
 <drawing>
 <settings>
-<setting alwaysvectorfont="no"/>
+<setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.05" altunitdist="inch" altunit="inch"/>
@@ -13170,6 +13170,12 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="MPN" value="GRM155R71H103JA88D"/>
 </part>
 <part name="GND4" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
+<part name="TP25" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP27" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP29" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP30" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP31" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="TP32" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -14088,6 +14094,12 @@ on rising edge.</text>
 <instance part="TP15" gate="G$1" x="236.22" y="104.14" rot="R180"/>
 <instance part="TP16" gate="G$1" x="236.22" y="101.6" rot="R180"/>
 <instance part="TP17" gate="G$1" x="236.22" y="111.76" rot="R180"/>
+<instance part="TP25" gate="G$1" x="236.22" y="129.54" rot="R180"/>
+<instance part="TP27" gate="G$1" x="236.22" y="127" rot="R180"/>
+<instance part="TP29" gate="G$1" x="236.22" y="124.46" rot="R180"/>
+<instance part="TP30" gate="G$1" x="236.22" y="121.92" rot="R180"/>
+<instance part="TP31" gate="G$1" x="236.22" y="119.38" rot="R180"/>
+<instance part="TP32" gate="G$1" x="236.22" y="132.08" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -14493,12 +14505,22 @@ on rising edge.</text>
 <wire x1="63.5" y1="109.22" x2="60.96" y2="109.22" width="0.1524" layer="91"/>
 <label x="60.96" y="109.22" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
+<segment>
+<pinref part="TP30" gate="G$1" pin="TESTPOINT"/>
+<wire x1="233.68" y1="121.92" x2="231.14" y2="121.92" width="0.1524" layer="91"/>
+<label x="231.14" y="121.92" size="1.016" layer="95" rot="R180" xref="yes"/>
+</segment>
 </net>
 <net name="AC/N-MEASURE" class="0">
 <segment>
 <pinref part="ASSY1" gate="A1" pin="B3"/>
 <wire x1="63.5" y1="111.76" x2="60.96" y2="111.76" width="0.1524" layer="91"/>
 <label x="60.96" y="111.76" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="TP27" gate="G$1" pin="TESTPOINT"/>
+<wire x1="233.68" y1="127" x2="231.14" y2="127" width="0.1524" layer="91"/>
+<label x="231.14" y="127" size="1.016" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="AC/L-SENSE" class="0">
@@ -14507,12 +14529,22 @@ on rising edge.</text>
 <wire x1="63.5" y1="114.3" x2="60.96" y2="114.3" width="0.1524" layer="91"/>
 <label x="60.96" y="114.3" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
+<segment>
+<pinref part="TP31" gate="G$1" pin="TESTPOINT"/>
+<wire x1="233.68" y1="119.38" x2="231.14" y2="119.38" width="0.1524" layer="91"/>
+<label x="231.14" y="119.38" size="1.016" layer="95" rot="R180" xref="yes"/>
+</segment>
 </net>
 <net name="AC/L-MEASURE" class="0">
 <segment>
 <pinref part="ASSY1" gate="A1" pin="B5"/>
 <wire x1="63.5" y1="116.84" x2="60.96" y2="116.84" width="0.1524" layer="91"/>
 <label x="60.96" y="116.84" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="TP29" gate="G$1" pin="TESTPOINT"/>
+<wire x1="233.68" y1="124.46" x2="231.14" y2="124.46" width="0.1524" layer="91"/>
+<label x="231.14" y="124.46" size="1.016" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="AC/L-PERTURB" class="0">
@@ -14521,12 +14553,22 @@ on rising edge.</text>
 <wire x1="63.5" y1="119.38" x2="60.96" y2="119.38" width="0.1524" layer="91"/>
 <label x="60.96" y="119.38" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
+<segment>
+<pinref part="TP25" gate="G$1" pin="TESTPOINT"/>
+<wire x1="233.68" y1="129.54" x2="231.14" y2="129.54" width="0.1524" layer="91"/>
+<label x="231.14" y="129.54" size="1.016" layer="95" rot="R180" xref="yes"/>
+</segment>
 </net>
 <net name="AC/N-PERTURB" class="0">
 <segment>
 <pinref part="ASSY1" gate="A1" pin="A1"/>
 <wire x1="63.5" y1="121.92" x2="60.96" y2="121.92" width="0.1524" layer="91"/>
 <label x="60.96" y="121.92" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="TP32" gate="G$1" pin="TESTPOINT"/>
+<wire x1="233.68" y1="132.08" x2="231.14" y2="132.08" width="0.1524" layer="91"/>
+<label x="231.14" y="132.08" size="1.016" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="!RTC_CS" class="0">
