@@ -3,7 +3,7 @@
 <eagle version="9.0.1">
 <drawing>
 <settings>
-<setting alwaysvectorfont="yes"/>
+<setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.05" altunitdist="inch" altunit="inch"/>
@@ -12913,7 +12913,9 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="MPN" value="MAX-M8Q-0"/>
 </part>
 <part name="U9" library="chips" deviceset="SIP32510" device=""/>
-<part name="SERIAL" library="DS2401P+" deviceset="DS2401P+" device=""/>
+<part name="U20" library="DS2401P+" deviceset="DS2401P+" device="">
+<attribute name="SPICEPREFIX" value="X"/>
+</part>
 <part name="P+4" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="R29" library="passives" deviceset="RESISTOR" device="0402_RES" value="5K">
 <attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
@@ -14074,7 +14076,7 @@ on rising edge.</text>
 <instance part="TP5" gate="G$1" x="236.22" y="81.28" rot="R180"/>
 <instance part="TP6" gate="G$1" x="236.22" y="78.74" rot="R180"/>
 <instance part="U12" gate="G$1" x="45.72" y="48.26"/>
-<instance part="SERIAL" gate="A" x="175.26" y="142.24"/>
+<instance part="U20" gate="A" x="175.26" y="142.24"/>
 <instance part="P+4" gate="VCC" x="162.56" y="160.02"/>
 <instance part="R29" gate="G$1" x="162.56" y="149.86" rot="R270">
 <attribute name="DIGIKEY" x="162.56" y="149.86" size="1.27" layer="96" rot="R270" display="off"/>
@@ -14201,7 +14203,7 @@ on rising edge.</text>
 <label x="231.14" y="27.94" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
-<pinref part="SERIAL" gate="A" pin="GND"/>
+<pinref part="U20" gate="A" pin="GND"/>
 <pinref part="GND41" gate="1" pin="GND"/>
 <wire x1="177.8" y1="142.24" x2="170.18" y2="142.24" width="0.1524" layer="91"/>
 <wire x1="170.18" y1="142.24" x2="170.18" y2="134.62" width="0.1524" layer="91"/>
@@ -14445,7 +14447,7 @@ on rising edge.</text>
 <label x="231.14" y="96.52" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
-<pinref part="SERIAL" gate="A" pin="DATA"/>
+<pinref part="U20" gate="A" pin="DATA"/>
 <wire x1="177.8" y1="139.7" x2="162.56" y2="139.7" width="0.1524" layer="91"/>
 <pinref part="R29" gate="G$1" pin="2"/>
 <wire x1="162.56" y1="139.7" x2="162.56" y2="147.32" width="0.1524" layer="91"/>
