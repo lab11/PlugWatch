@@ -12960,35 +12960,43 @@ Block, Siemens and generic&lt;p&gt;
 <part name="V1" library="varistor" library_urn="urn:adsk.eagle:library:410" deviceset="S14K385" device="" package3d_urn="urn:adsk.eagle:package:30572/1"/>
 <part name="F1" library="powerwatch" deviceset="MICRO_FUSE" device="500MA_350VAC" value="300VAC - 500ma"/>
 <part name="R28" library="passives" deviceset="RESISTOR" device="1206_RES_HIGH_CLEARANCE" value="750k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DIGIKEY" value="311-750KFRCT-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="RC1206FR-07750KL"/>
 </part>
 <part name="SUPPLY2" library="umich" deviceset="GND" device=""/>
 <part name="R29" library="passives" deviceset="RESISTOR" device="1206_RES_HIGH_CLEARANCE" value="750k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DIGIKEY" value="311-750KFRCT-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="RC1206FR-07750KL"/>
 </part>
 <part name="U9" library="powerfilm" deviceset="OPA369" device="" value="OPA369">
 <attribute name="DIGIKEY" value="296-25252-1-ND"/>
 </part>
 <part name="R8" library="passives" deviceset="RESISTOR" device="0402_RES" value="4.99k">
 <attribute name="DIGIKEY" value="P4.99KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
+<attribute name="MPN" value="ERJ-2RKF4991X"/>
 </part>
 <part name="R37" library="passives" deviceset="RESISTOR" device="0402_RES" value="1M">
-<attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc."/>
+<attribute name="MPN" value="RMCF0402FT1M00"/>
 </part>
 <part name="R38" library="passives" deviceset="RESISTOR" device="0402_RES" value="1M">
-<attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc."/>
+<attribute name="MPN" value="RMCF0402FT1M00"/>
 </part>
 <part name="R35" library="passives" deviceset="RESISTOR" device="1206_RES_HIGH_CLEARANCE" value="953k">
-<attribute name="DIGIKEY" value="P953KLCT-ND"/>
+<attribute name="DIGIKEY" value="P953KBCCT-ND"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
+<attribute name="MPN" value="ERA-8AEB9533V"/>
 </part>
 <part name="R33" library="passives" deviceset="RESISTOR" device="0402_RES" value="953k">
-<attribute name="DIGIKEY" value="P953KLCT-ND"/>
+<attribute name="DIGIKEY" value="YAG3262CT-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="RC0402FR-07953KL"/>
 </part>
 <part name="SUPPLY3" library="umich" deviceset="GND" device=""/>
 <part name="C5" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.1uF"/>
@@ -13000,18 +13008,28 @@ Block, Siemens and generic&lt;p&gt;
 </part>
 <part name="R9" library="passives" deviceset="RESISTOR" device="0402_RES" value="4.99k">
 <attribute name="DIGIKEY" value="P4.99KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
+<attribute name="MPN" value="ERJ-2RKF4991X"/>
 </part>
 <part name="R39" library="passives" deviceset="RESISTOR" device="0402_RES" value="1M">
-<attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc."/>
+<attribute name="MPN" value="RMCF0402FT1M00"/>
 </part>
 <part name="R40" library="passives" deviceset="RESISTOR" device="0402_RES" value="1M">
-<attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc."/>
+<attribute name="MPN" value="RMCF0402FT1M00"/>
 </part>
 <part name="R36" library="passives" deviceset="RESISTOR" device="1206_RES_HIGH_CLEARANCE" value="953k">
-<attribute name="DIGIKEY" value="P953KLCT-ND"/>
+<attribute name="DIGIKEY" value="P953KBCCT-ND"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
+<attribute name="MPN" value="ERA-8AEB9533V"/>
 </part>
 <part name="R34" library="passives" deviceset="RESISTOR" device="0402_RES" value="953k">
-<attribute name="DIGIKEY" value="P953KLCT-ND"/>
+<attribute name="DIGIKEY" value="YAG3262CT-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="RC0402FR-07953KL"/>
 </part>
 <part name="SUPPLY7" library="umich" deviceset="GND" device=""/>
 <part name="C6" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.1uF"/>
@@ -13019,21 +13037,19 @@ Block, Siemens and generic&lt;p&gt;
 <part name="SUPPLY9" library="umich" deviceset="GND" device=""/>
 <part name="SUPPLY10" library="umich" deviceset="GND" device=""/>
 <part name="R30" library="passives" deviceset="RESISTOR" device="1206_RES_HIGH_CLEARANCE" value="750k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DIGIKEY" value="311-750KFRCT-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="RC1206FR-07750KL"/>
 </part>
 <part name="D5" library="passives" deviceset="DIODE_ZENER" device="SOT323">
-<attribute name="DIGIKEY" value="MM3Z3V3BCT-ND"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
 <attribute name="MANUFACTURER" value="ON Semiconductor"/>
 <attribute name="MPN" value="MM3Z3V3B"/>
 </part>
 <part name="R31" library="passives" deviceset="RESISTOR" device="1206_RES_HIGH_CLEARANCE" value="750k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DIGIKEY" value="311-750KFRCT-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="RC1206FR-07750KL"/>
 </part>
 <part name="D1" library="passives" deviceset="DIODE_SCHOTTKY" device="SOD323">
 <attribute name="DIGIKEY" value="CUS10S30H3FCT-ND"/>
@@ -13056,7 +13072,7 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="MPN" value="CUS10S30,H3F"/>
 </part>
 <part name="D6" library="passives" deviceset="DIODE_ZENER" device="SOT323">
-<attribute name="DIGIKEY" value="MM3Z3V3BCT-ND"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
 <attribute name="MANUFACTURER" value="ON Semiconductor"/>
 <attribute name="MPN" value="MM3Z3V3B"/>
 </part>
@@ -13215,26 +13231,40 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <instance part="F1" gate="G$1" x="48.26" y="170.18"/>
 <instance part="R28" gate="G$1" x="53.34" y="132.08" rot="R270">
 <attribute name="DIGIKEY" x="53.34" y="132.08" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="MANUFACTURER" x="53.34" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="53.34" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="SUPPLY2" gate="1" x="71.12" y="99.06"/>
 <instance part="R29" gate="G$1" x="93.98" y="134.62" rot="R270">
 <attribute name="DIGIKEY" x="93.98" y="134.62" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="MANUFACTURER" x="93.98" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="93.98" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="U9" gate="G$1" x="63.5" y="60.96"/>
 <instance part="R8" gate="G$1" x="60.96" y="40.64">
 <attribute name="DIGIKEY" x="60.96" y="40.64" size="1.27" layer="96" display="off"/>
+<attribute name="MANUFACTURER" x="60.96" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="60.96" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R37" gate="G$1" x="55.88" y="78.74">
 <attribute name="DIGIKEY" x="55.88" y="78.74" size="1.27" layer="96" display="off"/>
+<attribute name="MANUFACTURER" x="55.88" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="55.88" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R38" gate="G$1" x="40.64" y="78.74">
 <attribute name="DIGIKEY" x="40.64" y="78.74" size="1.27" layer="96" display="off"/>
+<attribute name="MANUFACTURER" x="40.64" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="40.64" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R35" gate="G$1" x="40.64" y="58.42">
 <attribute name="DIGIKEY" x="40.64" y="58.42" size="1.27" layer="96" display="off"/>
+<attribute name="MANUFACTURER" x="40.64" y="58.42" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="40.64" y="58.42" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R33" gate="G$1" x="40.64" y="40.64">
 <attribute name="DIGIKEY" x="40.64" y="40.64" size="1.27" layer="96" display="off"/>
+<attribute name="MANUFACTURER" x="40.64" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="40.64" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="SUPPLY3" gate="1" x="30.48" y="71.12"/>
 <instance part="C5" gate="G$1" x="76.2" y="76.2"/>
@@ -13244,18 +13274,28 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <instance part="U10" gate="G$1" x="142.24" y="60.96"/>
 <instance part="R9" gate="G$1" x="139.7" y="40.64">
 <attribute name="DIGIKEY" x="139.7" y="40.64" size="1.27" layer="96" display="off"/>
+<attribute name="MANUFACTURER" x="139.7" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="139.7" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R39" gate="G$1" x="134.62" y="78.74">
 <attribute name="DIGIKEY" x="134.62" y="78.74" size="1.27" layer="96" display="off"/>
+<attribute name="MANUFACTURER" x="134.62" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="134.62" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R40" gate="G$1" x="119.38" y="78.74">
 <attribute name="DIGIKEY" x="119.38" y="78.74" size="1.27" layer="96" display="off"/>
+<attribute name="MANUFACTURER" x="119.38" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="119.38" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R36" gate="G$1" x="119.38" y="58.42">
 <attribute name="DIGIKEY" x="119.38" y="58.42" size="1.27" layer="96" display="off"/>
+<attribute name="MANUFACTURER" x="119.38" y="58.42" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="119.38" y="58.42" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R34" gate="G$1" x="119.38" y="40.64">
 <attribute name="DIGIKEY" x="119.38" y="40.64" size="1.27" layer="96" display="off"/>
+<attribute name="MANUFACTURER" x="119.38" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="119.38" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="SUPPLY7" gate="1" x="109.22" y="71.12"/>
 <instance part="C6" gate="G$1" x="154.94" y="76.2"/>
@@ -13264,6 +13304,8 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <instance part="SUPPLY10" gate="1" x="142.24" y="48.26"/>
 <instance part="R30" gate="G$1" x="43.18" y="132.08" rot="R270">
 <attribute name="DIGIKEY" x="43.18" y="132.08" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="MANUFACTURER" x="43.18" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="43.18" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="D5" gate="G$1" x="43.18" y="119.38" rot="R90">
 <attribute name="DIGIKEY" x="43.18" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
@@ -13272,6 +13314,8 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 </instance>
 <instance part="R31" gate="G$1" x="83.82" y="134.62" rot="R270">
 <attribute name="DIGIKEY" x="83.82" y="134.62" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="MANUFACTURER" x="83.82" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="83.82" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="D1" gate="G$1" x="35.56" y="116.84" rot="R90">
 <attribute name="DIGIKEY" x="35.56" y="116.84" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>

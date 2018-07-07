@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="5" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="10" altunitdist="mil" altunit="mil"/>
+<grid distance="100" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="10" altunitdist="mil" altunit="mil"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="yes"/>
 <layer number="2" name="Route2" color="14" fill="1" visible="no" active="yes"/>
@@ -3323,17 +3323,15 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="NAME" x="17.431" y="36.274" size="0.889" layer="21" font="vector" ratio="12" align="bottom-center"/>
 </element>
 <element name="R28" library="passives" package="1206_RES_HIGH_CLEARANCE" value="750k" x="6.985" y="25.019" smashed="yes" rot="R180">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402" x="6.985" y="25.019" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND" x="6.985" y="25.019" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics" x="6.985" y="25.019" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MPN" value="RMCF0402FT150R" x="6.985" y="25.019" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="311-750KFRCT-ND" x="6.985" y="25.019" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MANUFACTURER" value="Yageo" x="6.985" y="25.019" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="MPN" value="RC1206FR-07750KL" x="6.985" y="25.019" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="6.985" y="24.038" size="0.762" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 </element>
 <element name="R29" library="passives" package="1206_RES_HIGH_CLEARANCE" value="750k" x="6.858" y="19.939" smashed="yes" rot="R180">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402" x="6.858" y="19.939" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND" x="6.858" y="19.939" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics" x="6.858" y="19.939" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MPN" value="RMCF0402FT150R" x="6.858" y="19.939" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="311-750KFRCT-ND" x="6.858" y="19.939" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MANUFACTURER" value="Yageo" x="6.858" y="19.939" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="MPN" value="RC1206FR-07750KL" x="6.858" y="19.939" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="6.731" y="21.625" size="0.762" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 </element>
 <element name="U9" library="powerfilm" package="SC70-5" value="OPA369" x="3.429" y="33.02" smashed="yes" rot="R90">
@@ -3344,25 +3342,35 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 </element>
 <element name="R8" library="passives" package="0402_RES" value="4.99k" x="4.953" y="33.401" smashed="yes" rot="R90">
 <attribute name="DIGIKEY" value="P4.99KLCT-ND" x="10.033" y="33.401" size="1.778" layer="27" font="vector" ratio="12" rot="R90" display="off"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components" x="4.953" y="33.401" size="1.778" layer="27" rot="R90" display="off"/>
+<attribute name="MPN" value="ERJ-2RKF4991X" x="4.953" y="33.401" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="NAME" x="5.461" y="34.925" size="0.889" layer="25" font="vector" ratio="12" rot="R90" align="bottom-center"/>
 <attribute name="VALUE" x="6.35" y="33.401" size="1.016" layer="27" font="vector" ratio="12" rot="R90" align="bottom-center"/>
 </element>
 <element name="R37" library="passives" package="0402_RES" value="1M" x="1.397" y="32.131" smashed="yes" rot="R180">
-<attribute name="DIGIKEY" value="P1.00MLCT-ND" x="1.397" y="27.051" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND" x="1.397" y="27.051" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc." x="1.397" y="32.131" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="MPN" value="RMCF0402FT1M00" x="1.397" y="32.131" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="1.397" y="31.75" size="0.889" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 <attribute name="VALUE" x="1.397" y="33.528" size="1.016" layer="27" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 </element>
 <element name="R38" library="passives" package="0402_RES" value="1M" x="1.905" y="33.528" smashed="yes" rot="R270">
-<attribute name="DIGIKEY" value="P1.00MLCT-ND" x="1.905" y="41.148" size="1.778" layer="27" font="vector" ratio="12" rot="R270" display="off"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND" x="1.905" y="41.148" size="1.778" layer="27" font="vector" ratio="12" rot="R270" display="off"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc." x="1.905" y="33.528" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="MPN" value="RMCF0402FT1M00" x="1.905" y="33.528" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="1.651" y="35.433" size="0.889" layer="25" font="vector" ratio="12" rot="R270" align="bottom-center"/>
 <attribute name="VALUE" x="0.508" y="33.528" size="1.016" layer="27" font="vector" ratio="12" rot="R270" align="bottom-center"/>
 </element>
 <element name="R35" library="passives" package="1206_RES_HIGH_CLEARANCE" value="953k" x="6.985" y="29.718" smashed="yes" rot="R180">
-<attribute name="DIGIKEY" value="P953KLCT-ND" x="6.985" y="44.958" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="P953KBCCT-ND" x="6.985" y="44.958" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components" x="6.985" y="29.718" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="MPN" value="ERA-8AEB9533V" x="6.985" y="29.718" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="6.985" y="31.404" size="0.762" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 </element>
 <element name="R33" library="passives" package="0402_RES" value="953k" x="5.842" y="33.401" smashed="yes" rot="R270">
-<attribute name="DIGIKEY" value="P953KLCT-ND" x="-9.398" y="33.401" size="1.778" layer="27" font="vector" ratio="12" rot="R270" display="off"/>
+<attribute name="DIGIKEY" value="YAG3262CT-ND" x="-9.398" y="33.401" size="1.778" layer="27" font="vector" ratio="12" rot="R270" display="off"/>
+<attribute name="MANUFACTURER" value="Yageo" x="5.842" y="33.401" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="MPN" value="RC0402FR-07953KL" x="5.842" y="33.401" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="6.35" y="33.401" size="0.889" layer="25" font="vector" ratio="12" rot="R270" align="bottom-center"/>
 <attribute name="VALUE" x="4.445" y="33.401" size="1.016" layer="27" font="vector" ratio="12" rot="R270" align="bottom-center"/>
 </element>
@@ -3377,25 +3385,35 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 </element>
 <element name="R9" library="passives" package="0402_RES" value="4.99k" x="2.794" y="13.335" smashed="yes" rot="R180">
 <attribute name="DIGIKEY" value="P4.99KLCT-ND" x="2.794" y="18.415" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components" x="2.794" y="13.335" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="MPN" value="ERJ-2RKF4991X" x="2.794" y="13.335" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="4.699" y="13.843" size="0.889" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 <attribute name="VALUE" x="2.794" y="14.732" size="1.016" layer="27" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 </element>
 <element name="R39" library="passives" package="0402_RES" value="1M" x="4.064" y="10.033" smashed="yes" rot="R270">
-<attribute name="DIGIKEY" value="P1.00MLCT-ND" x="9.144" y="10.033" size="1.778" layer="27" font="vector" ratio="12" rot="R270" display="off"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND" x="9.144" y="10.033" size="1.778" layer="27" font="vector" ratio="12" rot="R270" display="off"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc." x="4.064" y="10.033" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="MPN" value="RMCF0402FT1M00" x="4.064" y="10.033" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="5.588" y="10.033" size="0.889" layer="25" font="vector" ratio="12" align="bottom-center"/>
 <attribute name="VALUE" x="2.667" y="10.033" size="1.016" layer="27" font="vector" ratio="12" rot="R270" align="bottom-center"/>
 </element>
 <element name="R40" library="passives" package="0402_RES" value="1M" x="2.794" y="10.414" smashed="yes">
-<attribute name="DIGIKEY" value="P1.00MLCT-ND" x="-4.826" y="10.414" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND" x="-4.826" y="10.414" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc." x="2.794" y="10.414" size="1.778" layer="27" display="off"/>
+<attribute name="MPN" value="RMCF0402FT1M00" x="2.794" y="10.414" size="1.778" layer="27" display="off"/>
 <attribute name="NAME" x="1.651" y="10.414" size="0.889" layer="25" font="vector" ratio="12" rot="R90" align="bottom-center"/>
 <attribute name="VALUE" x="2.794" y="9.017" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
 <element name="R36" library="passives" package="1206_RES_HIGH_CLEARANCE" value="953k" x="6.858" y="15.367" smashed="yes" rot="R180">
-<attribute name="DIGIKEY" value="P953KLCT-ND" x="6.858" y="30.607" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="P953KBCCT-ND" x="6.858" y="30.607" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components" x="6.858" y="15.367" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="MPN" value="ERA-8AEB9533V" x="6.858" y="15.367" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="6.858" y="14.386" size="0.762" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 </element>
 <element name="R34" library="passives" package="0402_RES" value="953k" x="2.794" y="14.224" smashed="yes">
-<attribute name="DIGIKEY" value="P953KLCT-ND" x="2.794" y="-1.016" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<attribute name="DIGIKEY" value="YAG3262CT-ND" x="2.794" y="-1.016" size="1.778" layer="27" font="vector" ratio="12" display="off"/>
+<attribute name="MANUFACTURER" value="Yageo" x="2.794" y="14.224" size="1.778" layer="27" display="off"/>
+<attribute name="MPN" value="RC0402FR-07953KL" x="2.794" y="14.224" size="1.778" layer="27" display="off"/>
 <attribute name="NAME" x="1.143" y="13.716" size="0.762" layer="25" font="vector" ratio="12" align="bottom-center"/>
 <attribute name="VALUE" x="2.794" y="12.827" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
@@ -3403,23 +3421,21 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="NAME" x="2.794" y="9.017" size="0.889" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 </element>
 <element name="R30" library="passives" package="1206_RES_HIGH_CLEARANCE" value="750k" x="6.985" y="27.305" smashed="yes" rot="R180">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402" x="6.985" y="27.305" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND" x="6.985" y="27.305" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics" x="6.985" y="27.305" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MPN" value="RMCF0402FT150R" x="6.985" y="27.305" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="311-750KFRCT-ND" x="6.985" y="27.305" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MANUFACTURER" value="Yageo" x="6.985" y="27.305" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="MPN" value="RC1206FR-07750KL" x="6.985" y="27.305" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="10.287" y="28.229" size="0.762" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 </element>
 <element name="D5" library="passives" package="SOD323" value="" x="2.159" y="27.432" smashed="yes" rot="R180">
-<attribute name="DIGIKEY" value="MM3Z3V3BCT-ND" x="2.159" y="27.432" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND" x="2.159" y="27.432" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="MANUFACTURER" value="ON Semiconductor" x="2.159" y="27.432" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="MPN" value="MM3Z3V3B" x="2.159" y="27.432" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="3.937" y="28.599" size="0.762" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 </element>
 <element name="R31" library="passives" package="1206_RES_HIGH_CLEARANCE" value="750k" x="6.858" y="17.653" smashed="yes" rot="R180">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402" x="6.858" y="17.653" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND" x="6.858" y="17.653" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics" x="6.858" y="17.653" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
-<attribute name="MPN" value="RMCF0402FT150R" x="6.858" y="17.653" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="311-750KFRCT-ND" x="6.858" y="17.653" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="MANUFACTURER" value="Yageo" x="6.858" y="17.653" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="MPN" value="RC1206FR-07750KL" x="6.858" y="17.653" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="6.858" y="18.507" size="0.762" layer="25" font="vector" ratio="12" align="bottom-center"/>
 </element>
 <element name="D1" library="passives" package="SOD323" value="" x="2.159" y="29.337" smashed="yes" rot="R180">
@@ -3447,7 +3463,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="NAME" x="3.937" y="22.757" size="0.762" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 </element>
 <element name="D6" library="passives" package="SOD323" value="" x="2.159" y="25.527" smashed="yes" rot="R180">
-<attribute name="DIGIKEY" value="MM3Z3V3BCT-ND" x="2.159" y="25.527" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND" x="2.159" y="25.527" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
 <attribute name="MANUFACTURER" value="ON Semiconductor" x="2.159" y="25.527" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
 <attribute name="MPN" value="MM3Z3V3B" x="2.159" y="25.527" size="1.778" layer="27" font="vector" ratio="12" rot="R180" display="off"/>
 <attribute name="NAME" x="3.937" y="26.694" size="0.762" layer="25" font="vector" ratio="12" rot="R180" align="bottom-center"/>
