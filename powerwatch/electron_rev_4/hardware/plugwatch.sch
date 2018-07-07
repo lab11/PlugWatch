@@ -645,7 +645,7 @@ https://www.vishay.com/docs/72821/72821.pdf</description>
 <pin name="WDI" x="-17.78" y="7.62" visible="pin" length="middle"/>
 <pin name="WDS" x="17.78" y="-12.7" visible="pin" length="middle" rot="R180"/>
 <text x="-7.62" y="15.24" size="1.778" layer="95" align="bottom-center">&gt;NAME</text>
-<text x="0" y="12.7" size="1.778" layer="95" rot="R180" align="bottom-center">MAX6746</text>
+<text x="0" y="12.7" size="1.778" layer="95" rot="R180" align="bottom-center">MAX67XX</text>
 </symbol>
 <symbol name="AB1815-T3">
 <wire x1="0" y1="0" x2="0" y2="33.02" width="0.254" layer="94"/>
@@ -741,13 +741,13 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 </device>
 </devices>
 </deviceset>
-<deviceset name="MAX6746" prefix="U">
+<deviceset name="MAX67XX" prefix="U">
 <description>A simple watchdog timer with adjustable timeouts and reset time</description>
 <gates>
 <gate name="G$1" symbol="MAX6746" x="0" y="0"/>
 </gates>
 <devices>
-<device name="" package="SOT-23-8">
+<device name="MAX67XX" package="SOT-23-8">
 <connects>
 <connect gate="G$1" pin="!MR" pad="1"/>
 <connect gate="G$1" pin="!RESET" pad="7"/>
@@ -759,8 +759,15 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 <connect gate="G$1" pin="WDS" pad="5"/>
 </connects>
 <technologies>
-<technology name="">
-<attribute name="DIGIKEY" value="MAX6746KA29+TCT-ND" constant="no"/>
+<technology name="MAX6746">
+<attribute name="DIGIKEY" value="MAX6746KA26+TCT-ND" constant="no"/>
+<attribute name="MANUFACTURER" value="Maxim Integrated" constant="no"/>
+<attribute name="MPN" value="MAX6746KA26+T" constant="no"/>
+</technology>
+<technology name="MAX6749">
+<attribute name="DIGIKEY" value="MAX6749KA+TCT-ND" constant="no"/>
+<attribute name="MANUFACTURER" value="Maxim Integrated" constant="no"/>
+<attribute name="MPN" value="MAX6749KA+T" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -822,6 +829,7 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 </connects>
 <technologies>
 <technology name="">
+<attribute name="DIGIKEY" value="497-17718-6-ND" constant="no"/>
 <attribute name="MANUFACTURER" value="STMicroelectronics" constant="no"/>
 <attribute name="MOUSER" value="511-LIS2DW12TR" constant="no"/>
 <attribute name="MPN" value="LIS2DW12TR" constant="no"/>
@@ -892,40 +900,6 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 <text x="-2.8" y="0.7" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
 <text x="4.2" y="0.7" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center">&gt;VALUE</text>
 </package>
-<package name="ST12S010VBAR1800">
-<smd name="GND1" x="-9.45" y="-14.55" dx="1.7" dy="0.9" layer="1" rot="R90"/>
-<smd name="GND7" x="4.85" y="-14.55" dx="1.7" dy="0.9" layer="1" rot="R90"/>
-<smd name="GND4" x="4.85" y="-0.85" dx="1.7" dy="0.9" layer="1" rot="R90"/>
-<smd name="GND3" x="-9.45" y="-0.85" dx="1.7" dy="0.9" layer="1" rot="R90"/>
-<smd name="C10" x="-9.35" y="-12.325" dx="0.85" dy="1" layer="1" rot="R90"/>
-<smd name="DSW1" x="-9.35" y="-10.4" dx="0.85" dy="1" layer="1" rot="R90"/>
-<smd name="C9" x="4.675" y="-12.325" dx="0.85" dy="1" layer="1" rot="R90"/>
-<smd name="GND6" x="4.5875" y="-10.2" dx="0.825" dy="1.4" layer="1" rot="R180"/>
-<smd name="GND5" x="4.5875" y="-4.75" dx="0.825" dy="1.4" layer="1" rot="R180"/>
-<smd name="GND2" x="-9.35" y="-7.45" dx="0.95" dy="1.4" layer="1" rot="R180"/>
-<smd name="DSW2" x="-7.875" y="-0.5" dx="0.9" dy="1" layer="1" rot="R180"/>
-<smd name="C8" x="-6.3" y="-0.5" dx="0.65" dy="1" layer="1" rot="R180"/>
-<smd name="C7" x="-5.4" y="-0.5" dx="0.65" dy="1" layer="1" rot="R180"/>
-<smd name="C6" x="-4.5" y="-0.5" dx="0.65" dy="1" layer="1" rot="R180"/>
-<smd name="C5" x="-3.6" y="-0.5" dx="0.65" dy="1" layer="1" rot="R180"/>
-<smd name="C4" x="-2.7" y="-0.5" dx="0.65" dy="1" layer="1" rot="R180"/>
-<smd name="C3" x="-1.8" y="-0.5" dx="0.65" dy="1" layer="1" rot="R180"/>
-<smd name="C2" x="-0.9" y="-0.5" dx="0.65" dy="1" layer="1" rot="R180"/>
-<smd name="C1" x="0" y="-0.5" dx="0.65" dy="1" layer="1" rot="R180"/>
-<wire x1="-9.15" y1="-0.3" x2="4.55" y2="-0.3" width="0.0508" layer="21"/>
-<wire x1="4.55" y1="-0.3" x2="4.55" y2="-15.6" width="0.0508" layer="21"/>
-<wire x1="4.55" y1="-15.6" x2="-9.15" y2="-15.6" width="0.0508" layer="21"/>
-<wire x1="-9.15" y1="-15.6" x2="-9.15" y2="-0.3" width="0.0508" layer="21"/>
-<polygon width="0.1524" layer="41">
-<vertex x="-8.75" y="-8.15"/>
-<vertex x="-8.3" y="-8.15"/>
-<vertex x="-8.3" y="-13.65"/>
-<vertex x="2.45" y="-13.65"/>
-<vertex x="2.45" y="-1.55"/>
-<vertex x="-8.75" y="-1.55"/>
-</polygon>
-<text x="-7.8" y="0.35" size="0.889" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
-</package>
 </packages>
 <symbols>
 <symbol name="SD-CARD_WITH-CARD-DETECT">
@@ -954,13 +928,13 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 </symbol>
 </symbols>
 <devicesets>
-<deviceset name="CON_MICRO_SD" prefix="J">
+<deviceset name="DM3AT-SF-PEJM5" prefix="J">
 <description>CONN MICRO SD R/A PUSH-PUSH SMD</description>
 <gates>
 <gate name="G$1" symbol="SD-CARD_WITH-CARD-DETECT" x="0" y="0"/>
 </gates>
 <devices>
-<device name="DM3AT-SF-PEJM5" package="DM3AT-SF-PEJM5">
+<device name="" package="DM3AT-SF-PEJM5">
 <connects>
 <connect gate="G$1" pin="A" pad="A"/>
 <connect gate="G$1" pin="B" pad="B"/>
@@ -975,28 +949,10 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 </connects>
 <technologies>
 <technology name="">
+<attribute name="DESCRIPTION" value="CONN MICRO SD CARD PUSH-PUSH R/A" constant="no"/>
 <attribute name="DIGIKEY" value="HR1964CT-ND"/>
-</technology>
-</technologies>
-</device>
-<device name="ST12S010VBAR1800" package="ST12S010VBAR1800">
-<connects>
-<connect gate="G$1" pin="A" pad="DSW1"/>
-<connect gate="G$1" pin="B" pad="DSW2"/>
-<connect gate="G$1" pin="CLK" pad="C5"/>
-<connect gate="G$1" pin="CMD/MOSI" pad="C3"/>
-<connect gate="G$1" pin="DATA0/MISO" pad="C7"/>
-<connect gate="G$1" pin="DATA1/RSV" pad="C8"/>
-<connect gate="G$1" pin="DATA2/NC" pad="C1"/>
-<connect gate="G$1" pin="DATA3-CD/CS_N" pad="C2"/>
-<connect gate="G$1" pin="GND" pad="C6 C9 C10 GND1 GND2 GND3 GND4 GND5 GND6 GND7" route="any"/>
-<connect gate="G$1" pin="VCC" pad="C4"/>
-</connects>
-<technologies>
-<technology name="">
-<attribute name="DIGIKEY" value="670-3034-1-ND" constant="no"/>
-<attribute name="MANUFACTURER" value="JAE Electronics" constant="no"/>
-<attribute name="MPN" value="ST12S010VBAR1800" constant="no"/>
+<attribute name="MANUFACTURER" value="Hirose Electric Co Ltd" constant="no"/>
+<attribute name="MPN" value="DM3AT-SF-PEJM5" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -2585,89 +2541,6 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <technology name="">
 <attribute name="MANUFACTURER_PART_NUMBER" value="DS2401P+" constant="no"/>
 <attribute name="VENDOR" value="Maxim Integrated Products" constant="no"/>
-</technology>
-</technologies>
-</device>
-</devices>
-</deviceset>
-</devicesets>
-</library>
-<library name="SparkFun-Connectors">
-<description>&lt;h3&gt;SparkFun Electronics' preferred foot prints&lt;/h3&gt;
-In this library you'll find connectors and sockets- basically anything that can be plugged into or onto.&lt;br&gt;&lt;br&gt;
-We've spent an enormous amount of time creating and checking these footprints and parts, but it is the end user's responsibility to ensure correctness and suitablity for a given componet or application. If you enjoy using this library, please buy one of our products at www.sparkfun.com.
-&lt;br&gt;&lt;br&gt;
-&lt;b&gt;Licensing:&lt;/b&gt; CC v3.0 Share-Alike You are welcome to use this library for commercial purposes. For attribution, we ask that when you begin to sell your device using our footprint, you email us with a link to the product being sold. We want bragging rights that we helped (in a very small part) to create your 8th world wonder. We would like the opportunity to feature your device on our homepage.</description>
-<packages>
-<package name="JST-2-SMD">
-<description>2mm SMD side-entry connector. tDocu layer indicates the actual physical plastic housing. +/- indicate SparkFun standard batteries and wiring.</description>
-<wire x1="-4" y1="-1" x2="-4" y2="-4.5" width="0.2032" layer="21"/>
-<wire x1="-4" y1="-4.5" x2="-3.2" y2="-4.5" width="0.2032" layer="21"/>
-<wire x1="-3.2" y1="-4.5" x2="-3.2" y2="-2" width="0.2032" layer="21"/>
-<wire x1="-3.2" y1="-2" x2="-2" y2="-2" width="0.2032" layer="21"/>
-<wire x1="2" y1="-2" x2="3.2" y2="-2" width="0.2032" layer="21"/>
-<wire x1="3.2" y1="-2" x2="3.2" y2="-4.5" width="0.2032" layer="21"/>
-<wire x1="3.2" y1="-4.5" x2="4" y2="-4.5" width="0.2032" layer="21"/>
-<wire x1="4" y1="-4.5" x2="4" y2="-1" width="0.2032" layer="21"/>
-<wire x1="2" y1="3" x2="-2" y2="3" width="0.2032" layer="21"/>
-<smd name="1" x="-1" y="-3.7" dx="1" dy="4.6" layer="1"/>
-<smd name="2" x="1" y="-3.7" dx="1" dy="4.6" layer="1"/>
-<smd name="NC1" x="-3.4" y="1.5" dx="3.4" dy="1.6" layer="1" rot="R90"/>
-<smd name="NC2" x="3.4" y="1.5" dx="3.4" dy="1.6" layer="1" rot="R90"/>
-<text x="-1.27" y="1.27" size="0.4064" layer="25">&gt;Name</text>
-<text x="-1.27" y="0" size="0.4064" layer="27">&gt;Value</text>
-<text x="2.159" y="-4.445" size="1.27" layer="51">+</text>
-<text x="-2.921" y="-4.445" size="1.27" layer="51">-</text>
-</package>
-</packages>
-<symbols>
-<symbol name="JST_2MM_MALE">
-<wire x1="-2.54" y1="-2.54" x2="-2.54" y2="1.778" width="0.254" layer="94"/>
-<wire x1="-2.54" y1="1.778" x2="-2.54" y2="3.302" width="0.254" layer="94"/>
-<wire x1="-2.54" y1="3.302" x2="-2.54" y2="5.08" width="0.254" layer="94"/>
-<wire x1="-2.54" y1="5.08" x2="5.08" y2="5.08" width="0.254" layer="94"/>
-<wire x1="5.08" y1="5.08" x2="5.08" y2="3.302" width="0.254" layer="94"/>
-<wire x1="5.08" y1="3.302" x2="5.08" y2="1.778" width="0.254" layer="94"/>
-<wire x1="5.08" y1="1.778" x2="5.08" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="5.08" y1="-2.54" x2="4.064" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="4.064" y1="-2.54" x2="4.064" y2="0" width="0.254" layer="94"/>
-<wire x1="4.064" y1="0" x2="-1.524" y2="0" width="0.254" layer="94"/>
-<wire x1="-1.524" y1="0" x2="-1.524" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="-2.54" y1="-2.54" x2="-1.524" y2="-2.54" width="0.254" layer="94"/>
-<pin name="-" x="0" y="-5.08" visible="off" length="middle" rot="R90"/>
-<pin name="+" x="2.54" y="-5.08" visible="off" length="middle" rot="R90"/>
-<pin name="PAD2" x="5.08" y="2.54" visible="off" length="point" rot="R90"/>
-<pin name="PAD1" x="-2.54" y="2.54" visible="off" length="point" rot="R90"/>
-<wire x1="-2.54" y1="1.778" x2="-1.778" y2="1.778" width="0.254" layer="94"/>
-<wire x1="-1.778" y1="1.778" x2="-1.778" y2="3.302" width="0.254" layer="94"/>
-<wire x1="-1.778" y1="3.302" x2="-2.54" y2="3.302" width="0.254" layer="94"/>
-<wire x1="5.08" y1="1.778" x2="4.318" y2="1.778" width="0.254" layer="94"/>
-<wire x1="4.318" y1="1.778" x2="4.318" y2="3.302" width="0.254" layer="94"/>
-<wire x1="4.318" y1="3.302" x2="5.08" y2="3.302" width="0.254" layer="94"/>
-<wire x1="2.032" y1="1.016" x2="3.048" y2="1.016" width="0.254" layer="94"/>
-<wire x1="2.54" y1="0.508" x2="2.54" y2="1.524" width="0.254" layer="94"/>
-<wire x1="0" y1="0.508" x2="0" y2="1.524" width="0.254" layer="94"/>
-<text x="-2.54" y="5.842" size="1.778" layer="95">&gt;NAME</text>
-</symbol>
-</symbols>
-<devicesets>
-<deviceset name="JST_2MM_MALE" prefix="J" uservalue="yes">
-<description>Mates to single-cell LiPo batteries.&lt;br&gt;
-CONN-08352</description>
-<gates>
-<gate name="G$1" symbol="JST_2MM_MALE" x="0" y="0"/>
-</gates>
-<devices>
-<device name="" package="JST-2-SMD">
-<connects>
-<connect gate="G$1" pin="+" pad="2"/>
-<connect gate="G$1" pin="-" pad="1"/>
-<connect gate="G$1" pin="PAD1" pad="NC1"/>
-<connect gate="G$1" pin="PAD2" pad="NC2"/>
-</connects>
-<technologies>
-<technology name="">
-<attribute name="PROD_ID" value="CONN-08352"/>
 </technology>
 </technologies>
 </device>
@@ -12708,6 +12581,589 @@ Block, Siemens and generic&lt;p&gt;
 </deviceset>
 </devicesets>
 </library>
+<library name="SparkFun-Connectors">
+<description>&lt;h3&gt;SparkFun Electronics' preferred foot prints&lt;/h3&gt;
+In this library you'll find connectors and sockets- basically anything that can be plugged into or onto.&lt;br&gt;&lt;br&gt;
+We've spent an enormous amount of time creating and checking these footprints and parts, but it is the end user's responsibility to ensure correctness and suitablity for a given componet or application. If you enjoy using this library, please buy one of our products at www.sparkfun.com.
+&lt;br&gt;&lt;br&gt;
+&lt;b&gt;Licensing:&lt;/b&gt; CC v3.0 Share-Alike You are welcome to use this library for commercial purposes. For attribution, we ask that when you begin to sell your device using our footprint, you email us with a link to the product being sold. We want bragging rights that we helped (in a very small part) to create your 8th world wonder. We would like the opportunity to feature your device on our homepage.</description>
+<packages>
+<package name="1X02">
+<wire x1="-0.635" y1="1.27" x2="0.635" y2="1.27" width="0.2032" layer="21"/>
+<wire x1="0.635" y1="1.27" x2="1.27" y2="0.635" width="0.2032" layer="21"/>
+<wire x1="1.27" y1="-0.635" x2="0.635" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="1.27" y1="0.635" x2="1.905" y2="1.27" width="0.2032" layer="21"/>
+<wire x1="1.905" y1="1.27" x2="3.175" y2="1.27" width="0.2032" layer="21"/>
+<wire x1="3.175" y1="1.27" x2="3.81" y2="0.635" width="0.2032" layer="21"/>
+<wire x1="3.81" y1="-0.635" x2="3.175" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="3.175" y1="-1.27" x2="1.905" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="1.905" y1="-1.27" x2="1.27" y2="-0.635" width="0.2032" layer="21"/>
+<wire x1="-1.27" y1="0.635" x2="-1.27" y2="-0.635" width="0.2032" layer="21"/>
+<wire x1="-0.635" y1="1.27" x2="-1.27" y2="0.635" width="0.2032" layer="21"/>
+<wire x1="-1.27" y1="-0.635" x2="-0.635" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="0.635" y1="-1.27" x2="-0.635" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="3.81" y1="0.635" x2="3.81" y2="-0.635" width="0.2032" layer="21"/>
+<pad name="1" x="0" y="0" drill="1.016" diameter="1.8796" rot="R90"/>
+<pad name="2" x="2.54" y="0" drill="1.016" diameter="1.8796" rot="R90"/>
+<text x="-1.3462" y="1.8288" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="-1.27" y="-3.175" size="1.27" layer="27">&gt;VALUE</text>
+<rectangle x1="2.286" y1="-0.254" x2="2.794" y2="0.254" layer="51"/>
+<rectangle x1="-0.254" y1="-0.254" x2="0.254" y2="0.254" layer="51"/>
+</package>
+<package name="MOLEX-1X2">
+<wire x1="-1.27" y1="3.048" x2="-1.27" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="3.81" y1="3.048" x2="3.81" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="3.81" y1="3.048" x2="-1.27" y2="3.048" width="0.127" layer="21"/>
+<wire x1="3.81" y1="-2.54" x2="2.54" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="2.54" y1="-2.54" x2="0" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="0" y1="-2.54" x2="-1.27" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="0" y1="-2.54" x2="0" y2="-1.27" width="0.127" layer="21"/>
+<wire x1="0" y1="-1.27" x2="2.54" y2="-1.27" width="0.127" layer="21"/>
+<wire x1="2.54" y1="-1.27" x2="2.54" y2="-2.54" width="0.127" layer="21"/>
+<pad name="1" x="0" y="0" drill="1.016" diameter="1.8796" shape="square"/>
+<pad name="2" x="2.54" y="0" drill="1.016" diameter="1.8796"/>
+</package>
+<package name="SCREWTERMINAL-3.5MM-2">
+<wire x1="-1.75" y1="3.4" x2="5.25" y2="3.4" width="0.2032" layer="21"/>
+<wire x1="5.25" y1="3.4" x2="5.25" y2="-2.8" width="0.2032" layer="21"/>
+<wire x1="5.25" y1="-2.8" x2="5.25" y2="-3.6" width="0.2032" layer="21"/>
+<wire x1="5.25" y1="-3.6" x2="-1.75" y2="-3.6" width="0.2032" layer="21"/>
+<wire x1="-1.75" y1="-3.6" x2="-1.75" y2="-2.8" width="0.2032" layer="21"/>
+<wire x1="-1.75" y1="-2.8" x2="-1.75" y2="3.4" width="0.2032" layer="21"/>
+<wire x1="5.25" y1="-2.8" x2="-1.75" y2="-2.8" width="0.2032" layer="21"/>
+<wire x1="-1.75" y1="-1.35" x2="-2.15" y2="-1.35" width="0.2032" layer="51"/>
+<wire x1="-2.15" y1="-1.35" x2="-2.15" y2="-2.35" width="0.2032" layer="51"/>
+<wire x1="-2.15" y1="-2.35" x2="-1.75" y2="-2.35" width="0.2032" layer="51"/>
+<wire x1="5.25" y1="3.15" x2="5.65" y2="3.15" width="0.2032" layer="51"/>
+<wire x1="5.65" y1="3.15" x2="5.65" y2="2.15" width="0.2032" layer="51"/>
+<wire x1="5.65" y1="2.15" x2="5.25" y2="2.15" width="0.2032" layer="51"/>
+<circle x="2" y="3" radius="0.2828" width="0.127" layer="51"/>
+<pad name="1" x="0" y="0" drill="1.2" diameter="2.032" shape="square"/>
+<pad name="2" x="3.5" y="0" drill="1.2" diameter="2.032"/>
+<text x="-1.27" y="2.54" size="0.4064" layer="25">&gt;NAME</text>
+<text x="-1.27" y="1.27" size="0.4064" layer="27">&gt;VALUE</text>
+</package>
+<package name="JST-2-SMD">
+<description>2mm SMD side-entry connector. tDocu layer indicates the actual physical plastic housing. +/- indicate SparkFun standard batteries and wiring.</description>
+<wire x1="-4" y1="-1" x2="-4" y2="-4.5" width="0.2032" layer="21"/>
+<wire x1="-4" y1="-4.5" x2="-3.2" y2="-4.5" width="0.2032" layer="21"/>
+<wire x1="-3.2" y1="-4.5" x2="-3.2" y2="-2" width="0.2032" layer="21"/>
+<wire x1="-3.2" y1="-2" x2="-2" y2="-2" width="0.2032" layer="21"/>
+<wire x1="2" y1="-2" x2="3.2" y2="-2" width="0.2032" layer="21"/>
+<wire x1="3.2" y1="-2" x2="3.2" y2="-4.5" width="0.2032" layer="21"/>
+<wire x1="3.2" y1="-4.5" x2="4" y2="-4.5" width="0.2032" layer="21"/>
+<wire x1="4" y1="-4.5" x2="4" y2="-1" width="0.2032" layer="21"/>
+<wire x1="2" y1="3" x2="-2" y2="3" width="0.2032" layer="21"/>
+<smd name="1" x="-1" y="-3.7" dx="1" dy="4.6" layer="1"/>
+<smd name="2" x="1" y="-3.7" dx="1" dy="4.6" layer="1"/>
+<smd name="NC1" x="-3.4" y="1.5" dx="3.4" dy="1.6" layer="1" rot="R90"/>
+<smd name="NC2" x="3.4" y="1.5" dx="3.4" dy="1.6" layer="1" rot="R90"/>
+<text x="-1.27" y="1.27" size="0.4064" layer="25">&gt;Name</text>
+<text x="-1.27" y="0" size="0.4064" layer="27">&gt;Value</text>
+<text x="2.159" y="-4.445" size="1.27" layer="51">+</text>
+<text x="-2.921" y="-4.445" size="1.27" layer="51">-</text>
+</package>
+<package name="1X02_BIG">
+<wire x1="-1.27" y1="1.27" x2="-1.27" y2="-1.27" width="0.127" layer="21"/>
+<wire x1="-1.27" y1="-1.27" x2="5.08" y2="-1.27" width="0.127" layer="21"/>
+<wire x1="5.08" y1="-1.27" x2="5.08" y2="1.27" width="0.127" layer="21"/>
+<wire x1="5.08" y1="1.27" x2="-1.27" y2="1.27" width="0.127" layer="21"/>
+<pad name="P$1" x="0" y="0" drill="1.0668"/>
+<pad name="P$2" x="3.81" y="0" drill="1.0668"/>
+</package>
+<package name="JST-2-SMD-VERT">
+<wire x1="-4.1" y1="2.97" x2="4.2" y2="2.97" width="0.2032" layer="51"/>
+<wire x1="4.2" y1="2.97" x2="4.2" y2="-2.13" width="0.2032" layer="51"/>
+<wire x1="4.2" y1="-2.13" x2="-4.1" y2="-2.13" width="0.2032" layer="51"/>
+<wire x1="-4.1" y1="-2.13" x2="-4.1" y2="2.97" width="0.2032" layer="51"/>
+<wire x1="-4.1" y1="3" x2="4.2" y2="3" width="0.2032" layer="21"/>
+<wire x1="4.2" y1="3" x2="4.2" y2="2.3" width="0.2032" layer="21"/>
+<wire x1="-4.1" y1="3" x2="-4.1" y2="2.3" width="0.2032" layer="21"/>
+<wire x1="2" y1="-2.1" x2="4.2" y2="-2.1" width="0.2032" layer="21"/>
+<wire x1="4.2" y1="-2.1" x2="4.2" y2="-1.7" width="0.2032" layer="21"/>
+<wire x1="-2" y1="-2.1" x2="-4.1" y2="-2.1" width="0.2032" layer="21"/>
+<wire x1="-4.1" y1="-2.1" x2="-4.1" y2="-1.8" width="0.2032" layer="21"/>
+<smd name="P$1" x="-3.4" y="0.27" dx="3" dy="1.6" layer="1" rot="R90"/>
+<smd name="P$2" x="3.4" y="0.27" dx="3" dy="1.6" layer="1" rot="R90"/>
+<smd name="VCC" x="-1" y="-2" dx="1" dy="5.5" layer="1"/>
+<smd name="GND" x="1" y="-2" dx="1" dy="5.5" layer="1"/>
+<text x="2.54" y="-5.08" size="1.27" layer="25">&gt;Name</text>
+<text x="2.24" y="3.48" size="1.27" layer="27">&gt;Value</text>
+</package>
+<package name="R_SW_TH">
+<wire x1="-1.651" y1="19.2532" x2="-1.651" y2="-1.3716" width="0.2032" layer="21"/>
+<wire x1="-1.651" y1="-1.3716" x2="-1.651" y2="-2.2352" width="0.2032" layer="21"/>
+<wire x1="-1.651" y1="19.2532" x2="13.589" y2="19.2532" width="0.2032" layer="21"/>
+<wire x1="13.589" y1="19.2532" x2="13.589" y2="-2.2352" width="0.2032" layer="21"/>
+<wire x1="13.589" y1="-2.2352" x2="-1.651" y2="-2.2352" width="0.2032" layer="21"/>
+<pad name="P$1" x="0" y="0" drill="1.6002"/>
+<pad name="P$2" x="0" y="16.9926" drill="1.6002"/>
+<pad name="P$3" x="12.0904" y="15.494" drill="1.6002"/>
+<pad name="P$4" x="12.0904" y="8.4582" drill="1.6002"/>
+</package>
+<package name="SCREWTERMINAL-5MM-2">
+<wire x1="-3.1" y1="4.2" x2="8.1" y2="4.2" width="0.2032" layer="21"/>
+<wire x1="8.1" y1="4.2" x2="8.1" y2="-2.3" width="0.2032" layer="21"/>
+<wire x1="8.1" y1="-2.3" x2="8.1" y2="-3.3" width="0.2032" layer="21"/>
+<wire x1="8.1" y1="-3.3" x2="-3.1" y2="-3.3" width="0.2032" layer="21"/>
+<wire x1="-3.1" y1="-3.3" x2="-3.1" y2="-2.3" width="0.2032" layer="21"/>
+<wire x1="-3.1" y1="-2.3" x2="-3.1" y2="4.2" width="0.2032" layer="21"/>
+<wire x1="8.1" y1="-2.3" x2="-3.1" y2="-2.3" width="0.2032" layer="21"/>
+<wire x1="-3.1" y1="-1.35" x2="-3.7" y2="-1.35" width="0.2032" layer="51"/>
+<wire x1="-3.7" y1="-1.35" x2="-3.7" y2="-2.35" width="0.2032" layer="51"/>
+<wire x1="-3.7" y1="-2.35" x2="-3.1" y2="-2.35" width="0.2032" layer="51"/>
+<wire x1="8.1" y1="4" x2="8.7" y2="4" width="0.2032" layer="51"/>
+<wire x1="8.7" y1="4" x2="8.7" y2="3" width="0.2032" layer="51"/>
+<wire x1="8.7" y1="3" x2="8.1" y2="3" width="0.2032" layer="51"/>
+<circle x="2.5" y="3.7" radius="0.2828" width="0.127" layer="51"/>
+<pad name="1" x="0" y="0" drill="1.3" diameter="2.032" shape="square"/>
+<pad name="2" x="5" y="0" drill="1.3" diameter="2.032"/>
+<text x="-1.27" y="2.54" size="0.4064" layer="25">&gt;NAME</text>
+<text x="-1.27" y="1.27" size="0.4064" layer="27">&gt;VALUE</text>
+</package>
+<package name="1X02_LOCK">
+<wire x1="-0.635" y1="1.27" x2="0.635" y2="1.27" width="0.2032" layer="21"/>
+<wire x1="0.635" y1="1.27" x2="1.27" y2="0.635" width="0.2032" layer="21"/>
+<wire x1="1.27" y1="-0.635" x2="0.635" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="1.27" y1="0.635" x2="1.905" y2="1.27" width="0.2032" layer="21"/>
+<wire x1="1.905" y1="1.27" x2="3.175" y2="1.27" width="0.2032" layer="21"/>
+<wire x1="3.175" y1="1.27" x2="3.81" y2="0.635" width="0.2032" layer="21"/>
+<wire x1="3.81" y1="-0.635" x2="3.175" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="3.175" y1="-1.27" x2="1.905" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="1.905" y1="-1.27" x2="1.27" y2="-0.635" width="0.2032" layer="21"/>
+<wire x1="-1.27" y1="0.635" x2="-1.27" y2="-0.635" width="0.2032" layer="21"/>
+<wire x1="-0.635" y1="1.27" x2="-1.27" y2="0.635" width="0.2032" layer="21"/>
+<wire x1="-1.27" y1="-0.635" x2="-0.635" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="0.635" y1="-1.27" x2="-0.635" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="3.81" y1="0.635" x2="3.81" y2="-0.635" width="0.2032" layer="21"/>
+<pad name="1" x="-0.1778" y="0" drill="1.016" diameter="1.8796" rot="R90"/>
+<pad name="2" x="2.7178" y="0" drill="1.016" diameter="1.8796" rot="R90"/>
+<text x="-1.3462" y="1.8288" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="-1.27" y="-3.175" size="1.27" layer="27">&gt;VALUE</text>
+<rectangle x1="-0.2921" y1="-0.2921" x2="0.2921" y2="0.2921" layer="51"/>
+<rectangle x1="2.2479" y1="-0.2921" x2="2.8321" y2="0.2921" layer="51"/>
+</package>
+<package name="MOLEX-1X2_LOCK">
+<wire x1="-1.27" y1="3.048" x2="-1.27" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="3.81" y1="3.048" x2="3.81" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="3.81" y1="3.048" x2="-1.27" y2="3.048" width="0.127" layer="21"/>
+<wire x1="3.81" y1="-2.54" x2="2.54" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="2.54" y1="-2.54" x2="0" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="0" y1="-2.54" x2="-1.27" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="0" y1="-2.54" x2="0" y2="-1.27" width="0.127" layer="21"/>
+<wire x1="0" y1="-1.27" x2="2.54" y2="-1.27" width="0.127" layer="21"/>
+<wire x1="2.54" y1="-1.27" x2="2.54" y2="-2.54" width="0.127" layer="21"/>
+<pad name="1" x="-0.127" y="0" drill="1.016" diameter="1.8796" shape="square"/>
+<pad name="2" x="2.667" y="0" drill="1.016" diameter="1.8796"/>
+<rectangle x1="-0.2921" y1="-0.2921" x2="0.2921" y2="0.2921" layer="51"/>
+<rectangle x1="2.2479" y1="-0.2921" x2="2.8321" y2="0.2921" layer="51"/>
+</package>
+<package name="1X02_LOCK_LONGPADS">
+<description>This footprint was designed to help hold the alignment of a through-hole component (i.e.  6-pin header) while soldering it into place.  
+You may notice that each hole has been shifted either up or down by 0.005 of an inch from it's more standard position (which is a perfectly straight line).  
+This slight alteration caused the pins (the squares in the middle) to touch the edges of the holes.  Because they are alternating, it causes a "brace" 
+to hold the component in place.  0.005 has proven to be the perfect amount of "off-center" position when using our standard breakaway headers.
+Although looks a little odd when you look at the bare footprint, once you have a header in there, the alteration is very hard to notice.  Also,
+if you push a header all the way into place, it is covered up entirely on the bottom side.  This idea of altering the position of holes to aid alignment 
+will be further integrated into the Sparkfun Library for other footprints.  It can help hold any component with 3 or more connection pins.</description>
+<wire x1="1.651" y1="0" x2="0.889" y2="0" width="0.2032" layer="21"/>
+<wire x1="-1.27" y1="0" x2="-1.016" y2="0" width="0.2032" layer="21"/>
+<wire x1="-1.27" y1="0" x2="-1.27" y2="0.9906" width="0.2032" layer="21"/>
+<wire x1="-1.27" y1="0.9906" x2="-0.9906" y2="1.27" width="0.2032" layer="21"/>
+<wire x1="-1.27" y1="0" x2="-1.27" y2="-0.9906" width="0.2032" layer="21"/>
+<wire x1="-1.27" y1="-0.9906" x2="-0.9906" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="3.81" y1="0" x2="3.556" y2="0" width="0.2032" layer="21"/>
+<wire x1="3.81" y1="0" x2="3.81" y2="-0.9906" width="0.2032" layer="21"/>
+<wire x1="3.81" y1="-0.9906" x2="3.5306" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="3.81" y1="0" x2="3.81" y2="0.9906" width="0.2032" layer="21"/>
+<wire x1="3.81" y1="0.9906" x2="3.5306" y2="1.27" width="0.2032" layer="21"/>
+<pad name="1" x="-0.127" y="0" drill="1.016" shape="long" rot="R90"/>
+<pad name="2" x="2.667" y="0" drill="1.016" shape="long" rot="R90"/>
+<text x="-1.27" y="1.778" size="1.27" layer="25" font="vector">&gt;NAME</text>
+<text x="-1.27" y="-3.302" size="1.27" layer="27" font="vector">&gt;VALUE</text>
+<rectangle x1="-0.2921" y1="-0.2921" x2="0.2921" y2="0.2921" layer="51"/>
+<rectangle x1="2.2479" y1="-0.2921" x2="2.8321" y2="0.2921" layer="51"/>
+</package>
+<package name="SCREWTERMINAL-3.5MM-2_LOCK">
+<wire x1="-1.75" y1="3.4" x2="5.25" y2="3.4" width="0.2032" layer="21"/>
+<wire x1="5.25" y1="3.4" x2="5.25" y2="-2.8" width="0.2032" layer="21"/>
+<wire x1="5.25" y1="-2.8" x2="5.25" y2="-3.6" width="0.2032" layer="21"/>
+<wire x1="5.25" y1="-3.6" x2="-1.75" y2="-3.6" width="0.2032" layer="21"/>
+<wire x1="-1.75" y1="-3.6" x2="-1.75" y2="-2.8" width="0.2032" layer="21"/>
+<wire x1="-1.75" y1="-2.8" x2="-1.75" y2="3.4" width="0.2032" layer="21"/>
+<wire x1="5.25" y1="-2.8" x2="-1.75" y2="-2.8" width="0.2032" layer="21"/>
+<wire x1="-1.75" y1="-1.35" x2="-2.15" y2="-1.35" width="0.2032" layer="51"/>
+<wire x1="-2.15" y1="-1.35" x2="-2.15" y2="-2.35" width="0.2032" layer="51"/>
+<wire x1="-2.15" y1="-2.35" x2="-1.75" y2="-2.35" width="0.2032" layer="51"/>
+<wire x1="5.25" y1="3.15" x2="5.65" y2="3.15" width="0.2032" layer="51"/>
+<wire x1="5.65" y1="3.15" x2="5.65" y2="2.15" width="0.2032" layer="51"/>
+<wire x1="5.65" y1="2.15" x2="5.25" y2="2.15" width="0.2032" layer="51"/>
+<circle x="2" y="3" radius="0.2828" width="0.127" layer="51"/>
+<circle x="0" y="0" radius="0.4318" width="0.0254" layer="51"/>
+<circle x="3.5" y="0" radius="0.4318" width="0.0254" layer="51"/>
+<pad name="1" x="-0.1778" y="0" drill="1.2" diameter="2.032" shape="square"/>
+<pad name="2" x="3.6778" y="0" drill="1.2" diameter="2.032"/>
+<text x="-1.27" y="2.54" size="0.4064" layer="25">&gt;NAME</text>
+<text x="-1.27" y="1.27" size="0.4064" layer="27">&gt;VALUE</text>
+</package>
+<package name="1X02_LONGPADS">
+<pad name="1" x="0" y="0" drill="1.1176" diameter="1.8796" shape="long" rot="R90"/>
+<pad name="2" x="2.54" y="0" drill="1.1176" diameter="1.8796" shape="long" rot="R90"/>
+</package>
+<package name="1X02_NO_SILK">
+<pad name="1" x="0" y="0" drill="1.016" diameter="1.8796" rot="R90"/>
+<pad name="2" x="2.54" y="0" drill="1.016" diameter="1.8796" rot="R90"/>
+<text x="-1.3462" y="1.8288" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="-1.27" y="-3.175" size="1.27" layer="27">&gt;VALUE</text>
+<rectangle x1="2.286" y1="-0.254" x2="2.794" y2="0.254" layer="51"/>
+<rectangle x1="-0.254" y1="-0.254" x2="0.254" y2="0.254" layer="51"/>
+</package>
+<package name="JST-2-PTH">
+<wire x1="-2" y1="0" x2="-2" y2="-1.8" width="0.2032" layer="21"/>
+<wire x1="-2" y1="-1.8" x2="-3" y2="-1.8" width="0.2032" layer="21"/>
+<wire x1="-3" y1="-1.8" x2="-3" y2="6" width="0.2032" layer="21"/>
+<wire x1="-3" y1="6" x2="3" y2="6" width="0.2032" layer="21"/>
+<wire x1="3" y1="6" x2="3" y2="-1.8" width="0.2032" layer="21"/>
+<wire x1="3" y1="-1.8" x2="2" y2="-1.8" width="0.2032" layer="21"/>
+<wire x1="2" y1="-1.8" x2="2" y2="0" width="0.2032" layer="21"/>
+<pad name="1" x="-1" y="0" drill="0.7" diameter="1.4478"/>
+<pad name="2" x="1" y="0" drill="0.7" diameter="1.4478"/>
+<text x="-1.27" y="5.27" size="0.4064" layer="25">&gt;Name</text>
+<text x="-1.27" y="4" size="0.4064" layer="27">&gt;Value</text>
+<text x="0.6" y="0.7" size="1.27" layer="51">+</text>
+<text x="-1.4" y="0.7" size="1.27" layer="51">-</text>
+</package>
+<package name="1X02_XTRA_BIG">
+<wire x1="-5.08" y1="2.54" x2="-5.08" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="-5.08" y1="-2.54" x2="5.08" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="5.08" y1="-2.54" x2="5.08" y2="2.54" width="0.127" layer="21"/>
+<wire x1="5.08" y1="2.54" x2="-5.08" y2="2.54" width="0.127" layer="21"/>
+<pad name="1" x="-2.54" y="0" drill="2.0574" diameter="3.556"/>
+<pad name="2" x="2.54" y="0" drill="2.0574" diameter="3.556"/>
+</package>
+<package name="1X02_PP_HOLES_ONLY">
+<circle x="0" y="0" radius="0.635" width="0.127" layer="51"/>
+<circle x="2.54" y="0" radius="0.635" width="0.127" layer="51"/>
+<pad name="1" x="0" y="0" drill="0.889" diameter="0.8128" rot="R90"/>
+<pad name="2" x="2.54" y="0" drill="0.889" diameter="0.8128" rot="R90"/>
+<hole x="0" y="0" drill="1.4732"/>
+<hole x="2.54" y="0" drill="1.4732"/>
+</package>
+<package name="SCREWTERMINAL-3.5MM-2-NS">
+<wire x1="-1.75" y1="3.4" x2="5.25" y2="3.4" width="0.2032" layer="51"/>
+<wire x1="5.25" y1="3.4" x2="5.25" y2="-2.8" width="0.2032" layer="51"/>
+<wire x1="5.25" y1="-2.8" x2="5.25" y2="-3.6" width="0.2032" layer="51"/>
+<wire x1="5.25" y1="-3.6" x2="-1.75" y2="-3.6" width="0.2032" layer="51"/>
+<wire x1="-1.75" y1="-3.6" x2="-1.75" y2="-2.8" width="0.2032" layer="51"/>
+<wire x1="-1.75" y1="-2.8" x2="-1.75" y2="3.4" width="0.2032" layer="51"/>
+<wire x1="5.25" y1="-2.8" x2="-1.75" y2="-2.8" width="0.2032" layer="51"/>
+<wire x1="-1.75" y1="-1.35" x2="-2.15" y2="-1.35" width="0.2032" layer="51"/>
+<wire x1="-2.15" y1="-1.35" x2="-2.15" y2="-2.35" width="0.2032" layer="51"/>
+<wire x1="-2.15" y1="-2.35" x2="-1.75" y2="-2.35" width="0.2032" layer="51"/>
+<wire x1="5.25" y1="3.15" x2="5.65" y2="3.15" width="0.2032" layer="51"/>
+<wire x1="5.65" y1="3.15" x2="5.65" y2="2.15" width="0.2032" layer="51"/>
+<wire x1="5.65" y1="2.15" x2="5.25" y2="2.15" width="0.2032" layer="51"/>
+<circle x="2" y="3" radius="0.2828" width="0.127" layer="51"/>
+<pad name="1" x="0" y="0" drill="1.2" diameter="2.032" shape="square"/>
+<pad name="2" x="3.5" y="0" drill="1.2" diameter="2.032"/>
+<text x="-1.27" y="2.54" size="0.4064" layer="25">&gt;NAME</text>
+<text x="-1.27" y="1.27" size="0.4064" layer="27">&gt;VALUE</text>
+</package>
+<package name="JST-2-PTH-NS">
+<wire x1="-2" y1="0" x2="-2" y2="-1.8" width="0.2032" layer="51"/>
+<wire x1="-2" y1="-1.8" x2="-3" y2="-1.8" width="0.2032" layer="51"/>
+<wire x1="-3" y1="-1.8" x2="-3" y2="6" width="0.2032" layer="51"/>
+<wire x1="-3" y1="6" x2="3" y2="6" width="0.2032" layer="51"/>
+<wire x1="3" y1="6" x2="3" y2="-1.8" width="0.2032" layer="51"/>
+<wire x1="3" y1="-1.8" x2="2" y2="-1.8" width="0.2032" layer="51"/>
+<wire x1="2" y1="-1.8" x2="2" y2="0" width="0.2032" layer="51"/>
+<pad name="1" x="-1" y="0" drill="0.7" diameter="1.4478"/>
+<pad name="2" x="1" y="0" drill="0.7" diameter="1.4478"/>
+<text x="-1.27" y="5.27" size="0.4064" layer="25">&gt;Name</text>
+<text x="-1.27" y="4" size="0.4064" layer="27">&gt;Value</text>
+<text x="0.6" y="0.7" size="1.27" layer="51">+</text>
+<text x="-1.4" y="0.7" size="1.27" layer="51">-</text>
+</package>
+<package name="JST-2-PTH-KIT">
+<description>&lt;H3&gt;JST-2-PTH-KIT&lt;/h3&gt;
+2-Pin JST, through-hole connector&lt;br&gt;
+&lt;br&gt;
+&lt;b&gt;Warning:&lt;/b&gt; This is the KIT version of this package. This package has a smaller diameter top stop mask, which doesn't cover the diameter of the pad. This means only the bottom side of the pads' copper will be exposed. You'll only be able to solder to the bottom side.</description>
+<wire x1="-2" y1="0" x2="-2" y2="-1.8" width="0.2032" layer="51"/>
+<wire x1="-2" y1="-1.8" x2="-3" y2="-1.8" width="0.2032" layer="51"/>
+<wire x1="-3" y1="-1.8" x2="-3" y2="6" width="0.2032" layer="51"/>
+<wire x1="-3" y1="6" x2="3" y2="6" width="0.2032" layer="51"/>
+<wire x1="3" y1="6" x2="3" y2="-1.8" width="0.2032" layer="51"/>
+<wire x1="3" y1="-1.8" x2="2" y2="-1.8" width="0.2032" layer="51"/>
+<wire x1="2" y1="-1.8" x2="2" y2="0" width="0.2032" layer="51"/>
+<pad name="1" x="-1" y="0" drill="0.7" diameter="1.4478" stop="no"/>
+<pad name="2" x="1" y="0" drill="0.7" diameter="1.4478" stop="no"/>
+<text x="-1.27" y="5.27" size="0.4064" layer="25">&gt;Name</text>
+<text x="-1.27" y="4" size="0.4064" layer="27">&gt;Value</text>
+<text x="0.6" y="0.7" size="1.27" layer="51">+</text>
+<text x="-1.4" y="0.7" size="1.27" layer="51">-</text>
+<polygon width="0.127" layer="30">
+<vertex x="-0.9975" y="-0.6604" curve="-90.025935"/>
+<vertex x="-1.6604" y="0" curve="-90.017354"/>
+<vertex x="-1" y="0.6604" curve="-90"/>
+<vertex x="-0.3396" y="0" curve="-90.078137"/>
+</polygon>
+<polygon width="0.127" layer="29">
+<vertex x="-1" y="-0.2865" curve="-90.08005"/>
+<vertex x="-1.2865" y="0" curve="-90.040011"/>
+<vertex x="-1" y="0.2865" curve="-90"/>
+<vertex x="-0.7135" y="0" curve="-90"/>
+</polygon>
+<polygon width="0.127" layer="30">
+<vertex x="1.0025" y="-0.6604" curve="-90.025935"/>
+<vertex x="0.3396" y="0" curve="-90.017354"/>
+<vertex x="1" y="0.6604" curve="-90"/>
+<vertex x="1.6604" y="0" curve="-90.078137"/>
+</polygon>
+<polygon width="0.127" layer="29">
+<vertex x="1" y="-0.2865" curve="-90.08005"/>
+<vertex x="0.7135" y="0" curve="-90.040011"/>
+<vertex x="1" y="0.2865" curve="-90"/>
+<vertex x="1.2865" y="0" curve="-90"/>
+</polygon>
+</package>
+<package name="SPRINGTERMINAL-2.54MM-2">
+<wire x1="-4.2" y1="7.88" x2="-4.2" y2="-2.8" width="0.254" layer="21"/>
+<wire x1="-4.2" y1="-2.8" x2="-4.2" y2="-4.72" width="0.254" layer="51"/>
+<wire x1="-4.2" y1="-4.72" x2="3.44" y2="-4.72" width="0.254" layer="51"/>
+<wire x1="3.44" y1="-4.72" x2="3.44" y2="-2.8" width="0.254" layer="51"/>
+<wire x1="3.44" y1="7.88" x2="-4.2" y2="7.88" width="0.254" layer="21"/>
+<wire x1="0" y1="0" x2="0" y2="5.08" width="0.254" layer="1"/>
+<wire x1="0" y1="0" x2="0" y2="5.08" width="0.254" layer="16"/>
+<wire x1="2.54" y1="0" x2="2.54" y2="5.08" width="0.254" layer="16"/>
+<wire x1="2.54" y1="0" x2="2.54" y2="5.08" width="0.254" layer="1"/>
+<wire x1="-4.2" y1="-2.8" x2="3.44" y2="-2.8" width="0.254" layer="21"/>
+<wire x1="3.44" y1="4" x2="3.44" y2="1" width="0.254" layer="21"/>
+<wire x1="3.44" y1="7.88" x2="3.44" y2="6" width="0.254" layer="21"/>
+<wire x1="3.44" y1="-0.9" x2="3.44" y2="-2.8" width="0.254" layer="21"/>
+<pad name="1" x="0" y="0" drill="1.1" diameter="1.9"/>
+<pad name="P$2" x="0" y="5.08" drill="1.1" diameter="1.9"/>
+<pad name="P$3" x="2.54" y="5.08" drill="1.1" diameter="1.9"/>
+<pad name="2" x="2.54" y="0" drill="1.1" diameter="1.9"/>
+</package>
+</packages>
+<symbols>
+<symbol name="M02">
+<wire x1="3.81" y1="-2.54" x2="-2.54" y2="-2.54" width="0.4064" layer="94"/>
+<wire x1="1.27" y1="2.54" x2="2.54" y2="2.54" width="0.6096" layer="94"/>
+<wire x1="1.27" y1="0" x2="2.54" y2="0" width="0.6096" layer="94"/>
+<wire x1="-2.54" y1="5.08" x2="-2.54" y2="-2.54" width="0.4064" layer="94"/>
+<wire x1="3.81" y1="-2.54" x2="3.81" y2="5.08" width="0.4064" layer="94"/>
+<wire x1="-2.54" y1="5.08" x2="3.81" y2="5.08" width="0.4064" layer="94"/>
+<text x="-2.54" y="-5.08" size="1.778" layer="96">&gt;VALUE</text>
+<text x="-2.54" y="5.842" size="1.778" layer="95">&gt;NAME</text>
+<pin name="1" x="7.62" y="0" visible="pad" length="middle" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="2" x="7.62" y="2.54" visible="pad" length="middle" direction="pas" swaplevel="1" rot="R180"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="M02" prefix="JP" uservalue="yes">
+<description>&lt;b&gt;Header 2&lt;/b&gt;
+Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-00116), right angle break away headers (PRT-00553), swiss pins (PRT-00743), machine pins (PRT-00117), and female headers (PRT-00115). Molex polarized connector foot print use with SKU : PRT-08233 with associated crimp pins and housings.</description>
+<gates>
+<gate name="G$1" symbol="M02" x="-2.54" y="0"/>
+</gates>
+<devices>
+<device name="PTH" package="1X02">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="POLAR" package="MOLEX-1X2">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="3.5MM" package="SCREWTERMINAL-3.5MM-2">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-JST-2MM-SMT" package="JST-2-SMD">
+<connects>
+<connect gate="G$1" pin="1" pad="2"/>
+<connect gate="G$1" pin="2" pad="1"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="PROD_ID" value="CONN-08352"/>
+</technology>
+</technologies>
+</device>
+<device name="PTH2" package="1X02_BIG">
+<connects>
+<connect gate="G$1" pin="1" pad="P$1"/>
+<connect gate="G$1" pin="2" pad="P$2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="4UCON-15767" package="JST-2-SMD-VERT">
+<connects>
+<connect gate="G$1" pin="1" pad="GND"/>
+<connect gate="G$1" pin="2" pad="VCC"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="ROCKER" package="R_SW_TH">
+<connects>
+<connect gate="G$1" pin="1" pad="P$3"/>
+<connect gate="G$1" pin="2" pad="P$4"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="5MM" package="SCREWTERMINAL-5MM-2">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="LOCK" package="1X02_LOCK">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="POLAR_LOCK" package="MOLEX-1X2_LOCK">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="LOCK_LONGPADS" package="1X02_LOCK_LONGPADS">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="3.5MM_LOCK" package="SCREWTERMINAL-3.5MM-2_LOCK">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="PTH3" package="1X02_LONGPADS">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="1X02_NO_SILK" package="1X02_NO_SILK">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="JST-PTH-2" package="JST-2-PTH">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="PTH4" package="1X02_XTRA_BIG">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="POGO_PIN_HOLES_ONLY" package="1X02_PP_HOLES_ONLY">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="3.5MM-NO_SILK" package="SCREWTERMINAL-3.5MM-2-NS">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-JST-2-PTH-NO_SILK" package="JST-2-PTH-NS">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="JST-PTH-2-KIT" package="JST-2-PTH-KIT">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="SPRING-2.54-RA" package="SPRINGTERMINAL-2.54MM-2">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 <attribute name="AUTHOR" value="Noah Klugman and Joshua Adkins"/>
@@ -12735,34 +13191,34 @@ Block, Siemens and generic&lt;p&gt;
 </part>
 <part name="ASSY2" library="chips" deviceset="WRL-13678" device=""/>
 <part name="C2" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10nF">
-<attribute name="DESCRIPTION" value="CAP CER 10000PF 50V X7R 0402"/>
-<attribute name="DIGIKEY" value="490-7763-1-ND"/>
-<attribute name="MANUFACTURER" value="Murata"/>
-<attribute name="MPN" value="GRM155R71H103JA88D"/>
+<attribute name="DESCRIPTION" value="CAP CER 10000PF 16V X7R 0402"/>
+<attribute name="DIGIKEY" value="490-1313-1-ND"/>
+<attribute name="MANUFACTURER" value="Murata Electronics North America"/>
+<attribute name="MPN" value="GRM155R71C103KA01D"/>
 </part>
 <part name="C3" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10nF">
-<attribute name="DESCRIPTION" value="CAP CER 10000PF 50V X7R 0402"/>
-<attribute name="DIGIKEY" value="490-7763-1-ND"/>
-<attribute name="MANUFACTURER" value="Murata"/>
-<attribute name="MPN" value="GRM155R71H103JA88D"/>
+<attribute name="DESCRIPTION" value="CAP CER 10000PF 16V X7R 0402"/>
+<attribute name="DIGIKEY" value="490-1313-1-ND"/>
+<attribute name="MANUFACTURER" value="Murata Electronics North America"/>
+<attribute name="MPN" value="GRM155R71C103KA01D"/>
 </part>
 <part name="C13" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10uF">
-<attribute name="DESCRIPTION" value="CAP CER 10000PF 50V X7R 0402"/>
-<attribute name="DIGIKEY" value="490-7763-1-ND"/>
-<attribute name="MANUFACTURER" value="Murata"/>
-<attribute name="MPN" value="GRM155R71H103JA88D"/>
+<attribute name="DESCRIPTION" value="CAP CER 10UF 6.3V X5R 0402"/>
+<attribute name="DIGIKEY" value="490-13211-1-ND"/>
+<attribute name="MANUFACTURER" value="Murata Electronics North America"/>
+<attribute name="MPN" value="GRJ155R60J106ME11D"/>
 </part>
-<part name="C7" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="100nF">
-<attribute name="DESCRIPTION" value="CAP CER 0.1UF 10V X7R 0402"/>
-<attribute name="DIGIKEY" value="490-10777-1-ND"/>
-<attribute name="MANUFACTURER" value="Murata"/>
-<attribute name="MPN" value="GRM155R71A104JA01D"/>
+<part name="C7" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.1uF">
+<attribute name="DESCRIPTION" value="CAP CER 0.1UF 10V X5R 0402"/>
+<attribute name="DIGIKEY" value="311-1336-1-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="CC0402KRX5R6BB104"/>
 </part>
 <part name="C4" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.1uF">
-<attribute name="DESCRIPTION" value="CAP CER 0.1UF 10V X7R 0402"/>
-<attribute name="DIGIKEY" value="490-10777-1-ND"/>
-<attribute name="MANUFACTURER" value="Murata"/>
-<attribute name="MPN" value="GRM155R71A104JA01D"/>
+<attribute name="DESCRIPTION" value="CAP CER 0.1UF 10V X5R 0402"/>
+<attribute name="DIGIKEY" value="311-1336-1-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="CC0402KRX5R6BB104"/>
 </part>
 <part name="C12" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="4.7uF">
 <attribute name="DESCRIPTION" value="CAP CER 4.7UF 6.3V X5R 0402"/>
@@ -12770,14 +13226,17 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="MANUFACTURER" value="TDK"/>
 <attribute name="MPN" value="C1005X5R0J475K050BC"/>
 </part>
-<part name="C14" library="passives" deviceset="CAPACITOR" device="0805_CAP" value="10uF">
-<attribute name="DESCRIPTION" value="CAP CER 10UF 10V X7R 0805"/>
-<attribute name="DIGIKEY" value="490-8316-1-ND"/>
-<attribute name="MANUFACTURER" value="Murata"/>
-<attribute name="MPN" value="GRM21BR71A106ME51L"/>
+<part name="C14" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="10uF">
+<attribute name="DESCRIPTION" value="CAP CER 10UF 6.3V X5R 0402"/>
+<attribute name="DIGIKEY" value="490-13211-1-ND"/>
+<attribute name="MANUFACTURER" value="Murata Electronics North America"/>
+<attribute name="MPN" value="GRJ155R60J106ME11D"/>
 </part>
 <part name="D9" library="leds" deviceset="LED" device="0603" value="BLUE">
-<attribute name="DIGIKEY" value="160-1837-6-ND"/>
+<attribute name="DESCRIPTION" value="LED BLUE CLEAR SMD"/>
+<attribute name="DIGIKEY" value="160-1837-6-ND "/>
+<attribute name="MANUFACTURER" value="Lite-On Inc."/>
+<attribute name="MPN" value="LTST-C194TBKT"/>
 </part>
 <part name="FRAME1" library="lab11-frames" deviceset="LETTER_L_BLANK" device=""/>
 <part name="FRAME3" library="lab11-frames" deviceset="LETTER_L_BLANK" device=""/>
@@ -12788,7 +13247,7 @@ Block, Siemens and generic&lt;p&gt;
 <part name="GND33" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND35" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND8" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
-<part name="J1" library="connector" deviceset="CON_MICRO_SD" device="DM3AT-SF-PEJM5"/>
+<part name="J1" library="connector" deviceset="DM3AT-SF-PEJM5" device=""/>
 <part name="L1" library="passives" deviceset="INDUCTOR" device="0402" value="5.6nH">
 <attribute name="DESCRIPTION" value="FIXED IND 5.6NH 1.77A 40 MOHM"/>
 <attribute name="DIGIKEY" value="490-11766-1-ND"/>
@@ -12812,52 +13271,52 @@ Block, Siemens and generic&lt;p&gt;
 <part name="P+1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="P+2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="R11" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT10K0"/>
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
 <part name="R12" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT10K0"/>
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
 <part name="R13" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT10K0"/>
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
 <part name="R14" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT10K0"/>
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
 <part name="R21" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
 <attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="1276-3432-1-ND"/>
-<attribute name="MANUFACTURER" value="Samsung"/>
-<attribute name="MPN" value="RC1005F104CS"/>
+<attribute name="DIGIKEY" value="541-100KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Vishay Dale"/>
+<attribute name="MPN" value="CRCW0402100KFKED"/>
 </part>
 <part name="R22" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
 <attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="1276-3432-1-ND"/>
-<attribute name="MANUFACTURER" value="Samsung"/>
-<attribute name="MPN" value="RC1005F104CS"/>
+<attribute name="DIGIKEY" value="541-100KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Vishay Dale"/>
+<attribute name="MPN" value="CRCW0402100KFKED"/>
 </part>
 <part name="R23" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
 <attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="1276-3432-1-ND"/>
-<attribute name="MANUFACTURER" value="Samsung"/>
-<attribute name="MPN" value="RC1005F104CS"/>
+<attribute name="DIGIKEY" value="541-100KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Vishay Dale"/>
+<attribute name="MPN" value="CRCW0402100KFKED"/>
 </part>
 <part name="R24" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
 <attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="1276-3432-1-ND"/>
-<attribute name="MANUFACTURER" value="Samsung"/>
-<attribute name="MPN" value="RC1005F104CS"/>
+<attribute name="DIGIKEY" value="541-100KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Vishay Dale"/>
+<attribute name="MPN" value="CRCW0402100KFKED"/>
 </part>
 <part name="R5" library="passives" deviceset="RESISTOR" device="0402_RES" value="1k">
 <attribute name="DESCRIPTION" value="RES SMD 1K OHM 1% 1/16W 0402"/>
@@ -12866,10 +13325,10 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="MPN" value="RMCF0402FT1K00"/>
 </part>
 <part name="R15" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT10K0"/>
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
 <part name="TP1" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP2" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
@@ -12905,7 +13364,10 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="MPN" value="BGA725L6E6327FTSA1"/>
 </part>
 <part name="U4" library="Particle" deviceset="FILTERS" device="" value="SAFFB1G56KB0F0A">
-<attribute name="ABACUS_TECHNOLOGIES" value="SAFFB1G56KB0F0A"/>
+<attribute name="DESCRIPTION" value="FILTER SAW 1.582GHZ 5SMD"/>
+<attribute name="DIGIKEY" value="587-3990-1-ND"/>
+<attribute name="MANUFACTURER" value="Taiyo Yuden"/>
+<attribute name="MPN" value="F6QA1G582H2JM-J"/>
 </part>
 <part name="U7" library="u-blox" library_urn="urn:adsk.eagle:library:406" deviceset="MAX-M8" device="">
 <attribute name="DESCRIPTION" value="IC RECEIVER GPS/GNSS 18LCC"/>
@@ -12918,54 +13380,90 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="SPICEPREFIX" value="X"/>
 </part>
 <part name="P+4" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="R10" library="passives" deviceset="RESISTOR" device="0402_RES" value="5k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<part name="R10" library="passives" deviceset="RESISTOR" device="0402_RES" value="5.1k">
+<attribute name="DESCRIPTION" value="RES SMD 5.1K OHM 1% 1/10W 0402"/>
+<attribute name="DIGIKEY" value="P5.10KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
+<attribute name="MPN" value="ERJ-2RKF5101X"/>
 </part>
 <part name="GND41" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="FRAME5" library="lab11-frames" deviceset="LETTER_L_BLANK" device=""/>
-<part name="J2" library="SparkFun-Connectors" deviceset="JST_2MM_MALE" device=""/>
-<part name="J3" library="SparkFun-Connectors" deviceset="JST_2MM_MALE" device=""/>
 <part name="GND13" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="R32" library="passives" deviceset="RESISTOR" device="0402_RES" value="835k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<part name="R32" library="passives" deviceset="RESISTOR" device="0402_RES" value="825k">
+<attribute name="DESCRIPTION" value="RES SMD 825K OHM 1% 1/10W 0402"/>
+<attribute name="DIGIKEY" value="P825KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
+<attribute name="MPN" value="ERJ-2RKF8253X"/>
 </part>
-<part name="R27" library="passives" deviceset="RESISTOR" device="0402_RES" value="500k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<part name="R27" library="passives" deviceset="RESISTOR" device="0402_RES" value="499k">
+<attribute name="DESCRIPTION" value="RES SMD 499K OHM 1% 1/10W 0402"/>
+<attribute name="DIGIKEY" value="P499KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
+<attribute name="MPN" value="ERJ-2RKF4993X"/>
 </part>
 <part name="GND39" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="U8" library="chips" deviceset="MAX6746" device="">
+<part name="U8" library="chips" deviceset="MAX67XX" device="MAX67XX" technology="MAX6749">
 <attribute name="DIGIKEY" value="MAX6749KA"/>
 </part>
 <part name="GND40" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND42" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="C9" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.82uF"/>
-<part name="C8" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.47uF"/>
+<part name="C9" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.82uF">
+<attribute name="DIGIKEY" value="490-10440-1-ND"/>
+<attribute name="MANUFACTURER" value="Murata Electronics North America"/>
+<attribute name="MPN" value="GRM155C80J824KE15D"/>
+</part>
+<part name="C8" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="2.2uF">
+<attribute name="DIGIKEY" value="490-12696-1-ND"/>
+<attribute name="MANUFACTURER" value="Murata Electronics North America"/>
+<attribute name="MPN" value="GRM155C70J225KE11D"/>
+</part>
 <part name="U5" library="powerwatch" deviceset="IRM-03-5V" device=""/>
 <part name="FRAME6" library="lab11-frames" deviceset="LETTER_L_BLANK" device=""/>
 <part name="AC/L" library="headers" deviceset="TEST_POINT_0.060IN" device=""/>
 <part name="AC/N" library="headers" deviceset="TEST_POINT_0.060IN" device=""/>
 <part name="SUPPLY1" library="umich" deviceset="GND" device=""/>
-<part name="C17" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-US" device="E5-13" package3d_urn="urn:adsk.eagle:package:23375/1" value="2000uF"/>
-<part name="C15" library="passives" deviceset="CAPACITOR" device="1210_CAP" value="100uF"/>
-<part name="C16" library="passives" deviceset="CAPACITOR" device="1210_CAP" value="100uF"/>
-<part name="V1" library="varistor" library_urn="urn:adsk.eagle:library:410" deviceset="S14K385" device="" package3d_urn="urn:adsk.eagle:package:30572/1"/>
-<part name="F1" library="powerwatch" deviceset="MICRO_FUSE" device="500MA_350VAC" value="300VAC - 500ma"/>
+<part name="C17" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-US" device="E5-13" package3d_urn="urn:adsk.eagle:package:23375/1" value="2000uF">
+<spice>
+<pinmapping spiceprefix="C">
+<pinmap gate="G$1" pin="+" pinorder="1"/>
+<pinmap gate="G$1" pin="-" pinorder="2"/>
+</pinmapping>
+</spice>
+<attribute name="DESCRIPTION" value="CAP ALUM 2000UF 20% 6.3V T/H"/>
+<attribute name="DIGIKEY" value="P122284TB-ND"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
+<attribute name="MPN" value="EEU-FS0J202B"/>
+</part>
+<part name="C15" library="passives" deviceset="CAPACITOR" device="1210_CAP" value="100uF">
+<attribute name="DESCRIPTION" value="CAP CER 100UF 6.3V X7S 1210"/>
+<attribute name="DIGIKEY" value="490-10530-1-ND"/>
+<attribute name="MANUFACTURER" value="Murata Electronics North America"/>
+<attribute name="MPN" value="GRM32EC70J107ME15L"/>
+</part>
+<part name="C16" library="passives" deviceset="CAPACITOR" device="1210_CAP" value="100uF">
+<attribute name="DESCRIPTION" value="CAP CER 100UF 6.3V X7S 1210"/>
+<attribute name="DIGIKEY" value="490-10530-1-ND"/>
+<attribute name="MANUFACTURER" value="Murata Electronics North America"/>
+<attribute name="MPN" value="GRM32EC70J107ME15L"/>
+</part>
+<part name="V1" library="varistor" library_urn="urn:adsk.eagle:library:410" deviceset="S14K385" device="" package3d_urn="urn:adsk.eagle:package:30572/1">
+<attribute name="DESCRIPTION" value="VARISTOR 620V 5KA DISC 14MM"/>
+<attribute name="DIGIKEY" value="495-5945-ND"/>
+<attribute name="MANUFACTURER" value="EPCOS (TDK)"/>
+<attribute name="MPN" value="B72214S2381K101"/>
+</part>
+<part name="F1" library="powerwatch" deviceset="MICRO_FUSE" device="500MA_350VAC" value="300VAC - 500ma">
+<attribute name="DESCRIPTION" value="FUSE BRD MNT 500MA 350VAC 100VDC"/>
+</part>
 <part name="R28" library="passives" deviceset="RESISTOR" device="1206_RES_HIGH_CLEARANCE" value="750k">
+<attribute name="DESCRIPTION" value="RES SMD 750K OHM 1% 1/4W 1206"/>
 <attribute name="DIGIKEY" value="311-750KFRCT-ND"/>
 <attribute name="MANUFACTURER" value="Yageo"/>
 <attribute name="MPN" value="RC1206FR-07750KL"/>
 </part>
 <part name="SUPPLY2" library="umich" deviceset="GND" device=""/>
 <part name="R29" library="passives" deviceset="RESISTOR" device="1206_RES_HIGH_CLEARANCE" value="750k">
+<attribute name="DESCRIPTION" value="RES SMD 750K OHM 1% 1/4W 1206"/>
 <attribute name="DIGIKEY" value="311-750KFRCT-ND"/>
 <attribute name="MANUFACTURER" value="Yageo"/>
 <attribute name="MPN" value="RC1206FR-07750KL"/>
@@ -12974,16 +13472,19 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="DIGIKEY" value="296-25252-1-ND"/>
 </part>
 <part name="R8" library="passives" deviceset="RESISTOR" device="0402_RES" value="4.99k">
+<attribute name="DESCRIPTION" value="RES SMD 4.99K OHM 1% 1/10W 0402"/>
 <attribute name="DIGIKEY" value="P4.99KLCT-ND"/>
 <attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
 <attribute name="MPN" value="ERJ-2RKF4991X"/>
 </part>
 <part name="R37" library="passives" deviceset="RESISTOR" device="0402_RES" value="1M">
+<attribute name="DESCRIPTION" value="RES 1M OHM 1% 1/16W 0402"/>
 <attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc."/>
 <attribute name="MPN" value="RMCF0402FT1M00"/>
 </part>
 <part name="R38" library="passives" deviceset="RESISTOR" device="0402_RES" value="1M">
+<attribute name="DESCRIPTION" value="RES 1M OHM 1% 1/16W 0402"/>
 <attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc."/>
 <attribute name="MPN" value="RMCF0402FT1M00"/>
@@ -12994,12 +13495,18 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="MPN" value="ERA-8AEB9533V"/>
 </part>
 <part name="R33" library="passives" deviceset="RESISTOR" device="0402_RES" value="953k">
+<attribute name="DESCRIPTION" value="RES SMD 953K OHM 1% 1/16W 0402"/>
 <attribute name="DIGIKEY" value="YAG3262CT-ND"/>
 <attribute name="MANUFACTURER" value="Yageo"/>
 <attribute name="MPN" value="RC0402FR-07953KL"/>
 </part>
 <part name="SUPPLY3" library="umich" deviceset="GND" device=""/>
-<part name="C5" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.1uF"/>
+<part name="C5" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.1uF">
+<attribute name="DESCRIPTION" value="CAP CER 0.1UF 10V X5R 0402"/>
+<attribute name="DIGIKEY" value="311-1336-1-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="CC0402KRX5R6BB104"/>
+</part>
 <part name="SUPPLY4" library="umich" deviceset="GND" device=""/>
 <part name="SUPPLY5" library="umich" deviceset="GND" device=""/>
 <part name="SUPPLY6" library="umich" deviceset="GND" device=""/>
@@ -13007,16 +13514,19 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="DIGIKEY" value="296-25252-1-ND"/>
 </part>
 <part name="R9" library="passives" deviceset="RESISTOR" device="0402_RES" value="4.99k">
+<attribute name="DESCRIPTION" value="RES SMD 4.99K OHM 1% 1/10W 0402"/>
 <attribute name="DIGIKEY" value="P4.99KLCT-ND"/>
 <attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
 <attribute name="MPN" value="ERJ-2RKF4991X"/>
 </part>
 <part name="R39" library="passives" deviceset="RESISTOR" device="0402_RES" value="1M">
+<attribute name="DESCRIPTION" value="RES 1M OHM 1% 1/16W 0402"/>
 <attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc."/>
 <attribute name="MPN" value="RMCF0402FT1M00"/>
 </part>
 <part name="R40" library="passives" deviceset="RESISTOR" device="0402_RES" value="1M">
+<attribute name="DESCRIPTION" value="RES 1M OHM 1% 1/16W 0402"/>
 <attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc."/>
 <attribute name="MPN" value="RMCF0402FT1M00"/>
@@ -13027,26 +13537,35 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="MPN" value="ERA-8AEB9533V"/>
 </part>
 <part name="R34" library="passives" deviceset="RESISTOR" device="0402_RES" value="953k">
+<attribute name="DESCRIPTION" value="RES SMD 953K OHM 1% 1/16W 0402"/>
 <attribute name="DIGIKEY" value="YAG3262CT-ND"/>
 <attribute name="MANUFACTURER" value="Yageo"/>
 <attribute name="MPN" value="RC0402FR-07953KL"/>
 </part>
 <part name="SUPPLY7" library="umich" deviceset="GND" device=""/>
-<part name="C6" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.1uF"/>
+<part name="C6" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.1uF">
+<attribute name="DESCRIPTION" value="CAP CER 0.1UF 10V X5R 0402"/>
+<attribute name="DIGIKEY" value="311-1336-1-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="CC0402KRX5R6BB104"/>
+</part>
 <part name="SUPPLY8" library="umich" deviceset="GND" device=""/>
 <part name="SUPPLY9" library="umich" deviceset="GND" device=""/>
 <part name="SUPPLY10" library="umich" deviceset="GND" device=""/>
 <part name="R30" library="passives" deviceset="RESISTOR" device="1206_RES_HIGH_CLEARANCE" value="750k">
+<attribute name="DESCRIPTION" value="RES SMD 750K OHM 1% 1/4W 1206"/>
 <attribute name="DIGIKEY" value="311-750KFRCT-ND"/>
 <attribute name="MANUFACTURER" value="Yageo"/>
 <attribute name="MPN" value="RC1206FR-07750KL"/>
 </part>
 <part name="D5" library="passives" deviceset="DIODE_ZENER" device="SOT323">
-<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
-<attribute name="MANUFACTURER" value="ON Semiconductor"/>
-<attribute name="MPN" value="MM3Z3V3B"/>
+<attribute name="DESCRIPTION" value="DIODE ZENER 3.3V 200MW SOD323F"/>
+<attribute name="DIGIKEY" value="MM3Z3V3BCT-ND "/>
+<attribute name="MANUFACTURER" value="ON Semiconductor "/>
+<attribute name="MPN" value="MM3Z3V3B "/>
 </part>
 <part name="R31" library="passives" deviceset="RESISTOR" device="1206_RES_HIGH_CLEARANCE" value="750k">
+<attribute name="DESCRIPTION" value="RES SMD 750K OHM 1% 1/4W 1206"/>
 <attribute name="DIGIKEY" value="311-750KFRCT-ND"/>
 <attribute name="MANUFACTURER" value="Yageo"/>
 <attribute name="MPN" value="RC1206FR-07750KL"/>
@@ -13072,100 +13591,113 @@ Block, Siemens and generic&lt;p&gt;
 <attribute name="MPN" value="CUS10S30,H3F"/>
 </part>
 <part name="D6" library="passives" deviceset="DIODE_ZENER" device="SOT323">
-<attribute name="DIGIKEY" value="RMCF0402FT1M00CT-ND"/>
-<attribute name="MANUFACTURER" value="ON Semiconductor"/>
-<attribute name="MPN" value="MM3Z3V3B"/>
+<attribute name="DESCRIPTION" value="DIODE ZENER 3.3V 200MW SOD323F"/>
+<attribute name="DIGIKEY" value="MM3Z3V3BCT-ND "/>
+<attribute name="MANUFACTURER" value="ON Semiconductor "/>
+<attribute name="MPN" value="MM3Z3V3B "/>
 </part>
 <part name="D7" library="passives" deviceset="DIODE_ZENER" device="SOT323">
-<attribute name="DIGIKEY" value="MM3Z3V3BCT-ND"/>
-<attribute name="MANUFACTURER" value="ON Semiconductor"/>
-<attribute name="MPN" value="MM3Z3V3B"/>
+<attribute name="DESCRIPTION" value="DIODE ZENER 3.3V 200MW SOD323F"/>
+<attribute name="DIGIKEY" value="MM3Z3V3BCT-ND "/>
+<attribute name="MANUFACTURER" value="ON Semiconductor "/>
+<attribute name="MPN" value="MM3Z3V3B "/>
 </part>
 <part name="D8" library="passives" deviceset="DIODE_ZENER" device="SOT323">
-<attribute name="DIGIKEY" value="MM3Z3V3BCT-ND"/>
-<attribute name="MANUFACTURER" value="ON Semiconductor"/>
-<attribute name="MPN" value="MM3Z3V3B"/>
+<attribute name="DESCRIPTION" value="DIODE ZENER 3.3V 200MW SOD323F"/>
+<attribute name="DIGIKEY" value="MM3Z3V3BCT-ND "/>
+<attribute name="MANUFACTURER" value="ON Semiconductor "/>
+<attribute name="MPN" value="MM3Z3V3B "/>
 </part>
 <part name="U1" library="chips" deviceset="AB1815-T3" device=""/>
 <part name="B1" library="batteries" deviceset="MS518SE" device=""/>
 <part name="GND6" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="R6" library="passives" deviceset="RESISTOR" device="0402_RES" value="1.5k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DESCRIPTION" value="RES SMD 1.5K OHM 0.1% 1/16W 0402"/>
+<attribute name="DIGIKEY" value="P1.5KDCCT-ND"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
+<attribute name="MPN" value="ERA-2AEB152X"/>
 </part>
 <part name="GND11" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="R7" library="passives" deviceset="RESISTOR" device="0402_RES" value="1.5k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DESCRIPTION" value="RES SMD 1.5K OHM 0.1% 1/16W 0402"/>
+<attribute name="DIGIKEY" value="P1.5KDCCT-ND"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
+<attribute name="MPN" value="ERA-2AEB152X"/>
 </part>
-<part name="C10" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="1uF"/>
-<part name="C1" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="47pF"/>
+<part name="C10" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="1uF">
+<attribute name="DESCRIPTION" value="CAP CER 1UF 10V X7S 0402"/>
+<attribute name="DIGIKEY" value="490-13409-1-ND"/>
+<attribute name="MANUFACTURER" value="Murata Electronics North America"/>
+<attribute name="MPN" value="GCM155C71A105KE38D"/>
+</part>
+<part name="C1" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="47pF">
+<attribute name="DESCRIPTION" value="CAP CER 47PF 100V C0G/NP0 0402"/>
+<attribute name="DIGIKEY" value="490-7307-1-ND"/>
+<attribute name="MANUFACTURER" value="Murata Electronics North America"/>
+<attribute name="MPN" value="GRM1555C2A470JA01D"/>
+</part>
 <part name="X1" library="crystals" deviceset="ABS07-32.768KHZ" device="-7-T"/>
 <part name="R16" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
 <part name="R25" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
+<attribute name="DIGIKEY" value="541-100KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Vishay Dale"/>
+<attribute name="MPN" value="CRCW0402100KFKED"/>
 </part>
 <part name="R26" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
+<attribute name="DIGIKEY" value="541-100KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Vishay Dale"/>
+<attribute name="MPN" value="CRCW0402100KFKED"/>
 </part>
 <part name="R17" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
 <part name="R1" library="passives" deviceset="RESISTOR" device="0402_RES" value="66.5">
-<attribute name="DESCRIPTION" value="RES SMD 1K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT1K00"/>
+<attribute name="DESCRIPTION" value="RES SMD 66.5 OHM 1% 1/16W 0402"/>
+<attribute name="DIGIKEY" value="YAG3210CT-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="RC0402FR-0766R5L"/>
 </part>
 <part name="R20" library="passives" deviceset="RESISTOR" device="0402_RES" value="34k">
-<attribute name="DESCRIPTION" value="RES SMD 1K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT1K00"/>
+<attribute name="DESCRIPTION" value="RES SMD 34K OHM 1% 1/10W 0402"/>
+<attribute name="DIGIKEY" value="P34.0KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
+<attribute name="MPN" value="ERJ-2RKF3402X"/>
 </part>
 <part name="U6" library="chips" deviceset="LIS2DW12" device=""/>
 <part name="R18" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
 <part name="U14" library="microphones" deviceset="SPH0645LM4H-B" device=""/>
 <part name="R2" library="passives" deviceset="RESISTOR" device="0402_RES" value="68">
-<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT10K0"/>
+<attribute name="DESCRIPTION" value="RES SMD 68 OHM 1% 1/16W 0402"/>
+<attribute name="DIGIKEY" value="311-68.0LRCT-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="RC0402FR-0768RL"/>
 </part>
 <part name="R3" library="passives" deviceset="RESISTOR" device="0402_RES" value="68">
-<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT10K0"/>
+<attribute name="DESCRIPTION" value="RES SMD 68 OHM 1% 1/16W 0402"/>
+<attribute name="DIGIKEY" value="311-68.0LRCT-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="RC0402FR-0768RL"/>
 </part>
 <part name="R4" library="passives" deviceset="RESISTOR" device="0402_RES" value="68">
-<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT10K0"/>
+<attribute name="DESCRIPTION" value="RES SMD 68 OHM 1% 1/16W 0402"/>
+<attribute name="DIGIKEY" value="311-68.0LRCT-ND"/>
+<attribute name="MANUFACTURER" value="Yageo"/>
+<attribute name="MPN" value="RC0402FR-0768RL"/>
 </part>
 <part name="GND2" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="TP19" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
@@ -13177,16 +13709,16 @@ Block, Siemens and generic&lt;p&gt;
 <part name="TP25" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP26" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="R19" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DESCRIPTION" value="RES SMD 150 OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="RMCF0402FT150RCT-ND"/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics"/>
-<attribute name="MPN" value="RMCF0402FT150R"/>
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
 <part name="C11" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="1uF">
-<attribute name="DESCRIPTION" value="CAP CER 10000PF 50V X7R 0402"/>
-<attribute name="DIGIKEY" value="490-7763-1-ND"/>
-<attribute name="MANUFACTURER" value="Murata"/>
-<attribute name="MPN" value="GRM155R71H103JA88D"/>
+<attribute name="DESCRIPTION" value="CAP CER 1UF 10V X7S 0402"/>
+<attribute name="DIGIKEY" value="490-13409-1-ND"/>
+<attribute name="MANUFACTURER" value="Murata Electronics North America"/>
+<attribute name="MPN" value="GCM155C71A105KE38D"/>
 </part>
 <part name="GND4" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="TP27" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
@@ -13195,6 +13727,18 @@ Block, Siemens and generic&lt;p&gt;
 <part name="TP30" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP31" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP32" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
+<part name="JP1" library="SparkFun-Connectors" deviceset="M02" device="4UCON-15767">
+<attribute name="DESCRIPTION" value="CONN HEADER PH TOP 2POS 2MM SMD"/>
+<attribute name="DIGIKEY" value="455-1734-1-ND"/>
+<attribute name="MANUFACTURER" value="JST Sales America Inc."/>
+<attribute name="MPN" value="B2B-PH-SM4-TB(LF)(SN)"/>
+</part>
+<part name="JP2" library="SparkFun-Connectors" deviceset="M02" device="4UCON-15767">
+<attribute name="DESCRIPTION" value="CONN HEADER PH TOP 2POS 2MM SMD"/>
+<attribute name="DIGIKEY" value="455-1734-1-ND"/>
+<attribute name="MANUFACTURER" value="JST Sales America Inc."/>
+<attribute name="MPN" value="B2B-PH-SM4-TB(LF)(SN)"/>
+</part>
 </parts>
 <sheets>
 <sheet>
@@ -13224,37 +13768,64 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <instance part="AC/L" gate="G$1" x="35.56" y="170.18"/>
 <instance part="AC/N" gate="G$1" x="35.56" y="147.32"/>
 <instance part="SUPPLY1" gate="1" x="142.24" y="147.32"/>
-<instance part="C17" gate="G$1" x="152.4" y="162.56"/>
-<instance part="C15" gate="G$1" x="165.1" y="162.56"/>
-<instance part="C16" gate="G$1" x="177.8" y="162.56"/>
-<instance part="V1" gate="G$1" x="60.96" y="160.02" rot="R270"/>
-<instance part="F1" gate="G$1" x="48.26" y="170.18"/>
+<instance part="C17" gate="G$1" x="152.4" y="162.56">
+<attribute name="DIGIKEY" x="152.4" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="152.4" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="152.4" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="152.4" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+</instance>
+<instance part="C15" gate="G$1" x="165.1" y="162.56">
+<attribute name="DIGIKEY" x="165.1" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="165.1" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="165.1" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="165.1" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+</instance>
+<instance part="C16" gate="G$1" x="177.8" y="162.56">
+<attribute name="DIGIKEY" x="177.8" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="177.8" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="177.8" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="177.8" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+</instance>
+<instance part="V1" gate="G$1" x="60.96" y="160.02" rot="R270">
+<attribute name="DIGIKEY" x="60.96" y="160.02" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="60.96" y="160.02" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="60.96" y="160.02" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="60.96" y="160.02" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+</instance>
+<instance part="F1" gate="G$1" x="48.26" y="170.18">
+<attribute name="DESCRIPTION" x="48.26" y="170.18" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+</instance>
 <instance part="R28" gate="G$1" x="53.34" y="132.08" rot="R270">
 <attribute name="DIGIKEY" x="53.34" y="132.08" size="1.27" layer="96" rot="R270" display="off"/>
 <attribute name="MANUFACTURER" x="53.34" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="53.34" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="53.34" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="SUPPLY2" gate="1" x="71.12" y="99.06"/>
 <instance part="R29" gate="G$1" x="93.98" y="134.62" rot="R270">
 <attribute name="DIGIKEY" x="93.98" y="134.62" size="1.27" layer="96" rot="R270" display="off"/>
 <attribute name="MANUFACTURER" x="93.98" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="93.98" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="93.98" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="U9" gate="G$1" x="63.5" y="60.96"/>
 <instance part="R8" gate="G$1" x="60.96" y="40.64">
 <attribute name="DIGIKEY" x="60.96" y="40.64" size="1.27" layer="96" display="off"/>
 <attribute name="MANUFACTURER" x="60.96" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="60.96" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="60.96" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R37" gate="G$1" x="55.88" y="78.74">
 <attribute name="DIGIKEY" x="55.88" y="78.74" size="1.27" layer="96" display="off"/>
 <attribute name="MANUFACTURER" x="55.88" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="55.88" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="55.88" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R38" gate="G$1" x="40.64" y="78.74">
 <attribute name="DIGIKEY" x="40.64" y="78.74" size="1.27" layer="96" display="off"/>
 <attribute name="MANUFACTURER" x="40.64" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="40.64" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="40.64" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R35" gate="G$1" x="40.64" y="58.42">
 <attribute name="DIGIKEY" x="40.64" y="58.42" size="1.27" layer="96" display="off"/>
@@ -13265,9 +13836,15 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="DIGIKEY" x="40.64" y="40.64" size="1.27" layer="96" display="off"/>
 <attribute name="MANUFACTURER" x="40.64" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="40.64" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="40.64" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="SUPPLY3" gate="1" x="30.48" y="71.12"/>
-<instance part="C5" gate="G$1" x="76.2" y="76.2"/>
+<instance part="C5" gate="G$1" x="76.2" y="76.2">
+<attribute name="DIGIKEY" x="76.2" y="76.2" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="76.2" y="76.2" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="76.2" y="76.2" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="76.2" y="76.2" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+</instance>
 <instance part="SUPPLY4" gate="1" x="76.2" y="66.04"/>
 <instance part="SUPPLY5" gate="1" x="33.02" y="33.02"/>
 <instance part="SUPPLY6" gate="1" x="63.5" y="48.26"/>
@@ -13276,16 +13853,19 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="DIGIKEY" x="139.7" y="40.64" size="1.27" layer="96" display="off"/>
 <attribute name="MANUFACTURER" x="139.7" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="139.7" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="139.7" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R39" gate="G$1" x="134.62" y="78.74">
 <attribute name="DIGIKEY" x="134.62" y="78.74" size="1.27" layer="96" display="off"/>
 <attribute name="MANUFACTURER" x="134.62" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="134.62" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="134.62" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R40" gate="G$1" x="119.38" y="78.74">
 <attribute name="DIGIKEY" x="119.38" y="78.74" size="1.27" layer="96" display="off"/>
 <attribute name="MANUFACTURER" x="119.38" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="119.38" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="119.38" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R36" gate="G$1" x="119.38" y="58.42">
 <attribute name="DIGIKEY" x="119.38" y="58.42" size="1.27" layer="96" display="off"/>
@@ -13296,9 +13876,15 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="DIGIKEY" x="119.38" y="40.64" size="1.27" layer="96" display="off"/>
 <attribute name="MANUFACTURER" x="119.38" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="119.38" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="119.38" y="40.64" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="SUPPLY7" gate="1" x="109.22" y="71.12"/>
-<instance part="C6" gate="G$1" x="154.94" y="76.2"/>
+<instance part="C6" gate="G$1" x="154.94" y="76.2">
+<attribute name="DIGIKEY" x="154.94" y="76.2" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="154.94" y="76.2" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="154.94" y="76.2" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="154.94" y="76.2" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+</instance>
 <instance part="SUPPLY8" gate="1" x="154.94" y="66.04"/>
 <instance part="SUPPLY9" gate="1" x="111.76" y="33.02"/>
 <instance part="SUPPLY10" gate="1" x="142.24" y="48.26"/>
@@ -13306,16 +13892,19 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="DIGIKEY" x="43.18" y="132.08" size="1.27" layer="96" rot="R270" display="off"/>
 <attribute name="MANUFACTURER" x="43.18" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="43.18" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="43.18" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="D5" gate="G$1" x="43.18" y="119.38" rot="R90">
 <attribute name="DIGIKEY" x="43.18" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="43.18" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MPN" x="43.18" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="43.18" y="119.38" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R31" gate="G$1" x="83.82" y="134.62" rot="R270">
 <attribute name="DIGIKEY" x="83.82" y="134.62" size="1.27" layer="96" rot="R270" display="off"/>
 <attribute name="MANUFACTURER" x="83.82" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="83.82" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="83.82" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="D1" gate="G$1" x="35.56" y="116.84" rot="R90">
 <attribute name="DIGIKEY" x="35.56" y="116.84" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
@@ -13341,16 +13930,19 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="DIGIKEY" x="53.34" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="53.34" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MPN" x="53.34" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="53.34" y="119.38" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="D7" gate="G$1" x="83.82" y="119.38" rot="R90">
 <attribute name="DIGIKEY" x="83.82" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="83.82" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MPN" x="83.82" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="83.82" y="119.38" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="D8" gate="G$1" x="93.98" y="119.38" rot="R90">
 <attribute name="DIGIKEY" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MPN" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="93.98" y="119.38" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 </instances>
 <busses>
@@ -13723,7 +14315,7 @@ Max input thresh is 2.0v, so dividing 5v/2 (2.5v) should work.
 Note that this is only a problem during transition (5v but no VCC).</text>
 <text x="165.1" y="71.12" size="1.016" layer="98" align="bottom-center">Must not float. Could float 
 if particle is sleeping - so pull down.</text>
-<text x="83.82" y="137.16" size="1.016" layer="98" align="bottom-center">Watchdog Timeout = 297s
+<text x="83.82" y="137.16" size="1.016" layer="98" align="bottom-center">Watchdog Timeout = 1137s
 Reset Period = ~4s</text>
 <text x="167.64" y="88.9" size="1.016" layer="98" align="bottom-center">We want to capture power on/off events on EXTI - 
 use a resistor devider to get the right voltage.</text>
@@ -13733,51 +14325,93 @@ If we don't have VCC the particle won't be on anyways.</text>
 <instances>
 <instance part="FRAME6" gate="G$1" x="0" y="0"/>
 <instance part="FRAME6" gate="G$2" x="152.4" y="0"/>
-<instance part="J2" gate="G$1" x="55.88" y="162.56" rot="R90"/>
-<instance part="J3" gate="G$1" x="233.68" y="162.56" rot="MR90"/>
 <instance part="GND13" gate="1" x="66.04" y="154.94"/>
 <instance part="R32" gate="G$1" x="139.7" y="147.32" rot="R270">
 <attribute name="DIGIKEY" x="139.7" y="147.32" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="DESCRIPTION" x="139.7" y="147.32" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R27" gate="G$1" x="139.7" y="124.46" rot="R270">
 <attribute name="DIGIKEY" x="139.7" y="124.46" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="DESCRIPTION" x="139.7" y="124.46" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="GND39" gate="1" x="226.06" y="157.48"/>
 <instance part="U8" gate="G$1" x="106.68" y="139.7"/>
 <instance part="GND42" gate="1" x="86.36" y="116.84"/>
-<instance part="C9" gate="G$1" x="71.12" y="137.16"/>
-<instance part="C8" gate="G$1" x="78.74" y="129.54"/>
+<instance part="C9" gate="G$1" x="71.12" y="137.16">
+<attribute name="DIGIKEY" x="71.12" y="137.16" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="71.12" y="137.16" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="MPN" x="71.12" y="137.16" size="1.016" layer="96" align="bottom-center" display="off"/>
+</instance>
+<instance part="C8" gate="G$1" x="78.74" y="129.54">
+<attribute name="DIGIKEY" x="78.74" y="129.54" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="78.74" y="129.54" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="MPN" x="78.74" y="129.54" size="1.016" layer="96" align="bottom-center" display="off"/>
+</instance>
 <instance part="GND40" gate="1" x="139.7" y="114.3"/>
 <instance part="U1" gate="G$1" x="121.92" y="45.72"/>
 <instance part="B1" gate="G$1" x="50.8" y="60.96"/>
 <instance part="GND6" gate="1" x="50.8" y="45.72"/>
 <instance part="R6" gate="G$1" x="50.8" y="78.74" rot="R270">
 <attribute name="DIGIKEY" x="50.8" y="78.74" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="DESCRIPTION" x="50.8" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="GND11" gate="1" x="137.16" y="33.02"/>
 <instance part="R7" gate="G$1" x="58.42" y="73.66">
 <attribute name="DIGIKEY" x="58.42" y="73.66" size="1.27" layer="96" display="off"/>
+<attribute name="DESCRIPTION" x="58.42" y="73.66" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="C10" gate="G$1" x="33.02" y="66.04"/>
-<instance part="C1" gate="G$1" x="86.36" y="53.34"/>
+<instance part="C10" gate="G$1" x="33.02" y="66.04">
+<attribute name="DIGIKEY" x="33.02" y="66.04" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="33.02" y="66.04" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="33.02" y="66.04" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="33.02" y="66.04" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+</instance>
+<instance part="C1" gate="G$1" x="86.36" y="53.34">
+<attribute name="DIGIKEY" x="86.36" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="86.36" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="86.36" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="86.36" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+</instance>
 <instance part="X1" gate="G$1" x="68.58" y="63.5" rot="R270"/>
 <instance part="R16" gate="G$1" x="160.02" y="53.34" rot="R270">
 <attribute name="DIGIKEY" x="160.02" y="53.34" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="DESCRIPTION" x="160.02" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R25" gate="G$1" x="190.5" y="91.44" rot="R270">
-<attribute name="DIGIKEY" x="190.5" y="91.44" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="MPN" x="190.5" y="91.44" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DIGIKEY" x="190.5" y="91.44" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="190.5" y="91.44" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="190.5" y="91.44" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R26" gate="G$1" x="190.5" y="71.12" rot="R270">
-<attribute name="DIGIKEY" x="190.5" y="71.12" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="MPN" x="190.5" y="71.12" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DIGIKEY" x="190.5" y="71.12" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="190.5" y="71.12" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="190.5" y="71.12" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R17" gate="G$1" x="200.66" y="71.12" rot="R270">
 <attribute name="DIGIKEY" x="200.66" y="71.12" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="DESCRIPTION" x="200.66" y="71.12" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R18" gate="G$1" x="101.6" y="53.34" rot="R270">
 <attribute name="DIGIKEY" x="101.6" y="53.34" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="DESCRIPTION" x="101.6" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R19" gate="G$1" x="149.86" y="147.32" rot="R270">
 <attribute name="DIGIKEY" x="149.86" y="147.32" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="DESCRIPTION" x="149.86" y="147.32" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+</instance>
+<instance part="JP1" gate="G$1" x="53.34" y="162.56">
+<attribute name="DIGIKEY" x="53.34" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="53.34" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="MPN" x="53.34" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="53.34" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
+</instance>
+<instance part="JP2" gate="G$1" x="236.22" y="162.56" rot="MR0">
+<attribute name="DIGIKEY" x="236.22" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="236.22" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="MPN" x="236.22" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="236.22" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
 </instance>
 </instances>
 <busses>
@@ -13786,15 +14420,15 @@ If we don't have VCC the particle won't be on anyways.</text>
 <net name="GND" class="0">
 <segment>
 <pinref part="GND13" gate="1" pin="GND"/>
-<pinref part="J2" gate="G$1" pin="-"/>
 <wire x1="60.96" y1="162.56" x2="66.04" y2="162.56" width="0.1524" layer="91"/>
 <wire x1="66.04" y1="162.56" x2="66.04" y2="157.48" width="0.1524" layer="91"/>
+<pinref part="JP1" gate="G$1" pin="1"/>
 </segment>
 <segment>
-<pinref part="J3" gate="G$1" pin="-"/>
 <wire x1="228.6" y1="162.56" x2="226.06" y2="162.56" width="0.1524" layer="91"/>
 <pinref part="GND39" gate="1" pin="GND"/>
 <wire x1="226.06" y1="162.56" x2="226.06" y2="160.02" width="0.1524" layer="91"/>
+<pinref part="JP2" gate="G$1" pin="1"/>
 </segment>
 <segment>
 <pinref part="GND42" gate="1" pin="GND"/>
@@ -13853,7 +14487,6 @@ If we don't have VCC the particle won't be on anyways.</text>
 </net>
 <net name="N$23" class="0">
 <segment>
-<pinref part="J2" gate="G$1" pin="+"/>
 <wire x1="60.96" y1="165.1" x2="132.08" y2="165.1" width="0.1524" layer="91"/>
 <wire x1="132.08" y1="165.1" x2="149.86" y2="165.1" width="0.1524" layer="91"/>
 <wire x1="149.86" y1="165.1" x2="228.6" y2="165.1" width="0.1524" layer="91"/>
@@ -13873,7 +14506,8 @@ If we don't have VCC the particle won't be on anyways.</text>
 <pinref part="R19" gate="G$1" pin="1"/>
 <wire x1="149.86" y1="152.4" x2="149.86" y2="165.1" width="0.1524" layer="91"/>
 <junction x="149.86" y="165.1"/>
-<pinref part="J3" gate="G$1" pin="+"/>
+<pinref part="JP1" gate="G$1" pin="2"/>
+<pinref part="JP2" gate="G$1" pin="2"/>
 </segment>
 </net>
 <net name="!EXTERNAL_RST" class="0">
@@ -14725,6 +15359,9 @@ on rising edge.</text>
 </instance>
 <instance part="D9" gate="G$1" x="100.33" y="149.352" rot="R270">
 <attribute name="DIGIKEY" x="100.33" y="149.352" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="MANUFACTURER" x="100.33" y="149.352" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="100.33" y="149.352" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="100.33" y="149.352" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="FRAME3" gate="G$1" x="0" y="0"/>
 <instance part="FRAME3" gate="G$2" x="152.4" y="0"/>
@@ -14762,7 +15399,10 @@ on rising edge.</text>
 <attribute name="DIGIKEY" x="38.1" y="130.81" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="U4" gate="U" x="83.82" y="133.35">
-<attribute name="ABACUS_TECHNOLOGIES" x="83.82" y="133.35" size="1.27" layer="96" display="off"/>
+<attribute name="DESCRIPTION" x="83.82" y="133.35" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="DIGIKEY" x="83.82" y="133.35" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="83.82" y="133.35" size="1.016" layer="96" align="bottom-center" display="off"/>
+<attribute name="MPN" x="83.82" y="133.35" size="1.016" layer="96" align="bottom-center" display="off"/>
 </instance>
 <instance part="U7" gate="MAX-M8" x="139.7" y="128.27">
 <attribute name="DIGIKEY" x="139.7" y="128.27" size="1.27" layer="96" display="off"/>
@@ -15084,9 +15724,11 @@ Pull SA0 low to zero last address bit.</text>
 <instance part="GND8" gate="1" x="124.46" y="81.28"/>
 <instance part="R11" gate="G$1" x="170.18" y="114.3" rot="R90">
 <attribute name="DIGIKEY" x="170.18" y="114.3" size="1.778" layer="96" rot="R90" display="off"/>
+<attribute name="DESCRIPTION" x="170.18" y="114.3" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R15" gate="G$1" x="162.56" y="114.3" rot="R90">
 <attribute name="DIGIKEY" x="162.56" y="114.3" size="1.778" layer="96" rot="R90" display="off"/>
+<attribute name="DESCRIPTION" x="162.56" y="114.3" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="U6" gate="G$1" x="182.88" y="93.98"/>
 <instance part="U14" gate="G$1" x="63.5" y="106.68"/>
@@ -15108,11 +15750,6 @@ Pull SA0 low to zero last address bit.</text>
 <busses>
 </busses>
 <nets>
-<net name="AUDIO_PWR_EN" class="0">
-<segment>
-<wire x1="172.72" y1="187.96" x2="170.18" y2="187.96" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="GND" class="0">
 <segment>
 <pinref part="C13" gate="G$1" pin="2"/>
@@ -15147,21 +15784,6 @@ Pull SA0 low to zero last address bit.</text>
 <net name="N$19" class="0">
 <segment>
 <wire x1="182.88" y1="99.06" x2="182.88" y2="96.52" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$7" class="0">
-<segment>
-<wire x1="96.52" y1="170.18" x2="99.06" y2="170.18" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$6" class="0">
-<segment>
-<wire x1="149.86" y1="175.26" x2="152.4" y2="175.26" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$11" class="0">
-<segment>
-<wire x1="48.26" y1="156.21" x2="48.26" y2="157.48" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="VCC" class="0">
