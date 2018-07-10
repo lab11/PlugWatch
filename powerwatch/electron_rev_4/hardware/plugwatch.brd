@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.1.0">
+<eagle version="9.0.1">
 <drawing>
 <settings>
-<setting alwaysvectorfont="no"/>
+<setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="10" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="10" altunitdist="mil" altunit="mil"/>
+<grid distance="100" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="10" altunitdist="mil" altunit="mil"/>
 <layers>
-<layer number="1" name="Top" color="4" fill="1" visible="no" active="yes"/>
-<layer number="2" name="Route2" color="14" fill="1" visible="no" active="yes"/>
+<layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
+<layer number="2" name="Route2" color="14" fill="1" visible="yes" active="yes"/>
 <layer number="3" name="Route3" color="4" fill="3" visible="no" active="no"/>
 <layer number="4" name="Route4" color="1" fill="4" visible="no" active="no"/>
 <layer number="5" name="Route5" color="4" fill="4" visible="no" active="no"/>
@@ -22,8 +22,8 @@
 <layer number="12" name="Route12" color="1" fill="5" visible="no" active="no"/>
 <layer number="13" name="Route13" color="4" fill="5" visible="no" active="no"/>
 <layer number="14" name="Route14" color="1" fill="6" visible="no" active="no"/>
-<layer number="15" name="Route15" color="11" fill="1" visible="no" active="yes"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="yes"/>
+<layer number="15" name="Route15" color="11" fill="1" visible="yes" active="yes"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
 <layer number="17" name="Pads" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="18" name="Vias" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="yes"/>
@@ -33,11 +33,11 @@
 <layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="yes"/>
 <layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="yes"/>
 <layer number="25" name="tNames" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="26" name="bNames" color="7" fill="1" visible="no" active="yes"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="27" name="tValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="28" name="bValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="yes" active="yes"/>
-<layer number="30" name="bStop" color="7" fill="6" visible="no" active="yes"/>
+<layer number="30" name="bStop" color="7" fill="6" visible="yes" active="yes"/>
 <layer number="31" name="tCream" color="7" fill="4" visible="no" active="yes"/>
 <layer number="32" name="bCream" color="7" fill="5" visible="no" active="yes"/>
 <layer number="33" name="tFinish" color="6" fill="3" visible="no" active="yes"/>
@@ -173,12 +173,10 @@
 <wire x1="0" y1="95.25" x2="55.7022" y2="95.25" width="0.0254" layer="20"/>
 <text x="19.2532" y="54.6608" size="1.016" layer="48" font="vector" ratio="12" rot="R90" align="bottom-center">Cell Antenna below
 (No solid groundplane)</text>
-<text x="2.286" y="69.342" size="1.27" layer="26" font="vector" ratio="12" rot="MR270" align="bottom-center">IMU</text>
 <wire x1="26.3144" y1="15.24" x2="11.303" y2="15.24" width="0.508" layer="48" style="dashdot"/>
 <wire x1="26.3144" y1="92.964" x2="26.3144" y2="15.24" width="0.508" layer="48" style="dashdot"/>
 <text x="27.7114" y="10.287" size="1.016" layer="48" font="vector" ratio="12" rot="R90" align="bottom-center">Wire Entry (above board)</text>
 <wire x1="28.575" y1="-0.3556" x2="28.575" y2="20.0914" width="0.508" layer="48"/>
-<text x="29.718" y="27.178" size="1.27" layer="26" font="vector" ratio="12" rot="MR270" align="bottom-center">GPS</text>
 <text x="27.559" y="40.005" size="0.889" layer="25" font="vector" ratio="12">PowerWatch
 Noah Klugman
 Josh Adkins
@@ -187,7 +185,6 @@ Rev D, 07/18</text>
 <hole x="6.35" y="90.5764" drill="3.175" locked="yes"/>
 <hole x="51.7652" y="4.6736" drill="3.175"/>
 <hole x="49.3522" y="90.5764" drill="3.175" locked="yes"/>
-<text x="52.324" y="36.322" size="1.27" layer="26" font="vector" ratio="12" rot="MR0" align="bottom-center">LIGHT</text>
 <wire x1="55.7022" y1="0" x2="55.7022" y2="95.25" width="0.0254" layer="20"/>
 <circle x="49.3522" y="90.5764" radius="2.6416" width="0.0762" layer="51"/>
 <circle x="6.35" y="90.5764" radius="2.794" width="0.0762" layer="51"/>
@@ -2830,9 +2827,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <param name="checkRestrict" value="1"/>
 <param name="checkStop" value="0"/>
 <param name="checkValues" value="0"/>
-<param name="checkNames" value="1"/>
-<param name="checkWireStubs" value="1"/>
-<param name="checkPolygonWidth" value="0"/>
 <param name="useDiameter" value="31"/>
 <param name="maxErrors" value="50"/>
 </designrules>
@@ -5184,13 +5178,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 </polygon>
 </signal>
 </signals>
-<mfgpreviewcolors>
-<mfgpreviewcolor name="soldermaskcolor" color="0xC8008000"/>
-<mfgpreviewcolor name="silkscreencolor" color="0xFFFEFEFE"/>
-<mfgpreviewcolor name="backgroundcolor" color="0xFF282828"/>
-<mfgpreviewcolor name="coppercolor" color="0xFFFFBF00"/>
-<mfgpreviewcolor name="substratecolor" color="0xFF786E46"/>
-</mfgpreviewcolors>
 <errors>
 <approved hash="6,1,d4573dcaa11eb9bd"/>
 </errors>
