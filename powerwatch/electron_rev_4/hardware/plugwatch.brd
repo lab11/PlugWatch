@@ -3168,17 +3168,17 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="DIGIKEY" value="5001K-ND" x="44.45" y="88.646" size="1.778" layer="27" display="off"/>
 <attribute name="VALUE" x="44.45" y="86.106" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP15" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="34.29" y="91.186" smashed="yes" rot="MR0">
-<attribute name="DIGIKEY" value="5001K-ND" x="34.29" y="91.186" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="34.29" y="88.646" size="1.016" layer="28" font="vector" ratio="12" rot="MR0" align="bottom-center"/>
+<element name="TP15" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="34.29" y="91.186" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="34.29" y="91.186" size="1.778" layer="28" rot="MR0" display="off"/>
+<attribute name="VALUE" x="34.29" y="88.646" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
 <element name="TP16" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="36.83" y="91.186" smashed="yes">
 <attribute name="DIGIKEY" value="5001K-ND" x="36.83" y="91.186" size="1.778" layer="27" display="off"/>
 <attribute name="VALUE" x="36.83" y="88.646" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
-<element name="TP17" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="36.83" y="88.646" smashed="yes" rot="MR0">
-<attribute name="DIGIKEY" value="5001K-ND" x="36.83" y="88.646" size="1.778" layer="27" display="off"/>
-<attribute name="VALUE" x="36.83" y="86.106" size="1.016" layer="28" font="vector" ratio="12" rot="MR0" align="bottom-center"/>
+<element name="TP17" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="36.83" y="88.646" smashed="yes">
+<attribute name="DIGIKEY" value="5001K-ND" x="36.83" y="88.646" size="1.778" layer="28" rot="MR0" display="off"/>
+<attribute name="VALUE" x="36.83" y="86.106" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
 <element name="TP18" library="headers" package="TESTPOINT_0.040IN" value="TEST_POINT_0.040IN" x="31.75" y="88.646" smashed="yes">
 <attribute name="DIGIKEY" value="5001K-ND" x="31.75" y="88.646" size="1.778" layer="27" display="off"/>
