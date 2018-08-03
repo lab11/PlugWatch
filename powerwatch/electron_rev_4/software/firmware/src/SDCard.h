@@ -14,7 +14,7 @@ class SDCard: public Subsystem {
 	typedef Subsystem super;
 
 	const uint8_t SD_INT_PIN = D6;
-	const uint8_t SD_ENABLE_PIN = D5;
+	const uint8_t SD_ENABLE_PIN = C2;
 	const uint8_t SD_CHIP_SELECT = A2;
 
 	#define SCK A3
