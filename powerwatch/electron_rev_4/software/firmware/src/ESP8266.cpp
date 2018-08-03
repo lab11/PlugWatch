@@ -3,13 +3,11 @@
 #include "ESP8266.h"
 
 const int WIFI_PWR_EN = B1;
-const int WIFI_PWR_RST = C4;
 const String endstring = "OK\r\n";
 
 ESP8266::ESP8266() {
   // Power cycle and reset
   pinMode(WIFI_PWR_EN, OUTPUT);
-  pinMode(WIFI_PWR_RST, OUTPUT);
 
   powerOff();
 
@@ -17,15 +15,12 @@ ESP8266::ESP8266() {
 }
 
 void ESP8266::powerOff() {
-  digitalWrite(WIFI_PWR_RST, LOW);
   digitalWrite(WIFI_PWR_EN, LOW);
   delay(1000);
 }
 
 void ESP8266::powerOn() {
   digitalWrite(WIFI_PWR_EN, HIGH);
-  delay(1000);
-  digitalWrite(WIFI_PWR_RST, HIGH);
   delay(1000);
 
   // Reset and set baud rate to 9600 if at 115200
