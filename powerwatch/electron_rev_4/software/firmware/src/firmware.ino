@@ -531,7 +531,7 @@ void loop() {
 
     case SenseChargeState: {
       //It should not take more than 1s to sense charge state
-      manageStateTimer(1000);
+      manageStateTimer(100000);
 
       //Call the loop function for sensing charge state
       LoopStatus result = chargeStateSubsystem.loop();
@@ -554,7 +554,8 @@ void loop() {
       //It should not take more than 10s to check the IMU
       manageStateTimer(10000);
 
-      LoopStatus result = imuSubsystem.loop();
+      //LoopStatus result = imuSubsystem.loop();
+      LoopStatus result = FinishedSuccess;
 
       //return result or error
       if(result == FinishedError) {
@@ -593,7 +594,8 @@ void loop() {
     case SenseCell: {
       manageStateTimer(20000);
 
-      LoopStatus result = cellStatus.loop();
+      //LoopStatus result = cellStatus.loop();
+      LoopStatus result = FinishedSuccess;
 
       //return result or error
       if(result == FinishedError) {
@@ -613,7 +615,8 @@ void loop() {
       //This should just be a GPIO pin
       manageStateTimer(1000);
 
-      LoopStatus result = SD.loop();
+      //LoopStatus result = SD.loop();
+      LoopStatus result = FinishedSuccess;
 
       //return result or error
       if(result == FinishedError) {
@@ -631,7 +634,8 @@ void loop() {
 
     case SenseGPS: {
       manageStateTimer(30000);
-      LoopStatus result = gpsSubsystem.loop();
+      //LoopStatus result = gpsSubsystem.loop();
+      LoopStatus result = FinishedSuccess;
 
       //return result or error
       if(result == FinishedError) {
