@@ -40,6 +40,9 @@ public:
 	void setChargeCurrent();
 
 	int getChargeCurrent();
+    int getVoltage();
+    int getLCycles();
+    int getNCycles();
 
 	volatile unsigned long lastUnplugMillis = 0;
 	volatile int lastUnplugTime = 0;
