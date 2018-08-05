@@ -94,7 +94,7 @@ auto chargeStateSubsystem = ChargeState();
 //* IMU
 //***********************************
 retained int IMU_MOTION_THRESHOLD = Imu::DEFAULT_MOTION_THRESHOLD;
-auto imuSubsystem = Imu(&IMU_MOTION_THRESHOLD);
+auto imuSubsystem = Imu(IMU_MOTION_THRESHOLD);
 
 //***********************************
 //* uCommand
@@ -209,7 +209,7 @@ enum SystemState {
   CheckCloudEvent,
   CheckTimeSync,
   SenseChargeState,
-  SenseMPU,
+  SenseIMU,
   SenseWiFi,
   SenseCell,
   SenseSDPresent,
@@ -550,12 +550,11 @@ void loop() {
       break;
     }
 
-    case SenseMPU: {
+    case SenseIMU: {
       //It should not take more than 10s to check the IMU
       manageStateTimer(10000);
 
-      //LoopStatus result = imuSubsystem.loop();
-      LoopStatus result = FinishedSuccess;
+      LoopStatus result = imuSubsystem.loop();
 
       //return result or error
       if(result == FinishedError) {
@@ -594,8 +593,7 @@ void loop() {
     case SenseCell: {
       manageStateTimer(20000);
 
-      //LoopStatus result = cellStatus.loop();
-      LoopStatus result = FinishedSuccess;
+      LoopStatus result = cellStatus.loop();
 
       //return result or error
       if(result == FinishedError) {
@@ -615,8 +613,7 @@ void loop() {
       //This should just be a GPIO pin
       manageStateTimer(1000);
 
-      //LoopStatus result = SD.loop();
-      LoopStatus result = FinishedSuccess;
+      LoopStatus result = SD.loop();
 
       //return result or error
       if(result == FinishedError) {
@@ -634,8 +631,7 @@ void loop() {
 
     case SenseGPS: {
       manageStateTimer(30000);
-      //LoopStatus result = gpsSubsystem.loop();
-      LoopStatus result = FinishedSuccess;
+      LoopStatus result = gpsSubsystem.loop();
 
       //return result or error
       if(result == FinishedError) {
