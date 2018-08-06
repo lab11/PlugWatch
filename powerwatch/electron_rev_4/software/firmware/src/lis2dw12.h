@@ -31,34 +31,34 @@ protected:
       odr_800,       // High power/Low power 800/200 Hz
       odr_1600,      // High power/Low power 1600/200 Hz
     };
-    
+
     enum mode_t {
       low_power = 0,
       high_performance,
       on_demand,
     };
-    
+
     enum lp_mode_t {
       lp_1 = 0,
       lp_2,
       lp_3,
       lp_4,
     };
-    
+
     enum bandwidth_t {
       bw_odr_2 = 0,
       bw_odr_4,
       bw_odr_10,
       bw_odr_20,
     };
-    
+
     enum full_scale_t {
       fs_2g = 0,
       fs_4g,
       fs_8g,
       fs_16g,
     };
-    
+
     enum fifo_mode_t {
       fifo_bypass= 0,
       fifo_stop = 1,
@@ -66,7 +66,7 @@ protected:
       fifo_byp_to_cont = 4,
       fifo_continuous = 6,
     };
-    
+
     struct config_t {
       odr_t odr;
       mode_t mode;
@@ -85,7 +85,7 @@ protected:
       bool high_pass;
       bool low_noise;
     };
-    
+
     struct int_config_t {
       bool int1_6d;
       bool int1_sngl_tap;
@@ -104,19 +104,19 @@ protected:
       bool int2_fifo_thresh;
       bool int2_data_ready;
     };
-    
+
     struct fifo_config_t {
       fifo_mode_t mode;
       uint8_t thresh; // 0 - 32
     };
-    
+
     struct wakeup_config_t {
       bool sleep_enable;
       uint8_t threshold;
       uint8_t wake_duration;
       uint8_t sleep_duration;
     };
-    
+
     struct status_t {
       bool fifo_thresh;
       bool wakeup;
@@ -130,11 +130,13 @@ protected:
 
 public:
     lis2dw12() {};
-    void  config_for_wake_on_motion(uint8_t motion_threshold);
-    void  config(config_t config);
+    void  read_reg(uint8_t reg, uint8_t* read_buf, size_t len);
+    void  write_reg(uint8_t reg, uint8_t* write_buf, size_t len);
+    void  config(config_t config_s);
     void  interrupt_config(int_config_t config);
     void  interrupt_enable(bool enable);
     void  fifo_config(fifo_config_t config);
+    void  config_for_wake_on_motion(uint8_t motion_threshold);
     void  read_full_fifo(int16_t* x, int16_t* y, int16_t* z);
     void  wakeup_config(wakeup_config_t wake_config);
     status_t read_status(void);
@@ -142,9 +144,6 @@ public:
     void  off();
     void  on();
 
-private:
-    void  read_reg(uint8_t reg, uint8_t* read_buf, size_t len);
-    void  write_reg(uint8_t reg, uint8_t* write_buf, size_t len);
+    config_t ctl_config;
+    uint8_t full_scale;
 };
-
-

@@ -1,8 +1,8 @@
+#include <Particle.h>
+
 #include <Wire.h>
 #include "lis2dw12.h"
 
-static config_t ctl_config;
-static uint8_t full_scale = 2;
 
 void lis2dw12::read_reg(uint8_t reg, uint8_t* read_buf, size_t len){
   if (len > 256) return;
@@ -11,7 +11,7 @@ void lis2dw12::read_reg(uint8_t reg, uint8_t* read_buf, size_t len){
   if(!Wire.isEnabled()) {
     Wire.begin();
   }
-    
+
   Wire.beginTransmission(LIS2DW12_I2C_ADDRESS);
   Wire.write(reg);
   Wire.endTransmission(false);
@@ -27,7 +27,7 @@ void lis2dw12::write_reg(uint8_t reg, uint8_t* write_buf, size_t len){
   Wire.beginTransmission(LIS2DW12_I2C_ADDRESS);
   Wire.write(reg);
   for(size_t i = 0; i < len; i++) {
-    Wire.write(write_buf[i]); 
+    Wire.write(write_buf[i]);
   }
   Wire.endTransmission(true);
 }
@@ -40,8 +40,8 @@ void  lis2dw12::config_for_wake_on_motion(uint8_t motion_threshold) {
     .wake_duration = 3,
     .sleep_duration = 2
   };
-  
-  config_t config = {
+
+  config_t config_s = {
     .odr = odr_200,
     .mode = low_power,
     .lp_mode = lp_1,
@@ -63,7 +63,7 @@ void  lis2dw12::config_for_wake_on_motion(uint8_t motion_threshold) {
   int_config.int1_wakeup = 1;
 
   reset();
-  config(config);
+  config(config_s);
   interrupt_config(int_config);
   interrupt_enable(1);
   wakeup_config(wake_config);
@@ -93,7 +93,7 @@ void lis2dw12::config(config_t config) {
   buf[1] = config.cs_nopull << 4 | config.bdu << 3 |
            config.auto_increment << 2 | config.i2c_disable << 1 |
            config.sim;
-  buf[2] = config.int_open_drain << 5 | config.int_latch << 4 | 
+  buf[2] = config.int_open_drain << 5 | config.int_latch << 4 |
            config.int_active_low << 3 | config.on_demand << 1;
   buf[5] = config.bandwidth << 6 | config.fs << 4 |
            config.high_pass << 3 | config.low_noise << 2;
@@ -134,7 +134,7 @@ void lis2dw12::read_full_fifo(int16_t* x, int16_t* y, int16_t* z) {
   Wire.endTransmission(false);
   Wire.requestFrom(LIS2DW12_I2C_ADDRESS, 1+32*3*2, true);
 
-  size_t i, xyz_i = 0;                                                         
+  size_t i, xyz_i = 0;
   for (i = 1; i < 1 + 32*3*2; i += 6) {
     uint8_t one = Wire.read();
     uint8_t two = Wire.read();
@@ -146,9 +146,9 @@ void lis2dw12::read_full_fifo(int16_t* x, int16_t* y, int16_t* z) {
 
     one = Wire.read();
     two = Wire.read();
-    z[xyz_i] = (xyz_buf[i+4] | (int16_t) xyz_buf[i+5] << 8);
-    xyz_i++;                                                                   
-  }   
+    z[xyz_i] = (one | (int16_t)two << 8);
+    xyz_i++;
+  }
 }
 
 void lis2dw12::reset() {
@@ -185,7 +185,7 @@ void lis2dw12::wakeup_config(wakeup_config_t wake_config) {
   write_reg(LIS2DW12_WAKE_UP_DUR, &wake_dur_byte, 1);
 }
 
-status_t lis2dw12::read_status(void) {
+lis2dw12::status_t lis2dw12::read_status(void) {
   uint8_t status_byte;
   read_reg(LIS2DW12_STATUS, &status_byte, 1);
 

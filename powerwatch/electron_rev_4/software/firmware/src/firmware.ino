@@ -93,8 +93,7 @@ auto chargeStateSubsystem = ChargeState();
 //***********************************
 //* IMU
 //***********************************
-retained int IMU_MOTION_THRESHOLD = Imu::DEFAULT_MOTION_THRESHOLD;
-auto imuSubsystem = Imu(IMU_MOTION_THRESHOLD);
+auto imuSubsystem = Imu();
 
 //***********************************
 //* uCommand
