@@ -13,6 +13,7 @@ LoopStatus Timesync::loop() {
         Particle.syncTime(); // kick off a sync
         return NotFinished;
       } else {
+        rtc.setTime(Time.now());
         return FinishedSuccess;
       }
     }
@@ -66,6 +67,7 @@ LoopStatus Timesync::loop() {
         unsigned long t = NTPtime - 2208988800UL + 1;
         Serial.printlnf("Got time %lu", t);
         Time.setTime(t);
+        rtc.setTime(t);
         return FinishedSuccess;
       }
     }
@@ -73,6 +75,16 @@ LoopStatus Timesync::loop() {
     udp.stop();
     return FinishedError;
   } else {
-    return FinishedError;
+    // Do we need to sync?
+    unsigned long now = millis();
+    unsigned long last = Particle.timeSyncedLast();
+    
+    //We don't have a cellular connection so rely on the RTC
+    if ((now - last) > Timesync::TWELVE_HOURS) { // been a while
+        //set the time
+        Time.setTime(rtc.getTime());
+    } 
+
+    return FinishedSuccess;
   }
 }
