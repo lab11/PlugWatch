@@ -13,7 +13,7 @@ void lis2dw12::read_reg(uint8_t reg, uint8_t* read_buf, size_t len){
   }
 
   Wire.beginTransmission(LIS2DW12_I2C_ADDRESS);
-  Wire.write(reg);
+  Wire.write(readreg);
   Wire.endTransmission(false);
   Wire.requestFrom(LIS2DW12_I2C_ADDRESS, len, true);
   for(size_t i = 0; i < len; i++) {
@@ -34,30 +34,28 @@ void lis2dw12::write_reg(uint8_t reg, uint8_t* write_buf, size_t len){
 
 
 void  lis2dw12::config_for_wake_on_motion(uint8_t motion_threshold) {
-  wakeup_config_t wake_config = {
-    .sleep_enable = 1,
-    .threshold = motion_threshold,
-    .wake_duration = 3,
-    .sleep_duration = 2
-  };
+  wakeup_config_t wake_config;
+  wake_config.sleep_enable = 1;
+  wake_config.threshold = motion_threshold;
+  wake_config.wake_duration = 3;
+  wake_config.sleep_duration = 2;
 
-  config_t config_s = {
-    .odr = odr_200,
-    .mode = low_power,
-    .lp_mode = lp_1,
-    .cs_nopull = 0,
-    .bdu = 1,
-    .auto_increment = 1,
-    .i2c_disable = 1,
-    .int_open_drain = 0,
-    .int_latch = 1,
-    .int_active_low = 0,
-    .on_demand = 1,
-    .bandwidth = bw_odr_2,
-    .fs = fs_4g,
-    .high_pass = 0,
-    .low_noise = 1,
-  };
+  config_t config_s;
+  config_s.odr = odr_200;
+  config_s.mode = low_power;
+  config_s.lp_mode = lp_1;
+  config_s.cs_nopull = 0;
+  config_s.bdu = 1;
+  config_s.auto_increment = 1;
+  config_s.i2c_disable = 1;
+  config_s.int_open_drain = 0;
+  config_s.int_latch = 1;
+  config_s.int_active_low = 0;
+  config_s.on_demand = 1;
+  config_s.bandwidth = bw_odr_2;
+  config_s.fs = fs_4g;
+  config_s.high_pass = 0;
+  config_s.low_noise = 1;
 
   int_config_t int_config = {0};
   int_config.int1_wakeup = 1;
