@@ -47,8 +47,8 @@
 //* Critical System Config
 //***********************************
 int version_num = 2; //hack
-PRODUCT_ID(7009); //US testbed
-int product_id = 7009;
+PRODUCT_ID(7233); //VZ
+int product_id = 7233;
 PRODUCT_VERSION(25);
 int version_int = 25;
 SYSTEM_THREAD(ENABLED);
