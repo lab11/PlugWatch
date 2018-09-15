@@ -113,13 +113,21 @@
 <layer number="131" name="tAdjust" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="132" name="bAdjust" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="133" name="bottom_silk" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="134" name="silk_top" color="7" fill="1" visible="no" active="no"/>
+<layer number="135" name="silk_bottom" color="7" fill="1" visible="no" active="no"/>
+<layer number="136" name="silktop" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="137" name="silkbottom" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="144" name="Drill_legend" color="7" fill="1" visible="no" active="yes"/>
+<layer number="145" name="DrillLegend_01-16" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="146" name="DrillLegend_01-20" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="150" name="Notes" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="151" name="HeatSink" color="7" fill="1" visible="no" active="yes"/>
 <layer number="152" name="_bDocu" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="153" name="FabDoc1" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="154" name="FabDoc2" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="155" name="FabDoc3" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="166" name="AntennaArea" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="168" name="4mmHeightArea" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="199" name="Contour" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="200" name="200bmp" color="1" fill="10" visible="yes" active="yes"/>
 <layer number="201" name="201bmp" color="1" fill="10" visible="yes" active="yes"/>
@@ -900,6 +908,20 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 <text x="-2.8" y="0.7" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
 <text x="4.2" y="0.7" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center">&gt;VALUE</text>
 </package>
+<package name="360272-TERMINAL-BLOCK">
+<pad name="P$1" x="-1.5" y="0" drill="1.2"/>
+<pad name="P$2" x="1.5" y="0" drill="1.2"/>
+<wire x1="-2" y1="2" x2="-2" y2="-2" width="0.254" layer="21"/>
+<wire x1="-2" y1="-2" x2="2" y2="-2" width="0.254" layer="21"/>
+<wire x1="2" y1="-2" x2="2" y2="2" width="0.254" layer="21"/>
+<wire x1="2" y1="2" x2="-2" y2="2" width="0.254" layer="21"/>
+<wire x1="-6" y1="0" x2="-4" y2="0" width="0.254" layer="51"/>
+<wire x1="-4" y1="0" x2="-4.5" y2="0.5" width="0.254" layer="51"/>
+<wire x1="-4" y1="0" x2="-4.5" y2="-0.5" width="0.254" layer="51"/>
+<text x="-5" y="1" size="1.016" layer="51" font="vector" ratio="12" align="bottom-center">Wire
+Entry</text>
+<text x="0" y="2.5" size="0.889" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
+</package>
 </packages>
 <symbols>
 <symbol name="SD-CARD_WITH-CARD-DETECT">
@@ -925,6 +947,14 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 <wire x1="9.398" y1="-16.256" x2="8.89" y2="-15.748" width="0.254" layer="94"/>
 <wire x1="8.89" y1="-15.748" x2="8.128" y2="-15.748" width="0.254" layer="94"/>
 <text x="7.874" y="-15.748" size="1.524" layer="97" ratio="12" align="center-right">CARD_INSERTED</text>
+</symbol>
+<symbol name="1-PIN">
+<pin name="P$1" x="2.54" y="0" visible="off" length="short" rot="R180"/>
+<wire x1="0" y1="2.54" x2="-5.08" y2="2.54" width="0.254" layer="94"/>
+<wire x1="-5.08" y1="2.54" x2="-5.08" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="-5.08" y1="-2.54" x2="0" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="0" y1="-2.54" x2="0" y2="2.54" width="0.254" layer="94"/>
+<text x="-2.54" y="5.08" size="1.778" layer="95" ratio="12" align="bottom-center">&gt;NAME</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -953,6 +983,26 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 <attribute name="DIGIKEY" value="HR1964CT-ND"/>
 <attribute name="MANUFACTURER" value="Hirose Electric Co Ltd" constant="no"/>
 <attribute name="MPN" value="DM3AT-SF-PEJM5" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="SCREW_TERMNIAL_1" prefix="J">
+<description>A small, single terminal block</description>
+<gates>
+<gate name="G$1" symbol="1-PIN" x="2.54" y="0"/>
+</gates>
+<devices>
+<device name="" package="360272-TERMINAL-BLOCK">
+<connects>
+<connect gate="G$1" pin="P$1" pad="P$1 P$2"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="DIGIKEY" value="1849-1246-ND" constant="no"/>
+<attribute name="MANUFACTURER" value="METZ CONNECT USA Inc." constant="no"/>
+<attribute name="MPN" value="360272" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -1337,12 +1387,6 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 <text x="0" y="-2.54" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center">&gt;VALUE</text>
 <circle x="0" y="0" radius="1.27" width="0.127" layer="21"/>
 </package>
-<package name="TESTPOINT_0.060IN">
-<pad name="TESTPOINT" x="-0.02031875" y="0.03301875" drill="1.524"/>
-<text x="-0.02031875" y="1.55701875" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
-<text x="-0.02031875" y="-2.50698125" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center">&gt;VALUE</text>
-<circle x="-0.02031875" y="0.03301875" radius="1.27" width="0.127" layer="21"/>
-</package>
 </packages>
 <symbols>
 <symbol name="TEST_POINT">
@@ -1367,22 +1411,6 @@ https://www.mouser.com/ds/2/813/ESP8266ModuleV1-1095236.pdf</description>
 <technology name="">
 <attribute name="DIGIKEY" value="5001K-ND"/>
 </technology>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="TEST_POINT_0.060IN" prefix="TP">
-<description>A 60mil Testpoint</description>
-<gates>
-<gate name="G$1" symbol="TEST_POINT" x="2.54" y="0"/>
-</gates>
-<devices>
-<device name="" package="TESTPOINT_0.060IN">
-<connects>
-<connect gate="G$1" pin="TESTPOINT" pad="TESTPOINT"/>
-</connects>
-<technologies>
-<technology name=""/>
 </technologies>
 </device>
 </devices>
@@ -1734,6 +1762,29 @@ To use, set global attributes TITLE, AUTHOR and REV in your schematic.</descript
 <wire x1="-1.1" y1="0.8" x2="-1.1" y2="-0.8" width="0.0508" layer="21"/>
 <wire x1="1.1" y1="0.8" x2="1.1" y2="-0.8" width="0.0508" layer="21"/>
 </package>
+<package name="0201_RES" urn="urn:adsk.eagle:footprint:23101/1" locally_modified="yes">
+<description>&lt;b&gt;RESISTOR&lt;/b&gt; chip&lt;p&gt;
+Source: https://www.ibselectronics.com/pdf/pa/walsin/smt_notes.pdf</description>
+<smd name="1" x="-0.255" y="0" dx="0.28" dy="0.43" layer="1"/>
+<smd name="2" x="0.255" y="0" dx="0.28" dy="0.43" layer="1"/>
+<text x="0" y="0.381" size="1.016" layer="25" align="bottom-center">&gt;NAME</text>
+<text x="0" y="-1.397" size="1.016" layer="27" align="bottom-center">&gt;VALUE</text>
+<rectangle x1="-0.3" y1="-0.15" x2="-0.15" y2="0.15" layer="51"/>
+<rectangle x1="0.15" y1="-0.15" x2="0.3" y2="0.15" layer="51"/>
+<rectangle x1="-0.15" y1="-0.15" x2="0.15" y2="0.15" layer="21"/>
+</package>
+<package name="SOD923">
+<smd name="P$1" x="-0.42" y="0" dx="0.36" dy="0.25" layer="1"/>
+<smd name="P$2" x="0.42" y="0" dx="0.36" dy="0.25" layer="1"/>
+<text x="0" y="1.5" size="1.27" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
+<wire x1="-0.4" y1="0.3" x2="-0.15" y2="0.3" width="0.127" layer="21"/>
+<wire x1="-0.15" y1="0.3" x2="0.4" y2="0.3" width="0.127" layer="21"/>
+<wire x1="0.4" y1="0.3" x2="0.4" y2="-0.3" width="0.127" layer="21"/>
+<wire x1="0.4" y1="-0.3" x2="-0.15" y2="-0.3" width="0.127" layer="21"/>
+<wire x1="-0.15" y1="-0.3" x2="-0.4" y2="-0.3" width="0.127" layer="21"/>
+<wire x1="-0.4" y1="-0.3" x2="-0.4" y2="0.3" width="0.127" layer="21"/>
+<wire x1="-0.15" y1="0.3" x2="-0.15" y2="-0.3" width="0.127" layer="21"/>
+</package>
 </packages>
 <symbols>
 <symbol name="CAPACITOR">
@@ -2009,7 +2060,7 @@ To use, set global attributes TITLE, AUTHOR and REV in your schematic.</descript
 </deviceset>
 <deviceset name="RESISTOR" prefix="R" uservalue="yes">
 <description>&lt;b&gt;Resistor&lt;/b&gt;
-Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</description>
+Basic schematic elements and footprints for 0201, 0402, 0603, 1206, and PTH resistors.</description>
 <gates>
 <gate name="G$1" symbol="RESISTOR" x="0" y="0"/>
 </gates>
@@ -2042,6 +2093,15 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 </technologies>
 </device>
 <device name="1206_RES_HIGH_CLEARANCE" package="1206_RES_HIGH_CLEARANCE">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="0201_RES" package="0201_RES">
 <connects>
 <connect gate="G$1" pin="1" pad="1"/>
 <connect gate="G$1" pin="2" pad="2"/>
@@ -2128,6 +2188,17 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <attribute name="DIGIKEY" value="MBR0520LT1GOSCT-ND" constant="no"/>
 <attribute name="MANUFACTURER" value="ON Semiconductor" constant="no"/>
 <attribute name="MPN" value="MBR0520LT1G" constant="no"/>
+</technology>
+</technologies>
+</device>
+<device name="NSR0620P2T5G" package="SOD923">
+<connects>
+<connect gate="G$1" pin="ANODE" pad="P$2"/>
+<connect gate="G$1" pin="CATHODE" pad="P$1"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="DIGIKEY" value="NSR0620P2T5GOSCT-ND" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -2555,11 +2626,11 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <wire x1="18.5" y1="12" x2="18.5" y2="-12" width="0.254" layer="21"/>
 <wire x1="18.5" y1="-12" x2="-18.5" y2="-12" width="0.254" layer="21"/>
 <wire x1="-18.5" y1="-12" x2="-18.5" y2="12" width="0.254" layer="21"/>
-<pad name="AC/L" x="-15.24" y="8.89" drill="0.8" diameter="1.6"/>
-<pad name="AC/N" x="-10.16" y="8.89" drill="0.8" diameter="1.6"/>
-<pad name="V+" x="10.16" y="-8.89" drill="0.8" diameter="1.6"/>
-<pad name="V-" x="15.24" y="-8.89" drill="0.8" diameter="1.6"/>
-<pad name="NC" x="15.24" y="8.89" drill="0.8" diameter="1.6"/>
+<pad name="AC/L" x="15.24" y="8.89" drill="0.8" diameter="1.6" rot="R180"/>
+<pad name="AC/N" x="10.16" y="8.89" drill="0.8" diameter="1.6" rot="R180"/>
+<pad name="V+" x="-10.16" y="-8.89" drill="0.8" diameter="1.6"/>
+<pad name="V-" x="-15.24" y="-8.89" drill="0.8" diameter="1.6"/>
+<pad name="NC" x="-15.24" y="8.89" drill="0.8" diameter="1.6" rot="R180"/>
 <text x="-16" y="13" size="0.889" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
 </package>
 <package name="MIRCRO_FUSE_5MM">
@@ -13419,8 +13490,6 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 </part>
 <part name="U5" library="powerwatch" deviceset="IRM-03-5V" device=""/>
 <part name="FRAME6" library="lab11-frames" deviceset="LETTER_L_BLANK" device=""/>
-<part name="AC/L" library="headers" deviceset="TEST_POINT_0.060IN" device=""/>
-<part name="AC/N" library="headers" deviceset="TEST_POINT_0.060IN" device=""/>
 <part name="SUPPLY1" library="umich" deviceset="GND" device=""/>
 <part name="C17" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-US" device="E5-13" package3d_urn="urn:adsk.eagle:package:23375/1" value="2000uF">
 <spice>
@@ -13739,6 +13808,8 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MANUFACTURER" value="JST Sales America Inc."/>
 <attribute name="MPN" value="B2B-PH-SM4-TB(LF)(SN)"/>
 </part>
+<part name="J2" library="connector" deviceset="SCREW_TERMNIAL_1" device=""/>
+<part name="J3" library="connector" deviceset="SCREW_TERMNIAL_1" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -13765,8 +13836,6 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <instance part="FRAME5" gate="G$1" x="0" y="0"/>
 <instance part="FRAME5" gate="G$2" x="152.4" y="0"/>
 <instance part="U5" gate="G$1" x="116.84" y="165.1"/>
-<instance part="AC/L" gate="G$1" x="35.56" y="170.18"/>
-<instance part="AC/N" gate="G$1" x="35.56" y="147.32"/>
 <instance part="SUPPLY1" gate="1" x="142.24" y="147.32"/>
 <instance part="C17" gate="G$1" x="152.4" y="162.56">
 <attribute name="DIGIKEY" x="152.4" y="162.56" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
@@ -13944,6 +14013,8 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="MPN" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="DESCRIPTION" x="93.98" y="119.38" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
+<instance part="J2" gate="G$1" x="35.56" y="170.18"/>
+<instance part="J3" gate="G$1" x="35.56" y="147.32"/>
 </instances>
 <busses>
 </busses>
@@ -13977,7 +14048,6 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 </net>
 <net name="AC/N-FUSED" class="0">
 <segment>
-<pinref part="AC/N" gate="G$1" pin="TESTPOINT"/>
 <pinref part="U5" gate="G$1" pin="AC/N"/>
 <wire x1="38.1" y1="147.32" x2="60.96" y2="147.32" width="0.1524" layer="91"/>
 <wire x1="60.96" y1="147.32" x2="83.82" y2="147.32" width="0.1524" layer="91"/>
@@ -13994,6 +14064,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <pinref part="R31" gate="G$1" pin="1"/>
 <wire x1="83.82" y1="139.7" x2="83.82" y2="147.32" width="0.1524" layer="91"/>
 <junction x="83.82" y="147.32"/>
+<pinref part="J3" gate="G$1" pin="P$1"/>
 </segment>
 <segment>
 <pinref part="R36" gate="G$1" pin="1"/>
@@ -14103,9 +14174,9 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 </net>
 <net name="N$38" class="0">
 <segment>
-<pinref part="AC/L" gate="G$1" pin="TESTPOINT"/>
 <pinref part="F1" gate="G$1" pin="P$1"/>
 <wire x1="38.1" y1="170.18" x2="40.64" y2="170.18" width="0.1524" layer="91"/>
+<pinref part="J2" gate="G$1" pin="P$1"/>
 </segment>
 </net>
 <net name="AC/L-PERTURB" class="0">
