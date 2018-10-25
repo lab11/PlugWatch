@@ -1,4 +1,4 @@
 {
     "authToken":"my_auth",
-    "product_id": "my_product"
+    "product_ids": [1111]
 }
