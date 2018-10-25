@@ -1,6 +1,6 @@
 [submodule "powerwatch/electron_rev_2/software/nrf/nrf5x-base"]
-	path = powerwatch/electron_rev_2/software/nrf/nrf5x-base
+	path = powerwatch/firmware/nrf/plugwatch_B/nrf5x-base
 	url = https://github.com/lab11/nrf5x-base
 [submodule "powerwatch/nrf51-wit/nrf5x-base"]
-	path = powerwatch/nrf5x-base
+	path = powerwatch/firmware/nrf/nrf5x-base
 	url = https://github.com/lab11/nrf5x-base
