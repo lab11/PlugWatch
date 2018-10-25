@@ -94,126 +94,146 @@ function post_event(event) {
     }
 }
 
-var global_data_stream = null;
+var global_data_streams = [];
+for (var i = 0; i < particle_config.product_ids.length; i++) {
+    global_data_streams.push(null)
+}
 
-function restart_data_stream() {
+function restart_data_streams() {
 
     console.log('Restarting data stream');
 
     // If we have a stream going, kill it
-    if(global_data_stream) {
-        global_data_stream.abort();
+    for (var i = 0; i < global_data_streams.length; i++) {
+        if(global_data_streams[i]) {
+            global_data_streams[i].abort();
+        }
     }
 
     // Get the particle event stream
-    var eventStream = particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'g' })
-    eventStream.catch(function(err) {
-        console.log("Error in event stream");
-        console.log(err);
-    });
-    
-    eventStream.then(
-        function(stream) {
-            console.log('Setting data stream');
-            global_data_stream = stream;
-            stream.on('event', function(event) {
-                try {
-                    post_event(event);
-                } catch(error) {
-                    console.log('Event handling error: ' + error)
-                }
-            });
-            stream.on('error', function(event) {
-                console.log('Stream had error:');
-                console.log(event);
-            });
-        }, function(err) {
-            console.log("Failed to getEventStream: ", err);
-        }
-    );
+    for (var j = 0; j < particle_config.product_ids.length; j++) {
+        var eventStream = particle.getEventStream({ product:particle_config.product_ids[j], auth:particle_config.authToken, name:'g' });
+        eventStream.catch(function(err) {
+            console.log("Error in event stream");
+            console.log(err);
+        });
+        
+        eventStream.then(
+            function(stream) {
+                console.log('Setting data stream');
+                global_data_streams[j] = stream;
+                stream.on('event', function(event) {
+                    try {
+                        post_event(event);
+                    } catch(error) {
+                        console.log('Event handling error: ' + error)
+                    }
+                });
+                stream.on('error', function(event) {
+                    console.log('Stream had error:');
+                    console.log(event);
+                });
+            }, function(err) {
+                console.log("Failed to getEventStream: ", err);
+            }
+        );
+    }
 }
 
-restart_data_stream();
-setInterval(restart_data_stream, 600000);
+restart_data_streams();
+setInterval(restart_data_streams, 600000);
 
+var global_error_streams = [];
+for (var i = 0; i < particle_config.product_ids.length; i++) {
+    global_error_streams.push(null)
+}
 
-var global_error_stream = null;
-
-function restart_error_stream() {
+function restart_error_streams() {
 
     console.log('Restarting error stream');
 
-    if(global_error_stream) {
-        global_error_stream.abort();
+    for (var i = 0; i < global_error_streams.length; i++) {
+        if(global_error_streams[i]) {
+            global_error_streams[i].abort();
+        }
     }
 
     // Get the particle event stream
-    var eventStream = particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken, name:'!' })
-    eventStream.catch(function(err) {
-        console.log("Error in event stream");
-        console.log(err);
-    });
-    
-    eventStream.then(
-        function(stream) {
-            console.log('Setting error stream');
-            global_error_stream = stream;
+    for (var j = 0; j < particle_config.product_ids.length; j++) {
+        var eventStream = particle.getEventStream({ product:particle_config.product_ids[j], auth:particle_config.authToken, name:'!' });
+        eventStream.catch(function(err) {
+            console.log("Error in event stream");
+            console.log(err);
+        });
+        
+        eventStream.then(
+            function(stream) {
+                console.log('Setting error stream');
+                global_error_streams[j] = stream;
 
-            stream.on('event', function(event) {
-                post_error(event);
-            });
-            stream.on('error', function(event) {
-                console.log('Stream had error:');
-                console.log(event);
-            });
-        }, function(err) {
-            console.log("Failed to getEventStream: ", err);
-        }
-    );
+                stream.on('event', function(event) {
+                    post_error(event);
+                });
+                stream.on('error', function(event) {
+                    console.log('Stream had error:');
+                    console.log(event);
+                });
+            }, function(err) {
+                console.log("Failed to getEventStream: ", err);
+            }
+        );
+    }
 }
 
-restart_error_stream();
-setInterval(restart_error_stream, 600000);
+restart_error_streams();
+setInterval(restart_error_streams, 600000);
 
-var global_spark_stream = null;
+var global_spark_streams = [];
+for (var i = 0; i < particle_config.product_ids.length; i++) {
+    global_spark_streams.push(null)
+}
 
-function restart_spark_stream() {
+function restart_spark_streams() {
 
     console.log('Restarting spark stream');
 
-    if(global_spark_stream) {
-        global_spark_stream.abort();
+    for (var i = 0; i < global_spark_streams.length; i++) {
+        if(global_spark_streams[i]) {
+            global_spark_streams[i].abort();
+        }
     }
 
     // Get the particle event stream
-    var eventStream = particle.getEventStream({ product:particle_config.product_id, auth:particle_config.authToken});
-    eventStream.catch(function(err) {
-        console.log("Error in event stream");
-        console.log(err);
-    });
+    for (var j = 0; j < particle_config.product_ids.length; j++) {
+        var eventStream = particle.getEventStream({ product:particle_config.product_ids[j], auth:particle_config.authToken});
+        eventStream.catch(function(err) {
+            console.log("Error in event stream");
+            console.log(err);
+        });
 
-    eventStream.then(
-        function(stream) {
-            console.log('Setting spark stream');
-            global_spark_stream = stream;
+        eventStream.then(
+            function(stream) {
+                console.log('Setting spark stream');
+                global_spark_streams[j] = stream;
 
-            stream.on('event', function(event) {
-                if(event.name.includes('spark')) {
+                stream.on('event', function(event) {
+                    if(event.name.includes('spark')) {
+                        console.log(event);
+                    }
+                });
+                stream.on('error', function(event) {
+                    console.log('Stream had error:');
                     console.log(event);
-                }
-            });
-            stream.on('error', function(event) {
-                console.log('Stream had error:');
-                console.log(event);
-            });
-        }, function(err) {
-            console.log("Failed to getEventStream: ", err);
-        }
-    );
+                });
+            }, function(err) {
+                console.log("Failed to getEventStream: ", err);
+            }
+        );
+    }
 }
 
-restart_spark_stream();
-setInterval(restart_spark_stream, 600000);
+restart_spark_streams();
+setInterval(restart_spark_streams, 600000);
 
 
 //This is the udp section of the listener
