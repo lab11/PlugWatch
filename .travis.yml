@@ -18,4 +18,4 @@ before_script:
 
 script:
   - ./.particle-cli-login.expect "$particle_email" "$particle_password" "$(which particle)"
-  - (pushd powerwatch/electron_rev_3/software && particle compile electron firmware/)
+  - (pushd powerwatch/firmware/particle/plugwatch_C && particle compile electron firmware/)
