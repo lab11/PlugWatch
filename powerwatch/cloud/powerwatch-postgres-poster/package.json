@@ -11,7 +11,7 @@
         "lab11-powerwatch-parser":"0.0.1"
     },
     "scripts": {
-        "start": "./powerwatch-postgres-poster.js -c /etc/config/particle-config.json"
+        "start": "./powerwatch-postgres-poster.js -c /etc/config/particle-config.json -d /etc/config/postgres-config.json"
     },
     "engines": {
         "node": ">=4.3.2"
