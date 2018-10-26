@@ -16,6 +16,9 @@
         "commander":"",
         "lab11-powerwatch-parser":"0.0.1"
     },
+    "scripts": {
+        "start": "./powerwatch-influx-poster.js -c /etc/config/particle-config.json"
+    },
     "engines": {
         "node": ">=4.3.2"
     }
