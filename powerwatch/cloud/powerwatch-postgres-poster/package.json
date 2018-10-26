@@ -10,6 +10,9 @@
         "commander": "",
         "lab11-powerwatch-parser":"0.0.1"
     },
+    "scripts": {
+        "start": "./powerwatch-postgres-poster.js"
+    },
     "engines": {
         "node": ">=4.3.2"
     }
