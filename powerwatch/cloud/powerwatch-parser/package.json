@@ -1,8 +1,7 @@
 {
-    "name": "powerwatch-parser",
+    "name": "lab11-powerwatch-parser",
     "version": "0.0.1",
     "description": "parses powerwatch packets",
-    "private": true,
     "scripts": {
         "start": "powerwatch-parser.js"
     },

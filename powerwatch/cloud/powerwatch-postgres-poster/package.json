@@ -7,7 +7,8 @@
         "particle-api-js": "^7.2.0",
         "pg": "^7.3.0",
         "pg-format": "",
-        "commander": ""
+        "commander": "",
+        "lab11-powerwatch-parser":"0.0.1"
     },
     "engines": {
         "node": ">=4.3.2"

@@ -13,7 +13,8 @@
     "dependencies": {
         "particle-api-js": "^7.2.0",
         "influx-poster": "^1.1.0",
-        "commander":""
+        "commander":"",
+        "lab11-powerwatch-parser":"0.0.1"
     },
     "engines": {
         "node": ">=4.3.2"
