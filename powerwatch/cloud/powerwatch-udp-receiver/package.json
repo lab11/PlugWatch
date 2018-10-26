@@ -5,6 +5,9 @@
     "private": true,
     "dependencies": {
     },
+    "scripts": {
+        "start": "./powerwatch-udp-receiver.js"
+    },
     "engines": {
         "node": ">=4.3.2"
     }
