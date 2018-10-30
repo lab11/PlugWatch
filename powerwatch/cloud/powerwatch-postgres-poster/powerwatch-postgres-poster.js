@@ -12,11 +12,15 @@ var server = dgram.createSocket({type: 'udp4', reuseAddr: true}).bind(5002);
 var command = require('commander');
 
 command.option('-c, --config [config]', 'Particle configuration file.')
-        .option('-d, --database [database]', 'Database configuration file.').parse(process.argv);
+        .option('-d, --database [database]', 'Database configuration file.')
+        .option('-a, --auth [auth]', 'Particle auth token')
+        .option('-u, --username [username]', 'Database username file')
+        .option('-p, --password [password]', 'Database password file').parse(process.argv);
 
 var particle_config = null; 
 if(typeof command.config !== 'undefined') {
     particle_config = require(command.config);
+    particle_config.authToken = fs.readFileSync(command.auth,'utf8').trim()
 } else {
     particle_config = require('./particle-config.json'); 
 }
@@ -24,6 +28,8 @@ if(typeof command.config !== 'undefined') {
 var timescale_config = null; 
 if(typeof command.database !== 'undefined') {
     timescale_config = require(command.database);
+    timescale_config.username = fs.readFileSync(command.username,'utf8').trim()
+    timescale_config.password = fs.readFileSync(command.password,'utf8').trim()
 } else {
     timescale_config = require('./postgres-config.json'); 
 }
