@@ -8,6 +8,7 @@ var moment      = require('moment');
 var rand        = require('random-seed').create(0);
 var passport = require('passport');
 var Strategy = require('passport-google-oauth20').Strategy;
+var fs = require('fs')
 var path = require('path');
 ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 
