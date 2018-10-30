@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: powerwatch-influx-poster
-        image: lab11/powerwatch-influx-poster:latest
+        image: lab11/powerwatch-influx-poster
         volumeMounts:
         - name: config
           mountPath: /etc/config
@@ -30,14 +30,14 @@ spec:
           readOnly: true
       
       - name: powerwatch-udp-receiver
-        image: lab11/powerwatch-udp-receiver:latest
+        image: lab11/powerwatch-udp-receiver
         volumeMounts:
         - name: config
           mountPath: /etc/config
           readOnly: true
 
       - name: powerwatch-postgres-poster
-        image: lab11/powerwatch-postgres-poster:latest
+        image: lab11/powerwatch-postgres-poster
         volumeMounts:
         - name: config
           mountPath: /etc/config
