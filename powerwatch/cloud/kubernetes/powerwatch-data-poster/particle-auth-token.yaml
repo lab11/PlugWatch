@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: particle-auth-token
+type: Opaque
+data:
+  auth-token:
