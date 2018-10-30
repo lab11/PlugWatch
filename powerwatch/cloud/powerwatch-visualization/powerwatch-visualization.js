@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const { Pool }  = require('pg');
 var format      = require('pg-format');
 const express   = require('express');
