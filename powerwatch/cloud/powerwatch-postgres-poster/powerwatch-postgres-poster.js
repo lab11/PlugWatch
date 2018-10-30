@@ -7,6 +7,7 @@ var Particle = require('particle-api-js');
 var powerwatch_parser = require('lab11-powerwatch-parser');
 var particle = new Particle();
 var dgram = require('dgram');
+var fs = require('fs')
 var server = dgram.createSocket({type: 'udp4', reuseAddr: true}).bind(5002);
 
 var command = require('commander');
