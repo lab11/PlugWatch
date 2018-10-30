@@ -1,0 +1,6 @@
+{
+    "host": "senseye.eecs.umich.edu",
+    "port": 8086,
+    "database": "powerwatch",
+    "protocol": "http"
+}

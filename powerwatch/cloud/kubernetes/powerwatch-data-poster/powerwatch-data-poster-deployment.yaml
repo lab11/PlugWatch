@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: powerwatch-data-poster
+  labels:
+    app: powerwatch-data-poster
+spec:
+  selector:
+    matchLabels:
+      app: powerwatch-data-poster
+  template:
+    metadata:
+      labels:
+        app: powerwatch-data-poster
+    spec:
+      containers:
+      - name: powerwatch-influx-poster
+        image: lab11/powerwatch-influx-poster:latest
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config
+          readOnly: true
+
+        - name: particle-secret
+          mountPath: /etc/config/particle
+          readOnly: true
+
+        - name: influx-secret
+          mountPath: /etc/config/influx
+          readOnly: true
+      
+      - name: powerwatch-udp-receiver
+        image: lab11/powerwatch-udp-receiver:latest
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config
+          readOnly: true
+
+      - name: powerwatch-postgres-poster
+        image: lab11/powerwatch-postgres-poster:latest
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config
+          readOnly: true
+
+        - name: particle-secret
+          mountPath: /etc/config/particle
+          readOnly: true
+
+        - name: postgres-secret
+          mountPath: /etc/config/postgres
+          readOnly: true
+
+      volumes:
+      - name: config
+        configMap:
+          name: config
+          items:
+          - key: config.json
+            path: config.json
+
+          - key: influx.json
+            path: influx.json
+
+          - key: postgres.json
+            path: postgres.json
+
+      - name: particle-secret
+        secret:
+          secretName: particle-auth-token
+          items:
+          - key: auth-token
+            path: auth-token
+
+      - name: influx-secret
+        secret:
+          secretName: influx-user-pass
+          items:
+          - key: username
+            path: username
+          - key: password
+            path: password
+
+      - name: postgres-secret
+        secret:
+          secretName: postgres-user-pass
+          items:
+          - key: username
+            path: username
+          - key: password
+            path: password

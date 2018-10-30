@@ -1,0 +1,5 @@
+{
+    "host": "timescale.lab11.eecs.umich.edu",
+    "port": 5432,
+    "database": "powerwatch"
+}
