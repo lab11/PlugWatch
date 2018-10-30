@@ -1,5 +1,3 @@
-var timescale_config = require('./postgres-config.json'); 
-
 const { Pool }  = require('pg');
 var format      = require('pg-format');
 const express   = require('express');
@@ -11,6 +9,20 @@ var Strategy = require('passport-google-oauth20').Strategy;
 var path = require('path');
 ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 
+var command = require('commander');
+
+command.option('-d, --database [database]', 'Database configuration file.')
+        .option('-u, --username [username]', 'Database username file')
+        .option('-p, --password [password]', 'Database password file').parse(process.argv);
+
+var timescale_config = null;
+if(typeof command.database !== 'undefined') {
+    timescale_config = require(command.database);
+    timescale_config.username = fs.readFileSync(command.username,'utf8').trim()
+    timescale_config.password = fs.readFileSync(command.password,'utf8').trim()
+} else {
+    timescale_config = require('./postgres-config.json');
+}
 
 // Configure the google strategy for use by Passport.
 //
