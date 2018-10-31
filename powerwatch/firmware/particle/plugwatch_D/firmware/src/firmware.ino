@@ -303,7 +303,7 @@ void setup() {
   pinMode(D3, OUTPUT);
   digitalWrite(D3, HIGH);
   // SD
-  SD.PowerOff();
+  //SD.PowerOff();
 
   if(uCmd.setSMSMode(1) == RESP_OK) {
     Serial.println("Set up SMS mode");
@@ -673,7 +673,6 @@ void loop() {
         last_logging_event = millis();
       }
 
-      SD.PowerOff();
       state = nextState(state);
       break;
     }
@@ -802,7 +801,6 @@ void loop() {
         }
       } else {
         count = 0;
-        SD.PowerOff();
         state = nextState(state);
       }
 
@@ -898,11 +896,13 @@ void loop() {
       if(!first) {
         mill = millis();
         first = true;
+        SD.PowerOff();
       }
 
       if(millis() - mill > 60000) {
         clearResults(&sensingResults);
         system_cnt++;
+        SD.PowerOn();
         state = CheckCloudEvent;
         first = false;
       }
