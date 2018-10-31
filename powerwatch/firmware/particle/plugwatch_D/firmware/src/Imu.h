@@ -2,7 +2,7 @@
 
 #include <Particle.h>
 
-#include "lis2dw12.h"
+#include "lis2dh12.h"
 #include "Subsystem.h"
 
 #define IMU_INT C4
@@ -15,7 +15,7 @@ class Imu: public Subsystem {
   String result;
 
 public:
-  lis2dw12 accel;
+  lis2dh12 accel;
   void setup();
   LoopStatus loop();
   String getResult();
