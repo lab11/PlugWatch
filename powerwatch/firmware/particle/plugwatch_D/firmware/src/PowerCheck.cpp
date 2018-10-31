@@ -68,12 +68,14 @@ int PowerCheck::getVoltage() {
         count++;
     }
 
-    Serial.printlnf("L count: %d", L_max);
-    Serial.printlnf("N count: %d", N_measure);
+    Serial.printlnf("L voltage count: %d", L_max);
+    Serial.printlnf("N voltage count: %d", N_measure);
 
     float L_volt = ((L_max/4096.0 * 3.3) - (3.3/2))*(953/4.99);
     float N_volt = ((N_measure/4096.0 * 3.3) - (3.3/2))*(953/4.99);
-    return (int)(L_volt - N_volt);
+		int volt = (int)(L_volt - N_volt);
+		Serial.printlnf("Calculated voltage: %d",volt);
+    return volt;
 }
 
 int PowerCheck::getLCycles() {
