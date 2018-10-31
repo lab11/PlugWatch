@@ -295,15 +295,13 @@ void setup() {
   FuelGauge().quickStart();
   shield_id = id();
 
-  //Turn off the audio front end section
-  pinMode(B4, OUTPUT);
-  digitalWrite(B4, LOW);
+  //Setup the watchdog toggle pin
+  pinMode(DAC, OUTPUT);
+  digitalWrite(DAC, LOW);
 
   // GPS
   pinMode(D3, OUTPUT);
   digitalWrite(D3, HIGH);
-  // SD
-  //SD.PowerOff();
 
   if(uCmd.setSMSMode(1) == RESP_OK) {
     Serial.println("Set up SMS mode");
@@ -313,7 +311,6 @@ void setup() {
 
   LEDStatus status;
   status.off();
-
 
   // If our state and lastState is the same we got stuck in a
   // state and didn't transtition
@@ -905,6 +902,11 @@ void loop() {
         SD.PowerOn();
         state = CheckCloudEvent;
         first = false;
+
+        // Toggle the watchdog
+        digitalWrite(DAC, HIGH);
+        delay(1000);
+        digitalWrite(DAC, LOW);
       }
       break;
     }
