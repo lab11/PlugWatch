@@ -4,6 +4,8 @@
 
 #define AB1815_CS C5
 #define AB1815_TIME_DATE_REG 0x00
+#define AB1815_CFG_KEY_REG 0x1F
+#define AB1815_TRICKLE_REG 0x20
 
 #define AB1815_SECOND_TENS_MASK     0x70
 #define AB1815_SECOND_TENS_OFFSET   4
@@ -37,6 +39,7 @@
 
 class AB1815 {
 public:
+   void     init();
    void     setTime(uint32_t unixTime);
    uint32_t getTime(void);
 };

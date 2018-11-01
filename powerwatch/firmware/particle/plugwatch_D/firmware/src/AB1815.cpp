@@ -2,6 +2,21 @@
 #include <SPI.h>
 #include "time.h"
 
+void AB1815::init() {
+    uint8_t start_reg = AB1815_CFG_KEY_REG | 0x80;
+
+    //Start the SPI transaction
+    SPI.begin(AB1815_CS);
+    SPI.beginTransaction(__SPISettings(1*MHZ,MSBFIRST,SPI_MODE0));
+    digitalWrite(AB1815_CS, LOW);
+    SPI.transfer(start_reg);
+    SPI.transfer(0x9D);
+    SPI.transfer(0xA5);
+    SPI.endTransaction();
+    digitalWrite(AB1815_CS, HIGH);
+    SPI.end();
+}
+
 void AB1815::setTime(uint32_t unixTime) {
 
     struct tm  * time;

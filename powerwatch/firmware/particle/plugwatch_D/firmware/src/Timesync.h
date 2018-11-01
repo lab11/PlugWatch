@@ -18,6 +18,7 @@ class Timesync: public Subsystem {
   AB1815 rtc;
 
 public:
+  void setup();
   LoopStatus loop();
 
 };

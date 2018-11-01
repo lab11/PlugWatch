@@ -1,5 +1,9 @@
 #include "Timesync.h"
 
+void Timesync::setup() {
+  rtc.init();
+}
+
 LoopStatus Timesync::loop() {
 
   if(Particle.connected()) {
