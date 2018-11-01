@@ -13368,9 +13368,7 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MPN" value="ERJ-2RKF4993X"/>
 </part>
 <part name="GND39" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="U8" library="chips" deviceset="MAX67XX" device="MAX67XX" technology="MAX6749">
-<attribute name="DIGIKEY" value="MAX6749KA"/>
-</part>
+<part name="U8" library="chips" deviceset="MAX67XX" device="MAX67XX" technology="MAX6749"/>
 <part name="GND40" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND42" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="C9" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="0.82uF">
@@ -13616,7 +13614,9 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
 <attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
-<part name="U15" library="microphones" deviceset="SPH0645LM4H-B" device=""/>
+<part name="U15" library="microphones" deviceset="SPH0645LM4H-B" device="">
+<attribute name="DIGIKEY" value="423-1405-1-ND"/>
+</part>
 <part name="R2" library="passives" deviceset="RESISTOR" device="0402_RES" value="68">
 <attribute name="DESCRIPTION" value="RES SMD 68 OHM 1% 1/16W 0402"/>
 <attribute name="DIGIKEY" value="311-68.0LRCT-ND"/>
@@ -15668,7 +15668,9 @@ Pull SA0 low to zero last address bit.</text>
 <attribute name="DESCRIPTION" x="162.56" y="114.3" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="U6" gate="G$1" x="182.88" y="93.98"/>
-<instance part="U15" gate="G$1" x="63.5" y="106.68"/>
+<instance part="U15" gate="G$1" x="63.5" y="106.68">
+<attribute name="DIGIKEY" x="63.5" y="106.68" size="1.016" layer="96" align="bottom-center" display="off"/>
+</instance>
 <instance part="R2" gate="G$1" x="38.1" y="114.3" rot="R180">
 <attribute name="DIGIKEY" x="38.1" y="114.3" size="1.778" layer="96" rot="R180" display="off"/>
 </instance>

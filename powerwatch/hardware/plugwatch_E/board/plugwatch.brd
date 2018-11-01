@@ -3284,7 +3284,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="VALUE" x="34.544" y="59.436" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center"/>
 </element>
 <element name="U8" library="chips" package="SOT-23-8" value="MAX67XXMAX6749MAX67XX" x="32.639" y="63.246" smashed="yes" rot="R90">
-<attribute name="DIGIKEY" value="MAX6749KA" x="32.639" y="63.246" size="1.778" layer="27" font="vector" ratio="12" rot="R90" display="off"/>
+<attribute name="DIGIKEY" value="MAX6749KA+TCT-ND" x="32.639" y="63.246" size="1.778" layer="27" font="vector" ratio="12" rot="R90" display="off"/>
 <attribute name="MANUFACTURER" value="Maxim Integrated" x="32.639" y="63.246" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="MPN" value="MAX6749KA+T" x="32.639" y="63.246" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="NAME" x="30.678" y="64.897" size="0.889" layer="25" font="vector" rot="R180"/>
@@ -3600,6 +3600,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="VALUE" x="3.937" y="77.597" size="1.016" layer="27" font="vector" ratio="12" rot="R180" align="bottom-center"/>
 </element>
 <element name="U15" library="microphones" package="SPH0465" value="" x="15.24" y="73.025" smashed="yes" rot="R270">
+<attribute name="DIGIKEY" value="423-1405-1-ND" x="15.24" y="73.025" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="MANUFACTURER" value="Knowles" x="15.24" y="73.025" size="1.778" layer="27" font="vector" ratio="12" rot="R270" display="off"/>
 <attribute name="MOUSER" value="721-SPH0645LM4H-B" x="15.24" y="73.025" size="1.778" layer="27" font="vector" ratio="12" rot="R270" display="off"/>
 <attribute name="MPN" value="SPH0645LM4H-B" x="15.24" y="73.025" size="1.778" layer="27" font="vector" ratio="12" rot="R270" display="off"/>
