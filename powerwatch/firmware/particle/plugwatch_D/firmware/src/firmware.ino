@@ -287,7 +287,6 @@ void setup() {
   SD.setup();
 
   //setup the other subsystems
-  timeSyncSubsystem.setup();
   chargeStateSubsystem.setup();
   imuSubsystem.setup();
   gpsSubsystem.setup();
@@ -302,6 +301,9 @@ void setup() {
   // GPS
   pinMode(D3, OUTPUT);
   digitalWrite(D3, HIGH);
+
+  //Timesync
+  timeSyncSubsystem.setup();
 
   if(uCmd.setSMSMode(1) == RESP_OK) {
     Serial.println("Set up SMS mode");
