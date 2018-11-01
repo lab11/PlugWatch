@@ -13198,7 +13198,7 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MANUFACTURER" value="Murata Electronics North America"/>
 <attribute name="MPN" value="GRJ155R60J106ME11D"/>
 </part>
-<part name="D9" library="leds" deviceset="LED" device="0603" value="BLUE">
+<part name="D5" library="leds" deviceset="LED" device="0603" value="BLUE">
 <attribute name="DESCRIPTION" value="LED BLUE CLEAR SMD"/>
 <attribute name="DIGIKEY" value="160-1837-6-ND "/>
 <attribute name="MANUFACTURER" value="Lite-On Inc."/>
@@ -13236,6 +13236,18 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <part name="P+15" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="P+1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="P+2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
+<part name="R9" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
+</part>
+<part name="R10" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
+</part>
 <part name="R11" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
 <attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
 <attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
@@ -13248,17 +13260,11 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
 <attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
-<part name="R13" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
-<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
-<attribute name="MPN" value="RMCF0402FT10K0 "/>
-</part>
-<part name="R14" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
-<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
-<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
-<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
-<attribute name="MPN" value="RMCF0402FT10K0 "/>
+<part name="R20" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
+<attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
+<attribute name="DIGIKEY" value="541-100KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Vishay Dale"/>
+<attribute name="MPN" value="CRCW0402100KFKED"/>
 </part>
 <part name="R21" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
 <attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
@@ -13278,19 +13284,13 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MANUFACTURER" value="Vishay Dale"/>
 <attribute name="MPN" value="CRCW0402100KFKED"/>
 </part>
-<part name="R24" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
-<attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="541-100KLCT-ND"/>
-<attribute name="MANUFACTURER" value="Vishay Dale"/>
-<attribute name="MPN" value="CRCW0402100KFKED"/>
-</part>
 <part name="R5" library="passives" deviceset="RESISTOR" device="0402_RES" value="1k">
 <attribute name="DESCRIPTION" value="RES SMD 1K OHM 1% 1/16W 0402"/>
 <attribute name="DIGIKEY" value="RMCF0402FT1K00CT-ND"/>
 <attribute name="MANUFACTURER" value="Stackpole Electronics"/>
 <attribute name="MPN" value="RMCF0402FT1K00"/>
 </part>
-<part name="R15" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
+<part name="R13" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
 <attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
 <attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
@@ -13346,7 +13346,7 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="SPICEPREFIX" value="X"/>
 </part>
 <part name="P+4" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="R10" library="passives" deviceset="RESISTOR" device="0402_RES" value="5.1k">
+<part name="R8" library="passives" deviceset="RESISTOR" device="0402_RES" value="5.1k">
 <attribute name="DESCRIPTION" value="RES SMD 5.1K OHM 1% 1/10W 0402"/>
 <attribute name="DIGIKEY" value="P5.10KLCT-ND"/>
 <attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
@@ -13435,7 +13435,7 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <part name="U9" library="powerfilm" deviceset="OPA369" device="" value="OPA369">
 <attribute name="DIGIKEY" value="296-25252-1-ND"/>
 </part>
-<part name="R8" library="passives" deviceset="RESISTOR" device="0402_RES" value="4.99k">
+<part name="R6" library="passives" deviceset="RESISTOR" device="0402_RES" value="4.99k">
 <attribute name="DESCRIPTION" value="RES SMD 4.99K OHM 1% 1/10W 0402"/>
 <attribute name="DIGIKEY" value="P4.99KLCT-ND"/>
 <attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
@@ -13477,7 +13477,7 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <part name="U10" library="powerfilm" deviceset="OPA369" device="" value="OPA369">
 <attribute name="DIGIKEY" value="296-25252-1-ND"/>
 </part>
-<part name="R9" library="passives" deviceset="RESISTOR" device="0402_RES" value="4.99k">
+<part name="R7" library="passives" deviceset="RESISTOR" device="0402_RES" value="4.99k">
 <attribute name="DESCRIPTION" value="RES SMD 4.99K OHM 1% 1/10W 0402"/>
 <attribute name="DIGIKEY" value="P4.99KLCT-ND"/>
 <attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
@@ -13522,7 +13522,7 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MANUFACTURER" value="Yageo"/>
 <attribute name="MPN" value="RC1206FR-07750KL"/>
 </part>
-<part name="D5" library="passives" deviceset="DIODE_ZENER" device="SOT323">
+<part name="D1" library="passives" deviceset="DIODE_ZENER" device="SOT323">
 <attribute name="DESCRIPTION" value="DIODE ZENER 3.3V 200MW SOD323F"/>
 <attribute name="DIGIKEY" value="MM3Z3V3BCT-ND "/>
 <attribute name="MANUFACTURER" value="ON Semiconductor "/>
@@ -13534,19 +13534,19 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MANUFACTURER" value="Yageo"/>
 <attribute name="MPN" value="RC1206FR-07750KL"/>
 </part>
-<part name="D6" library="passives" deviceset="DIODE_ZENER" device="SOT323">
+<part name="D2" library="passives" deviceset="DIODE_ZENER" device="SOT323">
 <attribute name="DESCRIPTION" value="DIODE ZENER 3.3V 200MW SOD323F"/>
 <attribute name="DIGIKEY" value="MM3Z3V3BCT-ND "/>
 <attribute name="MANUFACTURER" value="ON Semiconductor "/>
 <attribute name="MPN" value="MM3Z3V3B "/>
 </part>
-<part name="D7" library="passives" deviceset="DIODE_ZENER" device="SOT323">
+<part name="D3" library="passives" deviceset="DIODE_ZENER" device="SOT323">
 <attribute name="DESCRIPTION" value="DIODE ZENER 3.3V 200MW SOD323F"/>
 <attribute name="DIGIKEY" value="MM3Z3V3BCT-ND "/>
 <attribute name="MANUFACTURER" value="ON Semiconductor "/>
 <attribute name="MPN" value="MM3Z3V3B "/>
 </part>
-<part name="D8" library="passives" deviceset="DIODE_ZENER" device="SOT323">
+<part name="D4" library="passives" deviceset="DIODE_ZENER" device="SOT323">
 <attribute name="DESCRIPTION" value="DIODE ZENER 3.3V 200MW SOD323F"/>
 <attribute name="DIGIKEY" value="MM3Z3V3BCT-ND "/>
 <attribute name="MANUFACTURER" value="ON Semiconductor "/>
@@ -13569,11 +13569,17 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MPN" value="GRM1555C2A470JA01D"/>
 </part>
 <part name="X1" library="crystals" deviceset="ABS07-32.768KHZ" device="-7-T"/>
-<part name="R16" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
+<part name="R14" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
 <attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
 <attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
 <attribute name="MPN" value="RMCF0402FT10K0 "/>
+</part>
+<part name="R24" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
+<attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
+<attribute name="DIGIKEY" value="541-100KLCT-ND"/>
+<attribute name="MANUFACTURER" value="Vishay Dale"/>
+<attribute name="MPN" value="CRCW0402100KFKED"/>
 </part>
 <part name="R25" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
 <attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
@@ -13581,13 +13587,7 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MANUFACTURER" value="Vishay Dale"/>
 <attribute name="MPN" value="CRCW0402100KFKED"/>
 </part>
-<part name="R26" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
-<attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="541-100KLCT-ND"/>
-<attribute name="MANUFACTURER" value="Vishay Dale"/>
-<attribute name="MPN" value="CRCW0402100KFKED"/>
-</part>
-<part name="R17" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
+<part name="R15" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
 <attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
 <attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
@@ -13599,7 +13599,7 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MANUFACTURER" value="Yageo"/>
 <attribute name="MPN" value="RC0402FR-0766R5L"/>
 </part>
-<part name="R20" library="passives" deviceset="RESISTOR" device="0402_RES" value="34k">
+<part name="R19" library="passives" deviceset="RESISTOR" device="0402_RES" value="34k">
 <attribute name="DESCRIPTION" value="RES SMD 34K OHM 1% 1/10W 0402"/>
 <attribute name="DIGIKEY" value="P34.0KLCT-ND"/>
 <attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
@@ -13610,13 +13610,13 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <attribute name="MOUSER" value="511-LIS2DH12TR"/>
 <attribute name="MPN" value="LIS2DH12TR"/>
 </part>
-<part name="R18" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
+<part name="R16" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
 <attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
 <attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
 <attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
-<part name="U14" library="microphones" deviceset="SPH0645LM4H-B" device=""/>
+<part name="U15" library="microphones" deviceset="SPH0645LM4H-B" device=""/>
 <part name="R2" library="passives" deviceset="RESISTOR" device="0402_RES" value="68">
 <attribute name="DESCRIPTION" value="RES SMD 68 OHM 1% 1/16W 0402"/>
 <attribute name="DIGIKEY" value="311-68.0LRCT-ND"/>
@@ -13644,7 +13644,7 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <part name="TP24" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP25" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
 <part name="TP26" library="headers" deviceset="TEST_POINT_0.040IN" device=""/>
-<part name="R19" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
+<part name="R17" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
 <attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
 <attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
@@ -13677,20 +13677,20 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 </part>
 <part name="J2" library="connector" deviceset="SCREW_TERMNIAL_1" device=""/>
 <part name="J3" library="connector" deviceset="SCREW_TERMNIAL_1" device=""/>
-<part name="R6" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
+<part name="R18" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
 <attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
 <attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
 <attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
 <attribute name="MPN" value="RMCF0402FT10K0 "/>
 </part>
 <part name="P+3" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
-<part name="R7" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
+<part name="R26" library="passives" deviceset="RESISTOR" device="0402_RES" value="100k">
 <attribute name="DESCRIPTION" value="RES SMD 100K OHM 1% 1/16W 0402"/>
 <attribute name="DIGIKEY" value="541-100KLCT-ND"/>
 <attribute name="MANUFACTURER" value="Vishay Dale"/>
 <attribute name="MPN" value="CRCW0402100KFKED"/>
 </part>
-<part name="U15" library="chips" deviceset="SIP32510" device=""/>
+<part name="U14" library="chips" deviceset="SIP32510" device=""/>
 <part name="SUPPLY11" library="umich" deviceset="GND" device=""/>
 </parts>
 <sheets>
@@ -13760,7 +13760,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="DESCRIPTION" x="93.98" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="U9" gate="G$1" x="45.72" y="35.56"/>
-<instance part="R8" gate="G$1" x="43.18" y="15.24">
+<instance part="R6" gate="G$1" x="43.18" y="15.24">
 <attribute name="DIGIKEY" x="43.18" y="15.24" size="1.27" layer="96" display="off"/>
 <attribute name="MANUFACTURER" x="43.18" y="15.24" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="43.18" y="15.24" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
@@ -13800,7 +13800,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <instance part="SUPPLY5" gate="1" x="15.24" y="7.62"/>
 <instance part="SUPPLY6" gate="1" x="45.72" y="22.86"/>
 <instance part="U10" gate="G$1" x="124.46" y="35.56"/>
-<instance part="R9" gate="G$1" x="121.92" y="15.24">
+<instance part="R7" gate="G$1" x="121.92" y="15.24">
 <attribute name="DIGIKEY" x="121.92" y="15.24" size="1.27" layer="96" display="off"/>
 <attribute name="MANUFACTURER" x="121.92" y="15.24" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="121.92" y="15.24" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
@@ -13845,7 +13845,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="MPN" x="43.18" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="DESCRIPTION" x="43.18" y="132.08" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="D5" gate="G$1" x="43.18" y="119.38" rot="R90">
+<instance part="D1" gate="G$1" x="43.18" y="119.38" rot="R90">
 <attribute name="DIGIKEY" x="43.18" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="43.18" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MPN" x="43.18" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
@@ -13857,19 +13857,19 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <attribute name="MPN" x="83.82" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="DESCRIPTION" x="83.82" y="134.62" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="D6" gate="G$1" x="53.34" y="119.38" rot="R90">
+<instance part="D2" gate="G$1" x="53.34" y="119.38" rot="R90">
 <attribute name="DIGIKEY" x="53.34" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="53.34" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MPN" x="53.34" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="DESCRIPTION" x="53.34" y="119.38" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="D7" gate="G$1" x="83.82" y="119.38" rot="R90">
+<instance part="D3" gate="G$1" x="83.82" y="119.38" rot="R90">
 <attribute name="DIGIKEY" x="83.82" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="83.82" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MPN" x="83.82" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="DESCRIPTION" x="83.82" y="119.38" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="D8" gate="G$1" x="93.98" y="119.38" rot="R90">
+<instance part="D4" gate="G$1" x="93.98" y="119.38" rot="R90">
 <attribute name="DIGIKEY" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
 <attribute name="MPN" x="93.98" y="119.38" size="1.016" layer="96" rot="R90" align="bottom-center" display="off"/>
@@ -13878,10 +13878,10 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <instance part="J2" gate="G$1" x="35.56" y="170.18"/>
 <instance part="J3" gate="G$1" x="35.56" y="147.32"/>
 <instance part="P+3" gate="VCC" x="114.3" y="88.9"/>
-<instance part="R7" gate="G$1" x="88.9" y="88.9">
+<instance part="R26" gate="G$1" x="88.9" y="88.9">
 <attribute name="DIGIKEY" x="88.9" y="88.9" size="1.27" layer="96" font="vector" display="off"/>
 </instance>
-<instance part="U15" gate="G$1" x="93.98" y="83.82" rot="R180"/>
+<instance part="U14" gate="G$1" x="93.98" y="83.82" rot="R180"/>
 <instance part="SUPPLY11" gate="1" x="63.5" y="73.66"/>
 </instances>
 <busses>
@@ -13946,7 +13946,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <wire x1="71.12" y1="109.22" x2="71.12" y2="101.6" width="0.1524" layer="91"/>
 <wire x1="93.98" y1="114.3" x2="93.98" y2="109.22" width="0.1524" layer="91"/>
 <wire x1="93.98" y1="109.22" x2="83.82" y2="109.22" width="0.1524" layer="91"/>
-<pinref part="D5" gate="G$1" pin="ANODE"/>
+<pinref part="D1" gate="G$1" pin="ANODE"/>
 <wire x1="83.82" y1="109.22" x2="76.2" y2="109.22" width="0.1524" layer="91"/>
 <wire x1="76.2" y1="109.22" x2="71.12" y2="109.22" width="0.1524" layer="91"/>
 <wire x1="43.18" y1="114.3" x2="43.18" y2="109.22" width="0.1524" layer="91"/>
@@ -13958,9 +13958,9 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <junction x="53.34" y="109.22"/>
 <wire x1="83.82" y1="114.3" x2="83.82" y2="109.22" width="0.1524" layer="91"/>
 <junction x="83.82" y="109.22"/>
-<pinref part="D6" gate="G$1" pin="ANODE"/>
-<pinref part="D7" gate="G$1" pin="ANODE"/>
-<pinref part="D8" gate="G$1" pin="ANODE"/>
+<pinref part="D2" gate="G$1" pin="ANODE"/>
+<pinref part="D3" gate="G$1" pin="ANODE"/>
+<pinref part="D4" gate="G$1" pin="ANODE"/>
 </segment>
 <segment>
 <pinref part="R38" gate="G$1" pin="1"/>
@@ -14026,10 +14026,10 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <junction x="142.24" y="152.4"/>
 </segment>
 <segment>
-<pinref part="U15" gate="G$1" pin="GND"/>
+<pinref part="U14" gate="G$1" pin="GND"/>
 <wire x1="68.58" y1="78.74" x2="68.58" y2="86.36" width="0.1524" layer="91"/>
 <wire x1="73.66" y1="78.74" x2="68.58" y2="78.74" width="0.1524" layer="91"/>
-<pinref part="R7" gate="G$1" pin="1"/>
+<pinref part="R26" gate="G$1" pin="1"/>
 <wire x1="83.82" y1="88.9" x2="73.66" y2="88.9" width="0.1524" layer="91"/>
 <wire x1="73.66" y1="88.9" x2="73.66" y2="86.36" width="0.1524" layer="91"/>
 <wire x1="73.66" y1="86.36" x2="68.58" y2="86.36" width="0.1524" layer="91"/>
@@ -14054,7 +14054,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <wire x1="53.34" y1="127" x2="55.88" y2="127" width="0.1524" layer="91"/>
 <junction x="53.34" y="127"/>
 <label x="55.88" y="127" size="1.016" layer="95" xref="yes"/>
-<pinref part="D6" gate="G$1" pin="CATHODE"/>
+<pinref part="D2" gate="G$1" pin="CATHODE"/>
 </segment>
 </net>
 <net name="AC/N-PERTURB" class="0">
@@ -14065,7 +14065,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <wire x1="93.98" y1="127" x2="96.52" y2="127" width="0.1524" layer="91"/>
 <junction x="93.98" y="127"/>
 <label x="96.52" y="127" size="1.016" layer="95" xref="yes"/>
-<pinref part="D8" gate="G$1" pin="CATHODE"/>
+<pinref part="D4" gate="G$1" pin="CATHODE"/>
 </segment>
 </net>
 <net name="N$42" class="0">
@@ -14082,7 +14082,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 </net>
 <net name="AC/N-SENSE" class="0">
 <segment>
-<pinref part="R9" gate="G$1" pin="2"/>
+<pinref part="R7" gate="G$1" pin="2"/>
 <wire x1="124.46" y1="15.24" x2="137.16" y2="15.24" width="0.1524" layer="91"/>
 <wire x1="137.16" y1="15.24" x2="137.16" y2="35.56" width="0.1524" layer="91"/>
 <wire x1="139.7" y1="35.56" x2="137.16" y2="35.56" width="0.1524" layer="91"/>
@@ -14099,7 +14099,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <wire x1="30.48" y1="33.02" x2="30.48" y2="15.24" width="0.1524" layer="91"/>
 <pinref part="R33" gate="G$1" pin="2"/>
 <wire x1="30.48" y1="15.24" x2="25.4" y2="15.24" width="0.1524" layer="91"/>
-<pinref part="R8" gate="G$1" pin="1"/>
+<pinref part="R6" gate="G$1" pin="1"/>
 <wire x1="30.48" y1="15.24" x2="38.1" y2="15.24" width="0.1524" layer="91"/>
 <junction x="30.48" y="15.24"/>
 <junction x="30.48" y="33.02"/>
@@ -14110,7 +14110,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <net name="VCC" class="0">
 <segment>
 <pinref part="P+3" gate="VCC" pin="VCC"/>
-<pinref part="U15" gate="G$1" pin="VSUPP"/>
+<pinref part="U14" gate="G$1" pin="VSUPP"/>
 <wire x1="114.3" y1="76.2" x2="99.06" y2="76.2" width="0.1524" layer="91"/>
 <wire x1="114.3" y1="76.2" x2="114.3" y2="86.36" width="0.1524" layer="91"/>
 </segment>
@@ -14134,7 +14134,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <wire x1="109.22" y1="33.02" x2="109.22" y2="15.24" width="0.1524" layer="91"/>
 <pinref part="R34" gate="G$1" pin="2"/>
 <wire x1="109.22" y1="15.24" x2="104.14" y2="15.24" width="0.1524" layer="91"/>
-<pinref part="R9" gate="G$1" pin="1"/>
+<pinref part="R7" gate="G$1" pin="1"/>
 <wire x1="109.22" y1="15.24" x2="116.84" y2="15.24" width="0.1524" layer="91"/>
 <junction x="109.22" y="15.24"/>
 <junction x="109.22" y="33.02"/>
@@ -14144,7 +14144,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 </net>
 <net name="AC/L-SENSE" class="0">
 <segment>
-<pinref part="R8" gate="G$1" pin="2"/>
+<pinref part="R6" gate="G$1" pin="2"/>
 <wire x1="45.72" y1="15.24" x2="58.42" y2="15.24" width="0.1524" layer="91"/>
 <wire x1="58.42" y1="15.24" x2="58.42" y2="35.56" width="0.1524" layer="91"/>
 <wire x1="60.96" y1="35.56" x2="58.42" y2="35.56" width="0.1524" layer="91"/>
@@ -14156,7 +14156,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 </net>
 <net name="AC/L-MEASURE" class="0">
 <segment>
-<pinref part="D5" gate="G$1" pin="CATHODE"/>
+<pinref part="D1" gate="G$1" pin="CATHODE"/>
 <pinref part="R30" gate="G$1" pin="2"/>
 <wire x1="43.18" y1="124.46" x2="43.18" y2="127" width="0.1524" layer="91"/>
 <wire x1="43.18" y1="127" x2="43.18" y2="129.54" width="0.1524" layer="91"/>
@@ -14173,7 +14173,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <wire x1="83.82" y1="129.54" x2="81.28" y2="129.54" width="0.1524" layer="91"/>
 <junction x="83.82" y="129.54"/>
 <label x="81.28" y="129.54" size="1.016" layer="95" rot="R180" xref="yes"/>
-<pinref part="D7" gate="G$1" pin="CATHODE"/>
+<pinref part="D3" gate="G$1" pin="CATHODE"/>
 </segment>
 </net>
 <net name="5V" class="0">
@@ -14205,7 +14205,7 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 <wire x1="45.72" y1="43.18" x2="45.72" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="45.72" y1="58.42" x2="45.72" y2="53.34" width="0.1524" layer="91"/>
 <pinref part="C5" gate="G$1" pin="1"/>
-<pinref part="U15" gate="G$1" pin="VLOAD"/>
+<pinref part="U14" gate="G$1" pin="VLOAD"/>
 <wire x1="73.66" y1="73.66" x2="68.58" y2="73.66" width="0.1524" layer="91"/>
 <wire x1="68.58" y1="73.66" x2="68.58" y2="63.5" width="0.1524" layer="91"/>
 <wire x1="68.58" y1="63.5" x2="45.72" y2="63.5" width="0.1524" layer="91"/>
@@ -14226,13 +14226,13 @@ The full-scale voltage sensing circuit (below) could also be used, but would onl
 </net>
 <net name="AC_SENSE_PWR_EN" class="0">
 <segment>
-<pinref part="U15" gate="G$1" pin="EN"/>
+<pinref part="U14" gate="G$1" pin="EN"/>
 <wire x1="99.06" y1="78.74" x2="101.6" y2="78.74" width="0.1524" layer="91"/>
 <wire x1="101.6" y1="78.74" x2="101.6" y2="88.9" width="0.1524" layer="91"/>
 <wire x1="101.6" y1="88.9" x2="101.6" y2="93.98" width="0.1524" layer="91"/>
 <wire x1="101.6" y1="93.98" x2="99.06" y2="93.98" width="0.1524" layer="91"/>
 <label x="99.06" y="93.98" size="1.27" layer="95" rot="R180" xref="yes"/>
-<pinref part="R7" gate="G$1" pin="2"/>
+<pinref part="R26" gate="G$1" pin="2"/>
 <wire x1="91.44" y1="88.9" x2="101.6" y2="88.9" width="0.1524" layer="91"/>
 <junction x="101.6" y="88.9"/>
 </segment>
@@ -14313,31 +14313,31 @@ If we don't have VCC the particle won't be on anyways.</text>
 <attribute name="DESCRIPTION" x="81.28" y="55.88" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="X1" gate="G$1" x="68.58" y="63.5" rot="R270"/>
-<instance part="R16" gate="G$1" x="160.02" y="53.34" rot="R270">
+<instance part="R14" gate="G$1" x="160.02" y="53.34" rot="R270">
 <attribute name="DIGIKEY" x="160.02" y="53.34" size="1.27" layer="96" rot="R270" display="off"/>
 <attribute name="DESCRIPTION" x="160.02" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="R25" gate="G$1" x="190.5" y="91.44" rot="R270">
+<instance part="R24" gate="G$1" x="190.5" y="91.44" rot="R270">
 <attribute name="MPN" x="190.5" y="91.44" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="DIGIKEY" x="190.5" y="91.44" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="190.5" y="91.44" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="DESCRIPTION" x="190.5" y="91.44" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="R26" gate="G$1" x="190.5" y="71.12" rot="R270">
+<instance part="R25" gate="G$1" x="190.5" y="71.12" rot="R270">
 <attribute name="MPN" x="190.5" y="71.12" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="DIGIKEY" x="190.5" y="71.12" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="190.5" y="71.12" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="DESCRIPTION" x="190.5" y="71.12" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="R17" gate="G$1" x="200.66" y="71.12" rot="R270">
+<instance part="R15" gate="G$1" x="200.66" y="71.12" rot="R270">
 <attribute name="DIGIKEY" x="200.66" y="71.12" size="1.27" layer="96" rot="R270" display="off"/>
 <attribute name="DESCRIPTION" x="200.66" y="71.12" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="R18" gate="G$1" x="99.06" y="53.34" rot="R270">
+<instance part="R16" gate="G$1" x="99.06" y="53.34" rot="R270">
 <attribute name="DIGIKEY" x="99.06" y="53.34" size="1.27" layer="96" rot="R270" display="off"/>
 <attribute name="DESCRIPTION" x="99.06" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="R19" gate="G$1" x="149.86" y="147.32" rot="R270">
+<instance part="R17" gate="G$1" x="149.86" y="147.32" rot="R270">
 <attribute name="DIGIKEY" x="149.86" y="147.32" size="1.27" layer="96" rot="R270" display="off"/>
 <attribute name="DESCRIPTION" x="149.86" y="147.32" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
@@ -14353,7 +14353,7 @@ If we don't have VCC the particle won't be on anyways.</text>
 <attribute name="MPN" x="236.22" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
 <attribute name="DESCRIPTION" x="236.22" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
 </instance>
-<instance part="R6" gate="G$1" x="91.44" y="53.34" rot="R270">
+<instance part="R18" gate="G$1" x="91.44" y="53.34" rot="R270">
 <attribute name="DIGIKEY" x="91.44" y="53.34" size="1.27" layer="96" rot="R270" display="off"/>
 <attribute name="DESCRIPTION" x="91.44" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
@@ -14419,11 +14419,11 @@ If we don't have VCC the particle won't be on anyways.</text>
 <wire x1="154.94" y1="50.8" x2="154.94" y2="40.64" width="0.1524" layer="91"/>
 <wire x1="154.94" y1="40.64" x2="137.16" y2="40.64" width="0.1524" layer="91"/>
 <junction x="137.16" y="40.64"/>
-<pinref part="R16" gate="G$1" pin="2"/>
+<pinref part="R14" gate="G$1" pin="2"/>
 <wire x1="160.02" y1="50.8" x2="160.02" y2="40.64" width="0.1524" layer="91"/>
 <wire x1="160.02" y1="40.64" x2="154.94" y2="40.64" width="0.1524" layer="91"/>
 <junction x="154.94" y="40.64"/>
-<pinref part="R26" gate="G$1" pin="2"/>
+<pinref part="R25" gate="G$1" pin="2"/>
 <wire x1="190.5" y1="68.58" x2="190.5" y2="40.64" width="0.1524" layer="91"/>
 <wire x1="190.5" y1="40.64" x2="160.02" y2="40.64" width="0.1524" layer="91"/>
 <junction x="160.02" y="40.64"/>
@@ -14447,7 +14447,7 @@ If we don't have VCC the particle won't be on anyways.</text>
 <wire x1="124.46" y1="127" x2="132.08" y2="127" width="0.1524" layer="91"/>
 <wire x1="132.08" y1="127" x2="132.08" y2="147.32" width="0.1524" layer="91"/>
 <junction x="132.08" y="147.32"/>
-<pinref part="R19" gate="G$1" pin="1"/>
+<pinref part="R17" gate="G$1" pin="1"/>
 <wire x1="149.86" y1="152.4" x2="149.86" y2="165.1" width="0.1524" layer="91"/>
 <junction x="149.86" y="165.1"/>
 <pinref part="JP1" gate="G$1" pin="2"/>
@@ -14459,7 +14459,7 @@ If we don't have VCC the particle won't be on anyways.</text>
 <wire x1="124.46" y1="139.7" x2="149.86" y2="139.7" width="0.1524" layer="91"/>
 <label x="220.98" y="139.7" size="1.778" layer="95" xref="yes"/>
 <pinref part="U8" gate="G$1" pin="!RESET"/>
-<pinref part="R19" gate="G$1" pin="2"/>
+<pinref part="R17" gate="G$1" pin="2"/>
 <wire x1="149.86" y1="139.7" x2="220.98" y2="139.7" width="0.1524" layer="91"/>
 <wire x1="149.86" y1="144.78" x2="149.86" y2="139.7" width="0.1524" layer="91"/>
 <junction x="149.86" y="139.7"/>
@@ -14502,7 +14502,7 @@ If we don't have VCC the particle won't be on anyways.</text>
 <pinref part="U1" gate="G$1" pin="WDI"/>
 <wire x1="152.4" y1="73.66" x2="160.02" y2="73.66" width="0.1524" layer="91"/>
 <label x="175.26" y="73.66" size="1.016" layer="95" xref="yes"/>
-<pinref part="R16" gate="G$1" pin="1"/>
+<pinref part="R14" gate="G$1" pin="1"/>
 <wire x1="160.02" y1="73.66" x2="175.26" y2="73.66" width="0.1524" layer="91"/>
 <wire x1="160.02" y1="58.42" x2="160.02" y2="73.66" width="0.1524" layer="91"/>
 <junction x="160.02" y="73.66"/>
@@ -14524,12 +14524,12 @@ If we don't have VCC the particle won't be on anyways.</text>
 <wire x1="50.8" y1="86.36" x2="50.8" y2="88.9" width="0.1524" layer="91"/>
 <wire x1="33.02" y1="68.58" x2="33.02" y2="86.36" width="0.1524" layer="91"/>
 <wire x1="33.02" y1="86.36" x2="50.8" y2="86.36" width="0.1524" layer="91"/>
-<pinref part="R18" gate="G$1" pin="1"/>
+<pinref part="R16" gate="G$1" pin="1"/>
 <wire x1="99.06" y1="58.42" x2="99.06" y2="76.2" width="0.1524" layer="91"/>
 <junction x="99.06" y="76.2"/>
 </segment>
 <segment>
-<pinref part="R17" gate="G$1" pin="1"/>
+<pinref part="R15" gate="G$1" pin="1"/>
 <wire x1="200.66" y1="76.2" x2="200.66" y2="81.28" width="0.1524" layer="91"/>
 <label x="200.66" y="81.28" size="1.016" layer="95" rot="R90" xref="yes"/>
 </segment>
@@ -14543,7 +14543,7 @@ If we don't have VCC the particle won't be on anyways.</text>
 <pinref part="B1" gate="G$1" pin="+"/>
 <wire x1="50.8" y1="68.58" x2="50.8" y2="73.66" width="0.1524" layer="91"/>
 <wire x1="60.96" y1="73.66" x2="50.8" y2="73.66" width="0.1524" layer="91"/>
-<pinref part="R6" gate="G$1" pin="1"/>
+<pinref part="R18" gate="G$1" pin="1"/>
 <wire x1="91.44" y1="58.42" x2="91.44" y2="73.66" width="0.1524" layer="91"/>
 <junction x="91.44" y="73.66"/>
 </segment>
@@ -14553,13 +14553,13 @@ If we don't have VCC the particle won't be on anyways.</text>
 <pinref part="U1" gate="G$1" pin="!CS"/>
 <wire x1="119.38" y1="48.26" x2="99.06" y2="48.26" width="0.1524" layer="91"/>
 <label x="76.2" y="43.18" size="1.016" layer="95" rot="R180" xref="yes"/>
-<pinref part="R18" gate="G$1" pin="2"/>
+<pinref part="R16" gate="G$1" pin="2"/>
 <wire x1="99.06" y1="48.26" x2="99.06" y2="43.18" width="0.1524" layer="91"/>
 <wire x1="99.06" y1="43.18" x2="91.44" y2="43.18" width="0.1524" layer="91"/>
 <wire x1="91.44" y1="43.18" x2="76.2" y2="43.18" width="0.1524" layer="91"/>
 <wire x1="99.06" y1="50.8" x2="99.06" y2="48.26" width="0.1524" layer="91"/>
 <junction x="99.06" y="48.26"/>
-<pinref part="R6" gate="G$1" pin="2"/>
+<pinref part="R18" gate="G$1" pin="2"/>
 <wire x1="91.44" y1="50.8" x2="91.44" y2="43.18" width="0.1524" layer="91"/>
 <junction x="91.44" y="43.18"/>
 </segment>
@@ -14615,16 +14615,16 @@ If we don't have VCC the particle won't be on anyways.</text>
 <wire x1="152.4" y1="76.2" x2="167.64" y2="76.2" width="0.1524" layer="91"/>
 <wire x1="167.64" y1="76.2" x2="167.64" y2="78.74" width="0.1524" layer="91"/>
 <wire x1="167.64" y1="78.74" x2="190.5" y2="78.74" width="0.1524" layer="91"/>
-<pinref part="R25" gate="G$1" pin="2"/>
+<pinref part="R24" gate="G$1" pin="2"/>
 <wire x1="190.5" y1="78.74" x2="190.5" y2="88.9" width="0.1524" layer="91"/>
-<pinref part="R26" gate="G$1" pin="1"/>
+<pinref part="R25" gate="G$1" pin="1"/>
 <wire x1="190.5" y1="78.74" x2="190.5" y2="76.2" width="0.1524" layer="91"/>
 <junction x="190.5" y="78.74"/>
 </segment>
 </net>
 <net name="5V" class="0">
 <segment>
-<pinref part="R25" gate="G$1" pin="1"/>
+<pinref part="R24" gate="G$1" pin="1"/>
 <wire x1="190.5" y1="96.52" x2="190.5" y2="99.06" width="0.1524" layer="91"/>
 <label x="190.5" y="99.06" size="1.016" layer="95" rot="R90" xref="yes"/>
 </segment>
@@ -14633,7 +14633,7 @@ If we don't have VCC the particle won't be on anyways.</text>
 <segment>
 <pinref part="U1" gate="G$1" pin="FOUT/!IRQ1"/>
 <wire x1="152.4" y1="66.04" x2="200.66" y2="66.04" width="0.1524" layer="91"/>
-<pinref part="R17" gate="G$1" pin="2"/>
+<pinref part="R15" gate="G$1" pin="2"/>
 <wire x1="200.66" y1="66.04" x2="213.36" y2="66.04" width="0.1524" layer="91"/>
 <wire x1="200.66" y1="68.58" x2="200.66" y2="66.04" width="0.1524" layer="91"/>
 <junction x="200.66" y="66.04"/>
@@ -14667,19 +14667,19 @@ on rising edge.</text>
 <instance part="J1" gate="G$1" x="144.78" y="50.8" rot="MR0"/>
 <instance part="P+12" gate="VCC" x="93.98" y="152.4"/>
 <instance part="P+2" gate="VCC" x="35.56" y="60.96"/>
-<instance part="R12" gate="G$1" x="99.06" y="63.5" rot="R90">
+<instance part="R10" gate="G$1" x="99.06" y="63.5" rot="R90">
 <attribute name="DIGIKEY" x="99.06" y="63.5" size="1.27" layer="96" font="vector" rot="R90" display="off"/>
 </instance>
-<instance part="R13" gate="G$1" x="109.22" y="63.5" rot="R90">
+<instance part="R11" gate="G$1" x="109.22" y="63.5" rot="R90">
 <attribute name="DIGIKEY" x="109.22" y="63.5" size="1.27" layer="96" font="vector" rot="R90" display="off"/>
 </instance>
-<instance part="R14" gate="G$1" x="121.92" y="63.5" rot="R90">
+<instance part="R12" gate="G$1" x="121.92" y="63.5" rot="R90">
 <attribute name="DIGIKEY" x="121.92" y="63.5" size="1.27" layer="96" font="vector" rot="R90" display="off"/>
 </instance>
-<instance part="R21" gate="G$1" x="86.36" y="63.5" rot="R90">
+<instance part="R20" gate="G$1" x="86.36" y="63.5" rot="R90">
 <attribute name="DIGIKEY" x="86.36" y="63.5" size="1.27" layer="96" font="vector" rot="R90" display="off"/>
 </instance>
-<instance part="R22" gate="G$1" x="50.8" y="43.18" rot="R180">
+<instance part="R21" gate="G$1" x="50.8" y="43.18" rot="R180">
 <attribute name="DIGIKEY" x="50.8" y="43.18" size="1.27" layer="96" font="vector" rot="R180" display="off"/>
 </instance>
 <instance part="TP1" gate="G$1" x="236.22" y="68.58" rot="R180"/>
@@ -14703,14 +14703,14 @@ on rising edge.</text>
 <instance part="U12" gate="G$1" x="45.72" y="48.26"/>
 <instance part="U3" gate="A" x="193.04" y="139.7"/>
 <instance part="P+4" gate="VCC" x="162.56" y="160.02"/>
-<instance part="R10" gate="G$1" x="162.56" y="149.86" rot="R270">
+<instance part="R8" gate="G$1" x="162.56" y="149.86" rot="R270">
 <attribute name="DIGIKEY" x="162.56" y="149.86" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
 <instance part="GND41" gate="1" x="170.18" y="132.08"/>
 <instance part="R1" gate="G$1" x="30.48" y="129.54" rot="R270">
 <attribute name="DIGIKEY" x="30.48" y="129.54" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
-<instance part="R20" gate="G$1" x="30.48" y="142.24" rot="R270">
+<instance part="R19" gate="G$1" x="30.48" y="142.24" rot="R270">
 <attribute name="DIGIKEY" x="30.48" y="142.24" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
 <instance part="TP19" gate="G$1" x="236.22" y="73.66" rot="R180"/>
@@ -14734,7 +14734,7 @@ on rising edge.</text>
 <net name="!SD_CS" class="0">
 <segment>
 <pinref part="J1" gate="G$1" pin="DATA3-CD/CS_N"/>
-<pinref part="R13" gate="G$1" pin="1"/>
+<pinref part="R11" gate="G$1" pin="1"/>
 <wire x1="109.22" y1="48.26" x2="109.22" y2="58.42" width="0.1524" layer="91"/>
 <wire x1="129.54" y1="48.26" x2="109.22" y2="48.26" width="0.1524" layer="91"/>
 <label x="109.22" y="48.26" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
@@ -14753,7 +14753,7 @@ on rising edge.</text>
 <net name="!SD_DETECT" class="0">
 <segment>
 <pinref part="J1" gate="G$1" pin="A"/>
-<pinref part="R21" gate="G$1" pin="1"/>
+<pinref part="R20" gate="G$1" pin="1"/>
 <wire x1="129.54" y1="35.56" x2="86.36" y2="35.56" width="0.1524" layer="91"/>
 <wire x1="86.36" y1="35.56" x2="86.36" y2="58.42" width="0.1524" layer="91"/>
 <label x="86.36" y="35.56" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
@@ -14788,7 +14788,7 @@ on rising edge.</text>
 <junction x="127" y="33.02"/>
 <junction x="66.04" y="33.02"/>
 <junction x="71.12" y="33.02"/>
-<pinref part="R22" gate="G$1" pin="1"/>
+<pinref part="R21" gate="G$1" pin="1"/>
 <wire x1="55.88" y1="43.18" x2="66.04" y2="43.18" width="0.1524" layer="91"/>
 <junction x="66.04" y="43.18"/>
 </segment>
@@ -14862,10 +14862,10 @@ on rising edge.</text>
 <segment>
 <pinref part="C12" gate="G$1" pin="1"/>
 <pinref part="J1" gate="G$1" pin="VCC"/>
+<pinref part="R10" gate="G$1" pin="2"/>
+<pinref part="R11" gate="G$1" pin="2"/>
 <pinref part="R12" gate="G$1" pin="2"/>
-<pinref part="R13" gate="G$1" pin="2"/>
-<pinref part="R14" gate="G$1" pin="2"/>
-<pinref part="R21" gate="G$1" pin="2"/>
+<pinref part="R20" gate="G$1" pin="2"/>
 <pinref part="U12" gate="G$1" pin="VLOAD"/>
 <wire x1="109.22" y1="66.04" x2="109.22" y2="68.58" width="0.1524" layer="91"/>
 <wire x1="109.22" y1="68.58" x2="121.92" y2="68.58" width="0.1524" layer="91"/>
@@ -14894,7 +14894,7 @@ on rising edge.</text>
 <wire x1="40.64" y1="43.18" x2="33.02" y2="43.18" width="0.1524" layer="91"/>
 <wire x1="40.64" y1="53.34" x2="40.64" y2="43.18" width="0.1524" layer="91"/>
 <label x="33.02" y="43.18" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
-<pinref part="R22" gate="G$1" pin="2"/>
+<pinref part="R21" gate="G$1" pin="2"/>
 <wire x1="40.64" y1="43.18" x2="48.26" y2="43.18" width="0.1524" layer="91"/>
 <junction x="40.64" y="43.18"/>
 </segment>
@@ -14912,7 +14912,7 @@ on rising edge.</text>
 <net name="SD_MISO" class="0">
 <segment>
 <pinref part="J1" gate="G$1" pin="DATA0/MISO"/>
-<pinref part="R14" gate="G$1" pin="1"/>
+<pinref part="R12" gate="G$1" pin="1"/>
 <wire x1="121.92" y1="55.88" x2="121.92" y2="58.42" width="0.1524" layer="91"/>
 <wire x1="129.54" y1="55.88" x2="121.92" y2="55.88" width="0.1524" layer="91"/>
 <label x="121.92" y="55.88" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
@@ -14931,7 +14931,7 @@ on rising edge.</text>
 <net name="SD_MOSI" class="0">
 <segment>
 <pinref part="J1" gate="G$1" pin="CMD/MOSI"/>
-<pinref part="R12" gate="G$1" pin="1"/>
+<pinref part="R10" gate="G$1" pin="1"/>
 <wire x1="129.54" y1="45.72" x2="99.06" y2="45.72" width="0.1524" layer="91"/>
 <wire x1="99.06" y1="45.72" x2="99.06" y2="58.42" width="0.1524" layer="91"/>
 <label x="99.06" y="45.72" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
@@ -15007,7 +15007,7 @@ on rising edge.</text>
 <label x="231.14" y="30.48" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
-<pinref part="R10" gate="G$1" pin="1"/>
+<pinref part="R8" gate="G$1" pin="1"/>
 <pinref part="P+4" gate="VCC" pin="VCC"/>
 <wire x1="162.56" y1="154.94" x2="162.56" y2="157.48" width="0.1524" layer="91"/>
 </segment>
@@ -15062,7 +15062,7 @@ on rising edge.</text>
 <segment>
 <pinref part="U3" gate="A" pin="DATA"/>
 <wire x1="175.26" y1="139.7" x2="162.56" y2="139.7" width="0.1524" layer="91"/>
-<pinref part="R10" gate="G$1" pin="2"/>
+<pinref part="R8" gate="G$1" pin="2"/>
 <wire x1="162.56" y1="139.7" x2="162.56" y2="147.32" width="0.1524" layer="91"/>
 <label x="162.56" y="139.7" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
@@ -15098,7 +15098,7 @@ on rising edge.</text>
 <label x="53.34" y="147.32" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
-<pinref part="R20" gate="G$1" pin="1"/>
+<pinref part="R19" gate="G$1" pin="1"/>
 <wire x1="30.48" y1="147.32" x2="30.48" y2="154.94" width="0.1524" layer="91"/>
 <label x="30.48" y="154.94" size="1.016" layer="95" rot="R90" xref="yes"/>
 </segment>
@@ -15109,7 +15109,7 @@ on rising edge.</text>
 <wire x1="63.5" y1="137.16" x2="30.48" y2="137.16" width="0.1524" layer="91"/>
 <pinref part="R1" gate="G$1" pin="1"/>
 <wire x1="30.48" y1="134.62" x2="30.48" y2="137.16" width="0.1524" layer="91"/>
-<pinref part="R20" gate="G$1" pin="2"/>
+<pinref part="R19" gate="G$1" pin="2"/>
 <wire x1="30.48" y1="137.16" x2="30.48" y2="139.7" width="0.1524" layer="91"/>
 <junction x="30.48" y="137.16"/>
 </segment>
@@ -15301,7 +15301,7 @@ on rising edge.</text>
 <instance part="C14" gate="G$1" x="114.3" y="170.18" rot="R90">
 <attribute name="DIGIKEY" x="114.3" y="170.18" size="1.778" layer="96" rot="R90" display="off"/>
 </instance>
-<instance part="D9" gate="G$1" x="100.33" y="149.352" rot="R270">
+<instance part="D5" gate="G$1" x="100.33" y="149.352" rot="R270">
 <attribute name="DIGIKEY" x="100.33" y="149.352" size="1.27" layer="96" rot="R270" display="off"/>
 <attribute name="MANUFACTURER" x="100.33" y="149.352" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="100.33" y="149.352" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
@@ -15322,10 +15322,10 @@ on rising edge.</text>
 </instance>
 <instance part="P+15" gate="VCC" x="119.38" y="78.74"/>
 <instance part="P+1" gate="VCC" x="175.26" y="177.8"/>
-<instance part="R23" gate="G$1" x="149.86" y="177.8">
+<instance part="R22" gate="G$1" x="149.86" y="177.8">
 <attribute name="DIGIKEY" x="149.86" y="177.8" size="1.27" layer="96" font="vector" display="off"/>
 </instance>
-<instance part="R24" gate="G$1" x="86.36" y="76.2">
+<instance part="R23" gate="G$1" x="86.36" y="76.2">
 <attribute name="DIGIKEY" x="86.36" y="76.2" size="1.27" layer="96" font="vector" display="off"/>
 </instance>
 <instance part="R5" gate="G$1" x="100.33" y="158.75" rot="R90">
@@ -15422,7 +15422,7 @@ on rising edge.</text>
 <junction x="109.22" y="154.94"/>
 <junction x="109.22" y="162.56"/>
 <junction x="109.22" y="170.18"/>
-<pinref part="R23" gate="G$1" pin="1"/>
+<pinref part="R22" gate="G$1" pin="1"/>
 <wire x1="144.78" y1="177.8" x2="134.62" y2="177.8" width="0.1524" layer="91"/>
 <wire x1="134.62" y1="177.8" x2="134.62" y2="175.26" width="0.1524" layer="91"/>
 <wire x1="134.62" y1="175.26" x2="129.54" y2="175.26" width="0.1524" layer="91"/>
@@ -15438,7 +15438,7 @@ on rising edge.</text>
 <pinref part="U13" gate="G$1" pin="GND"/>
 <wire x1="53.34" y1="66.04" x2="53.34" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="78.74" y1="66.04" x2="68.58" y2="66.04" width="0.1524" layer="91"/>
-<pinref part="R24" gate="G$1" pin="1"/>
+<pinref part="R23" gate="G$1" pin="1"/>
 <wire x1="68.58" y1="66.04" x2="53.34" y2="66.04" width="0.1524" layer="91"/>
 <wire x1="81.28" y1="76.2" x2="68.58" y2="76.2" width="0.1524" layer="91"/>
 <wire x1="68.58" y1="76.2" x2="68.58" y2="66.04" width="0.1524" layer="91"/>
@@ -15453,7 +15453,7 @@ on rising edge.</text>
 <wire x1="162.56" y1="177.8" x2="162.56" y2="182.88" width="0.1524" layer="91"/>
 <wire x1="162.56" y1="182.88" x2="160.02" y2="182.88" width="0.1524" layer="91"/>
 <label x="160.02" y="182.88" size="1.27" layer="95" rot="R180" xref="yes"/>
-<pinref part="R23" gate="G$1" pin="2"/>
+<pinref part="R22" gate="G$1" pin="2"/>
 <wire x1="152.4" y1="177.8" x2="162.56" y2="177.8" width="0.1524" layer="91"/>
 <junction x="162.56" y="177.8"/>
 </segment>
@@ -15529,7 +15529,7 @@ on rising edge.</text>
 </net>
 <net name="N$1" class="0">
 <segment>
-<pinref part="D9" gate="G$1" pin="ANODE"/>
+<pinref part="D5" gate="G$1" pin="ANODE"/>
 <pinref part="R5" gate="G$1" pin="1"/>
 <wire x1="100.33" y1="153.67" x2="100.33" y2="151.892" width="0.1524" layer="91"/>
 </segment>
@@ -15554,7 +15554,7 @@ on rising edge.</text>
 </net>
 <net name="N$2" class="0">
 <segment>
-<pinref part="D9" gate="G$1" pin="CATHODE"/>
+<pinref part="D5" gate="G$1" pin="CATHODE"/>
 <pinref part="U7" gate="MAX-M8" pin="TIMEPULSE"/>
 <wire x1="100.33" y1="130.81" x2="100.33" y2="146.812" width="0.1524" layer="91"/>
 <wire x1="118.11" y1="130.81" x2="100.33" y2="130.81" width="0.1524" layer="91"/>
@@ -15619,7 +15619,7 @@ on rising edge.</text>
 <wire x1="106.68" y1="76.2" x2="106.68" y2="81.28" width="0.1524" layer="91"/>
 <wire x1="106.68" y1="81.28" x2="104.14" y2="81.28" width="0.1524" layer="91"/>
 <label x="104.14" y="81.28" size="1.27" layer="95" rot="R180" xref="yes"/>
-<pinref part="R24" gate="G$1" pin="2"/>
+<pinref part="R23" gate="G$1" pin="2"/>
 <wire x1="88.9" y1="76.2" x2="106.68" y2="76.2" width="0.1524" layer="91"/>
 <junction x="106.68" y="76.2"/>
 </segment>
@@ -15659,16 +15659,16 @@ Pull SA0 low to zero last address bit.</text>
 <instance part="FRAME4" gate="G$1" x="0" y="0"/>
 <instance part="FRAME4" gate="G$2" x="152.4" y="0"/>
 <instance part="GND8" gate="1" x="124.46" y="81.28"/>
-<instance part="R11" gate="G$1" x="170.18" y="114.3" rot="R90">
+<instance part="R9" gate="G$1" x="170.18" y="114.3" rot="R90">
 <attribute name="DIGIKEY" x="170.18" y="114.3" size="1.778" layer="96" rot="R90" display="off"/>
 <attribute name="DESCRIPTION" x="170.18" y="114.3" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="R15" gate="G$1" x="162.56" y="114.3" rot="R90">
+<instance part="R13" gate="G$1" x="162.56" y="114.3" rot="R90">
 <attribute name="DIGIKEY" x="162.56" y="114.3" size="1.778" layer="96" rot="R90" display="off"/>
 <attribute name="DESCRIPTION" x="162.56" y="114.3" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="U6" gate="G$1" x="182.88" y="93.98"/>
-<instance part="U14" gate="G$1" x="63.5" y="106.68"/>
+<instance part="U15" gate="G$1" x="63.5" y="106.68"/>
 <instance part="R2" gate="G$1" x="38.1" y="114.3" rot="R180">
 <attribute name="DIGIKEY" x="38.1" y="114.3" size="1.778" layer="96" rot="R180" display="off"/>
 </instance>
@@ -15709,7 +15709,7 @@ Pull SA0 low to zero last address bit.</text>
 </segment>
 <segment>
 <pinref part="GND2" gate="1" pin="GND"/>
-<pinref part="U14" gate="G$1" pin="GND"/>
+<pinref part="U15" gate="G$1" pin="GND"/>
 <wire x1="63.5" y1="83.82" x2="63.5" y2="88.9" width="0.1524" layer="91"/>
 </segment>
 <segment>
@@ -15745,10 +15745,10 @@ Pull SA0 low to zero last address bit.</text>
 <wire x1="180.34" y1="111.76" x2="175.26" y2="111.76" width="0.1524" layer="91"/>
 <wire x1="175.26" y1="111.76" x2="175.26" y2="114.3" width="0.1524" layer="91"/>
 <junction x="175.26" y="114.3"/>
-<pinref part="R15" gate="G$1" pin="2"/>
+<pinref part="R13" gate="G$1" pin="2"/>
 <wire x1="162.56" y1="116.84" x2="162.56" y2="129.54" width="0.1524" layer="91"/>
 <junction x="162.56" y="129.54"/>
-<pinref part="R11" gate="G$1" pin="2"/>
+<pinref part="R9" gate="G$1" pin="2"/>
 <wire x1="170.18" y1="116.84" x2="170.18" y2="129.54" width="0.1524" layer="91"/>
 <junction x="170.18" y="129.54"/>
 <pinref part="U6" gate="G$1" pin="CS"/>
@@ -15757,7 +15757,7 @@ Pull SA0 low to zero last address bit.</text>
 <junction x="175.26" y="111.76"/>
 </segment>
 <segment>
-<pinref part="U14" gate="G$1" pin="VDD"/>
+<pinref part="U15" gate="G$1" pin="VDD"/>
 <wire x1="63.5" y1="124.46" x2="63.5" y2="134.62" width="0.1524" layer="91"/>
 <label x="63.5" y="139.7" size="1.016" layer="95" rot="R90" xref="yes"/>
 <pinref part="C11" gate="G$1" pin="1"/>
@@ -15767,7 +15767,7 @@ Pull SA0 low to zero last address bit.</text>
 <junction x="63.5" y="134.62"/>
 </segment>
 <segment>
-<pinref part="U14" gate="G$1" pin="SELECT"/>
+<pinref part="U15" gate="G$1" pin="SELECT"/>
 <wire x1="45.72" y1="99.06" x2="17.78" y2="99.06" width="0.1524" layer="91"/>
 <wire x1="17.78" y1="99.06" x2="17.78" y2="106.68" width="0.1524" layer="91"/>
 <label x="17.78" y="106.68" size="1.016" layer="95" rot="R90" xref="yes"/>
@@ -15778,7 +15778,7 @@ Pull SA0 low to zero last address bit.</text>
 <pinref part="U6" gate="G$1" pin="SCL/SPC"/>
 <wire x1="180.34" y1="106.68" x2="162.56" y2="106.68" width="0.1524" layer="91"/>
 <label x="160.02" y="106.68" size="1.27" layer="95" rot="R180" xref="yes"/>
-<pinref part="R15" gate="G$1" pin="1"/>
+<pinref part="R13" gate="G$1" pin="1"/>
 <wire x1="162.56" y1="106.68" x2="160.02" y2="106.68" width="0.1524" layer="91"/>
 <wire x1="162.56" y1="109.22" x2="162.56" y2="106.68" width="0.1524" layer="91"/>
 <junction x="162.56" y="106.68"/>
@@ -15789,7 +15789,7 @@ Pull SA0 low to zero last address bit.</text>
 <pinref part="U6" gate="G$1" pin="MOSI/SDA"/>
 <wire x1="180.34" y1="99.06" x2="170.18" y2="99.06" width="0.1524" layer="91"/>
 <label x="160.02" y="99.06" size="1.27" layer="95" rot="R180" xref="yes"/>
-<pinref part="R11" gate="G$1" pin="1"/>
+<pinref part="R9" gate="G$1" pin="1"/>
 <wire x1="170.18" y1="99.06" x2="160.02" y2="99.06" width="0.1524" layer="91"/>
 <wire x1="170.18" y1="109.22" x2="170.18" y2="99.06" width="0.1524" layer="91"/>
 <junction x="170.18" y="99.06"/>
@@ -15804,14 +15804,14 @@ Pull SA0 low to zero last address bit.</text>
 </net>
 <net name="N$3" class="0">
 <segment>
-<pinref part="U14" gate="G$1" pin="WS"/>
+<pinref part="U15" gate="G$1" pin="WS"/>
 <pinref part="R2" gate="G$1" pin="1"/>
 <wire x1="45.72" y1="114.3" x2="43.18" y2="114.3" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$12" class="0">
 <segment>
-<pinref part="U14" gate="G$1" pin="BCLK"/>
+<pinref part="U15" gate="G$1" pin="BCLK"/>
 <pinref part="R3" gate="G$1" pin="1"/>
 <wire x1="45.72" y1="106.68" x2="43.18" y2="106.68" width="0.1524" layer="91"/>
 </segment>
@@ -15819,7 +15819,7 @@ Pull SA0 low to zero last address bit.</text>
 <net name="N$15" class="0">
 <segment>
 <pinref part="R4" gate="G$1" pin="2"/>
-<pinref part="U14" gate="G$1" pin="DATA"/>
+<pinref part="U15" gate="G$1" pin="DATA"/>
 <wire x1="78.74" y1="106.68" x2="76.2" y2="106.68" width="0.1524" layer="91"/>
 </segment>
 </net>
