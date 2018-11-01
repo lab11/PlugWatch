@@ -91,17 +91,19 @@ int PowerCheck::getLCycles() {
     setADCSampleTime(ADC_SampleTime_3Cycles);
 
     //let it go low
-    delay(10);
+    delay(50);
 
     //we high and read in a loop counting cycles
     digitalWrite(A0, HIGH);
-    int observe = analogRead(B5);
+    /*int observe = analogRead(B5);
     int count = 0;
     while(observe < 1240 && count < 100000) {
         observe = analogRead(B5);
         //Serial.printlnf("Observe %d", observe);
         count++;
-    }
+    }*/
+		delay(10);
+		int count = analogRead(B5);
     digitalWrite(A0, LOW);
     delay(10);
     pinMode(A0, INPUT);
@@ -129,17 +131,20 @@ int PowerCheck::getNCycles() {
     setADCSampleTime(ADC_SampleTime_3Cycles);
 
     //let it go low
-    delay(10);
+    delay(50);
 
     //we high and read in a loop counting cycles
     digitalWrite(A1, HIGH);
-    int observe = analogRead(B3);
+    /*int observe = analogRead(B3);
     int count = 0;
     while(observe < 1240 && count < 100000) {
         observe = analogRead(B3);
         //Serial.printlnf("Observe %d", observe);
         count++;
-    }
+    }*/
+		delay(10);
+		int count = analogRead(B3);
+
     digitalWrite(A1, LOW);
     delay(10);
     pinMode(A1, INPUT);
