@@ -13680,19 +13680,7 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <part name="U1" library="chips" deviceset="AB1815-T3" device=""/>
 <part name="B1" library="batteries" deviceset="MS518SE" device=""/>
 <part name="GND6" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="R6" library="passives" deviceset="RESISTOR" device="0402_RES" value="1.5k">
-<attribute name="DESCRIPTION" value="RES SMD 1.5K OHM 0.1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="P1.5KDCCT-ND"/>
-<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
-<attribute name="MPN" value="ERA-2AEB152X"/>
-</part>
 <part name="GND11" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="R7" library="passives" deviceset="RESISTOR" device="0402_RES" value="1.5k">
-<attribute name="DESCRIPTION" value="RES SMD 1.5K OHM 0.1% 1/16W 0402"/>
-<attribute name="DIGIKEY" value="P1.5KDCCT-ND"/>
-<attribute name="MANUFACTURER" value="Panasonic Electronic Components"/>
-<attribute name="MPN" value="ERA-2AEB152X"/>
-</part>
 <part name="C10" library="passives" deviceset="CAPACITOR" device="0402_CAP" value="1uF">
 <attribute name="DESCRIPTION" value="CAP CER 1UF 10V X7S 0402"/>
 <attribute name="DIGIKEY" value="490-13409-1-ND"/>
@@ -13810,6 +13798,12 @@ Standard 2-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 </part>
 <part name="J2" library="connector" deviceset="SCREW_TERMNIAL_1" device=""/>
 <part name="J3" library="connector" deviceset="SCREW_TERMNIAL_1" device=""/>
+<part name="R6" library="passives" deviceset="RESISTOR" device="0402_RES" value="10k">
+<attribute name="DESCRIPTION" value="RES SMD 10K OHM 1% 1/16W 0402 "/>
+<attribute name="DIGIKEY" value="RMCF0402FT10K0CT-ND "/>
+<attribute name="MANUFACTURER" value="Stackpole Electronics Inc. "/>
+<attribute name="MPN" value="RMCF0402FT10K0 "/>
+</part>
 </parts>
 <sheets>
 <sheet>
@@ -14377,7 +14371,7 @@ MR is the voltage input.
 MR Triggers at 1.235V.
 We want to trigger at 3.3V, so voltage
 divide down with 1% resistors.</text>
-<text x="68.58" y="53.34" size="1.016" layer="98" align="bottom-center">You don't need external caps on this crystal.
+<text x="76.2" y="68.58" size="1.016" layer="98" align="bottom-center">You don't need external caps on this crystal.
 Verified working on permamote.</text>
 <text x="35.56" y="73.66" size="1.016" layer="98" align="bottom-center">Battery charges from 3.3v through
  1.5k resistor per datasheet.</text>
@@ -14422,26 +14416,18 @@ If we don't have VCC the particle won't be on anyways.</text>
 <instance part="U1" gate="G$1" x="121.92" y="45.72"/>
 <instance part="B1" gate="G$1" x="50.8" y="60.96"/>
 <instance part="GND6" gate="1" x="50.8" y="45.72"/>
-<instance part="R6" gate="G$1" x="50.8" y="78.74" rot="R270">
-<attribute name="DIGIKEY" x="50.8" y="78.74" size="1.27" layer="96" rot="R270" display="off"/>
-<attribute name="DESCRIPTION" x="50.8" y="78.74" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
-</instance>
 <instance part="GND11" gate="1" x="137.16" y="33.02"/>
-<instance part="R7" gate="G$1" x="58.42" y="73.66">
-<attribute name="DIGIKEY" x="58.42" y="73.66" size="1.27" layer="96" display="off"/>
-<attribute name="DESCRIPTION" x="58.42" y="73.66" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
-</instance>
 <instance part="C10" gate="G$1" x="33.02" y="66.04">
 <attribute name="DIGIKEY" x="33.02" y="66.04" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MANUFACTURER" x="33.02" y="66.04" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="MPN" x="33.02" y="66.04" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 <attribute name="DESCRIPTION" x="33.02" y="66.04" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="C1" gate="G$1" x="86.36" y="53.34">
-<attribute name="DIGIKEY" x="86.36" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
-<attribute name="MANUFACTURER" x="86.36" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
-<attribute name="MPN" x="86.36" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
-<attribute name="DESCRIPTION" x="86.36" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<instance part="C1" gate="G$1" x="81.28" y="55.88">
+<attribute name="DIGIKEY" x="81.28" y="55.88" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MANUFACTURER" x="81.28" y="55.88" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="MPN" x="81.28" y="55.88" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<attribute name="DESCRIPTION" x="81.28" y="55.88" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="X1" gate="G$1" x="68.58" y="63.5" rot="R270"/>
 <instance part="R16" gate="G$1" x="160.02" y="53.34" rot="R270">
@@ -14464,9 +14450,9 @@ If we don't have VCC the particle won't be on anyways.</text>
 <attribute name="DIGIKEY" x="200.66" y="71.12" size="1.27" layer="96" rot="R270" display="off"/>
 <attribute name="DESCRIPTION" x="200.66" y="71.12" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
-<instance part="R18" gate="G$1" x="101.6" y="53.34" rot="R270">
-<attribute name="DIGIKEY" x="101.6" y="53.34" size="1.27" layer="96" rot="R270" display="off"/>
-<attribute name="DESCRIPTION" x="101.6" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
+<instance part="R18" gate="G$1" x="99.06" y="53.34" rot="R270">
+<attribute name="DIGIKEY" x="99.06" y="53.34" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="DESCRIPTION" x="99.06" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 <instance part="R19" gate="G$1" x="149.86" y="147.32" rot="R270">
 <attribute name="DIGIKEY" x="149.86" y="147.32" size="1.27" layer="96" rot="R270" display="off"/>
@@ -14483,6 +14469,10 @@ If we don't have VCC the particle won't be on anyways.</text>
 <attribute name="MANUFACTURER" x="236.22" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
 <attribute name="MPN" x="236.22" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
 <attribute name="DESCRIPTION" x="236.22" y="162.56" size="1.016" layer="96" align="bottom-center" display="off"/>
+</instance>
+<instance part="R6" gate="G$1" x="91.44" y="53.34" rot="R270">
+<attribute name="DIGIKEY" x="91.44" y="53.34" size="1.27" layer="96" rot="R270" display="off"/>
+<attribute name="DESCRIPTION" x="91.44" y="53.34" size="1.016" layer="96" rot="R270" align="bottom-center" display="off"/>
 </instance>
 </instances>
 <busses>
@@ -14538,8 +14528,8 @@ If we don't have VCC the particle won't be on anyways.</text>
 <pinref part="C1" gate="G$1" pin="2"/>
 <wire x1="137.16" y1="38.1" x2="137.16" y2="40.64" width="0.1524" layer="91"/>
 <wire x1="137.16" y1="40.64" x2="137.16" y2="43.18" width="0.1524" layer="91"/>
-<wire x1="86.36" y1="48.26" x2="86.36" y2="38.1" width="0.1524" layer="91"/>
-<wire x1="86.36" y1="38.1" x2="137.16" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="81.28" y1="50.8" x2="81.28" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="81.28" y1="38.1" x2="137.16" y2="38.1" width="0.1524" layer="91"/>
 <junction x="137.16" y="38.1"/>
 <pinref part="U1" gate="G$1" pin="!EXTR"/>
 <wire x1="152.4" y1="50.8" x2="154.94" y2="50.8" width="0.1524" layer="91"/>
@@ -14635,37 +14625,25 @@ If we don't have VCC the particle won't be on anyways.</text>
 <junction x="160.02" y="73.66"/>
 </segment>
 </net>
-<net name="N$4" class="0">
-<segment>
-<pinref part="B1" gate="G$1" pin="+"/>
-<wire x1="50.8" y1="68.58" x2="50.8" y2="73.66" width="0.1524" layer="91"/>
-<pinref part="R6" gate="G$1" pin="2"/>
-<pinref part="R7" gate="G$1" pin="1"/>
-<wire x1="50.8" y1="73.66" x2="50.8" y2="76.2" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="73.66" x2="50.8" y2="73.66" width="0.1524" layer="91"/>
-<junction x="50.8" y="73.66"/>
-</segment>
-</net>
 <net name="VCC" class="0">
 <segment>
 <pinref part="U1" gate="G$1" pin="VCC"/>
 <wire x1="119.38" y1="76.2" x2="101.6" y2="76.2" width="0.1524" layer="91"/>
-<wire x1="101.6" y1="76.2" x2="66.04" y2="76.2" width="0.1524" layer="91"/>
+<wire x1="101.6" y1="76.2" x2="99.06" y2="76.2" width="0.1524" layer="91"/>
+<wire x1="99.06" y1="76.2" x2="91.44" y2="76.2" width="0.1524" layer="91"/>
+<wire x1="91.44" y1="76.2" x2="66.04" y2="76.2" width="0.1524" layer="91"/>
 <wire x1="66.04" y1="76.2" x2="66.04" y2="88.9" width="0.1524" layer="91"/>
 <wire x1="66.04" y1="88.9" x2="50.8" y2="88.9" width="0.1524" layer="91"/>
 <wire x1="50.8" y1="88.9" x2="50.8" y2="93.98" width="0.1524" layer="91"/>
-<pinref part="R6" gate="G$1" pin="1"/>
-<wire x1="50.8" y1="83.82" x2="50.8" y2="86.36" width="0.1524" layer="91"/>
 <junction x="50.8" y="88.9"/>
 <label x="50.8" y="93.98" size="1.016" layer="95" rot="R90" xref="yes"/>
 <pinref part="C10" gate="G$1" pin="1"/>
 <wire x1="50.8" y1="86.36" x2="50.8" y2="88.9" width="0.1524" layer="91"/>
 <wire x1="33.02" y1="68.58" x2="33.02" y2="86.36" width="0.1524" layer="91"/>
 <wire x1="33.02" y1="86.36" x2="50.8" y2="86.36" width="0.1524" layer="91"/>
-<junction x="50.8" y="86.36"/>
 <pinref part="R18" gate="G$1" pin="1"/>
-<wire x1="101.6" y1="58.42" x2="101.6" y2="76.2" width="0.1524" layer="91"/>
-<junction x="101.6" y="76.2"/>
+<wire x1="99.06" y1="58.42" x2="99.06" y2="76.2" width="0.1524" layer="91"/>
+<junction x="99.06" y="76.2"/>
 </segment>
 <segment>
 <pinref part="R17" gate="G$1" pin="1"/>
@@ -14675,20 +14653,32 @@ If we don't have VCC the particle won't be on anyways.</text>
 </net>
 <net name="N$5" class="0">
 <segment>
-<pinref part="R7" gate="G$1" pin="2"/>
 <pinref part="U1" gate="G$1" pin="VBAT"/>
-<wire x1="60.96" y1="73.66" x2="119.38" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="60.96" y1="73.66" x2="91.44" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="91.44" y1="73.66" x2="99.06" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="99.06" y1="73.66" x2="119.38" y2="73.66" width="0.1524" layer="91"/>
+<pinref part="B1" gate="G$1" pin="+"/>
+<wire x1="50.8" y1="68.58" x2="50.8" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="60.96" y1="73.66" x2="50.8" y2="73.66" width="0.1524" layer="91"/>
+<pinref part="R6" gate="G$1" pin="1"/>
+<wire x1="91.44" y1="58.42" x2="91.44" y2="73.66" width="0.1524" layer="91"/>
+<junction x="91.44" y="73.66"/>
 </segment>
 </net>
 <net name="!RTC_CS" class="0">
 <segment>
 <pinref part="U1" gate="G$1" pin="!CS"/>
-<wire x1="119.38" y1="48.26" x2="101.6" y2="48.26" width="0.1524" layer="91"/>
-<label x="99.06" y="48.26" size="1.016" layer="95" rot="R180" xref="yes"/>
+<wire x1="119.38" y1="48.26" x2="99.06" y2="48.26" width="0.1524" layer="91"/>
+<label x="76.2" y="43.18" size="1.016" layer="95" rot="R180" xref="yes"/>
 <pinref part="R18" gate="G$1" pin="2"/>
-<wire x1="101.6" y1="48.26" x2="99.06" y2="48.26" width="0.1524" layer="91"/>
-<wire x1="101.6" y1="50.8" x2="101.6" y2="48.26" width="0.1524" layer="91"/>
-<junction x="101.6" y="48.26"/>
+<wire x1="99.06" y1="48.26" x2="99.06" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="99.06" y1="43.18" x2="91.44" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="91.44" y1="43.18" x2="76.2" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="99.06" y1="50.8" x2="99.06" y2="48.26" width="0.1524" layer="91"/>
+<junction x="99.06" y="48.26"/>
+<pinref part="R6" gate="G$1" pin="2"/>
+<wire x1="91.44" y1="50.8" x2="91.44" y2="43.18" width="0.1524" layer="91"/>
+<junction x="91.44" y="43.18"/>
 </segment>
 </net>
 <net name="SD_MOSI" class="0">
@@ -14715,18 +14705,18 @@ If we don't have VCC the particle won't be on anyways.</text>
 <net name="N$13" class="0">
 <segment>
 <pinref part="C1" gate="G$1" pin="1"/>
-<wire x1="86.36" y1="55.88" x2="86.36" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="81.28" y1="58.42" x2="81.28" y2="60.96" width="0.1524" layer="91"/>
 <pinref part="U1" gate="G$1" pin="AF"/>
-<wire x1="86.36" y1="60.96" x2="119.38" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="81.28" y1="60.96" x2="119.38" y2="60.96" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$20" class="0">
 <segment>
 <pinref part="X1" gate="G$1" pin="2"/>
-<wire x1="68.58" y1="58.42" x2="81.28" y2="58.42" width="0.1524" layer="91"/>
-<wire x1="81.28" y1="58.42" x2="81.28" y2="66.04" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="58.42" x2="78.74" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="58.42" x2="78.74" y2="66.04" width="0.1524" layer="91"/>
 <pinref part="U1" gate="G$1" pin="XO"/>
-<wire x1="81.28" y1="66.04" x2="119.38" y2="66.04" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="66.04" x2="119.38" y2="66.04" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$21" class="0">
