@@ -1,5 +1,5 @@
 {
-    "host": "senseye.eecs.umich.edu",
+    "host": "influx",
     "port": 8086,
     "database": "powerwatch",
     "protocol": "http"
