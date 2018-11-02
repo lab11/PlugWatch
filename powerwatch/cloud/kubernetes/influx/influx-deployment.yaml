@@ -1,0 +1,70 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: influx-pv-volume
+  labels:
+    type: local
+    app: influx
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/data/influx"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: influx-pv-claim
+  labels:
+    app: influx
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: influx
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: influx
+    spec:
+      containers:
+        - name: influx
+          image: influxdb:1.6.4
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 8086
+          envFrom:
+            - secretRef:
+                name: influx-config
+          volumeMounts:
+            - mountPath: /var/lib/influxdb
+              name: influxdb
+      volumes:
+        - name: influxdb
+          persistentVolumeClaim:
+            claimName: influx-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: influx
+  labels:
+    app: influx
+spec:
+  type: NodePort
+  ports:
+   - port: 8086
+  selector:
+   app: influx
