@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: timescale-config
+type: Opaque
+data:
+  POSTGRES_DB: 
+  POSTGRES_USER: 
+  POSTGRES_PASSWORD: 

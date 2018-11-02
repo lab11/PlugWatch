@@ -1,0 +1,70 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: timescale-pv-volume
+  labels:
+    type: local
+    app: timescale
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/data"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: timescale-pv-claim
+  labels:
+    app: timescale
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: timescale
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: timescale
+    spec:
+      containers:
+        - name: timescale
+          image: timescale/timescaledb
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: timescale-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: timescaledb
+      volumes:
+        - name: timescaledb
+          persistentVolumeClaim:
+            claimName: timescale-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescale
+  labels:
+    app: timescale
+spec:
+  type: NodePort
+  ports:
+   - port: 5432
+  selector:
+   app: timescale
