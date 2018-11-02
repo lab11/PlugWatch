@@ -1,0 +1,94 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: grafana-pv-volume
+  labels:
+    type: local
+    app: grafana
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/grafana2"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: grafana-pv-claim
+  labels:
+    app: grafana
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      initContainers:
+        - name: volume-mount-hack
+          image: busybox
+          command: ["sh", "-c", "chown -R 472:472 /var/lib/grafana"]
+          envFrom:
+            - secretRef:
+                name: grafana-config
+          volumeMounts:
+          - name: grafanadb
+            mountPath: /var/lib/grafana
+
+      containers:
+        - name: grafana
+          image: grafana/grafana:5.3.0
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: grafana-config
+          volumeMounts:
+            - mountPath: /var/lib/grafana
+              name: grafanadb
+
+            - mountPath: /etc/grafana/provisioning
+              name: grafana-provisioning
+      volumes:
+        - name: grafanadb
+          persistentVolumeClaim:
+            claimName: grafana-pv-claim
+
+        - name: grafana-provisioning
+          configMap:
+            name: grafana-provisioning
+            items:
+            - key: datasource.yaml
+              path: datasources/datasource.yaml
+
+            - key: dashboard.yaml
+              path: dashboards/dashboard.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  labels:
+    app: grafana
+spec:
+  type: NodePort
+  ports:
+   - port: 3000
+  selector:
+   app: grafana
