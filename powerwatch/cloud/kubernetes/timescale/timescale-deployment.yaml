@@ -51,10 +51,21 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: timescaledb
+
+            - mountPath: /docker-entrypoint-initdb.d
+              name: timescale-initialization
+              readOnly: true
       volumes:
         - name: timescaledb
           persistentVolumeClaim:
             claimName: timescale-pv-claim
+
+        - name: timescale-initialization
+          configMap:
+            name: timescale-initialization
+            items:
+            - key: initialize-read-user.sh
+              path: initialize-read-user.sh
 ---
 apiVersion: v1
 kind: Service
