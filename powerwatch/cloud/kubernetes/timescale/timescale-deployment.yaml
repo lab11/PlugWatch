@@ -12,7 +12,7 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: "/mnt/data"
+    path: "/data/timescale"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
