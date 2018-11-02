@@ -21,7 +21,7 @@ device_filter_list = [];
 if args.filter != None:
     with open(args.filter) as f:
         device_filter_list = f.readlines()
-device_filter_list = [x.strip() for x in device_filter_list] 
+device_filter_list = [x.strip() for x in device_filter_list]
 
 print()
 print('Uploading firmware to the particle cloud...')
@@ -61,7 +61,7 @@ for device in devices['devices']:
         print('Skipping {} - not in filter list'.format(device['id']));
         continue
 
-    if(device['firmware_version'] >= args.version):
+    if('firmware_version' in device and device['firmware_version'] >= args.version):
         print('Skipping {} - already has equal or greater version'.format(device['id']));
         continue
 
