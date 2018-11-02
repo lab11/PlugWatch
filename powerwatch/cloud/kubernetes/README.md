@@ -1,6 +1,17 @@
 Deploying a Powerwatch Backend
 ==============================
 
+## Requirements
+
+To deploy a powerwatch backend instance you need to have google cloud installed
+and logged into a google account which has been granted an admin role on the 
+powerwatch-backend project.
+
+To check:
+```
+gcloud config set project powerwatch-backend
+```
+
 ## This is still a work in progress
 
 To startup a new powerwatch backend you should 

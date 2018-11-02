@@ -11,6 +11,8 @@ import json
 import shutil
 import base64
 import glob
+import subprocess
+from kubernetes import client, config, utils
 
 parser = argparse.ArgumentParser(description = 'Provision and deploy powerwatch backend')
 parser.add_argument('-p','--product', type=int, required=True, action='append')
@@ -31,12 +33,17 @@ grafana_database_password = str(base64.b64encode(grafana_database_password_clear
 grafana_admin_password = str(base64.b64encode(''.join(secrets.choice(alphabet) for i in range(12)).encode('ascii')), 'utf-8')
 product_ids = str(args.product)
 
-now get the particle authentication token using the particle API
+
+#now get the particle authentication token using the particle API
+print()
+print('Generating a particle access token...')
 username = input('Particle username:')
 password = getpass.getpass('Particle password:')
 resp =  requests.post('https://api.particle.io/oauth/token', data={'username':username, 'password':password,'grant_type':'password','expires_in':0}, auth=('particle', 'particle'))
 access_token = str(base64.b64encode(json.loads(resp.text)['access_token'].encode('ascii')), 'utf-8')
 
+print()
+print('Configuring new cluster for these products...')
 #copy all of the kubernetes configuration files into a staging area
 dest = args.name+'_deployment'
 os.mkdir(dest)
@@ -66,3 +73,110 @@ for filepath in glob.iglob('./'+dest+'/**', recursive=True):
         s = s.replace('${PARTICLE_AUTH_TOKEN}', access_token)
         with open(filepath, "w") as file:
             file.write(s)
+
+#deploy a cluster in google cloud
+#print()
+#print('Deploying a new google cloud container cluster (this could take several minutes)...')
+#
+##Make sure the project is set correctly
+#try:
+#    subprocess.check_call(['gcloud', 'config','set','project','powerwatch-backend'])
+#except Exception as e:
+#    print('Error setting the cloud project - do you the google cloud SDK isntalled and logged into an account with access to the powerwatch-backend project?')
+#    shutil.rmtree(dest)
+#    raise e
+#
+##Create a new cluster with the deployment name
+#try:
+#    subprocess.check_call(['gcloud', 'container','clusters','create',args.name,
+#                            '--region', 'us-west1',
+#                            '--num-nodes', '2',
+#                            '--machine-type', 'n1-standard-1'])
+#except Exception as e:
+#    shutil.rmtree(dest)
+#    raise e
+#
+##point the kubernetes python API at the new cluster
+#try:
+#    subprocess.check_call(['gcloud', 'container', 'clusters', 'get-credentials', args.name,
+#                            '--region', 'us-west1',
+#                            '--project', 'powerwatch-backend'])
+#except Exception as e:
+#    shutil.rmtree(dest)
+#    raise e
+
+#now use kubernetes to deploy a backend on this cluster
+config.load_kube_config()
+k8s_client = client.ApiClient()
+
+#Timescale deployment
+try:
+    subprocess.check_call(['kubectl', 'delete', 'configmap', 'timescale-initialization'])
+except:
+    pass
+
+try:
+    subprocess.check_call(['kubectl', 'create', 'configmap', 'timescale-initialization',
+                            '--from-file='+dest+'/timescale/initialize-read-user.sh'])
+except Exception as e:
+    shutil.rmtree(dest)
+    raise e
+
+subprocess.check_call(['kubectl', 'create', '-f', dest+'/timescale/timescale-config.yaml'])
+subprocess.check_call(['kubectl','create','-f', dest+'/timescale/timescale-deployment.yaml'])
+
+#Influx deployment
+subprocess.check_call(['kubectl','create','-f', dest+'/influx/influx-config.yaml'])
+subprocess.check_call(['kubectl','create','-f', dest+'/influx/influx-deployment.yaml'])
+
+#Grafana deployment
+try:
+    subprocess.check_call(['kubectl', 'delete', 'configmap', 'grafana-provisioning'])
+except:
+    pass
+
+try:
+    subprocess.check_call(['kubectl', 'create', 'configmap', 'grafana-provisioning',
+                            '--from-file='+dest+'/grafana/datasource.yaml',
+                            '--from-file='+dest+'/grafana/dashboard.yaml'])
+except Exception as e:
+    shutil.rmtree(dest)
+    raise e
+
+subprocess.check_call(['kubectl','create','-f', dest+'/grafana/grafana-config.yaml'])
+subprocess.check_call(['kubectl','create','-f', dest+'/grafana/grafana-deployment.yaml'])
+
+#Powerwatch poster deployment
+try:
+    subprocess.check_call(['kubectl', 'delete', 'configmap', 'config'])
+except:
+    pass
+
+try:
+    subprocess.check_call(['kubectl', 'create', 'configmap', 'config',
+                            '--from-file='+dest+'/powerwatch-data-poster/config.json',
+                            '--from-file='+dest+'/powerwatch-data-poster/influx.json',
+                            '--from-file='+dest+'/powerwatch-data-poster/postgres.json'])
+except Exception as e:
+    shutil.rmtree(dest)
+    raise e
+
+subprocess.check_call(['kubectl','create','-f', dest+'/powerwatch-data-poster/particle-auth-token.yaml'])
+subprocess.check_call(['kubectl','create','-f', dest+'/powerwatch-data-poster/influx-user-pass.yaml'])
+subprocess.check_call(['kubectl','create','-f', dest+'/powerwatch-data-poster/postgres-user-pass.yaml'])
+subprocess.check_call(['kubectl','create','-f', dest+'/powerwatch-data-poster/powerwatch-data-poster-deployment.yaml'])
+
+print()
+print('Generated usernames and passwords (save to lastpass)')
+#Print the information generated above
+print('Timescale User: ' + str(base64.b64decode(timescale_user),'utf-8'))
+print('Timescale Password: ' + str(base64.b64decode(timescale_password),'utf-8'))
+print('Influx User: ' + str(base64.b64decode(influx_user),'utf-8'))
+print('Influx Password: ' + str(base64.b64decode(influx_password),'utf-8'))
+print('Influx Admin User: ' + str(base64.b64decode(influx_admin_user),'utf-8'))
+print('Influx Admin Password: ' + str(base64.b64decode(influx_admin_password),'utf-8'))
+print('Grafana Database User: ' + grafana_database_user_clear)
+print('Grafana Database Password: ' + grafana_database_password_clear)
+print('Grafana Admin User: admin')
+print('Grafana Admin Password: ' + str(base64.b64decode(grafana_admin_password),'utf-8'))
+print('Particle access token: ' + str(base64.b64decode(access_token),'utf-8'))
