@@ -15,9 +15,9 @@ datasources:
   # <string> url
   url: timescale
   # <string> database password, if used
-  password: ${GRAFANA_DATABASE_PASSWORD}
+  password: ${GRAFANA_DATABASE_PASSWORD_CLEAR}
   # <string> database user, if used
-  user: ${GRAFANA_DATABASE_USER}
+  user: ${GRAFANA_DATABASE_USER_CLEAR}
   # <string> database name, if used
   database: powerwatch
   timescaledb: true
@@ -38,9 +38,9 @@ datasources:
   # <string> url
   url: influx
   # <string> database password, if used
-  password: ${GRAFANA_DATABASE_PASSWORD}
+  password: ${GRAFANA_DATABASE_PASSWORD_CLEAR}
   # <string> database user, if used
-  user: ${GRAFANA_DATABASE_USER}
+  user: ${GRAFANA_DATABASE_USER_CLEAR}
   # <string> database name, if used
   database: powerwatch
   version: 1
