@@ -1,4 +1,4 @@
 {
-    "deployment_name": "ghana",
-    "product_ids": [7008, 7009]
+    "deployment_name": ${DEPLOYMENT_NAME},
+    "product_ids": ${PRODUCT_IDS}
 }

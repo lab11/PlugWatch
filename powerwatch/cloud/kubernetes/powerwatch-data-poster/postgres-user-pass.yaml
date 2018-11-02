@@ -4,5 +4,5 @@ metadata:
   name: postgres-user-pass
 type: Opaque
 data:
-  username:
-  password:
+  username: ${TIMESCALE_USER}
+  password: ${TIMESCALE_PASSWORD}

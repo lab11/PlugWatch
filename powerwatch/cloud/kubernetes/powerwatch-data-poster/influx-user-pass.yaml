@@ -4,5 +4,5 @@ metadata:
   name: influx-user-pass
 type: Opaque
 data:
-  username: 
-  password:
+  username: ${INFLUX_USER}
+  password: ${INFLUX_PASSWORD}

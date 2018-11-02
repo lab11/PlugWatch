@@ -4,4 +4,4 @@ metadata:
   name: particle-auth-token
 type: Opaque
 data:
-  auth-token:
+  auth-token: ${PARTICLE_AUTH_TOKEN}
