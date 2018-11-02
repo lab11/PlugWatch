@@ -1,4 +1,3 @@
 {
-    "deployment_name": ${DEPLOYMENT_NAME},
     "product_ids": ${PRODUCT_IDS}
 }
