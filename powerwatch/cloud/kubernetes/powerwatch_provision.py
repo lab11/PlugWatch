@@ -33,7 +33,6 @@ grafana_database_password = str(base64.b64encode(grafana_database_password_clear
 grafana_admin_password = str(base64.b64encode(''.join(secrets.choice(alphabet) for i in range(12)).encode('ascii')), 'utf-8')
 product_ids = str(args.product)
 
-
 #now get the particle authentication token using the particle API
 print()
 print('Generating a particle access token...')
@@ -71,43 +70,64 @@ for filepath in glob.iglob('./'+dest+'/**', recursive=True):
         s = s.replace('${GRAFANA_PASSWORD}', grafana_admin_password)
         s = s.replace('${PRODUCT_IDS}', product_ids)
         s = s.replace('${PARTICLE_AUTH_TOKEN}', access_token)
+        s = s.replace('${GRAFANA_IP_ADDRESS}', args.name+'-grafana')
         with open(filepath, "w") as file:
             file.write(s)
 
 #deploy a cluster in google cloud
-#print()
-#print('Deploying a new google cloud container cluster (this could take several minutes)...')
-#
-##Make sure the project is set correctly
-#try:
-#    subprocess.check_call(['gcloud', 'config','set','project','powerwatch-backend'])
-#except Exception as e:
-#    print('Error setting the cloud project - do you the google cloud SDK isntalled and logged into an account with access to the powerwatch-backend project?')
-#    shutil.rmtree(dest)
-#    raise e
-#
-##Create a new cluster with the deployment name
-#try:
-#    subprocess.check_call(['gcloud', 'container','clusters','create',args.name,
-#                            '--region', 'us-west1',
-#                            '--num-nodes', '2',
-#                            '--machine-type', 'n1-standard-1'])
-#except Exception as e:
-#    shutil.rmtree(dest)
-#    raise e
-#
-##point the kubernetes python API at the new cluster
-#try:
-#    subprocess.check_call(['gcloud', 'container', 'clusters', 'get-credentials', args.name,
-#                            '--region', 'us-west1',
-#                            '--project', 'powerwatch-backend'])
-#except Exception as e:
-#    shutil.rmtree(dest)
-#    raise e
+print()
+print('Deploying a new google cloud container cluster (this could take several minutes)...')
 
-#now use kubernetes to deploy a backend on this cluster
-config.load_kube_config()
-k8s_client = client.ApiClient()
+#Make sure the project is set correctly
+try:
+    subprocess.check_call(['gcloud', 'config','set','project','powerwatch-backend'])
+except Exception as e:
+    print('Error setting the cloud project - do you the google cloud SDK isntalled and logged into an account with access to the powerwatch-backend project?')
+    shutil.rmtree(dest)
+    raise e
+
+#Create a new cluster with the deployment name
+try:
+    subprocess.check_call(['gcloud', 'container','clusters','create',args.name,
+                            '--region', 'us-west1',
+                            '--num-nodes', '2',
+                            '--machine-type', 'n1-standard-1'])
+except Exception as e:
+    shutil.rmtree(dest)
+    raise e
+
+#CREATE a new globally routable ip address
+try:
+    subprocess.check_call(['gcloud', 'compute','addresses','create',
+                        args.name+'-grafana','--global'])
+except Exception as e:
+    #shutil.rmtree(dest)
+    #raise e
+    pass
+
+#describe that address for printing
+grafana_ip_address = ''
+try:
+    grafana_ip_address = subprocess.check_output(['gcloud', 'compute','addresses','describe',
+                        args.name+'-grafana','--global'])
+except Exception as e:
+    shutil.rmtree(dest)
+    raise e
+
+#point the kubernetes python API at the new cluster
+try:
+    subprocess.check_call(['gcloud', 'container', 'clusters', 'get-credentials', args.name,
+                            '--region', 'us-west1',
+                            '--project', 'powerwatch-backend'])
+except Exception as e:
+    shutil.rmtree(dest)
+    raise e
+
+#A retained storage class for SDDs
+try:
+    subprocess.check_call(['kubectl', 'create', '-f', 'storage-class/retained-storage-class.yaml'])
+except:
+    pass
 
 #Timescale deployment
 try:
@@ -187,3 +207,4 @@ print('Grafana Database Password: ' + grafana_database_password_clear)
 print('Grafana Admin User: admin')
 print('Grafana Admin Password: ' + str(base64.b64decode(grafana_admin_password),'utf-8'))
 print('Particle access token: ' + str(base64.b64decode(access_token),'utf-8'))
+print('Grafana globally accessible IP address: ' + str(grafana_ip_address))
