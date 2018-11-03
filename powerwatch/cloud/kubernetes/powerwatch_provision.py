@@ -136,9 +136,16 @@ except:
     pass
 
 try:
+    subprocess.check_call(['kubectl', 'delete', 'configmap', 'grafana-dashboards'])
+except:
+    pass
+
+try:
     subprocess.check_call(['kubectl', 'create', 'configmap', 'grafana-provisioning',
                             '--from-file='+dest+'/grafana/datasource.yaml',
                             '--from-file='+dest+'/grafana/dashboard.yaml'])
+    subprocess.check_call(['kubectl', 'create', 'configmap', 'grafana-dashboards',
+                            '--from-file='+dest+'/grafana/Powerwatch_General.json'])
 except Exception as e:
     shutil.rmtree(dest)
     raise e

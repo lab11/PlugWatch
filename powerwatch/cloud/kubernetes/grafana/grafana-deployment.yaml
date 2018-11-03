@@ -65,6 +65,9 @@ spec:
 
             - mountPath: /etc/grafana/provisioning
               name: grafana-provisioning
+
+            - mountPath: /etc/grafana/dashboards
+              name: grafana-dashboards
       volumes:
         - name: grafanadb
           persistentVolumeClaim:
@@ -79,6 +82,13 @@ spec:
 
             - key: dashboard.yaml
               path: dashboards/dashboard.yaml
+
+        - name: grafana-dashboards
+          configMap:
+            name: grafana-dashboards
+            items:
+            - key: Powerwatch_General.json
+              path: Powerwatch_General.json
 ---
 apiVersion: v1
 kind: Service
