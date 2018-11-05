@@ -149,13 +149,8 @@ function insert_data(device, timestamp, table_obj) {
 }
 
 function create_table(device, timestamp, table_obj) {
-    //how many rows is the table
-    var cols = "";
-    for (var key in table_obj) {
-        cols = cols + ", %I %s";
-    }
-
     //I think this can be done better with postgres internal data converter!!
+    var cols = "";
     var names = [];
     names.push(device);
     for (var key in table_obj) {
@@ -164,6 +159,7 @@ function create_table(device, timestamp, table_obj) {
         if(type != 'err') {
             names.push(key);
             names.push(type);
+            cols = cols + ", %I %s";
         } else {
             console.log('Error with field ' + key);
         }
@@ -182,6 +178,7 @@ function create_table(device, timestamp, table_obj) {
             console.log(err)
         } else {
             //make it a hyptertable!
+            console.log("Making it a hypertable");
             pg_pool.query("SELECT create_hypertable($1,'time')",[device], (err, res) => {
                 if(err) {
                     console.log(err)
