@@ -5,7 +5,7 @@ metadata:
   labels:
     app: timescale
 spec:
-  storageClassName: fast
+  storageClassName: slow
   accessModes:
     - ReadWriteOnce
   resources:

@@ -5,7 +5,7 @@ metadata:
   labels:
     app: influx
 spec:
-  storageClassName: fast
+  storageClassName: slow
   accessModes:
     - ReadWriteOnce
   resources:

@@ -1,6 +1,18 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
+  name: slow
+  labels:
+    addonmanager.kubernetes.io/mode: EnsureExists
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard
+reclaimPolicy: Retain
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
   name: fast
   labels:
     addonmanager.kubernetes.io/mode: EnsureExists
