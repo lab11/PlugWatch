@@ -285,7 +285,7 @@ function parse_packet(event) {
 }
 
 function parse_error(event) {
-    console.log(json.stringify(event,null,null));
+    console.log(JSON.stringify(event,null,null));
     if(event.version && event.data) {
         if(parseInt(event.version) >= 14) {
             var fields = {};
