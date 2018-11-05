@@ -11,7 +11,7 @@ function parseHexString(str) {
 }
 
 function parse_packet(event) {
-    console.log(event);
+    console.log(JSON.stringify(event,null,null));
     if(event.version && event.data) {
         if(parseInt(event.version) >= 14) {
             var major_field_list = event.data.split(";");
@@ -275,8 +275,8 @@ function parse_packet(event) {
                 }
             }
 
-            console.log(fields);
-            console.log(tags);
+            console.log(JSON.stringify(fields,null,null));
+            console.log(JSON.stringify(tags,null,null));
             console.log(timestamp);
 
             return [fields, tags, timestamp];
@@ -285,7 +285,7 @@ function parse_packet(event) {
 }
 
 function parse_error(event) {
-    console.log(event);
+    console.log(json.stringify(event,null,null));
     if(event.version && event.data) {
         if(parseInt(event.version) >= 14) {
             var fields = {};
@@ -310,8 +310,8 @@ function parse_error(event) {
                 fields['hanging_error'] = false;
             }
 
-            console.log(fields);
-            console.log(tags);
+            console.log(JSON.stringify(fields,null,null));
+            console.log(JSON.stringify(tags,null,null));
             console.log(timestamp);
 
             return [fields, tags, timestamp];
