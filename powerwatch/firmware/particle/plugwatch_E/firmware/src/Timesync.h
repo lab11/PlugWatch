@@ -2,6 +2,7 @@
 
 #include <Particle.h>
 #include "Subsystem.h"
+#include "AB1815.h"
 
 //***********************************
 //* Time Sync
@@ -14,8 +15,10 @@ class Timesync: public Subsystem {
   typedef Subsystem super;
 
   const int TWELVE_HOURS = 1000 * 60 * 60 * 12;
+  AB1815 rtc;
 
 public:
+  void setup();
   LoopStatus loop();
 
 };

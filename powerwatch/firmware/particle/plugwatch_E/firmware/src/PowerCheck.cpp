@@ -9,6 +9,10 @@ void PowerCheck::setup() {
 	// BATT_INT_PC13
 	attachInterrupt(LOW_BAT_UC, &PowerCheck::interruptHandler, this, FALLING);
 
+	//Drive the pin low
+	pinMode(C3, OUTPUT);
+	digitalWrite(C3, LOW);
+
 	// Enable charging
 	pmic.begin();
 	pmic.enableCharging();
@@ -54,6 +58,7 @@ int PowerCheck::getChargeCurrent() {
 
 int PowerCheck::getVoltage() {
     Serial.println("getting voltage");
+		digitalWrite(C3, HIGH);
     int count = 0;
     int L_max = 0;
     int N_measure = 0;
@@ -68,12 +73,15 @@ int PowerCheck::getVoltage() {
         count++;
     }
 
-    Serial.printlnf("L count: %d", L_max);
-    Serial.printlnf("N count: %d", N_measure);
+    Serial.printlnf("L voltage count: %d", L_max);
+    Serial.printlnf("N voltage count: %d", N_measure);
 
     float L_volt = ((L_max/4096.0 * 3.3) - (3.3/2))*(953/4.99);
     float N_volt = ((N_measure/4096.0 * 3.3) - (3.3/2))*(953/4.99);
-    return (int)(L_volt - N_volt);
+		int volt = (int)(L_volt - N_volt);
+		digitalWrite(C3, LOW);
+		Serial.printlnf("Calculated voltage: %d",volt);
+    return volt;
 }
 
 int PowerCheck::getLCycles() {
@@ -89,17 +97,19 @@ int PowerCheck::getLCycles() {
     setADCSampleTime(ADC_SampleTime_3Cycles);
 
     //let it go low
-    delay(10);
+    delay(50);
 
     //we high and read in a loop counting cycles
     digitalWrite(A0, HIGH);
-    int observe = analogRead(B5);
+    /*int observe = analogRead(B5);
     int count = 0;
     while(observe < 1240 && count < 100000) {
         observe = analogRead(B5);
         //Serial.printlnf("Observe %d", observe);
         count++;
-    }
+    }*/
+		delay(10);
+		int count = analogRead(B5);
     digitalWrite(A0, LOW);
     delay(10);
     pinMode(A0, INPUT);
@@ -127,17 +137,20 @@ int PowerCheck::getNCycles() {
     setADCSampleTime(ADC_SampleTime_3Cycles);
 
     //let it go low
-    delay(10);
+    delay(50);
 
     //we high and read in a loop counting cycles
     digitalWrite(A1, HIGH);
-    int observe = analogRead(B3);
+    /*int observe = analogRead(B3);
     int count = 0;
     while(observe < 1240 && count < 100000) {
         observe = analogRead(B3);
         //Serial.printlnf("Observe %d", observe);
         count++;
-    }
+    }*/
+		delay(10);
+		int count = analogRead(B3);
+
     digitalWrite(A1, LOW);
     delay(10);
     pinMode(A1, INPUT);

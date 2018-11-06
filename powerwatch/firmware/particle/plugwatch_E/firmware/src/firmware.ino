@@ -93,8 +93,7 @@ auto chargeStateSubsystem = ChargeState();
 //***********************************
 //* IMU
 //***********************************
-retained int IMU_MOTION_THRESHOLD = Imu::DEFAULT_MOTION_THRESHOLD;
-auto imuSubsystem = Imu(&IMU_MOTION_THRESHOLD);
+auto imuSubsystem = Imu();
 
 //***********************************
 //* uCommand
@@ -209,7 +208,7 @@ enum SystemState {
   CheckCloudEvent,
   CheckTimeSync,
   SenseChargeState,
-  SenseMPU,
+  SenseIMU,
   SenseWiFi,
   SenseCell,
   SenseSDPresent,
@@ -288,7 +287,6 @@ void setup() {
   SD.setup();
 
   //setup the other subsystems
-  timeSyncSubsystem.setup();
   chargeStateSubsystem.setup();
   imuSubsystem.setup();
   gpsSubsystem.setup();
@@ -296,15 +294,16 @@ void setup() {
   FuelGauge().quickStart();
   shield_id = id();
 
-  //Turn off the audio front end section
-  pinMode(B4, OUTPUT);
-  digitalWrite(B4, LOW);
+  //Setup the watchdog toggle pin
+  pinMode(DAC, OUTPUT);
+  digitalWrite(DAC, LOW);
 
   // GPS
   pinMode(D3, OUTPUT);
   digitalWrite(D3, HIGH);
-  // SD
-  SD.PowerOff();
+
+  //Timesync
+  timeSyncSubsystem.setup();
 
   if(uCmd.setSMSMode(1) == RESP_OK) {
     Serial.println("Set up SMS mode");
@@ -314,7 +313,6 @@ void setup() {
 
   LEDStatus status;
   status.off();
-
 
   // If our state and lastState is the same we got stuck in a
   // state and didn't transtition
@@ -550,12 +548,11 @@ void loop() {
       break;
     }
 
-    case SenseMPU: {
+    case SenseIMU: {
       //It should not take more than 10s to check the IMU
       manageStateTimer(10000);
 
-      //LoopStatus result = imuSubsystem.loop();
-      LoopStatus result = FinishedSuccess;
+      LoopStatus result = imuSubsystem.loop();
 
       //return result or error
       if(result == FinishedError) {
@@ -594,8 +591,7 @@ void loop() {
     case SenseCell: {
       manageStateTimer(20000);
 
-      //LoopStatus result = cellStatus.loop();
-      LoopStatus result = FinishedSuccess;
+      LoopStatus result = cellStatus.loop();
 
       //return result or error
       if(result == FinishedError) {
@@ -615,8 +611,7 @@ void loop() {
       //This should just be a GPIO pin
       manageStateTimer(1000);
 
-      //LoopStatus result = SD.loop();
-      LoopStatus result = FinishedSuccess;
+      LoopStatus result = SD.loop();
 
       //return result or error
       if(result == FinishedError) {
@@ -634,8 +629,7 @@ void loop() {
 
     case SenseGPS: {
       manageStateTimer(30000);
-      //LoopStatus result = gpsSubsystem.loop();
-      LoopStatus result = FinishedSuccess;
+      LoopStatus result = gpsSubsystem.loop();
 
       //return result or error
       if(result == FinishedError) {
@@ -678,7 +672,6 @@ void loop() {
         last_logging_event = millis();
       }
 
-      SD.PowerOff();
       state = nextState(state);
       break;
     }
@@ -807,7 +800,6 @@ void loop() {
         }
       } else {
         count = 0;
-        SD.PowerOff();
         state = nextState(state);
       }
 
@@ -903,13 +895,20 @@ void loop() {
       if(!first) {
         mill = millis();
         first = true;
+        SD.PowerOff();
       }
 
       if(millis() - mill > 60000) {
         clearResults(&sensingResults);
         system_cnt++;
+        SD.PowerOn();
         state = CheckCloudEvent;
         first = false;
+
+        // Toggle the watchdog
+        digitalWrite(DAC, HIGH);
+        delay(1000);
+        digitalWrite(DAC, LOW);
       }
       break;
     }

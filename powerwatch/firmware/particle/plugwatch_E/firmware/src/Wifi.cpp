@@ -8,7 +8,6 @@
 
 void Wifi::construct_ssid_list() {
   size_t place = 0;
-  Serial.println();
   String serial_response = esp8266.getResult();
   while (place < serial_response.length() and place >= 0) {
     size_t first = serial_response.indexOf('"', place);
