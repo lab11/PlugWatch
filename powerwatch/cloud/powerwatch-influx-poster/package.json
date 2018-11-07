@@ -7,7 +7,7 @@
         "particle-api-js": "^7.2.0",
         "influx-poster": "^1.1.0",
         "commander":"",
-        "lab11-powerwatch-parser":"0.0.1"
+        "lab11-powerwatch-parser":"0.0.2"
     },
     "scripts": {
         "start": "./powerwatch-influx-poster.js -c /etc/config/config.json -d /etc/config/influx.json -a /etc/config/particle/auth-token -u /etc/config/influx/username -p /etc/config/influx/password"
