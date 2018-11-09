@@ -50,6 +50,7 @@ shutil.copytree('timescale', dest + '/timescale')
 shutil.copytree('influx', dest + '/influx')
 shutil.copytree('grafana', dest + '/grafana')
 shutil.copytree('powerwatch-data-poster', dest + '/powerwatch-data-poster')
+shutil.copytree('powerwatch-visualization', dest + '/powerwatch-visualization')
 
 #now search and replace all of the templating variables with the generated values
 for filepath in glob.iglob('./'+dest+'/**', recursive=True):
@@ -71,6 +72,7 @@ for filepath in glob.iglob('./'+dest+'/**', recursive=True):
         s = s.replace('${PRODUCT_IDS}', product_ids)
         s = s.replace('${PARTICLE_AUTH_TOKEN}', access_token)
         s = s.replace('${GRAFANA_IP_ADDRESS}', args.name+'-grafana')
+        s = s.replace('${GRAFANA_IP_ADDRESS}', args.name+'-powerwatch-visualization')
         with open(filepath, "w") as file:
             file.write(s)
 
@@ -89,7 +91,7 @@ except Exception as e:
 #Create a new cluster with the deployment name
 try:
     subprocess.check_call(['gcloud', 'container','clusters','create',args.name,
-                            '--region', 'us-west1',
+                            '--region', 'us-central1',
                             '--num-nodes', '2',
                             '--machine-type', 'n1-standard-1'])
 except Exception as e:
@@ -105,6 +107,16 @@ except Exception as e:
     #raise e
     pass
 
+#CREATE a new globally routable ip address
+try:
+    subprocess.check_call(['gcloud', 'compute','addresses','create',
+                        args.name+'-powerwatch-visualization','--global'])
+except Exception as e:
+    #shutil.rmtree(dest)
+    #raise e
+    pass
+
+
 #describe that address for printing
 grafana_ip_address = ''
 try:
@@ -114,10 +126,20 @@ except Exception as e:
     shutil.rmtree(dest)
     raise e
 
+#describe that address for printing
+visualization_ip_address = ''
+try:
+    visualization_ip_address = subprocess.check_output(['gcloud', 'compute','addresses','describe',
+                        args.name+'-powerwatch-visualization','--global'])
+except Exception as e:
+    shutil.rmtree(dest)
+    raise e
+
+
 #point the kubernetes python API at the new cluster
 try:
     subprocess.check_call(['gcloud', 'container', 'clusters', 'get-credentials', args.name,
-                            '--region', 'us-west1',
+                            '--region', 'us-central1',
                             '--project', 'powerwatch-backend'])
 except Exception as e:
     shutil.rmtree(dest)
@@ -193,6 +215,10 @@ subprocess.check_call(['kubectl','create','-f', dest+'/powerwatch-data-poster/in
 subprocess.check_call(['kubectl','create','-f', dest+'/powerwatch-data-poster/postgres-user-pass.yaml'])
 subprocess.check_call(['kubectl','create','-f', dest+'/powerwatch-data-poster/powerwatch-data-poster-deployment.yaml'])
 
+#Powerwatch Visualization
+subprocess.check_call(['kubectl','create','-f', dest+'/grafana/powerwatch-visualization-deployment.yaml'])
+
+
 print()
 print('Generated usernames and passwords (save to lastpass)')
 #Print the information generated above
@@ -208,3 +234,4 @@ print('Grafana Admin User: admin')
 print('Grafana Admin Password: ' + str(base64.b64decode(grafana_admin_password),'utf-8'))
 print('Particle access token: ' + str(base64.b64decode(access_token),'utf-8'))
 print('Grafana globally accessible IP address: ' + str(grafana_ip_address))
+print('Visualization globally accessible IP address: ' + str(visualization_ip_address))

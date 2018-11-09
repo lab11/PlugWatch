@@ -5,9 +5,6 @@ metadata:
   labels:
     app: powerwatch-visualization
 spec:
-  selector:
-    matchLabels:
-      app: powerwatch-visualization
   template:
     metadata:
       labels:
@@ -15,16 +12,13 @@ spec:
     spec:
       containers:
       - name: powerwatch-visualization
-        image: lab11/powerwatch-visualization:latest
+        image: lab11/powerwatch-visualization
         ports:
         - containerPort: 3765
-
-          #livenessProbe:
-          #tcpSocket:
-          #httpGet:
-          #  path: /
-          #  port: 3765
-
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3765
         volumeMounts:
         - name: config
           mountPath: /etc/config
@@ -54,92 +48,22 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: powerwatch-visualization-service
+  name: powerwatch-visualization
 spec:
   type: NodePort
   selector:
     app: powerwatch-visualization
   ports:
-  - protocol: "TCP"
-    port: 80
+  - port: 80
     targetPort: 3765
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: powerwatch-visualization-ingress
+  name: powerwatch-visualization
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: ${POWERWATCH_VISUALIZATION_IP_ADDRESS}
 spec:
-  #tls:
-  #- hosts:
-  #  - portal.grid.watch
-  #  secretName: letsencrypt-certs
-  rules:
-  - host: portal.grid.watch
-    http:
-      paths:
-        #- path: /.well-known/*
-        #- backend:
-        #-   serviceName: letsencrypt
-        #-   servicePort: 80
-      - path: /*
-        backend:
-          serviceName: powerwatch-visualization-service
-          servicePort: 80
-# This section of the file sets up let's encrypt
-# The idea is to create a secret that holds the certs
-# Then have a job that launches certbot for validation and stores the certs in the secret
-# The secret is then accessible by the ingester
-#---
-#apiVersion: v1
-#kind: Secret
-#metadata:
-#  name: letsencrypt-certs
-#type: Opaque
-#---
-#apiVersion: batch/v1
-#kind: Job
-#metadata:
-#  name: letsencrypt-job
-#  labels:
-#    app: letsencrypt
-#spec:
-#  template:
-#    metadata:
-#      name: letsencrypt
-#      labels:
-#        app: letsencrypt
-#    spec:
-#      containers:
-#      # Bash script that starts an http server and launches certbot
-#      # Fork of github.com/sjenning/kube-nginx-letsencrypt
-#      - image: quay.io/hiphipjorge/kube-nginx-letsencrypt:latest
-#        name: letsencrypt
-#        imagePullPolicy: Always
-#
-#        ports:
-#        - name: letsencrypt
-#          containerPort: 80
-#        env:
-#        - name: DOMAINS
-#          value: portal.grid.watch
-#        - name: EMAIL
-#          value: adkins@berkeley.edu
-#        - name: SECRET
-#          value: letsencrypt-certs
-#
-#        livenessProbe:
-#          tcpSocket:
-#            port: 80
-#
-#      restartPolicy: Never
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: letsencrypt
-#spec:
-#  selector:
-#    app: letsencrypt
-#  ports:
-#  - protocol: "TCP"
-#    port: 80
+  backend:
+    serviceName: powerwatch-visualization
+    servicePort: 80
