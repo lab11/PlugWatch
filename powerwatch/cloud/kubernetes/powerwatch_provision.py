@@ -91,7 +91,7 @@ except Exception as e:
 #Create a new cluster with the deployment name
 try:
     subprocess.check_call(['gcloud', 'container','clusters','create',args.name,
-                            '--region', 'us-central1',
+                            '--region', 'us-west1',
                             '--num-nodes', '2',
                             '--machine-type', 'n1-standard-1'])
 except Exception as e:
@@ -139,7 +139,7 @@ except Exception as e:
 #point the kubernetes python API at the new cluster
 try:
     subprocess.check_call(['gcloud', 'container', 'clusters', 'get-credentials', args.name,
-                            '--region', 'us-central1',
+                            '--region', 'us-west1',
                             '--project', 'powerwatch-backend'])
 except Exception as e:
     shutil.rmtree(dest)
