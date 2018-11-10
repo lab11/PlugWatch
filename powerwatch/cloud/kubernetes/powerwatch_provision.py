@@ -99,42 +99,38 @@ except Exception as e:
     raise e
 
 #CREATE a new globally routable ip address
+grafana_ip_address = ''
 try:
     subprocess.check_call(['gcloud', 'compute','addresses','create',
                         args.name+'-grafana','--global'])
+    grafana_ip_address = subprocess.check_output(['gcloud', 'compute','addresses','describe',
+                        args.name+'-grafana','--global'])
+    grafana_ip_address = grafana_ip_address.split(' ')[1]
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','add',
+                        '--zone','powerwatch',
+                        '--name','graphs.'+args.name+'.powerwatch.io',
+                        '--type','A',
+                        '--ttl','300','"'+grafana_ip_address+'"'])
 except Exception as e:
-    #shutil.rmtree(dest)
-    #raise e
+    print('Error creating or setting grafana IP address records')
     pass
 
 #CREATE a new globally routable ip address
+visualization_ip_address = ''
 try:
     subprocess.check_call(['gcloud', 'compute','addresses','create',
                         args.name+'-powerwatch-visualization','--global'])
-except Exception as e:
-    #shutil.rmtree(dest)
-    #raise e
-    pass
-
-
-#describe that address for printing
-grafana_ip_address = ''
-try:
-    grafana_ip_address = subprocess.check_output(['gcloud', 'compute','addresses','describe',
-                        args.name+'-grafana','--global'])
-except Exception as e:
-    shutil.rmtree(dest)
-    raise e
-
-#describe that address for printing
-visualization_ip_address = ''
-try:
     visualization_ip_address = subprocess.check_output(['gcloud', 'compute','addresses','describe',
                         args.name+'-powerwatch-visualization','--global'])
+    visualization_ip_address = visualization_ip_address.split(' ')[1]
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','add',
+                        '--zone','powerwatch',
+                        '--name','vis.'+args.name+'.powerwatch.io',
+                        '--type','A',
+                        '--ttl','300','"'+visualization_ip_address+'"'])
 except Exception as e:
-    shutil.rmtree(dest)
-    raise e
-
+    print('Error creating or setting visualization IP address records')
+    pass
 
 #point the kubernetes python API at the new cluster
 try:
