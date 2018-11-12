@@ -1,0 +1,19 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: grafana-tls
+  namespace: default
+spec:
+  secretName: grafana-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: ${GRAFANA_DOMAIN_NAME}
+  dnsNames:
+  - ${GRAFANA_DOMAIN_NAME}
+  acme:
+    config:
+    - http01:
+        ingress: grafana
+      domains:
+      - ${GRAFANA_DOMAIN_NAME}

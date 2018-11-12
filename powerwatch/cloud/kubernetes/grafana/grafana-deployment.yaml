@@ -98,18 +98,10 @@ metadata:
   name: grafana
   annotations:
     kubernetes.io/ingress.global-static-ip-name: ${GRAFANA_IP_ADDRESS}
-    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
-    kubernetes.io/tls-acme: “true”
+    kubernetes.io/ingress.allow-http: "false"
 spec:
-  rules:
-  - host: ${GRAFANA_DOMAIN_NAME}
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: grafana
-          servicePort: 80
+  backend:
+    serviceName: grafana
+    servicePort: 80
   tls:
-  - secretName: tls-staging-cert
-    hosts:
-    - ${GRAFANA_DOMAIN_NAME}
+  - secretName: grafana-tls
