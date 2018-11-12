@@ -98,7 +98,6 @@ metadata:
   name: grafana
   annotations:
     kubernetes.io/ingress.global-static-ip-name: ${GRAFANA_IP_ADDRESS}
-    kubernetes.io/ingress.allow-http: "false"
 spec:
   backend:
     serviceName: grafana
