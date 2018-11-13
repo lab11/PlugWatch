@@ -102,3 +102,5 @@ spec:
   backend:
     serviceName: grafana
     servicePort: 80
+  tls:
+  - secretName: grafana-tls

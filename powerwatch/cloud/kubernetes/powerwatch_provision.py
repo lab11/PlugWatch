@@ -12,7 +12,6 @@ import shutil
 import base64
 import glob
 import subprocess
-from kubernetes import client, config, utils
 
 parser = argparse.ArgumentParser(description = 'Provision and deploy powerwatch backend')
 parser.add_argument('-p','--product', type=int, required=True, action='append')
@@ -51,6 +50,7 @@ shutil.copytree('influx', dest + '/influx')
 shutil.copytree('grafana', dest + '/grafana')
 shutil.copytree('powerwatch-data-poster', dest + '/powerwatch-data-poster')
 shutil.copytree('powerwatch-visualization', dest + '/powerwatch-visualization')
+shutil.copytree('certificate', dest + '/certificate')
 
 #now search and replace all of the templating variables with the generated values
 for filepath in glob.iglob('./'+dest+'/**', recursive=True):
@@ -72,7 +72,9 @@ for filepath in glob.iglob('./'+dest+'/**', recursive=True):
         s = s.replace('${PRODUCT_IDS}', product_ids)
         s = s.replace('${PARTICLE_AUTH_TOKEN}', access_token)
         s = s.replace('${GRAFANA_IP_ADDRESS}', args.name+'-grafana')
-        s = s.replace('${GRAFANA_IP_ADDRESS}', args.name+'-powerwatch-visualization')
+        s = s.replace('${GRAFANA_DOMAIN_NAME}', 'graphs.'+args.name+'.powerwatch.io')
+        s = s.replace('${POWERWATCH_VISUALIZATION_IP_ADDRESS}', args.name+'-powerwatch-visualization')
+        s = s.replace('${POWERWATCH_VISUALIZATION_DOMAIN_NAME}', 'vis.'+args.name+'.powerwatch.io')
         with open(filepath, "w") as file:
             file.write(s)
 
@@ -93,61 +95,102 @@ try:
     subprocess.check_call(['gcloud', 'container','clusters','create',args.name,
                             '--region', 'us-west1',
                             '--num-nodes', '2',
+                            '--disk-size', '10GB',
                             '--machine-type', 'n1-standard-1'])
 except Exception as e:
     shutil.rmtree(dest)
     raise e
 
 #CREATE a new globally routable ip address
+grafana_ip_address = ''
 try:
     subprocess.check_call(['gcloud', 'compute','addresses','create',
                         args.name+'-grafana','--global'])
 except Exception as e:
-    #shutil.rmtree(dest)
-    #raise e
-    pass
+    print(e)
 
-#CREATE a new globally routable ip address
-try:
-    subprocess.check_call(['gcloud', 'compute','addresses','create',
-                        args.name+'-powerwatch-visualization','--global'])
-except Exception as e:
-    #shutil.rmtree(dest)
-    #raise e
-    pass
-
-
-#describe that address for printing
-grafana_ip_address = ''
 try:
     grafana_ip_address = subprocess.check_output(['gcloud', 'compute','addresses','describe',
                         args.name+'-grafana','--global'])
+    grafana_ip_address = grafana_ip_address.decode('utf-8').replace('\n',' ').split(' ')[1]
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','start',
+                        '--zone','powerwatch'])
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','add',
+                        '--zone','powerwatch',
+                        '--name','graphs.'+args.name+'.powerwatch.io',
+                        '--type','A',
+                        '--ttl','300',grafana_ip_address])
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','execute',
+                        '--zone','powerwatch'])
 except Exception as e:
-    shutil.rmtree(dest)
-    raise e
+    os.remove('transaction.yaml')
+    print(e)
 
-#describe that address for printing
+#CREATE a new globally routable ip address
 visualization_ip_address = ''
+try:
+    subprocess.check_call(['gcloud', 'compute','addresses','create',
+                        args.name+'-powerwatch-visualization','--global'])
+except Exception as e:
+    print(e)
+
 try:
     visualization_ip_address = subprocess.check_output(['gcloud', 'compute','addresses','describe',
                         args.name+'-powerwatch-visualization','--global'])
+    visualization_ip_address = visualization_ip_address.decode('utf-8').replace('\n',' ').split(' ')[1]
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','start',
+                        '--zone','powerwatch'])
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','add',
+                        '--zone','powerwatch',
+                        '--name','vis.'+args.name+'.powerwatch.io',
+                        '--type','A',
+                        '--ttl','300',visualization_ip_address])
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','execute',
+                        '--zone','powerwatch'])
 except Exception as e:
-    shutil.rmtree(dest)
-    raise e
-
+    os.remove('transaction.yaml')
+    print(e)
 
 #point the kubernetes python API at the new cluster
 try:
     subprocess.check_call(['gcloud', 'container', 'clusters', 'get-credentials', args.name,
-                            '--region', 'us-west1',
+                            '--region', 'asia-east1',
                             '--project', 'powerwatch-backend'])
 except Exception as e:
     shutil.rmtree(dest)
     raise e
 
+#Install tiller on the cluster
+try:
+    subprocess.check_call(['kubectl', 'apply', '-f', 'cluster-rolebinding/tiller-rolebinding.yaml'])
+    subprocess.check_call(['helm', 'init', '--service-account', 'tiller','--wait'])
+except Exception as e:
+    shutil.rmtree(dest)
+    raise e
+
+#install the helm cert-manager
+try:
+    subprocess.check_call(['helm', 'install',
+                            '--name', 'cert-manager',
+                            '--namespace', 'kube-system',
+                            'stable/cert-manager',
+                            '--version','v0.5.0'])
+except Exception as e:
+    shutil.rmtree(dest)
+    raise e
+
+#create the cluster issuer
+try:
+    subprocess.check_call(['kubectl', 'apply', '-f', 'cluster-issuer/letsencrypt-staging.yaml'])
+    subprocess.check_call(['kubectl', 'apply', '-f', 'cluster-issuer/letsencrypt-prod.yaml'])
+except Exception as e:
+    shutil.rmtree(dest)
+    raise e
+
+
 #A retained storage class for SDDs
 try:
-    subprocess.check_call(['kubectl', 'create', '-f', 'storage-class/retained-storage-class.yaml'])
+    subprocess.check_call(['kubectl', 'apply', '-f', 'storage-class/retained-storage-class.yaml'])
 except:
     pass
 
@@ -164,12 +207,12 @@ except Exception as e:
     shutil.rmtree(dest)
     raise e
 
-subprocess.check_call(['kubectl', 'create', '-f', dest+'/timescale/timescale-config.yaml'])
-subprocess.check_call(['kubectl','create','-f', dest+'/timescale/timescale-deployment.yaml'])
+subprocess.check_call(['kubectl', 'apply', '-f', dest+'/timescale/timescale-config.yaml'])
+subprocess.check_call(['kubectl','apply','-f', dest+'/timescale/timescale-deployment.yaml'])
 
 #Influx deployment
-subprocess.check_call(['kubectl','create','-f', dest+'/influx/influx-config.yaml'])
-subprocess.check_call(['kubectl','create','-f', dest+'/influx/influx-deployment.yaml'])
+subprocess.check_call(['kubectl','apply','-f', dest+'/influx/influx-config.yaml'])
+subprocess.check_call(['kubectl','apply','-f', dest+'/influx/influx-deployment.yaml'])
 
 #Grafana deployment
 try:
@@ -192,8 +235,8 @@ except Exception as e:
     shutil.rmtree(dest)
     raise e
 
-subprocess.check_call(['kubectl','create','-f', dest+'/grafana/grafana-config.yaml'])
-subprocess.check_call(['kubectl','create','-f', dest+'/grafana/grafana-deployment.yaml'])
+subprocess.check_call(['kubectl','apply','-f', dest+'/grafana/grafana-config.yaml'])
+subprocess.check_call(['kubectl','apply','-f', dest+'/grafana/grafana-deployment.yaml'])
 
 #Powerwatch poster deployment
 try:
@@ -210,14 +253,16 @@ except Exception as e:
     shutil.rmtree(dest)
     raise e
 
-subprocess.check_call(['kubectl','create','-f', dest+'/powerwatch-data-poster/particle-auth-token.yaml'])
-subprocess.check_call(['kubectl','create','-f', dest+'/powerwatch-data-poster/influx-user-pass.yaml'])
-subprocess.check_call(['kubectl','create','-f', dest+'/powerwatch-data-poster/postgres-user-pass.yaml'])
-subprocess.check_call(['kubectl','create','-f', dest+'/powerwatch-data-poster/powerwatch-data-poster-deployment.yaml'])
+subprocess.check_call(['kubectl','apply','-f', dest+'/powerwatch-data-poster/particle-auth-token.yaml'])
+subprocess.check_call(['kubectl','apply','-f', dest+'/powerwatch-data-poster/influx-user-pass.yaml'])
+subprocess.check_call(['kubectl','apply','-f', dest+'/powerwatch-data-poster/postgres-user-pass.yaml'])
+subprocess.check_call(['kubectl','apply','-f', dest+'/powerwatch-data-poster/powerwatch-data-poster-deployment.yaml'])
+
+#issue the grafana certificate
+subprocess.check_call(['kubectl','apply','-f', dest+'/certificate/grafana-certificate.yaml'])
 
 #Powerwatch Visualization
-subprocess.check_call(['kubectl','create','-f', dest+'/grafana/powerwatch-visualization-deployment.yaml'])
-
+#subprocess.check_call(['kubectl','apply','-f', dest+'/powerwatch-visualization/powerwatch-visualization-deployment.yaml'])
 
 print()
 print('Generated usernames and passwords (save to lastpass)')
