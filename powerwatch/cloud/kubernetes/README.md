@@ -62,9 +62,7 @@ docker hub's production tag will get out of sync with the tag running in the clu
 
 There are several clear things that need updating moving forward:
 
- - The Grafana page should have an SSL Cert through Let's Encrypt
  - The internal cluster communications should use SSL
  - We need to get the powerwatch visualization up and running and get its SSL working
- - We should auto-register the domain name with cloud-dns
-    and making a splash page for the each deployment
+ - Make a splash page for the each deployment
  - Potential hooks to lastpass for password storage for the group
