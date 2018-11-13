@@ -16,6 +16,7 @@ import subprocess
 parser = argparse.ArgumentParser(description = 'Provision and deploy powerwatch backend')
 parser.add_argument('-p','--product', type=int, required=True, action='append')
 parser.add_argument('-n','--name', type=str, required=True)
+parser.add_argument('-r','--redundancy', type=int, required=False)
 args = parser.parse_args()
 
 # Gather/generate the necessary information
@@ -42,15 +43,33 @@ access_token = str(base64.b64encode(json.loads(resp.text)['access_token'].encode
 
 print()
 print('Configuring new cluster for these products...')
-#copy all of the kubernetes configuration files into a staging area
-dest = args.name+'_deployment'
-os.mkdir(dest)
-shutil.copytree('timescale', dest + '/timescale')
-shutil.copytree('influx', dest + '/influx')
-shutil.copytree('grafana', dest + '/grafana')
-shutil.copytree('powerwatch-data-poster', dest + '/powerwatch-data-poster')
-shutil.copytree('powerwatch-visualization', dest + '/powerwatch-visualization')
-shutil.copytree('certificate', dest + '/certificate')
+#check and see if a deployment of this type already exists
+if os.path.isdir(args.name+'_deployment'):
+    answer = input('Local deployment folder with name ' + args.name + ' already exists. Overwrite this folder? [Y/n]')
+    if answer == 'y' or answer == 'Y' or answer == 'Yes' or answer == 'yes':
+        #copy all of the kubernetes configuration files into a staging area
+        dest = args.name+'_deployment'
+        shutil.rmtree(dest)
+        os.mkdir(dest)
+        shutil.copytree('timescale', dest + '/timescale')
+        shutil.copytree('influx', dest + '/influx')
+        shutil.copytree('grafana', dest + '/grafana')
+        shutil.copytree('powerwatch-data-poster', dest + '/powerwatch-data-poster')
+        shutil.copytree('powerwatch-visualization', dest + '/powerwatch-visualization')
+        shutil.copytree('certificate', dest + '/certificate')
+    else:
+        print('Remove folder or specify a different name.')
+        sys.exit(1)
+else:
+    #copy all of the kubernetes configuration files into a staging area
+    dest = args.name+'_deployment'
+    os.mkdir(dest)
+    shutil.copytree('timescale', dest + '/timescale')
+    shutil.copytree('influx', dest + '/influx')
+    shutil.copytree('grafana', dest + '/grafana')
+    shutil.copytree('powerwatch-data-poster', dest + '/powerwatch-data-poster')
+    shutil.copytree('powerwatch-visualization', dest + '/powerwatch-visualization')
+    shutil.copytree('certificate', dest + '/certificate')
 
 #now search and replace all of the templating variables with the generated values
 for filepath in glob.iglob('./'+dest+'/**', recursive=True):
@@ -91,15 +110,30 @@ except Exception as e:
     raise e
 
 #Create a new cluster with the deployment name
+output = None
 try:
-    subprocess.check_call(['gcloud', 'container','clusters','create',args.name,
+    if args.redundancy is None:
+        output = subprocess.check_output(['gcloud', 'container','clusters','create',args.name,
                             '--region', 'us-west1',
                             '--num-nodes', '2',
                             '--disk-size', '10GB',
-                            '--machine-type', 'n1-standard-1'])
+                            '--machine-type', 'n1-standard-1'], stderr=subprocess.STDOUT)
+    else:
+        output = subprocess.check_output(['gcloud', 'container','clusters','create',args.name,
+                            '--region', 'us-west1',
+                            '--num-nodes', str(args.redundancy),
+                            '--disk-size', '10GB',
+                            '--machine-type', 'n1-standard-1'], stderr=subprocess.STDOUT)
 except Exception as e:
-    shutil.rmtree(dest)
-    raise e
+    if type(e) is subprocess.CalledProcessError and str(e.output,'utf-8').find('Already exists') != -1:
+        answer = input('Cluster with name ' + args.name + ' already exists in this zone. Use existing cluster? [Y/n]')
+        if answer == 'y' or answer == 'Y' or answer == 'Yes' or answer == 'yes':
+            pass
+        else:
+            print('Please specify a different cluster name')
+            sys.exit(1)
+    else:
+        raise e
 
 #CREATE a new globally routable ip address
 grafana_ip_address = ''
@@ -154,18 +188,25 @@ except Exception as e:
 #point the kubernetes python API at the new cluster
 try:
     subprocess.check_call(['gcloud', 'container', 'clusters', 'get-credentials', args.name,
-                            '--region', 'asia-east1',
+                            '--region', 'us-west1',
                             '--project', 'powerwatch-backend'])
 except Exception as e:
     shutil.rmtree(dest)
     raise e
 
+#Add the tiller rbac role
+try:
+    subprocess.check_output(['kubectl', 'apply', '-f', 'cluster-rolebinding/tiller-rolebinding.yaml'])
+except Exception as e:
+    if type(e) is subprocess.CalledProcessError and str(e.output,'utf-8').find('Already exists') != -1:
+        pass
+    else:
+        raise(e)
+
 #Install tiller on the cluster
 try:
-    subprocess.check_call(['kubectl', 'apply', '-f', 'cluster-rolebinding/tiller-rolebinding.yaml'])
-    subprocess.check_call(['helm', 'init', '--service-account', 'tiller','--wait'])
+    subprocess.check_output(['helm', 'init', '--service-account', 'tiller','--wait'])
 except Exception as e:
-    shutil.rmtree(dest)
     raise e
 
 #install the helm cert-manager
