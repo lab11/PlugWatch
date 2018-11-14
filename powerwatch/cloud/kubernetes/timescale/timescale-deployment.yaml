@@ -35,6 +35,7 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/postgresql
               name: timescaledb
+              subPath: data
 
             - mountPath: /docker-entrypoint-initdb.d/initialize-read-user.sh
               subPath: initialize-read-user.sh
