@@ -14,7 +14,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.2.1"
+      "version": "5.3.0"
     },
     {
       "type": "panel",
@@ -120,8 +120,29 @@
         {
           "alias": "",
           "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
           "rawSql": "SELECT \n  core_id, \n  min(current_timestamp - time) as \"Lag\",\n  CAST(extract(epoch from min(current_timestamp - time)) AS INTEGER) as \"Lag_Seconds\",\n  ROW_NUMBER() OVER (ORDER BY min(current_timestamp - time) DESC, core_id)\nFROM powerwatch\nGROUP BY \n  core_id\nORDER BY \n  \"Lag\" ASC,\n  core_id\n\n",
-          "refId": "A"
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "title": "Status Table",
@@ -173,6 +194,7 @@
           "alias": "",
           "dsType": "influxdb",
           "format": "time_series",
+          "group": [],
           "groupBy": [
             {
               "params": [
@@ -183,8 +205,10 @@
           ],
           "hide": false,
           "measurement": "is_powered",
+          "metricColumn": "none",
           "orderByTime": "ASC",
           "policy": "default",
+          "rawQuery": true,
           "rawSql": "SELECT  \n  time_bucket('10 minutes', time) AS \"time\",\n  count(distinct core_id) AS \"powered\"\nFROM\n  powerwatch\nWHERE\n  $__timeFilter(time) AND \"is_powered\" = true\nGROUP BY time_bucket('10 minutes', time)\n\n",
           "refId": "A",
           "resultFormat": "time_series",
@@ -198,12 +222,21 @@
               }
             ]
           ],
-          "tags": []
+          "tags": [],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         },
         {
           "alias": "",
           "dsType": "influxdb",
           "format": "time_series",
+          "group": [],
           "groupBy": [
             {
               "params": [
@@ -214,8 +247,10 @@
           ],
           "hide": false,
           "measurement": "is_powered",
+          "metricColumn": "none",
           "orderByTime": "ASC",
           "policy": "default",
+          "rawQuery": true,
           "rawSql": "SELECT  \n  time_bucket('10 minutes', time) AS \"time\",\n  count(distinct core_id) AS \"reporting\"\nFROM\n  powerwatch\nWHERE\n  $__timeFilter(time)\nGROUP BY time_bucket('10 minutes', time)\n\n",
           "refId": "B",
           "resultFormat": "time_series",
@@ -229,12 +264,21 @@
               }
             ]
           ],
-          "tags": []
+          "tags": [],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         },
         {
           "alias": "",
           "dsType": "influxdb",
           "format": "time_series",
+          "group": [],
           "groupBy": [
             {
               "params": [
@@ -245,8 +289,10 @@
           ],
           "hide": false,
           "measurement": "is_powered",
+          "metricColumn": "none",
           "orderByTime": "ASC",
           "policy": "default",
+          "rawQuery": true,
           "rawSql": "SELECT  \n  time_bucket('10 minutes', time) AS \"time\",\n  count(distinct core_id) AS \"not powered\"\nFROM\n  powerwatch\nWHERE\n  $__timeFilter(time) AND \"is_powered\" = false\nGROUP BY time_bucket('10 minutes', time)\n\n",
           "refId": "C",
           "resultFormat": "time_series",
@@ -260,7 +306,15 @@
               }
             ]
           ],
-          "tags": []
+          "tags": [],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -282,10 +336,11 @@
       },
       "yaxes": [
         {
+          "decimals": 0,
           "format": "short",
           "label": "Num devices powered",
           "logBase": 1,
-          "max": "180",
+          "max": null,
           "min": "0",
           "show": true
         },
@@ -356,6 +411,7 @@
           "alias": "",
           "dsType": "influxdb",
           "format": "time_series",
+          "group": [],
           "groupBy": [
             {
               "params": [
@@ -371,8 +427,10 @@
             }
           ],
           "measurement": "cell_voltage",
+          "metricColumn": "none",
           "orderByTime": "ASC",
           "policy": "default",
+          "rawQuery": true,
           "rawSql": "SELECT\n  time_bucket('10 minutes', time) as \"time\",\n  core_id as \"metric\",\n  max(cell_voltage)\nFROM\n  powerwatch\nWHERE\n  $__timeFilter(time)\nGROUP BY time_bucket('10 minutes', time), core_id\nORDER BY metric asc, time asc\n\n",
           "refId": "A",
           "resultFormat": "time_series",
@@ -390,7 +448,15 @@
               }
             ]
           ],
-          "tags": []
+          "tags": [],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -473,6 +539,7 @@
           "alias": "",
           "dsType": "influxdb",
           "format": "time_series",
+          "group": [],
           "groupBy": [
             {
               "params": [
@@ -488,8 +555,10 @@
             }
           ],
           "measurement": "state_of_charge",
+          "metricColumn": "none",
           "orderByTime": "ASC",
           "policy": "default",
+          "rawQuery": true,
           "rawSql": "SELECT\n  time_bucket('10 minutes', time) as \"time\",\n  core_id as \"metric\",\n  max(state_of_charge)\nFROM\n  powerwatch\nWHERE\n  $__timeFilter(time)\nGROUP BY time_bucket('10 minutes', time), core_id\nORDER BY metric asc, time asc",
           "refId": "A",
           "resultFormat": "time_series",
@@ -507,7 +576,15 @@
               }
             ]
           ],
-          "tags": []
+          "tags": [],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -590,6 +667,7 @@
           "alias": "",
           "dsType": "influxdb",
           "format": "time_series",
+          "group": [],
           "groupBy": [
             {
               "params": [
@@ -605,8 +683,10 @@
             }
           ],
           "measurement": "state_of_charge",
+          "metricColumn": "none",
           "orderByTime": "ASC",
           "policy": "default",
+          "rawQuery": true,
           "rawSql": "SELECT\n  time_bucket('10 minutes', time) as \"time\",\n  core_id as \"metric\",\n  max(CAST(is_powered as INTEGER))\nFROM\n  powerwatch\nWHERE\n  $__timeFilter(time)\nGROUP BY time_bucket('10 minutes', time), core_id\nORDER BY metric asc, time asc\n",
           "refId": "A",
           "resultFormat": "time_series",
@@ -624,7 +704,15 @@
               }
             ]
           ],
-          "tags": []
+          "tags": [],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -646,6 +734,7 @@
       },
       "yaxes": [
         {
+          "decimals": 0,
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -707,6 +796,7 @@
           "alias": "",
           "dsType": "influxdb",
           "format": "time_series",
+          "group": [],
           "groupBy": [
             {
               "params": [
@@ -722,8 +812,10 @@
             }
           ],
           "measurement": "state_of_charge",
+          "metricColumn": "none",
           "orderByTime": "ASC",
           "policy": "default",
+          "rawQuery": true,
           "rawSql": "SELECT\n  time_bucket('10 minutes', time) as \"time\",\n  core_id as \"metric\",\n  max(CAST (gps_satellites as INTEGER))\nFROM\n  powerwatch\nWHERE\n  $__timeFilter(time)\nGROUP BY time_bucket('10 minutes', time), core_id\nORDER BY metric asc, time asc\n",
           "refId": "A",
           "resultFormat": "time_series",
@@ -741,7 +833,15 @@
               }
             ]
           ],
-          "tags": []
+          "tags": [],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -824,6 +924,7 @@
           "alias": "",
           "dsType": "influxdb",
           "format": "time_series",
+          "group": [],
           "groupBy": [
             {
               "params": [
@@ -833,8 +934,10 @@
             }
           ],
           "measurement": "sd_log_size",
+          "metricColumn": "none",
           "orderByTime": "ASC",
           "policy": "default",
+          "rawQuery": true,
           "rawSql": "SELECT\n  time_bucket('10 minutes', time) as \"time\",\n  core_id as \"metric\",\n  max(sd_log_size)\nFROM\n  powerwatch\nWHERE\n  $__timeFilter(time) AND sd_log_size is not null\nGROUP BY time_bucket('10 minutes', time), core_id\nORDER BY metric asc, time asc",
           "refId": "A",
           "resultFormat": "time_series",
@@ -848,7 +951,15 @@
               }
             ]
           ],
-          "tags": []
+          "tags": [],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -931,6 +1042,7 @@
           "alias": "",
           "dsType": "influxdb",
           "format": "time_series",
+          "group": [],
           "groupBy": [
             {
               "params": [
@@ -940,8 +1052,10 @@
             }
           ],
           "measurement": "error_state",
+          "metricColumn": "none",
           "orderByTime": "ASC",
           "policy": "default",
+          "rawQuery": true,
           "rawSql": "SELECT\n  time_bucket('10 minutes', time) as \"time\",\n  core_id as \"metric\",\n  max(error_state)\nFROM\n  powerwatch_error\nWHERE\n  $__timeFilter(time)\nGROUP BY time_bucket('10 minutes', time), core_id\n",
           "refId": "A",
           "resultFormat": "time_series",
@@ -966,6 +1080,14 @@
               "key": "product_id",
               "operator": "=",
               "value": "7009"
+            }
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
             }
           ]
         }
@@ -1073,11 +1195,32 @@
         {
           "alias": "",
           "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
           "rawSql": "SELECT\n  to_timestamp((CAST(extract(epoch from time) as INTEGER)/900)*900) AS \"time\",\n  count(distinct core_id) \nFROM\n  powerwatch\nWHERE\n  (time > now() - INTERVAL '15m')\n  GROUP BY (CAST(extract(epoch from time) as INTEGER)/900)*900\nORDER BY count desc\nLIMIT 1\n",
-          "refId": "A"
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
-      "thresholds": "50,150",
+      "thresholds": "",
       "title": "# Reporting in Last 15 minutes",
       "type": "singlestat",
       "valueFontSize": "80%",
@@ -1153,8 +1296,29 @@
         {
           "alias": "",
           "format": "time_series",
-          "rawSql": "SELECT\n  to_timestamp((CAST(extract(epoch from time) as INTEGER)/900)*900) AS \"time\",\n  count(distinct core_id)::numeric * 100 / (SELECT count(distinct core_id) FROM powerwatch WHERE (product_id = 7008 OR product_id = 7009)) as \"count\"\nFROM\n  powerwatch\nWHERE\n  (time > now() - INTERVAL '15m')\n  GROUP BY (CAST(extract(epoch from time) as INTEGER)/900)*900\n  ORDER BY count desc\nLIMIT 1\n",
-          "refId": "A"
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  to_timestamp((CAST(extract(epoch from time) as INTEGER)/900)*900) AS \"time\",\n  count(distinct core_id)::numeric * 100 / (SELECT count(distinct core_id) FROM powerwatch) as \"count\"\nFROM\n  powerwatch\nWHERE\n  (time > now() - INTERVAL '15m')\n  GROUP BY (CAST(extract(epoch from time) as INTEGER)/900)*900\n  ORDER BY count desc\nLIMIT 1\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": "50, 75",
@@ -1233,8 +1397,29 @@
         {
           "alias": "",
           "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
           "rawSql": "SELECT\n  to_timestamp((CAST(extract(epoch from time) as INTEGER)/10800)*10800) AS \"time\",\n  count(distinct core_id) \nFROM\n  powerwatch\nWHERE\n  (time > now() - INTERVAL '3h')\n  GROUP BY (CAST(extract(epoch from time) as INTEGER)/10800)*10800\nORDER BY count desc\nLIMIT 1\n",
-          "refId": "A"
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": "50,150",
@@ -1313,8 +1498,29 @@
         {
           "alias": "",
           "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
           "rawSql": "SELECT\n  to_timestamp((CAST(extract(epoch from time) as INTEGER)/86400)*86400) AS \"time\",\n  count(distinct core_id) \nFROM\n  powerwatch\nWHERE\n  (time > now() - INTERVAL '1d')\n  GROUP BY (CAST(extract(epoch from time) as INTEGER)/86400)*86400\nORDER BY count desc\nLIMIT 1\n",
-          "refId": "A"
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": "50,150",
@@ -1393,8 +1599,29 @@
         {
           "alias": "",
           "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
           "rawSql": "SELECT\n  to_timestamp((CAST(extract(epoch from time) as INTEGER)/604800)*604800) AS \"time\",\n  count(distinct core_id) \nFROM\n  powerwatch\nWHERE\n  (time > now() - INTERVAL '7d')\n  GROUP BY (CAST(extract(epoch from time) as INTEGER)/604800)*604800\nORDER BY count desc\nLIMIT 1\n",
-          "refId": "A"
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": "50,150",
@@ -1419,8 +1646,8 @@
     "list": []
   },
   "time": {
-    "from": "2018-10-30T00:25:39.527Z",
-    "to": "2018-11-03T00:25:39.527Z"
+    "from": "now-2d",
+    "to": "now"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -1449,6 +1676,6 @@
   },
   "timezone": "",
   "title": "Powerwatch_General",
-  "uid": "ckgJ42aik",
+  "uid": "47dZzpBmz",
   "version": 3
 }
