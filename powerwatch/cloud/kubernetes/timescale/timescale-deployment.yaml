@@ -33,9 +33,9 @@ spec:
             - secretRef:
                 name: timescale-config
           volumeMounts:
-            - mountPath: /var/lib/postgresql
+            - mountPath: /var/lib/postgresql/data
               name: timescaledb
-              subPath: data
+              subPath: db
 
             - mountPath: /docker-entrypoint-initdb.d/initialize-read-user.sh
               subPath: initialize-read-user.sh
