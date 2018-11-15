@@ -302,6 +302,9 @@ subprocess.check_call(['kubectl','apply','-f', dest+'/powerwatch-data-poster/pow
 #issue the grafana certificate
 subprocess.check_call(['kubectl','apply','-f', dest+'/certificate/grafana-certificate.yaml'])
 
+#start the disk backup job
+subprocess.check_call(['kubectl','apply','-f', 'pvc-snapshot/pvc-snapshot.yaml'])
+
 #Powerwatch Visualization
 #subprocess.check_call(['kubectl','apply','-f', dest+'/powerwatch-visualization/powerwatch-visualization-deployment.yaml'])
 
