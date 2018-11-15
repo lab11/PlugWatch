@@ -7,6 +7,14 @@
       "type": "datasource",
       "pluginId": "postgres",
       "pluginName": "PostgreSQL"
+    },
+    {
+      "name": "Influx",
+      "label": "Influx",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
     }
   ],
   "__requires": [
@@ -20,6 +28,12 @@
       "type": "panel",
       "id": "graph",
       "name": "Graph",
+      "version": "5.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
       "version": "5.0.0"
     },
     {
@@ -863,10 +877,11 @@
       },
       "yaxes": [
         {
+          "decimals": 0,
           "format": "short",
           "label": null,
           "logBase": 1,
-          "max": "10",
+          "max": null,
           "min": "0",
           "show": true
         },
@@ -889,7 +904,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Timescale",
+      "datasource": "Influx",
       "fill": 0,
       "gridPos": {
         "h": 7,
@@ -936,8 +951,8 @@
           "measurement": "sd_log_size",
           "metricColumn": "none",
           "orderByTime": "ASC",
-          "policy": "default",
-          "rawQuery": true,
+          "policy": "autogen",
+          "rawQuery": false,
           "rawSql": "SELECT\n  time_bucket('10 minutes', time) as \"time\",\n  core_id as \"metric\",\n  max(sd_log_size)\nFROM\n  powerwatch\nWHERE\n  $__timeFilter(time) AND sd_log_size is not null\nGROUP BY time_bucket('10 minutes', time), core_id\nORDER BY metric asc, time asc",
           "refId": "A",
           "resultFormat": "time_series",
@@ -1051,7 +1066,7 @@
               "type": "tag"
             }
           ],
-          "measurement": "error_state",
+          "measurement": "error",
           "metricColumn": "none",
           "orderByTime": "ASC",
           "policy": "default",
@@ -1069,19 +1084,7 @@
               }
             ]
           ],
-          "tags": [
-            {
-              "key": "product_id",
-              "operator": "=",
-              "value": "7008"
-            },
-            {
-              "condition": "OR",
-              "key": "product_id",
-              "operator": "=",
-              "value": "7009"
-            }
-          ],
+          "tags": [],
           "timeColumn": "time",
           "where": [
             {
@@ -1676,6 +1679,6 @@
   },
   "timezone": "",
   "title": "Powerwatch_General",
-  "uid": "47dZzpBmz",
-  "version": 3
+  "uid": "NTRwitfmk",
+  "version": 4
 }
