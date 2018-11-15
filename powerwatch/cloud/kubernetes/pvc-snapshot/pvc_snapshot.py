@@ -3,9 +3,14 @@ import googleapiclient.discovery
 from kubernetes import client, config
 import requests
 import time
+import os
 
 #get all the persistent volume claims
-#config.load_kube_config()
+if "KUBERNETES_SERVICE_HOST" in os.environ:
+    config.load_incluster_config()
+else:
+    config.load_kube_config()
+
 v1 = client.CoreV1Api()
 pvcs = v1.list_persistent_volume_claim_for_all_namespaces()
 
