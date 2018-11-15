@@ -10,6 +10,6 @@ spec:
         spec:
           containers:
           - name: pvc-snapshot
-            image: lab11/pvc-snapshot:production
+            image: lab11/powerwatch-pvc-snapshot:production
 
           restartPolicy: onFailure
