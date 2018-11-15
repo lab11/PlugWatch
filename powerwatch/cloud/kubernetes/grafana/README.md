@@ -7,6 +7,7 @@ To deploy the grafana instance follow these steps:
 
 ```
 $ kubectl create configmap grafana-provisioning --from-file=datasource.yaml --from-file=dashboard.yaml
+$ kubectl create configmap grafana-dashboards --from-file=Powerwatch_General.json
 ```
 
 ## Add secrets
