@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: pvc-snapshot
 spec:
-  schedule: */5 * * * *
+  schedule: "*/5 * * * *"
   jobTemplate:
     spec:
       template:
@@ -11,5 +11,4 @@ spec:
           containers:
           - name: pvc-snapshot
             image: lab11/powerwatch-pvc-snapshot:production
-
-          restartPolicy: onFailure
+          restartPolicy: OnFailure
