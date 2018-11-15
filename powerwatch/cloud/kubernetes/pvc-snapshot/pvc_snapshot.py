@@ -21,10 +21,12 @@ for item in pvcs.items:
         pvs.append((item.metadata.uid,item.metadata.name.split('-')[0]))
 
 #get the project ID and region that this instance is a part of
-requests.get("http://metadata.google.internal/computeMetadata/v1/project/project-id",headers={'Metadata-Flavor':'Google'})
-project = requests.text()
-requests.get("http://metadata.google.internal/computeMetadata/v1/instance/cluster-name",headers={'Metadata-Flavor':'Google'})
-cluster = requests.text()
+r = requests.get("http://metadata.google.internal/computeMetadata/v1/project/project-id",headers={'Metadata-Flavor':'Google'})
+print(r.text)
+project = r.text
+r = requests.get("http://metadata.google.internal/computeMetadata/v1/instance/attributes/cluster-name",headers={'Metadata-Flavor':'Google'})
+print(r.text)
+cluster = r.text
 
 compute = googleapiclient.discovery.build('compute','v1')
 
@@ -53,8 +55,9 @@ print('Creating the following snapshots:')
 print(disks_to_snapshot)
 #now create snapshots of each disk to snapshot
 for disk in disks_to_snapshot:
-    compute.disks.createSnapshot(project=project,
+    compute.disks().createSnapshot(project=project,
                                 zone=disk[0][1], #we stored the zone in the disk tuple
+                                disk=disk[0][0],
                                 body={"name":'-'.join(
                                     [cluster,
                                     disk[1][1],

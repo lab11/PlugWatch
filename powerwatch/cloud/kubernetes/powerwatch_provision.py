@@ -303,6 +303,7 @@ subprocess.check_call(['kubectl','apply','-f', dest+'/powerwatch-data-poster/pow
 subprocess.check_call(['kubectl','apply','-f', dest+'/certificate/grafana-certificate.yaml'])
 
 #start the disk backup job
+subprocess.check_call(['kubectl','apply','-f', 'cluster-rolebinding/pvc-rolebinding.yaml'])
 subprocess.check_call(['kubectl','apply','-f', 'pvc-snapshot/pvc-snapshot.yaml'])
 
 #Powerwatch Visualization
