@@ -5,7 +5,7 @@ import requests
 import time
 
 #get all the persistent volume claims
-config.load_kube_config()
+#config.load_kube_config()
 v1 = client.CoreV1Api()
 pvcs = v1.list_persistent_volume_claim_for_all_namespaces()
 
