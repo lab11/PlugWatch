@@ -278,6 +278,8 @@ except Exception as e:
 
 subprocess.check_call(['kubectl','apply','-f', dest+'/grafana/grafana-config.yaml'])
 subprocess.check_call(['kubectl','apply','-f', dest+'/grafana/grafana-deployment.yaml'])
+#TODO: gcloud compute backend-services update $BACKEND --global --timeout=3600
+# the default timeout is 30 which doesn't seem to work for grafana
 
 #Powerwatch poster deployment
 try:
