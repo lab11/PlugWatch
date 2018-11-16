@@ -3,6 +3,7 @@ kind: CronJob
 metadata:
   name: pvc-snapshot
 spec:
+  concurrencyPolicy: Replace
   schedule: "28 9 * * *"
   jobTemplate:
     spec:
@@ -12,3 +13,4 @@ spec:
           - name: pvc-snapshot
             image: lab11/powerwatch-pvc-snapshot:production
           restartPolicy: OnFailure
+
