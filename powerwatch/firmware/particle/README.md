@@ -1,16 +1,27 @@
-# Electron Sensor Board Rev 2
-This sensor board is part of the [GridWatch](http://grid.watch) project.
+Plugwatch sensor firmware
+=========================
 
-The goal of this board is to test data collection in Accra. It contains 
-an IMU with accel/mag and temp, two different microphones (one analog and
-one digial), some memory, and a ultra-low power timer for future low-power 
-optimizations. 
+This folder holds all firmware running on plugwatch sensors. Currently
+the two active sub-folders are plugwatch_C and plugwatch_F. 
+Other folders hold testing revisions.
 
-This directory will host development for all electron software and firmware.
+Firmware versioning is a 6 digit decimal number. 
+Plugwatch C firmware starts at 000000 and plugwatch F firmware starts at 000100.
+
+##Revision list
+ - 000026 - Currently deployed on Ghana and Venezuela
+ - 0000100 - The most recent version of the new firmware. Still in development, not deployed.
+
+##To deploy firmware
+
+ 1) Commit your changes with the new version number.
+ 2) Build the versions for all of the product IDs and APNs - a script to do this will be coming soon.
+ 3) Push your builds to the particle cloud using the firmware deployment script - soon to be modified to take a folder of builds
+ 4) Commit the most recent firmware build folder
 
 
-Getting Started
----------------
+Getting Started with Firmware Development
+-----------------------------------------
 
 Install the `particle-cli`, ideally just:
 
