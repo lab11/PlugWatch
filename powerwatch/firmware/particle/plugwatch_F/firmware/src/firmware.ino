@@ -1,9 +1,3 @@
-/*
- * Project sensor_board_v2
- * Description: For Q2 2018 Deployment in Ghana
- * Author: Noah Klugman; Pat Pannuto
- */
-
 // Native
 #include <Particle.h>
 
@@ -28,6 +22,7 @@
 #include "Wifi.h"
 #include "firmware.h"
 #include "BatteryCheck.h"
+#include "product_id.h"
 
 //***********************************
 //* TODO's
@@ -49,10 +44,17 @@
 //By this scheme we currently have deployed 000026
 //Plugwatch F is new firmware with a new data format and would be 000100
 //This make s it easier to make minor changes to firmware of different versions
+
 int version_int = 000100; 
-int product_id = 7009;
+
+#ifdef PRODUCT
+int product_id = PRODUCT_ID;
+#else
+int product_id = 7456;
+#endif
+
 PRODUCT_ID(product_id); //US testbed
-PRODUCT_VERSION(product_version);
+PRODUCT_VERSION(version_int);
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));

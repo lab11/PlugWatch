@@ -30,6 +30,7 @@
 #include "Wifi.h"
 #include "firmware.h"
 #include "BatteryCheck.h"
+#include "product_id.h"
 
 //***********************************
 //* TODO's
@@ -46,11 +47,16 @@
 //***********************************
 //* Critical System Config
 //***********************************
-int version_num = 2; //hack
-PRODUCT_ID(7009); //US testbed
+int version_int = 000026; 
+
+#ifdef PRODUCT
+int product_id = PRODUCT_ID;
+#else
 int product_id = 7009;
-PRODUCT_VERSION(25);
-int version_int = 25;
+#endif
+
+PRODUCT_ID(product_id); //US testbed
+PRODUCT_VERSION(version_int);
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
