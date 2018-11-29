@@ -1,0 +1,19 @@
+build:
+  - name: ghana
+    folder: plugwatch_C/firmware
+    product_id: 7008
+  - name: ghana
+    folder: plugwatch_C/firmware
+    product_id: 7009
+  - name: ghana
+    folder: plugwatch_F/firmware
+    product_id: 7010
+  - name: ghana
+    folder: plugwatch_F/firmware
+    product_id: 7011
+  - name: testbed
+    folder: plugwatch_C/firmware
+    product_id: 7456
+  - name: testbed
+    folder: plugwatch_F/firmware
+    product_id: 8379
