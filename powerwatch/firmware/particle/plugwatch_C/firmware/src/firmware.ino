@@ -50,7 +50,7 @@
 int version_int = 000026; 
 
 #ifdef PRODUCT
-int product_id = PRODUCT_ID;
+int product_id = PRODUCT;
 #else
 int product_id = 7009;
 #endif
@@ -267,9 +267,12 @@ ParticleCloudState cloudState = ParticleConnectionCheck;
 retained SystemState state = CheckCloudEvent;
 retained SystemState lastState = Wait;
 
-const APNHelperAPN apns[2] = {
+const APNHelperAPN apns[5] = {
   {"8901260", "wireless.twilio.com"},
-  {"8923301", "http://mtnplay.com.gh"}
+  {"8923301", "http://mtnplay.com.gh"},
+  {"8991101", "airtelgprs.com"},
+  {"8958021", "gprsweb.digitel.ve"},
+  {"8958021", "internet.digitel.ve"}
 };
 APNHelper apnHelper(apns, sizeof(apns)/sizeof(apns[0]));
 
@@ -849,7 +852,23 @@ void loop() {
           String core = "\"coreid\": \"" + System.deviceID() + "\"";
           String blob = "{ " + data + version + product + core + " }";
 
-          int r = udp.sendPacket(blob.c_str(),blob.length(), IPAddress(141,212,11,145), 5000);
+          #ifdef DEPLOYMENT
+          String domain = String("udp.") + String(DEPLOYMENT) + String(".powerwatch.io");
+          IPAddress udp_ip = Cellular.resolve(domain);
+          Serial.println("UDP domain:");
+          Serial.println(domain);
+          Serial.println("UDP IP Address:");
+          Serial.println(udp_ip);
+          int r;
+          if(udp_ip == IPAddress(0,0,0,0)) {
+            r  = -201;
+          } else {
+            r = udp.sendPacket(blob.c_str(),blob.length(), udp_ip, 5000);
+          }
+          #else
+          int r = -200;
+          #endif
+
           if(r < 0) {
             handle_error("Data publishing error", false);
             Serial.printlnf("Got error code: %d",r);

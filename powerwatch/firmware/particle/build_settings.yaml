@@ -17,3 +17,6 @@ build:
   - name: testbed
     folder: plugwatch_F/firmware
     product_id: 8379
+  - name: venezuela
+    folder: plugwatch_C/firmware
+    product_id: 7233
