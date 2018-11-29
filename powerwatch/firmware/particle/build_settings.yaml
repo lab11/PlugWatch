@@ -20,3 +20,6 @@ build:
   - name: venezuela
     folder: plugwatch_C/firmware
     product_id: 7233
+  - name: nigeria
+    folder: plugwatch_C/firmware
+    product_id: 7641
