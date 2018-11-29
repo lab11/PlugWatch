@@ -45,16 +45,17 @@
 //Plugwatch F is new firmware with a new data format and would be 000100
 //This make s it easier to make minor changes to firmware of different versions
 
-int version_int = 000100; 
-
 #ifdef PRODUCT
 int product_id = PRODUCT;
+PRODUCT_ID(PRODUCT);
 #else
-int product_id = 7456;
+int product_id = 7010;
+PRODUCT_ID(7010);
 #endif
 
-PRODUCT_ID(product_id); //US testbed
-PRODUCT_VERSION(version_int);
+int version_int = 000100; 
+PRODUCT_VERSION(26);
+
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));

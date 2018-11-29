@@ -47,16 +47,18 @@
 //***********************************
 //* Critical System Config
 //***********************************
-int version_int = 000026; 
 
 #ifdef PRODUCT
 int product_id = PRODUCT;
+PRODUCT_ID(PRODUCT);
 #else
 int product_id = 7009;
+PRODUCT_ID(7009);
 #endif
 
-PRODUCT_ID(product_id); //US testbed
-PRODUCT_VERSION(version_int);
+int version_int = 000026; 
+PRODUCT_VERSION(26);
+
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
