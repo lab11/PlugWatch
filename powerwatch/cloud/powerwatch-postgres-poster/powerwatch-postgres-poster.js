@@ -281,9 +281,6 @@ function post_event(event) {
 }
 
 var global_data_streams = [];
-for (var i = 0; i < particle_config.product_ids.length; i++) {
-    global_data_streams.push(null)
-}
 
 function restart_data_streams() {
 
@@ -292,8 +289,14 @@ function restart_data_streams() {
     // If we have a stream going, kill it
     for (var i = 0; i < global_data_streams.length; i++) {
         if(global_data_streams[i]) {
+            console.log("Aborting data stream")
             global_data_streams[i].abort();
         }
+    }
+
+    // Pop all of those streams off of the list
+    for (var i = 0; i < global_data_streams.length; i++) {
+        global_data_streams.pop();
     }
 
     // Get the particle event stream
@@ -306,7 +309,12 @@ function restart_data_streams() {
 
         eventStream.then( function(stream) {
                 console.log('Setting data stream');
-                global_data_streams[j] = stream;
+                global_data_streams.push(stream);
+
+                stream.on('end',function(event) {
+                    console.log('Data stream ended');
+                });
+
                 stream.on('event', function(event) {
                     try {
                         post_event(event);
@@ -330,9 +338,6 @@ setInterval(restart_data_streams, 600000);
 
 
 var global_error_streams = [];
-for (var i = 0; i < particle_config.product_ids.length; i++) {
-    global_error_streams.push(null)
-}
 
 function restart_error_streams() {
 
@@ -340,8 +345,14 @@ function restart_error_streams() {
 
     for (var i = 0; i < global_error_streams.length; i++) {
         if(global_error_streams[i]) {
+            console.log("Aborting error stream")
             global_error_streams[i].abort();
         }
+    }
+
+    // Pop all of those streams off of the list
+    for (var i = 0; i < global_error_streams.length; i++) {
+        global_error_streams.pop();
     }
 
     // Get the particle event stream
@@ -354,7 +365,7 @@ function restart_error_streams() {
 
         eventStream.then( function(stream) {
                 console.log('Setting error stream');
-                global_error_streams[j] = stream;
+                global_error_streams.push(stream);
 
                 stream.on('event', function(event) {
                     post_error(event);
@@ -374,9 +385,6 @@ restart_error_streams();
 setInterval(restart_error_streams, 600000);
 
 var global_spark_streams = [];
-for (var i = 0; i < particle_config.product_ids.length; i++) {
-    global_spark_streams.push(null)
-}
 
 function restart_spark_streams() {
 
@@ -384,8 +392,14 @@ function restart_spark_streams() {
 
     for (var i = 0; i < global_spark_streams.length; i++) {
         if(global_spark_streams[i]) {
+            console.log("Aborting spark stream")
             global_spark_streams[i].abort();
         }
+    }
+
+    // Pop all of thosestreams off of the list
+    for (var i = 0; i < global_spark_streams.length; i++) {
+        global_spark_streams.pop();
     }
 
     // Get the particle event stream
@@ -398,8 +412,7 @@ function restart_spark_streams() {
 
         eventStream.then( function(stream) {
                 console.log('Setting spark stream');
-
-                global_spark_streams[j] = stream;
+                global_spark_streams.push(stream);
 
                 stream.on('event', function(event) {
                     if(event.name.includes('spark')) {
