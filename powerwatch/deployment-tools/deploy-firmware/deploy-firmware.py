@@ -49,7 +49,7 @@ for f in file_list:
     print('Uploading firmware to the particle cloud...')
     #first upload the binary file to the cloud
     r = requests.post("https://api.particle.io/v1/products/" + product_string + "/firmware?access_token=" + args.key,
-            data = {'version':str(version_string), 'title':args.title}, files=dict(binary=open(args.fname, 'rb')))
+            data = {'version': version_string, 'title':args.title}, files=dict(binary=open(args.fname, 'rb')))
 
     resp = json.loads(r.text)
     if 'ok' in resp:
@@ -83,13 +83,13 @@ for f in file_list:
             print('Skipping {} - not in filter list'.format(device['id']));
             continue
 
-        if('firmware_version' in device and device['firmware_version'] >= args.version):
+        if('firmware_version' in device and device['firmware_version'] >= int(version_string)):
             print('Skipping {} - already has equal or greater version'.format(device['id']));
             continue
 
 
         r = requests.put("https://api.particle.io/v1/products/" + product_string + "/devices/" + device['id'],
-            data = {'desired_firmware_version':str(args.version), 'access_token':args.key, 'flash':'true'})
+            data = {'desired_firmware_version': version_string, 'access_token':args.key, 'flash':'true'})
         resp = json.loads(r.text)
         if 'ok' in resp:
             if(resp['ok'] is False):
@@ -108,7 +108,7 @@ for f in file_list:
         #now release the version to the product
         print('Releasing firmware...')
         r = requests.put("https://api.particle.io/v1/products/" + product_string + "/firmware/release",
-                data = {'version':str(args.version), 'access_token':args.key, 'product_default':'true'})
+                data = {'version': version_string, 'access_token':args.key, 'product_default':'true'})
         resp = json.loads(r.text)
         if 'ok' in resp:
             if(resp['ok'] is False):

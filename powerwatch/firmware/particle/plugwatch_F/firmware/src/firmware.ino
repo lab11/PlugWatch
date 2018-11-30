@@ -248,12 +248,13 @@ ParticleCloudState cloudState = ParticleConnectionCheck;
 retained SystemState state = CheckCloudEvent;
 retained SystemState lastState = Wait;
 
-const APNHelperAPN apns[5] = {
+const APNHelperAPN apns[6] = {
   {"8901260", "wireless.twilio.com"},
   {"8923301", "http://mtnplay.com.gh"},
   {"8991101", "airtelgprs.com"},
   {"8958021", "gprsweb.digitel.ve"},
-  {"8958021", "internet.digitel.ve"}
+  {"8958021", "internet.digitel.ve"},
+  {"8923400", "9mobile"}
 };
 APNHelper apnHelper(apns, sizeof(apns)/sizeof(apns[0]));
 
