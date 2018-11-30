@@ -86,6 +86,12 @@ function parse_packet(event) {
                 }
             }
 
+            if(parseInt(event.version) >= 100) {
+                fields['grid_voltage'] = parseInt(charge_fields[5]);
+                fields['ac_l_probe_count'] = parseInt(charge_fields[6]);
+                fields['ac_n_probe_count'] = parseInt(charge_fields[7]);
+            }
+
             // MPU
             var mpu_fields = major_field_list[2].split('|');
             if(mpu_fields[0] == "0") {
