@@ -53,8 +53,8 @@ int product_id = 7010;
 PRODUCT_ID(7010);
 #endif
 
-int version_int = 000100; 
-PRODUCT_VERSION(000100);
+int version_int = 100; 
+PRODUCT_VERSION(100);
 
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
