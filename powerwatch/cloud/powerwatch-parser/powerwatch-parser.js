@@ -134,7 +134,6 @@ function parse_packet(event) {
                 }
             }
 
-
             // Cell Status
             if(parseInt(event.version) < 24) {
                 var cell_fields = major_field_list[4].split('|');
@@ -184,66 +183,74 @@ function parse_packet(event) {
             } else if(major_field_list[5] === '1') {
                 fields['sd_present'] = true;
             }
-
-            // Light
-            fields['light_lux'] = parseInt(major_field_list[6]);
             
-            // BLE
-            if(parseInt(event.version) < 24) {
-                var adv_string = major_field_list[7];
-                fields['wit_adv'] = adv_string;
-                if(adv_string == '!') {
-                    fields['wit_error'] = true; 
-                    fields['wit_present'] = false;
-                } else {
-                    fields['wit_error'] = false; 
-                    var adv_array = parseHexString(adv_string);
-
-                    if(adv_array[0] == 0xFF) {
-                        fields['wit_present'] = true;
-                        fields['wit_status'] = adv_array[1];
-                        fields['wit_power_factor'] = adv_array[2]/100.0;
-                        var current_decimal_point_value = ((adv_array[3] & 0xC0) >> 6);
-                        var wattage_decimal_point_value = ((adv_array[3] & 0x30) >> 4);
-                        fields['wit_voltage_volts'] = (((adv_array[3] & 0x0F) << 8) + adv_array[4])/10;
-                    
-                        var current_value = (((adv_array[5] >> 4) & 0xF)*1000 
-                                                + (adv_array[5] & 0xF)*100 
-                                                + ((adv_array[6] >> 4) & 0xF)*10
-                                                + (adv_array[6] & 0xF));
-                        fields['wit_current_amps'] = (current_value/(1000/(Math.pow(10,current_decimal_point_value))));
-
-                        var wattage_value = (((adv_array[7] >> 4) & 0xF)*1000 
-                                                + (adv_array[7] & 0xF)*100 
-                                                + ((adv_array[8] >> 4) & 0xF)*10
-                                                + (adv_array[8] & 0xF));
-                        fields['wit_power_watts'] = (wattage_value/(1000/(Math.pow(10,wattage_decimal_point_value))));
-
-                    } else {
+            if(parseInt(event.version) < 100) {
+                // Light
+                fields['light_lux'] = parseInt(major_field_list[6]);
+                
+                // BLE
+                if(parseInt(event.version) < 24) {
+                    var adv_string = major_field_list[7];
+                    fields['wit_adv'] = adv_string;
+                    if(adv_string == '!') {
+                        fields['wit_error'] = true; 
                         fields['wit_present'] = false;
-                    }
-                }
-            } else {
-                var string = major_field_list[7];
-                fields['wit_string'] = string;
-                if(string == '!') {
-                    fields['wit_present'] = false; 
-                    fields['wit_error'] = true; 
-                } else {
-                    fields['wit_present'] = true; 
-                    fields['wit_error'] = false; 
+                    } else {
+                        fields['wit_error'] = false; 
+                        var adv_array = parseHexString(adv_string);
 
-                    var buf = Buffer.from(string, 'base64');
-                    fields['wit_voltage_volts'] = buf.readInt32LE(0)/10000.0;
-                    fields['wit_current_amps'] = buf.readInt32LE(4)/10000.0;
-                    fields['wit_power_watts'] = buf.readInt32LE(8)/10000.0;
-                    fields['wit_frequnecy_hertz'] = buf.readInt32LE(12)/10000.0;
+                        if(adv_array[0] == 0xFF) {
+                            fields['wit_present'] = true;
+                            fields['wit_status'] = adv_array[1];
+                            fields['wit_power_factor'] = adv_array[2]/100.0;
+                            var current_decimal_point_value = ((adv_array[3] & 0xC0) >> 6);
+                            var wattage_decimal_point_value = ((adv_array[3] & 0x30) >> 4);
+                            fields['wit_voltage_volts'] = (((adv_array[3] & 0x0F) << 8) + adv_array[4])/10;
+                        
+                            var current_value = (((adv_array[5] >> 4) & 0xF)*1000 
+                                                    + (adv_array[5] & 0xF)*100 
+                                                    + ((adv_array[6] >> 4) & 0xF)*10
+                                                    + (adv_array[6] & 0xF));
+                            fields['wit_current_amps'] = (current_value/(1000/(Math.pow(10,current_decimal_point_value))));
+
+                            var wattage_value = (((adv_array[7] >> 4) & 0xF)*1000 
+                                                    + (adv_array[7] & 0xF)*100 
+                                                    + ((adv_array[8] >> 4) & 0xF)*10
+                                                    + (adv_array[8] & 0xF));
+                            fields['wit_power_watts'] = (wattage_value/(1000/(Math.pow(10,wattage_decimal_point_value))));
+
+                        } else {
+                            fields['wit_present'] = false;
+                        }
+                    }
+                } else {
+                    var string = major_field_list[7];
+                    fields['wit_string'] = string;
+                    if(string == '!') {
+                        fields['wit_present'] = false; 
+                        fields['wit_error'] = true; 
+                    } else {
+                        fields['wit_present'] = true; 
+                        fields['wit_error'] = false; 
+
+                        var buf = Buffer.from(string, 'base64');
+                        fields['wit_voltage_volts'] = buf.readInt32LE(0)/10000.0;
+                        fields['wit_current_amps'] = buf.readInt32LE(4)/10000.0;
+                        fields['wit_power_watts'] = buf.readInt32LE(8)/10000.0;
+                        fields['wit_frequnecy_hertz'] = buf.readInt32LE(12)/10000.0;
+                    }
                 }
             }
 
             // GPS
             if(parseInt(event.version) > 20) {
-                gps_subfields = major_field_list[8].split('|');
+                gps_subfields = null;
+                if(parseInt(event.version) >= 100) { 
+                    gps_subfields = major_field_list[6].split('|');
+                } else {
+                    gps_subfields = major_field_list[8].split('|');
+                }
+
                 if(gps_subfields[0] == '-1'){
                     fields['gps_fix'] = false;
                 } else {
@@ -267,7 +274,7 @@ function parse_packet(event) {
             }
             
 
-            if(major_field_list.length > 9) {
+            if(major_field_list.length > 9 && parseInt(event.version) < 100) {
                 //These fields should go in version 18 and greater
                 system_status_fields = major_field_list[9].split('|');
                 fields['system_loop_count'] = parseInt(system_status_fields[0]);
@@ -279,6 +286,16 @@ function parse_packet(event) {
                 if(parseInt(event.version) > 19) {
                     fields['sd_log_name'] = sd_status_fields[2];
                 }
+            } else if (parseInt(event.version) >= 100) {
+                //These fields should go in version 18 and greater
+                system_status_fields = major_field_list[7].split('|');
+                fields['system_loop_count'] = parseInt(system_status_fields[0]);
+                tags['shield_id'] = system_status_fields[1];
+
+                sd_status_fields = major_field_list[8].split('|');
+                fields['sd_log_count'] = parseInt(sd_status_fields[0]);
+                fields['sd_log_size'] = parseInt(sd_status_fields[1]);
+                fields['sd_log_name'] = sd_status_fields[2];
             }
 
             console.log(JSON.stringify(fields,null,null));
