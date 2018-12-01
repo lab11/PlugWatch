@@ -17,9 +17,9 @@ import datetime
 import struct
 from psheets import *
 
-shield_fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', 18)
+shield_fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', 14)
 case_fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', 30)
-case_fnt_l = ImageFont.truetype('/Library/Fonts/Arial.ttf', 70)
+case_fnt_l = ImageFont.truetype('/Library/Fonts/Arial.ttf', 60)
 
 parser = argparse.ArgumentParser(description = 'Deploy particle firmware')
 parser.add_argument('-p','--product', type=int, required=True)
@@ -91,12 +91,13 @@ while retryCount < 50 and not success:
         particle_id = version.split(",")[0]
         shield_id = version.split(",")[1]
         #sanity check the values
-        if(shield_id.find('91FF') != -1 and len(particle_id) != 24):
+        if(shield_id.find('91FF') != -1 or len(particle_id) != 24):
             print("Got invalid values - retrying")
-            continue
-        success = True
+            ser.close()
+            retryCount += 1
+        else:
+            success = True
     except Exception as e:
-        ser.close()
         retryCount += 1
 
 if retryCount == 50:
@@ -141,11 +142,11 @@ else:
 
 print("")
 print("Printing stickers...")
-def print_small(msg,copy):
-    img = Image.open('blank.png') #.new('RGBA', (135, 90), color = (255, 255, 0)
+def print_small(particle_id,shield_id):
 
-    qr_basewidth = 150
-    big_code = pyqrcode.create(str(msg), error='L', version=2)
+    img = Image.new('L', (100, 450), "white")
+    qr_basewidth = 80
+    big_code = pyqrcode.create(particle_id+':'+shield_id, error='L', version=4)
     big_code.png('code.png', scale=12, module_color=[0, 0, 0, 128], background=[0xff, 0xff, 0xff, 0xff])
     qr_img = Image.open('code.png','r')
     qr_img = qr_img.convert("RGBA")
@@ -154,55 +155,56 @@ def print_small(msg,copy):
     qr_img = qr_img.resize((qr_basewidth,qr_hsize), Image.ANTIALIAS)
     qr_img_w, qr_img_h = qr_img.size
     qr_img=qr_img.rotate(90,expand=1)
-    img.paste(qr_img,(-14,575))#,qr_img_w,qr_img_h))
+    img.paste(qr_img,(0,150))#,qr_img_w,qr_img_h))
+    img.paste(qr_img,(0,370))#,qr_img_w,qr_img_h))
 
-    txt = Image.new('L',(500,500))
+    txt = Image.new('L',(225,15),"white")
     d = ImageDraw.Draw(txt)
-    d.text( (0,0), msg, font=shield_fnt, fill=255)
+    d.text( (0,0), particle_id, font=shield_fnt, fill=0)
     w=txt.rotate(90, expand=1)
-    start = 75
-    img.paste( ImageOps.colorize(w, (0,0,0), (0,0,0)), (120,start+140),  w)
+    img.paste(w, (70,220))
+    img.paste(w, (70,0))
 
-    img_final = Image.open('blank.png')
-    spacer = 245
-    for x in xrange(0,copy):
-        cur_spacer = x*spacer*-1
-        print cur_spacer
-        img_final.paste(img, (0,cur_spacer))
+    txt = Image.new('L',(225,15),"white")
+    d = ImageDraw.Draw(txt)
+    d.text( (0,0), shield_id, font=shield_fnt, fill=0)
+    w=txt.rotate(90, expand=1)
+    img.paste(w, (85,220))
+    img.paste(w, (85,0))
 
 
-    img_final.save('./gen/logo_gen.png')
-    os.system('brother_ql_create --model QL-800 ./gen/logo_gen.png -r 90 > ./gen/'+str(msg)+'.bin')
-    os.system('brother_ql_print ./gen/'+str(msg)+'.bin usb://0x4f9:0x209b')
+    img.save('./gen/small_logo_gen.png')
+    os.system('brother_ql_create --model QL-800 ./gen/small_logo_gen.png -r 90 > ./gen/small_'+str(particle_id) + ":" +
+                str(shield_id) +'.bin')
+    os.system('brother_ql_print ./gen/small_'+str(particle_id) + ":" + str(shield_id) + '.bin')
 
 def print_case(particle_id, shield_id):
-    img = Image.open('case_blank.png') #.new('RGBA', (135, 90), color = (255, 255, 0)
-    txt = Image.new('L',(500,500))
+    img = Image.new('L', (420, 500), "white")
+    txt = Image.new('L',(500,35), "white")
     d = ImageDraw.Draw(txt)
-    d.text( (0,0), particle_id, font=case_fnt, fill=255)
-    w=txt.rotate(90, expand=1)
-    start = 75
-    img.paste( ImageOps.colorize(w, (0,0,0), (0,0,0)), (10,start),  w)
+    d.text( (0,0), particle_id, font=case_fnt, fill=0)
+    w,h = d.textsize(particle_id, font=case_fnt)
+    img.paste(txt,((420-w)/2,415))
 
-    txt2 = Image.new('L',(500,500))
+    txt2 = Image.new('L',(500,35),"white")
     d = ImageDraw.Draw(txt2)
-    d.text( (0,0), shield_id, font=case_fnt, fill=255)
-    w=txt2.rotate(90, expand=1)
-    img.paste( ImageOps.colorize(w, (0,0,0), (0,0,0)), (50,start),  w)
+    d.text( (0,0), shield_id, font=case_fnt, fill=0)
+    w,h = d.textsize(shield_id, font=case_fnt)
+    img.paste(txt2, ((420-w)/2,450))
 
-    txt3 = Image.new('L',(500,500))
-    d = ImageDraw.Draw(txt3)
-    d.text( (0,0), "THIS SIDE UP", font=case_fnt_l, fill=255)
-    w=txt3.rotate(90, expand=1)
-    img.paste( ImageOps.colorize(w, (0,0,0), (0,0,0)), (170,start+140), w)
-
-    txt6 = Image.new('L',(500,500))
+    txt6 = Image.new('L',(500,35),"white")
     d = ImageDraw.Draw(txt6)
-    d.text( (0,0), "POWERWATCH REV 3", font=case_fnt, fill=255)
-    w=txt6.rotate(90, expand=1)
-    img.paste( ImageOps.colorize(w, (0,0,0), (0,0,0)), (90,start), w)
+    d.text( (0,0), "Revision F", font=case_fnt, fill=0)
+    w,h = d.textsize("Revision F", font=case_fnt)
+    img.paste(txt6, ((420-w)/2,380))
 
-    qr_basewidth = 150
+    txt3 = Image.new('L',(500,80),"white")
+    d = ImageDraw.Draw(txt3)
+    d.text( (0,0), "DumsorWatch", font=case_fnt_l, fill=0)
+    w,h = d.textsize("DumsorWatch", font=case_fnt_l)
+    img.paste(txt3, ((420-w)/2,0))
+
+    qr_basewidth = 320
     big_code = pyqrcode.create(particle_id + ":" + shield_id, error='L', version=4)
     big_code.png('code.png', scale=12, module_color=[0, 0, 0, 128], background=[0xff, 0xff, 0xff, 0xff])
     qr_img = Image.open('code.png','r')
@@ -212,12 +214,11 @@ def print_case(particle_id, shield_id):
     qr_img = qr_img.resize((qr_basewidth,qr_hsize), Image.ANTIALIAS)
     qr_img_w, qr_img_h = qr_img.size
     qr_img=qr_img.rotate(90,expand=1)
+    img.paste(qr_img,(50,60))#,qr_img_w,qr_img_h))
 
-    img.paste(qr_img,(-5,575))#,qr_img_w,qr_img_h))
-    img.save('./gen/logo_gen.png')
-    os.system('brother_ql_create --model QL-800 ./gen/logo_gen.png -r 90 > ./gen/'+str(particle_id) + ":" + str(shield_id)+'.bin')
-    os.system('brother_ql_print ./gen/'+str(particle_id) + ":" + str(shield_id) + '.bin usb://0x4f9:0x209b')
+    img.save('./gen/case_logo_gen.png')
+    os.system('brother_ql_create --model QL-800 ./gen/case_logo_gen.png -r 90 > ./gen/'+str(particle_id) + ":" + str(shield_id)+'.bin')
+    os.system('brother_ql_print ./gen/'+str(particle_id) + ":" + str(shield_id) + '.bin')
 
 print_case(particle_id,shield_id)
-print_small(shield_id,1)
-print_small(particle_id,3)
+print_small(particle_id,shield_id)
