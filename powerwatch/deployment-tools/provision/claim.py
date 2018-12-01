@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 import pyqrcode
 import argparse
@@ -16,8 +18,9 @@ case_fnt_l = ImageFont.truetype('/Library/Fonts/Arial.ttf', 70)
 
 product_a_id = 7008
 product_b_id = 7009
+product_c_id = 7010
 
-ports = glob.glob('/dev/tty.u*')
+ports = glob.glob('/dev/tty*')
 cur_max = 0
 electron_port = ''
 for port in ports:
@@ -53,13 +56,13 @@ time_str = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
 with open("device_list.txt", "a") as myfile:
         myfile.write(particle_id + "," + shield_id + "," + time_str + "\n")
 print "WROTE TO LOCAL LOG"
-append(time_str,particle_id,shield_id,product_a_id)
+append(time_str,particle_id,shield_id,product_c_id)
 print "WROTE TO GOOGLE"
 print "PRINTING: " + particle_id + ":" + shield_id
 
 def print_small(msg,copy):
     img = Image.open('blank.png') #.new('RGBA', (135, 90), color = (255, 255, 0)
-    
+
     qr_basewidth = 150
     big_code = pyqrcode.create(str(msg), error='L', version=2)
     big_code.png('code.png', scale=12, module_color=[0, 0, 0, 128], background=[0xff, 0xff, 0xff, 0xff])
@@ -71,7 +74,7 @@ def print_small(msg,copy):
     qr_img_w, qr_img_h = qr_img.size
     qr_img=qr_img.rotate(90,expand=1)
     img.paste(qr_img,(-14,575))#,qr_img_w,qr_img_h))
-    
+
     txt = Image.new('L',(500,500))
     d = ImageDraw.Draw(txt)
     d.text( (0,0), msg, font=shield_fnt, fill=255)
@@ -99,19 +102,19 @@ def print_case(particle_id, shield_id):
     w=txt.rotate(90, expand=1)
     start = 75
     img.paste( ImageOps.colorize(w, (0,0,0), (0,0,0)), (10,start),  w)
-    
+
     txt2 = Image.new('L',(500,500))
     d = ImageDraw.Draw(txt2)
     d.text( (0,0), shield_id, font=case_fnt, fill=255)
     w=txt2.rotate(90, expand=1)
     img.paste( ImageOps.colorize(w, (0,0,0), (0,0,0)), (50,start),  w)
-   
+
     txt3 = Image.new('L',(500,500))
     d = ImageDraw.Draw(txt3)
     d.text( (0,0), "THIS SIDE UP", font=case_fnt_l, fill=255)
     w=txt3.rotate(90, expand=1)
     img.paste( ImageOps.colorize(w, (0,0,0), (0,0,0)), (170,start+140), w)
-   
+
     txt6 = Image.new('L',(500,500))
     d = ImageDraw.Draw(txt6)
     d.text( (0,0), "POWERWATCH REV 3", font=case_fnt, fill=255)
