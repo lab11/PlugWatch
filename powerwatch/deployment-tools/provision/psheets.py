@@ -1,9 +1,15 @@
 import pygsheets
 import datetime
 import time
+import sys
 
-gc = pygsheets.authorize()
-sh = gc.open('Devices')
+try:
+    gc = pygsheets.authorize()
+except:
+    print("Pysheets user not authorized, follow README instructions. Exiting")
+    sys.exit(1)
+
+sh = gc.open('PowerWatch Devices - Deployment Table Hardware Mapping')
 
 product_a_cnt = 0
 product_b_cnt = 0
@@ -43,31 +49,29 @@ def append(time_str,device_id,shield_id,product_id):
             product_c_cnt = product_c_cnt + 1
         if str(p_id) == str(product_d_id):
             product_d_cnt = product_d_cnt + 1
-    if str(product_id) == str(product_a_id): 
-        if product_a_cnt >= 99:
+    if str(product_id) == str(product_a_id):
+        if product_a_cnt >= 250:
             print "PRODUCT A LIMIT REACHED. REFLASH... EXITING"
             return -1
         product_a_cnt = product_a_cnt + 1
-    if str(product_id) == str(product_b_id): 
-        if product_b_cnt >= 99:
+    if str(product_id) == str(product_b_id):
+        if product_b_cnt >= 250:
             print "PRODUCT B LIMIT REACHED. REFLASH... EXITING"
             return -1
         product_b_cnt = product_b_cnt + 1
-    if str(product_id) == str(product_c_id): 
-        if product_c_cnt >= 99:
+    if str(product_id) == str(product_c_id):
+        if product_c_cnt >= 250:
             print "PRODUCT C LIMIT REACHED. REFLASH... EXITING"
             return -1
         product_c_cnt = product_c_cnt + 1
-    if str(product_id) == str(product_d_id): 
-        if product_d_cnt >= 99:
+    if str(product_id) == str(product_d_id):
+        if product_d_cnt >= 250:
             print "PRODUCT D LIMIT REACHED. REFLASH... EXITING"
             return -1
         product_d_cnt = product_d_cnt + 1
 
-    print product_a_cnt, product_b_cnt, product_c_cnt, product_d_cnt
-
-    range_str = "A"+str(cnt)+":"+"D"+str(cnt)
-    wks.update_cells(range_str,[[time_str, device_id, shield_id, product_id]])
+    r = "A"+str(cnt)+":"+"D"+str(cnt)
+    wks.update_values(crange=r,values=[[time_str, device_id, shield_id, product_id]])
 
 
 

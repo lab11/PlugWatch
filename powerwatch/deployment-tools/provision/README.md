@@ -21,11 +21,18 @@ $ pip install brother_ql #note that you may need to add ~/.local/bin to your pat
 
 ### Get the google sheets key
 
+https://pygsheets.readthedocs.io/en/latest/authorization.html
+
+At a high level you need to enable the google drive and google sheets APIs,
+the create a consent form and a client oauth crediential.
+
 
 ### Run the script
 
 Connect the particle and the printer to run the script
 
 ```
-$ ./claim.py -p PRODUCT_ID
+$ sudo ./claim.py -p PRODUCT_ID
 ```
+
+Sorry you have to use sudo

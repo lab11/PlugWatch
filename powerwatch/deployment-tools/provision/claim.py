@@ -4,24 +4,57 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 import pyqrcode
 import argparse
 import glob
+import yaml
+import json
+import requests
 import re
+import sys
 import os
 import time
 import pyscreen
 import serial
 import datetime
+import struct
 from psheets import *
 
 shield_fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', 18)
 case_fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', 30)
 case_fnt_l = ImageFont.truetype('/Library/Fonts/Arial.ttf', 70)
 
-product_a_id = 7008
-product_b_id = 7009
-product_c_id = 7010
+parser = argparse.ArgumentParser(description = 'Deploy particle firmware')
+parser.add_argument('-p','--product', type=int, required=True)
 
-ports = glob.glob('/dev/tty*')
+args = parser.parse_args()
+
+#Find the binary file in this directory with the correct product id
+correct_file = None
+binaries = glob.glob('./*.bin')
+for b in binaries:
+    binary = open(b, 'rb')
+    data = binary.read()
+    product_id = struct.unpack('<H',data[-44:-42])[0]
+    if (product_id == args.product):
+        #found the correct file
+        correct_file = b
+        break
+
+if(correct_file == None):
+    print("Did not find a predeployment firmware that matches the provided product ID. Exiting")
+    sys.exit(1)
+
+
+# Find the particle port
+ports = glob.glob('/dev/ttyA*') + glob.glob('/dev/tty.u*')
+if(len(ports) == 0):
+    print('Did not find any particles - exiting.')
+    sys.exit(1)
+
 cur_max = 0
+if sys.platform == 'linux' or sys.platform == 'linux2':
+    cur_max = -1
+elif sys.platform == 'darwin':
+    cur_max = 0
+
 electron_port = ''
 for port in ports:
     num = int(re.findall(r"([0-9.]*[0-9]+)",port)[0])
@@ -29,37 +62,75 @@ for port in ports:
         cur_max = num
         electron_port = port
 
-os.system("stty -f " + electron_port + " 14400") #go to dfu
+print("Updating the particle base firmware...")
+ser2 = serial.Serial(port=electron_port,baudrate=14400)
+time.sleep(0.1)
+ser2.close()
 time.sleep(4)
-os.system("particle update") #update
-raw_input("Press <Enter> to continue")
+os.system("particle flash --usb system-part1-0.7.0-electron.bin") #update
+os.system("particle flash --usb system-part2-0.7.0-electron.bin") #update
+os.system("particle flash --usb system-part3-0.7.0-electron.bin") #update
+os.system("particle flash --usb " + correct_file) #send correct file
 
+#extract the particle ID and shield ID from the predeploy firmware
+time.sleep(5)
+print
+print("Getting core and shield ID...")
 
-os.system("stty -f " + electron_port + " 14400") #go to dfu
-time.sleep(4)
-os.system("particle flash --usb predeploy_A.bin")
-raw_input("Press <Enter> to continue")
+retryCount = 0
+success = False
+ser = None
+particle_id = None
+shield_id = None
+while retryCount < 50 and not success:
+    try:
+        ser = serial.Serial(electron_port, 9600, timeout=10)
+        version = ser.readline().strip()
+        particle_id = version.split(",")[0]
+        shield_id = version.split(",")[1]
+        success = True
+    except Exception as e:
+        ser.close()
+        retryCount += 1
 
-ser=serial.Serial(electron_port, 9600)
-version = ser.readline().strip()
-version = ser.readline().strip()
-version = ser.readline().strip()
-version = ser.readline().strip()
-version = ser.readline().strip()
-version = ser.readline().strip()
-version = ser.readline().strip()
-particle_id = version.split(",")[0]
-shield_id = version.split(",")[1]
+if retryCount == 50:
+    print("Failed to read the core and shield IDs.")
+    sys.exit(1)
+
+print("Found particle:shield " + particle_id+":"+shield_id)
+print("")
 
 time_str = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
 
 with open("device_list.txt", "a") as myfile:
         myfile.write(particle_id + "," + shield_id + "," + time_str + "\n")
-print "WROTE TO LOCAL LOG"
-append(time_str,particle_id,shield_id,product_c_id)
-print "WROTE TO GOOGLE"
-print "PRINTING: " + particle_id + ":" + shield_id
+print("Wrote to local log")
+print("")
+print("Appending to google devices list...")
+append(time_str,particle_id,shield_id, str(args.product))
+print("Success.")
+print("")
+with open('particle-config.json') as config_file:
+    particle_config = yaml.safe_load(config_file)
 
+print("Adding device to particle cloud..")
+r = requests.post("https://api.particle.io/v1/products/" + str(args.product) +
+                    "/devices?access_token=" + particle_config['authToken'],
+                    data = {'id':particle_id})
+resp = json.loads(r.text)
+print(resp)
+if 'updated' in resp:
+    if(resp['updated'] == 1):
+        print("Adding device to product succeeded.")
+    else:
+        print("Adding device to product failed")
+        sys.exit(1)
+else:
+    print("Adding device to product failed")
+    sys.exit(1)
+
+
+print("Printing stickers...")
 def print_small(msg,copy):
     img = Image.open('blank.png') #.new('RGBA', (135, 90), color = (255, 255, 0)
 
