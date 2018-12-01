@@ -86,8 +86,14 @@ while retryCount < 50 and not success:
     try:
         ser = serial.Serial(electron_port, 9600, timeout=10)
         version = ser.readline().strip()
+        version = ser.readline().strip()
+        version = ser.readline().strip()
         particle_id = version.split(",")[0]
         shield_id = version.split(",")[1]
+        #sanity check the values
+        if(shield_id.find('91FF') != -1 and len(particle_id) != 24):
+            print("Got invalid values - retrying")
+            continue
         success = True
     except Exception as e:
         ser.close()
@@ -118,18 +124,22 @@ r = requests.post("https://api.particle.io/v1/products/" + str(args.product) +
                     "/devices?access_token=" + particle_config['authToken'],
                     data = {'id':particle_id})
 resp = json.loads(r.text)
-print(resp)
 if 'updated' in resp:
     if(resp['updated'] == 1):
         print("Adding device to product succeeded.")
     else:
-        print("Adding device to product failed")
-        sys.exit(1)
+        if(len(resp['nonmemberDeviceIds']) == 0 and len(resp['invalidDeviceIds']) == 0):
+            print("Device already present in product - continuing.")
+        else:
+            print("Adding device to product failed")
+            print(resp)
+            sys.exit(1)
 else:
     print("Adding device to product failed")
+    print(resp)
     sys.exit(1)
 
-
+print("")
 print("Printing stickers...")
 def print_small(msg,copy):
     img = Image.open('blank.png') #.new('RGBA', (135, 90), color = (255, 255, 0)

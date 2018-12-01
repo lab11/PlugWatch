@@ -33,10 +33,10 @@ def append(time_str,device_id,shield_id,product_id):
         d_id = row[1]
         s_id = row[2]
         if str(d_id) == str(device_id):
-            print "DUPLICATE DEVICE"
+            print "Device ID already present in spreadsheet"
             return -1
         if str(s_id) == str(shield_id):
-            print "DUPLICATE SHIELD"
+            print "Shield ID already present in spreadsheet"
             return -1
     for row in wks: #check for overage in product and get the index for the append
         cnt = cnt+1

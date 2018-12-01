@@ -15,9 +15,13 @@ The script performs several functions:
 ```
 $ pip install pygsheets
 $ pip install pyqrcode
+$ pip install pypng
 $ pip install pyscreen
 $ pip install brother_ql #note that you may need to add ~/.local/bin to your path
 ```
+
+Note that you may need to install brother_ql with sudo -H to be able to access
+it when you run the claim script as sudo.
 
 ### Setup keys
 
