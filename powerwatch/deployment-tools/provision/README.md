@@ -19,20 +19,19 @@ $ pip install pyscreen
 $ pip install brother_ql #note that you may need to add ~/.local/bin to your path
 ```
 
-### Get the google sheets key
+### Setup keys
 
 https://pygsheets.readthedocs.io/en/latest/authorization.html
 
 At a high level you need to enable the google drive and google sheets APIs,
 the create a consent form and a client oauth crediential.
 
+You must also put a valid particle auth token in the particle-config.json file
 
 ### Run the script
 
-Connect the particle and the printer to run the script
+Connect the particle and the printer to run the script.
 
 ```
 $ sudo ./claim.py -p PRODUCT_ID
 ```
-
-Sorry you have to use sudo
