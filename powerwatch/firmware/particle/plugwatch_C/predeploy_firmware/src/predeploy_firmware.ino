@@ -4,22 +4,26 @@
  * Author:
  * Date:
  */
- #include <OneWire.h>
- OneWire ds(B0);
- bool handshake_flag = false;
- SYSTEM_THREAD(ENABLED);
- #include <APNHelperRK.h>
+#include <OneWire.h>
+OneWire ds(B0);
+bool handshake_flag = false;
+SYSTEM_THREAD(ENABLED);
+#include <APNHelperRK.h>
 
- PRODUCT_ID(7008); // 7008 is PowerWatch_A; 7009 is PowerWatch_B
- PRODUCT_VERSION(1);
+PRODUCT_ID(7011); // 7008 is PowerWatch_A; 7009 is PowerWatch_B
+PRODUCT_VERSION(1);
 
- int last_millis;
+int last_millis;
 
- const APNHelperAPN apns[2] = {
-   {"8901260", "wireless.twilio.com"},
-   {"8923301", "http://mtnplay.com.gh"}
- };
- APNHelper apnHelper(apns, sizeof(apns)/sizeof(apns[0]));
+const APNHelperAPN apns[6] = {
+ {"8901260", "wireless.twilio.com"},
+ {"8923301", "http://mtnplay.com.gh"},
+ {"8991101", "airtelgprs.com"},
+ {"8958021", "gprsweb.digitel.ve"},
+ {"8958021", "internet.digitel.ve"},
+ {"8923400", "9mobile"}
+};
+APNHelper apnHelper(apns, sizeof(apns)/sizeof(apns[0]));
 
 const int WIFI_ENABLE_PIN = B1;
 const int AUDIO_ENABLE_PIN = B4;
