@@ -228,8 +228,8 @@ def print_case(particle_id, shield_id):
 
     txt9 = Image.new('L',(500,35),"white")
     d = ImageDraw.Draw(txt9)
-    d.text( (0,0), "+233 xxx-xxx-xxxx", font=case_fnt, fill=0)
-    w,h = d.textsize("+233 xxx-xxx-xxxx", font=case_fnt)
+    d.text( (0,0), "+233 024-653-6896", font=case_fnt, fill=0)
+    w,h = d.textsize("+233 024-653-6896", font=case_fnt)
     img.paste(txt9, ((420-w)/2,595))
 
     txt3 = Image.new('L',(500,80),"white")
