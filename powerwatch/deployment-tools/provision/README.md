@@ -21,6 +21,8 @@ $ pip install pyyamle
 $ pip install pyscreen
 $ pip install pyserial
 $ pip install brother_ql #note that you may need to add ~/.local/bin to your path
+$
+$ npm install -g particle-cli
 ```
 
 Note that you may need to install brother_ql with sudo -H to be able to access
