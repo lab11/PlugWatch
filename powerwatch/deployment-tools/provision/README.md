@@ -17,6 +17,9 @@ $ pip install pygsheets
 $ pip install pyqrcode
 $ pip install pypng
 $ pip install pyscreen
+$ pip install pyyamle
+$ pip install pyscreen
+$ pip install pyserial
 $ pip install brother_ql #note that you may need to add ~/.local/bin to your path
 ```
 
