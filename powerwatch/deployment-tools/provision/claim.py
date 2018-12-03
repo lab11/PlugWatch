@@ -29,6 +29,10 @@ parser.add_argument('-p','--product', type=int, required=True)
 
 args = parser.parse_args()
 
+#make the gen folder if it doesn't exist
+if(not os.path.isdir('./gen')):
+    os.mkdir('./gen')
+
 #Find the binary file in this directory with the correct product id
 correct_file = None
 binaries = glob.glob('./*.bin')

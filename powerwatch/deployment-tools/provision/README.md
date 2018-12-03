@@ -25,6 +25,11 @@ $
 $ npm install -g particle-cli
 ```
 
+You need to install dfu util - this is system dependent, but on mac
+```
+$ brew install dfu-util
+```
+
 Note that you may need to install brother_ql with sudo -H to be able to access
 it when you run the claim script as sudo.
 
