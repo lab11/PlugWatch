@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, window, asc, desc, lead, lag, udf
+from pyspark.sql.functions import col, window, asc, desc, lead, lag, udf, hour, month
 from pyspark.sql.window import Window
-from pyspark.sql.types import IntegerType
+from pyspark.sql.types import FloatType, IntegerType, DateType
 from pyspark import SparkConf
 import yaml
+import datetime
 
 conf = SparkConf()
 conf.set("spark.jars", "/Users/adkins/.ivy2/jars/org.postgresql_postgresql-42.1.1.jar")
@@ -37,19 +38,68 @@ def detectTransition(value1, value2):
         return 0
     else:
         return 1
-
 udfDetectTransition = udf(detectTransition, IntegerType())
 w = Window.partitionBy("core_id").orderBy(asc("time"))
+is_powered_lag = lag("is_powered",1).over(w)
+pw_df = pw_df.withColumn("transition", udfDetectTransition("is_powered",is_powered_lag))
 
-pw_df = pw_df.withColumn("transition", udfDetectTransition("is_powered",lead("is_powered", 1).over(w)))
+#filter out all transitions
 pw_df = pw_df.filter("transition != 0")
 
-def countOutage(value1, value2):
-    if(value1 == False and value2 == True):
+#now count each outage (really restoration)
+def countOutage(value1, value2, value3):
+    if(value1 == False and value2 == True and value3 == True):
         return 1
     else:
         return 0
 udfCountTransition = udf(countOutage, IntegerType())
-pw_df = pw_df.withColumn("outage", udfCountTransition("is_powered", lead("is_powered", 1).over(w)))
-pw_df = pw_df.groupBy("outage").sum().show()
+is_powered_lead = lead("is_powered",1).over(w)
+is_powered_lag = lag("is_powered",1).over(w)
+pw_df = pw_df.withColumn("outage", udfCountTransition("is_powered", is_powered_lead, is_powered_lag))
+
+#now denote the end time of the outage for saidi reasons
+time_lead = lead("time",1).over(w)
+pw_df = pw_df.withColumn("end_time", time_lead)
+
+#now filter out everything that is not an outage. We should have a time and end_time for every outage
+pw_df = pw_df.filter("outage != 0")
+
+#record the duration of the outage
+def calculateDuration(startTime, endTime):
+    delta = endTime-startTime
+    seconds = delta.total_seconds()
+    return int(seconds)
+
+udfcalculateDuration = udf(calculateDuration, IntegerType())
+pw_df = pw_df.withColumn("outage_duration", udfcalculateDuration("time","end_time"))
+
+#now only keep the outages that had another outage
+def filterOutage(timeNow, timeBefore, timeAfter):
+    if(timeBefore is None and timeAfter is not None):
+        if(timeAfter - timeNow < datetime.timedelta(minutes=5)):
+            return 1
+        else:
+            return 0
+    elif(timeAfter is None and timeBefore is not None):
+        if(timeNow - timeBefore < datetime.timedelta(minutes=5)):
+            return 1
+        else:
+            return 0
+    elif(timeBefore is None and timeAfter is None):
+        return 0
+    elif(timeNow - timeBefore < datetime.timedelta(minutes=5) or timeAfter - timeNow < datetime.timedelta(minutes=5)):
+        return 1
+    else:
+        return 0
+
+udfFilterTransition = udf(filterOutage, IntegerType())
+
+w = Window.orderBy(asc("time"))
+time_lead = lead("time",1).over(w)
+time_lag = lag("time",1).over(w)
+pw_df = pw_df.withColumn("outage_filtered", udfFilterTransition("time", time_lag, time_lead))
+pw_df.groupBy(month("time"),"outage_filtered").sum().orderBy("outage_filtered",month("time")).show()
+
+#pw_df = pw_df.groupBy("outage_filtered").sum().show()
+#
 #pw_df = pw_df.groupBy("core_id",window(col("time").cast("timestamp"),windowDuration="30 days",slideDuration="30 days"))
