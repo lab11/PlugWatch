@@ -6,9 +6,10 @@ from pyspark.sql.types import FloatType, IntegerType, DateType
 from pyspark import SparkConf
 import yaml
 import datetime
+import os
 
 conf = SparkConf()
-conf.set("spark.jars", "/Users/adkins/.ivy2/jars/org.postgresql_postgresql-42.1.1.jar")
+conf.set("spark.jars", os.getenv("HOME") + "/.ivy2/jars/org.postgresql_postgresql-42.1.1.jar")
 conf.set("spark.executor.extrajavaoptions", "-Xmx15000m")
 conf.set("spark.executor.memory", "15g")
 conf.set("spark.driver.memory", "15g")
@@ -28,8 +29,8 @@ pw_df = spark.read.jdbc("jdbc:postgresql://timescale.lab11.eecs.umich.edu/powerw
         properties={"user": config['user'], "password": config['password'],"driver":"org.postgresql.Driver"})
 
 #read the data that we care about
-pw_df = pw_df.select(pw_df['core_id'],pw_df['time'],pw_df['is_powered'])
-#pw_df = pw_df.filter("core_id == '2b002c001251363038393739'")
+pw_df = pw_df.select(pw_df['core_id'],pw_df['time'],pw_df['is_powered'],pw_df['product_id'])
+pw_df = pw_df.filter("product_id = 7008 OR product_id= 7009")
 
 #now we need to created a window function that looks at the leading lagging edge of is powered and detects transitions
 #then we can filter out all data that is not a transition
