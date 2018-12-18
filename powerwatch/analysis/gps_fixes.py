@@ -29,6 +29,8 @@ pw_df = spark.read.jdbc("jdbc:postgresql://timescale.lab11.eecs.umich.edu/powerw
         properties={"user": config['user'], "password": config['password'],"driver":"org.postgresql.Driver"})
 
 #read the data that we care about
+pw_df = pw_df.select(pw_df['core_id'],pw_df['time'],pw_df['gps_satellites'],pw_df['product_id'])
+pw_df = pw_df.filter(month("time") >= 7)
 pw_df = pw_df.select(pw_df['core_id'],pw_df['gps_satellites'],pw_df['product_id'])
 pw_df = pw_df.filter("product_id = 7008 OR product_id= 7009")
 pw_df = pw_df.filter("NOT isnan(gps_satellites)")
