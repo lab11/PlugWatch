@@ -102,25 +102,25 @@ udfFilterTransition = udf(filterOutage, IntegerType())
 pw_df = pw_df.withColumn("outage_cluster_size", udfFilterTransition("time","phone_imei","outage_window_list"))
 pw_df = pw_df.filter("outage_cluster_size > 0")
 pw_df = pw_df.withColumn("possible_outage", lit(int(1)))
-pw_df.groupBy(month("time"),"outage_cluster_size").sum().orderBy(month("time"),"outage_cluster_size").show(700)
+#pw_df.groupBy(month("time"),"outage_cluster_size").sum().orderBy(month("time"),"outage_cluster_size").show(700)
 
 
 #now remove any outages from the same imei
-#w = Window.orderBy(asc("time")).rowsBetween(-1*window_size,0)
-#pw_df = pw_df.withColumn("outage_repeat_list",collect_list(F.struct("time","phone_imei")).over(w))
-#
-#def removeRepeates(time, imei, timeList):
-#    for i in timeList:
-#        if abs((time - i[0]).total_seconds()) < 60 and imei == i[1]:
-#            return 1
-#
-#    return 0
-#udfremove = udf(removeRepeates, IntegerType())
-#pw_df = pw_df.withColumn("repeat", udfremove("time","phone_imei","outage_repeat_list"))
-#pw_df = pw_df.filter("repeat = 0")
-#
-#pw_df = pw_df.withColumn("possible_outage", lit(int(1)))
-#pw_df.groupBy(month("time"),"outage_cluster_size").sum().orderBy(month("time"),"outage_cluster_size").show(700)
+w = Window.orderBy(asc("time")).rowsBetween(-1*window_size,-1)
+pw_df = pw_df.withColumn("outage_repeat_list",collect_list(F.struct("time","phone_imei")).over(w))
+
+def removeRepeates(time, imei, timeList):
+    for i in timeList:
+        if abs((time - i[0]).total_seconds()) < 60 and imei == i[1]:
+            return 1
+
+    return 0
+udfremove = udf(removeRepeates, IntegerType())
+pw_df = pw_df.withColumn("repeat", udfremove("time","phone_imei","outage_repeat_list"))
+pw_df = pw_df.filter("repeat = 0")
+
+pw_df = pw_df.withColumn("possible_outage", lit(int(1)))
+pw_df.groupBy(month("time"),"outage_cluster_size").sum().orderBy(month("time"),"outage_cluster_size").show(700)
 
 #w = Window.partitionBy(month("time")).orderBy(asc("outage_cluster_size")).rowsBetween(0,Window.unboundedFollowing)
 #pw_df = pw_df.withColumn("cluster_size_cumulative",F.sum("possible_outage").over(w))
