@@ -9,6 +9,7 @@ from pyspark import SparkConf
 import yaml
 import datetime
 import os
+from math import isnan
 
 conf = SparkConf()
 conf.set("spark.jars", os.getenv("HOME") + "/.ivy2/jars/org.postgresql_postgresql-42.1.1.jar")
