@@ -44,10 +44,14 @@ pw_df = pw_df.withColumn("outage_window_list",collect_list(F.struct("time","phon
 def filterOutage(time, imei, timeList):
     for i in timeList:
         if imei != i[1]:
-            return (i[0] - time).total_seconds()
+            t =  (i[0] - time).total_seconds()
+            if(t < 0):
+                return 117
+            else:
+                return t
 
     return 117
 
 udfFilterTransition = udf(filterOutage, FloatType())
 pw_df = pw_df.withColumn("seconds_until_next_unplug", udfFilterTransition("time","phone_imei","outage_window_list"))
-print(pw_df.stat.approxQuantile("seconds_until_next_unplug", [0.02, 0.05, 0.1, 0.2, 0.5], 0.0))
+print(pw_df.stat.approxQuantile("seconds_until_next_unplug", [x*0.01 for x in range(0,100)], 0.0))
