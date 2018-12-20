@@ -89,7 +89,7 @@ udfcalculateDuration = udf(calculateDuration, IntegerType())
 pw_df = pw_df.withColumn("outage_duration", udfcalculateDuration("outage_time","restore_time"))
 
 window_size = 150
-w = Window.orderBy(asc("time")).rowsBetween(-1*window_size,window_size)
+w = Window.orderBy(asc("outage_time")).rowsBetween(-1*window_size,window_size)
 pw_df = pw_df.withColumn("outage_window_list",collect_list(F.struct("outage_time","core_id")).over(w))
 
 def filterOutage(time, core_id, timeList):
