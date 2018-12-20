@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, window, asc, desc, lead, lag, udf, hour, month, dayofmonth, collect_list
+from pyspark.sql.functions import col, window, asc, desc, lead, lag, udf, hour, month, dayofmonth, collect_list, lit
 import pyspark.sql.functions as F
 from pyspark.sql.window import Window
 from pyspark.sql.types import FloatType, IntegerType, DateType
@@ -75,12 +75,12 @@ def calculateDuration(startTime, endTime):
 udfcalculateDuration = udf(calculateDuration, IntegerType())
 pw_df = pw_df.withColumn("outage_duration", udfcalculateDuration("time","end_time"))
 
-window_size = 100
+window_size = 150
 w = Window.orderBy(asc("time")).rowsBetween(-1*window_size,window_size)
 pw_df = pw_df.withColumn("outage_window_list",collect_list(F.struct("time","core_id")).over(w))
 
 def filterOutage(time, core_id, timeList):
-    count = 0
+    count = 1
     used = []
     used.append(core_id)
     for i in timeList:
@@ -123,6 +123,9 @@ pw_df = pw_df.withColumn("outage_cluster_size", udfFilterTransition("time","core
 #pw_df = pw_df.filter("outage_number = 1")
 
 pw_df = pw_df.select("time","outage_duration","outage_cluster_size")
+pw_df = pw_df.withColumn("outage_events",lit(1))
 pw_df = pw_df.groupBy(month("time"),"outage_cluster_size").sum().orderBy(month("time"),"outage_cluster_size")
-pw_df.show(200)
+pw_df = pw_df.select("month(time)","outage_cluster_size","sum(outage_duration)","sum(outage_events)")
+pw_df = pw_df.withColumn("num_outages",pw_df["sum(outage_events)"]/pw_df["outage_cluster_size"])
+pw_df.show(500)
 pw_df.repartition(1).write.format("com.databricks.spark.csv").option("header", "true").save("monthly_outages_aggregate_cluster_size")
