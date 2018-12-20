@@ -3,6 +3,7 @@
 # looking for number of events within 1 second, 5 seconds, 10 seconds
 
 import csv
+import math
 import pprint
 import sys
 import time
@@ -10,6 +11,15 @@ import time
 import itertools
 import matplotlib.pyplot as plt
 import numpy as np
+
+try:
+    dw_file = sys.argv[1]
+    pw_file = sys.argv[2]
+except:
+    print()
+    print('Usage: {} dw_fils.csv pw_file.csv'.format(sys.argv[0]))
+    print()
+    raise
 
 # Threshold is time between events to define a cluster
 # Size is minimum number of events in a cluster to be considered an outage
@@ -27,7 +37,7 @@ print()
 # Load DW Data
 times_dw = []
 
-with open('2018-10-dumsorwatch-events.csv') as csvfile:
+with open(dw_file) as csvfile:
     reader = csv.reader(csvfile)
     headers = next(reader, None)
     fucked_rows = 0
@@ -97,7 +107,7 @@ print('times_dw size: ', len(times_dw))
 
 times_pw = []
 
-with open('2018-10-powerwatch-events.csv') as csvfile:
+with open(pw_file) as csvfile:
     reader = csv.reader(csvfile)
     headers = next(reader, None)
     cores = {}
@@ -163,8 +173,12 @@ cluster_times_dw = []
 cnts_dw = []
 for time,cluster in r2.items():
     #print(time,cluster)
-    cluster_times_dw.append(int(time/1000))
+    t = int(time/1000)
+    cluster_times_dw.append(t)
     cnts_dw.append(len(cluster))
+
+    if len(cluster) > 10:
+        print('\t{}\t{}'.format(t, len(cluster)))
 
 #print(cnts_dw)
 
@@ -185,7 +199,7 @@ for j, (f, b) in enumerate(zip(a, b)):
         cluster_times_pw = list(res[j])
         r2[int(np.average(cluster_times_pw))] = cluster_times_pw
 
-print('DW')
+print('PW')
 print('num clusters of any size', len(res))
 print('num clusters of min size', len(r2))
 
@@ -198,6 +212,9 @@ for time,cluster in r2.items():
     cluster_times_pw.append(time)
     cnts_pw.append(len(cluster))
 
+    if len(cluster) > 20:
+        print('\t{}\t{}'.format(time, len(cluster)))
+
 #print(cnts_pw)
 
 ax2 = ax1.twinx()
@@ -207,5 +224,63 @@ ax2.scatter(cluster_times_pw,cnts_pw,c='orange')
 for i,t in enumerate(cluster_times_pw):
     if cnts_pw[i] >= 20:
         plt.axvline(x=t,color='orange')
+
+print(np.array(cluster_times_dw))
+print(np.array(cluster_times_pw))
+
+# https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array/2566508
+def find_nearest(array,value):
+    idx = np.searchsorted(array, value, side="left")
+    if idx > 0 and (idx == len(array) or math.fabs(value - array[idx-1]) < math.fabs(value - array[idx])):
+        return array[idx-1]
+    else:
+        return array[idx]
+
+
+print('--------------')
+print('PW with nearby DW?')
+better60 = 0
+better300 = 0
+better600 = 0
+for pw in cluster_times_pw:
+    dw = find_nearest(cluster_times_dw, pw)
+    diff = abs(pw-dw)
+    print('{}\t{}\t{}\t{}\t{}\t{}'.format(pw, dw, diff, diff <= 60, diff <= 300, diff <= 600))
+    if diff <= 60:
+        better60 += 1
+    if diff <= 300:
+        better300 += 1
+    if diff <= 600:
+        better600 += 1
+print()
+print('tot {}, bet60 {} {:.2f}%, bet300 {} {:.2f}%, bet600 {} {:.2f}%'.format(
+    len(cluster_times_pw),
+    better60, 100*better60/len(cluster_times_pw),
+    better300, 100*better300/len(cluster_times_pw),
+    better600, 100*better600/len(cluster_times_pw)
+    ))
+
+print('--------------')
+print('DW with nearby PW?')
+better60 = 0
+better300 = 0
+better600 = 0
+for dw in cluster_times_dw:
+    pw = find_nearest(cluster_times_pw, dw)
+    diff = abs(pw-dw)
+    #print('{}\t{}\t{}\t{}\t{}\t{}'.format(pw, dw, diff, diff <= 60, diff <= 300, diff <= 600))
+    if diff <= 60:
+        better60 += 1
+    if diff <= 300:
+        better300 += 1
+    if diff <= 600:
+        better600 += 1
+print()
+print('tot {}, bet60 {} {:.2f}%, bet300 {} {:.2f}%, bet600 {} {:.2f}%'.format(
+    len(cluster_times_dw),
+    better60, 100*better60/len(cluster_times_dw),
+    better300, 100*better300/len(cluster_times_dw),
+    better600, 100*better600/len(cluster_times_dw)
+    ))
 
 plt.show()
