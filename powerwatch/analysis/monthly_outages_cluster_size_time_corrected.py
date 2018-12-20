@@ -62,7 +62,7 @@ pw_df = pw_df.withColumn("outage", udfCountTransition("is_powered", is_powered_l
 
 #now find all the exact outage and restore times using millis
 def timeCorrect(time, millis, unplugMillis):
-    if(unplugMillis == 0 or millis == None or unplugMillis == None or isnan(millis) or isnan(unplugMillis):
+    if(unplugMillis == 0 or millis == None or unplugMillis == None or isnan(millis) or isnan(unplugMillis)):
         return time
     elif unplugMillis > millis:
         return time
