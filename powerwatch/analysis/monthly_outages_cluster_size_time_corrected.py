@@ -117,9 +117,9 @@ pw_df = pw_df.groupBy(month("time"),"outage_cluster_size").sum().orderBy(month("
 pw_df = pw_df.select("month(time)","outage_cluster_size","sum(outage_duration)","sum(outage_events)")
 pw_df = pw_df.withColumn("num_outages",pw_df["sum(outage_events)"]/pw_df["outage_cluster_size"])
 pw_df.show(500)
-pw_df.repartition(1).write.format("com.databricks.spark.csv").option("header", "true").save("monthly_outages_aggregate_cluster_size_time_corrected")
+pw_cp = pw_df
 
 #now filter out all single outages
 pw_df = pw_df.filter("outage_cluster_size > 2")
 pw_df = pw_df.select("month(time)","sum(outage_duration)","sum(outage_events)","num_outages")
-pw_df = pw_df.groupBy(month("time")).sum().orderBy(month("time"))
+pw_cp.repartition(1).write.format("com.databricks.spark.csv").option("header", "true").save("monthly_outages_aggregate_cluster_size_time_corrected").groupBy(month("time")).sum().orderBy(month("time"))
