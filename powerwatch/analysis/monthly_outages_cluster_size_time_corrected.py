@@ -61,12 +61,12 @@ pw_df = pw_df.withColumn("outage", udfCountTransition("is_powered", is_powered_l
 
 #now find all the exact outage and restore times using millis
 def timeCorrect(time, millis, unplugMillis):
-    if(unplugMillis == 0):
+    if(unplugMillis == 0 or millis == None or unplugMillis == None):
         return time
     elif unplugMillis > millis:
         return time
     else:
-        return time - datetime.timedelta(microseconds = (millis-unplugMillis)*1000)
+        return time - datetime.timedelta(microseconds = (int(millis)-int(unplugMillis))*1000)
 udftimeCorrect = udf(timeCorrect, DateType())
 pw_df = pw_df.withColumn("outage_time", udftimeCorrect("time","millis","last_unplug_millis"))
 pw_df = pw_df.withColumn("r_time", udftimeCorrect("time","millis","last_plug_millis"))
