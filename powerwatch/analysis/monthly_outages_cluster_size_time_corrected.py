@@ -3,11 +3,12 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, window, asc, desc, lead, lag, udf, hour, month, dayofmonth, collect_list, lit
 import pyspark.sql.functions as F
 from pyspark.sql.window import Window
-from pyspark.sql.types import FloatType, IntegerType, DateType
+from pyspark.sql.types import FloatType, IntegerType, DateType, TimestampType
 from pyspark import SparkConf
 import yaml
 import datetime
 import os
+from math import isnan
 
 conf = SparkConf()
 conf.set("spark.jars", os.getenv("HOME") + "/.ivy2/jars/org.postgresql_postgresql-42.1.1.jar")
@@ -61,13 +62,13 @@ pw_df = pw_df.withColumn("outage", udfCountTransition("is_powered", is_powered_l
 
 #now find all the exact outage and restore times using millis
 def timeCorrect(time, millis, unplugMillis):
-    if(unplugMillis == 0 or millis == None or unplugMillis == None):
+    if(unplugMillis == 0 or millis == None or unplugMillis == None or isnan(millis) or isnan(unplugMillis):
         return time
     elif unplugMillis > millis:
         return time
     else:
         return time - datetime.timedelta(microseconds = (int(millis)-int(unplugMillis))*1000)
-udftimeCorrect = udf(timeCorrect, DateType())
+udftimeCorrect = udf(timeCorrect, TimestampType())
 pw_df = pw_df.withColumn("outage_time", udftimeCorrect("time","millis","last_unplug_millis"))
 pw_df = pw_df.withColumn("r_time", udftimeCorrect("time","millis","last_plug_millis"))
 
@@ -97,7 +98,7 @@ def filterOutage(time, core_id, timeList):
     used = []
     used.append(core_id)
     for i in timeList:
-        if abs((time - i[0]).total_seconds()) < 300 and i[1] not in used:
+        if abs((time - i[0]).total_seconds()) < 120 and i[1] not in used:
             used.append(i[1])
             count += 1
 
@@ -110,31 +111,6 @@ udfFilterTransition = udf(filterOutage, IntegerType())
 pw_df = pw_df.withColumn("outage_cluster_size", udfFilterTransition("outage_time","core_id","outage_window_list"))
 
 
-#now only keep the outages that had another outage
-#def filterOutage(timeNow, timeBefore, timeAfter):
-#    if(timeBefore is None and timeAfter is not None):
-#        if(timeAfter - timeNow < datetime.timedelta(minutes=5)):
-#            return 1
-#        else:
-#            return 0
-#    elif(timeAfter is None and timeBefore is not None):
-#        if(timeNow - timeBefore < datetime.timedelta(minutes=5)):
-#            return 1
-#        else:
-#            return 0
-#    elif(timeBefore is None and timeAfter is None):
-#        return 0
-#    elif(timeNow - timeBefore < datetime.timedelta(minutes=5) or timeAfter - timeNow < datetime.timedelta(minutes=5)):
-#        return 1
-#    else:
-#        return 0
-#udfFilterTransition = udf(filterOutage, IntegerType())
-#w = Window.orderBy(asc("time"))
-#time_lead = lead("time",1).over(w)
-#time_lag = lag("time",1).over(w)
-#pw_df = pw_df.withColumn("outage_number", udfFilterTransition("time", time_lag, time_lead))
-#pw_df = pw_df.filter("outage_number = 1")
-
 pw_df = pw_df.select("time","outage_duration","outage_cluster_size")
 pw_df = pw_df.withColumn("outage_events",lit(1))
 pw_df = pw_df.groupBy(month("time"),"outage_cluster_size").sum().orderBy(month("time"),"outage_cluster_size")
@@ -142,3 +118,8 @@ pw_df = pw_df.select("month(time)","outage_cluster_size","sum(outage_duration)",
 pw_df = pw_df.withColumn("num_outages",pw_df["sum(outage_events)"]/pw_df["outage_cluster_size"])
 pw_df.show(500)
 pw_df.repartition(1).write.format("com.databricks.spark.csv").option("header", "true").save("monthly_outages_aggregate_cluster_size_time_corrected")
+
+#now filter out all single outages
+pw_df = pw_df.filter("outage_cluster_size > 2")
+pw_df = pw_df.select("month(time)","sum(outage_duration)","sum(outage_events)","num_outages")
+pw_df = pw_df.groupBy(month("time")).sum().orderBy(month("time"))
