@@ -66,7 +66,7 @@ def timeCorrect(time, millis, unplugMillis):
     elif unplugMillis > millis:
         return time
     else:
-        return time - datetime.timedelta(microseconds = (millis-unplugmillis)*1000)
+        return time - datetime.timedelta(microseconds = (millis-unplugMillis)*1000)
 udftimeCorrect = udf(timeCorrect, DateType())
 pw_df = pw_df.withColumn("outage_time", udftimeCorrect("time","millis","last_unplug_millis"))
 pw_df = pw_df.withColumn("r_time", udftimeCorrect("time","millis","last_plug_millis"))
