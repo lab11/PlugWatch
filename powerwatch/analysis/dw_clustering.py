@@ -137,6 +137,12 @@ for time,cluster in r2.items():
     else:
         cluster_sizes_dw[len(cluster)] += 1
 
+    #if t == 1535060079:
+    #    print('PRINTING CLUSTER 1535060079')
+    #    for c in cluster:
+    #        print(times_ref[c])
+    #    sys.exit()
+
     if len(cluster) > 10:
         print('\t{}\t{}'.format(t, len(cluster)))
         s = set()
