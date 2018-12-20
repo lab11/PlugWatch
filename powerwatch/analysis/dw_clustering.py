@@ -125,11 +125,17 @@ print('num clusters of min size', len(r2))
 
 cluster_times_dw = []
 cnts_dw = []
+cluster_sizes_dw = {}
 for time,cluster in r2.items():
     #print(time,cluster)
     t = int(time/1000)
     cluster_times_dw.append(t)
     cnts_dw.append(len(cluster))
+
+    if len(cluster) not in cluster_sizes_dw:
+        cluster_sizes_dw[len(cluster)] = 1
+    else:
+        cluster_sizes_dw[len(cluster)] += 1
 
     if len(cluster) > 10:
         print('\t{}\t{}'.format(t, len(cluster)))
@@ -146,6 +152,8 @@ for time,cluster in r2.items():
             lng = row[headers.index('lng')]
             if lat != '-1':
                 print('\t\t{},{}'.format(lat,lng))
+
+pprint.pprint(cluster_sizes_dw)
 
 #print(cnts_dw)
 
