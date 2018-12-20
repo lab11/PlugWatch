@@ -75,18 +75,19 @@ pw_df = pw_df.withColumn("outage_time", udftimeCorrect("time","millis","last_unp
 #now filter out everything that is not an outage. We should have a time and end_time for every outage
 pw_df = pw_df.filter("outage != 0")
 
-window_size = 150
-w = Window.orderBy(asc("outage_time")).rowsBetween(0,window_size)
+w = Window.orderBy(asc("outage_time")).rowsBetween(-1,1)
 pw_df = pw_df.withColumn("outage_window_list",collect_list(F.struct("outage_time","core_id")).over(w))
 
 def filterOutage(time, imei, timeList):
+    times = []
     for i in timeList:
         if imei != i[1]:
             t =  (i[0] - time).total_seconds()
-            if(t < 0):
-                return None
-            else:
-                return t
+            if(t > 0):
+                times.append(t)
+
+    if len(times) > 0:
+        return min(times)
 
     return None
 
