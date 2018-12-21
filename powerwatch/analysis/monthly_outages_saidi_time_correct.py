@@ -86,8 +86,6 @@ def calculateDuration(startTime, endTime):
     seconds = delta.total_seconds()
     return int(seconds)
 
-udfcalculateDuration = udf(calculateDuration, IntegerType())
-pw_df = pw_df.withColumn("outage_duration", udfcalculateDuration("outage_time","restore_time"))
 
 window_size = 150
 w = Window.orderBy(asc("outage_time")).rowsBetween(-1*window_size,window_size)
@@ -110,9 +108,31 @@ def filterOutage(time, core_id, timeList):
 udfFilterTransition = udf(filterOutage, IntegerType())
 pw_df = pw_df.withColumn("outage_cluster_size", udfFilterTransition("outage_time","core_id","outage_window_list"))
 
+window_size = 150
+w = Window.orderBy(asc("restore_time")).rowsBetween(-1*window_size,window_size)
+pw_df = pw_df.withColumn("restore_window_list",collect_list(F.struct("restore_time","core_id")).over(w))
 
+def filterOutage2(time, core_id, timeList):
+    count = 1
+    used = []
+    used.append(core_id)
+    for i in timeList:
+        if abs((time - i[0]).total_seconds()) < 1800 and i[1] not in used:
+            used.append(i[1])
+            count += 1
+
+    if count > window_size:
+        return window_size
+    else:
+        return count
+
+udfFilterTransition = udf(filterOutage2, IntegerType())
+pw_df = pw_df.withColumn("restore_cluster_size", udfFilterTransition("restore_time","core_id","restore_window_list"))
+pw_df = pw_df.filter("outage_cluster_size > 1 AND restore_cluster_size > 1")
+
+udfcalculateDuration = udf(calculateDuration, IntegerType())
+pw_df = pw_df.withColumn("outage_duration", udfcalculateDuration("outage_time","restore_time"))
 pw_df = pw_df.select("time","outage_duration","outage_cluster_size")
-pw_df = pw_df.filter("outage_cluster_size > 1")
 
 def outageHours(duration):
     return int(duration/3600)
