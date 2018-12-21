@@ -13,7 +13,7 @@ cmap = ListedColormap(sns.color_palette('colorblind'))
 
 sep_cluster_size = []
 sep_duration = []
-with open('september_histogram.csv') as c:
+with open('september_saidi.csv') as c:
     csv_reader = csv.reader(c,delimiter=',')
     linecount = 0
     for row in csv_reader:
@@ -25,7 +25,7 @@ with open('september_histogram.csv') as c:
 
 jul_cluster_size = []
 jul_duration = []
-with open('july_histogram.csv') as c:
+with open('july_saidi.csv') as c:
     csv_reader = csv.reader(c,delimiter=',')
     linecount = 0
     for row in csv_reader:
@@ -37,7 +37,7 @@ with open('july_histogram.csv') as c:
 
 aug_cluster_size = []
 aug_duration = []
-with open('august_histogram.csv') as c:
+with open('august_saidi.csv') as c:
     csv_reader = csv.reader(c,delimiter=',')
     linecount = 0
     for row in csv_reader:
@@ -73,16 +73,16 @@ hv_saifi = [0, 0, 0]
 sep_num_devices = 140
 for x in range(0,len(sep_cluster_size)):
     if sep_cluster_size[x] <= lv_cutoff and sep_cluster_size[x]  >= 2:
-        lv_saifi[1] += sep_duration[x]/sep_num_devices/3600
+        lv_saifi[2] += sep_duration[x]/sep_num_devices/3600
     elif sep_cluster_size[x] > lv_cutoff:
-        hv_saifi[1] += sep_duration[x]/sep_num_devices/3600
+        hv_saifi[2] += sep_duration[x]/sep_num_devices/3600
 
 aug_num_devices = 141
 for x in range(0,len(aug_cluster_size)):
     if aug_cluster_size[x] <= lv_cutoff and aug_cluster_size[x]  >= 2:
-        lv_saifi[2] += aug_duration[x]/aug_num_devices/3600
+        lv_saifi[1] += aug_duration[x]/aug_num_devices/3600
     elif aug_cluster_size[x] > lv_cutoff:
-        hv_saifi[2] += aug_duration[x]/aug_num_devices/3600
+        hv_saifi[1] += aug_duration[x]/aug_num_devices/3600
 
 jul_num_devices = 160
 for x in range(0,len(jul_cluster_size)):
