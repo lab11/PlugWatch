@@ -117,7 +117,7 @@ def filterOutage2(time, core_id, timeList):
     used = []
     used.append(core_id)
     for i in timeList:
-        if abs((time - i[0]).total_seconds()) < 1800 and i[1] not in used:
+        if abs((time - i[0]).total_seconds()) < 600 and i[1] not in used:
             used.append(i[1])
             count += 1
 
@@ -143,6 +143,8 @@ pw_df = pw_df.withColumn("outage_duration_hours",udfHours("outage_duration"))
 pw_df = pw_df.withColumn("outage_events",lit(1))
 pw_df = pw_df.groupBy(month("time"),"outage_duration_hours").sum().orderBy(month("time"),"outage_duration_hours")
 pw_df = pw_df.select("month(time)","outage_duration_hours","sum(outage_duration)","sum(outage_events)")
+pw_df.show(2000)
+pw_df = pw_df.groupBy(month("time")).sum().orderBy(month("time"))
 pw_df.show(2000)
 #pw_cp = pw_df
 
