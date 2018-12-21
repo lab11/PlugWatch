@@ -144,7 +144,6 @@ pw_df = pw_df.groupBy(month("time"),"outage_cluster_size").sum().orderBy(month("
 pw_df = pw_df.select("month(time)","outage_cluster_size","sum(outage_duration)","sum(outage_events)")
 pw_df.show(500)
 pw_cp = pw_df
-j
 pw_df = pw_df.groupBy("month(time)").sum().orderBy("month(time)")
 pw_df.show(2000)
 pw_cp.repartition(1).write.format("com.databricks.spark.csv").option("header", "true").save("monthly_outages_saidi_time_corrected").groupBy(month("time")).sum().orderBy(month("time"))
