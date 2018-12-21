@@ -144,7 +144,7 @@ pw_df = pw_df.withColumn("outage_events",lit(1))
 pw_df = pw_df.groupBy(month("time"),"outage_duration_hours").sum().orderBy(month("time"),"outage_duration_hours")
 pw_df = pw_df.select("month(time)","outage_duration_hours","sum(outage_duration)","sum(outage_events)")
 pw_df.show(2000)
-pw_df = pw_df.groupBy(month("time")).sum().orderBy(month("time"))
+pw_df = pw_df.groupBy("month(time)").sum().orderBy("month(time)")
 pw_df.show(2000)
 #pw_cp = pw_df
 
