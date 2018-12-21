@@ -132,25 +132,19 @@ pw_df = pw_df.filter("outage_cluster_size > 1 AND restore_cluster_size > 1")
 
 udfcalculateDuration = udf(calculateDuration, IntegerType())
 pw_df = pw_df.withColumn("outage_duration", udfcalculateDuration("outage_time","restore_time"))
+
 pw_df = pw_df.select("time","outage_duration","outage_cluster_size")
-
-def outageHours(duration):
-    return int(duration/3600)
-
-udfHours = udf(outageHours, IntegerType())
-pw_df = pw_df.withColumn("outage_duration_hours",udfHours("outage_duration"))
-
+#def outageHours(duration):
+#    return int(duration/3600)
+#
+#udfHours = udf(outageHours, IntegerType())
+#pw_df = pw_df.withColumn("outage_duration_hours",udfHours("outage_duration"))
 pw_df = pw_df.withColumn("outage_events",lit(1))
-pw_df = pw_df.groupBy(month("time"),"outage_duration_hours").sum().orderBy(month("time"),"outage_duration_hours")
-pw_df = pw_df.select("month(time)","outage_duration_hours","sum(outage_duration)","sum(outage_events)")
-pw_df.show(2000)
+pw_df = pw_df.groupBy(month("time"),"outage_cluster_size").sum().orderBy(month("time"),"outage_cluster_size")
+pw_df = pw_df.select("month(time)","outage_cluster_size","sum(outage_duration)","sum(outage_events)")
+pw_df.show(500)
+pw_cp = pw_df
+j
 pw_df = pw_df.groupBy("month(time)").sum().orderBy("month(time)")
 pw_df.show(2000)
-#pw_cp = pw_df
-
-#now filter out all single outages
-#pw_df = pw_df.select("month(time)","sum(outage_duration)","sum(outage_events)","num_outages")
-#pw_df = pw_df.groupBy("month(time)").sum().orderBy("month(time)")
-#pw_df = pw_df.show(200)
-
-#pw_cp.repartition(1).write.format("com.databricks.spark.csv").option("header", "true").save("monthly_outages_aggregate_cluster_size_time_corrected").groupBy(month("time")).sum().orderBy(month("time"))
+pw_cp.repartition(1).write.format("com.databricks.spark.csv").option("header", "true").save("monthly_outages_saidi_time_corrected").groupBy(month("time")).sum().orderBy(month("time"))
