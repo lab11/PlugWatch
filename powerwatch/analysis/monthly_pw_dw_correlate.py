@@ -150,7 +150,7 @@ joined_df.show(1000)
 #for each outage time we need to see how many DW unplug events occurred within some time window
 window_size = 1000
 w = Window.orderBy(asc("agg_time"),).rowsBetween(-1*window_size,window_size)
-pw_df = pw_df.withColumn("imei_list",collect_list(F.struct("agg_time","phone_imei")).over(w))
+joined_df = joined_df.withColumn("imei_list",collect_list(F.struct("agg_time","phone_imei")).over(w))
 
 def filterOutage(time, phone_imei, imeiList):
     count = 0
