@@ -8,7 +8,7 @@
         "pg": "^7.3.0",
         "pg-format": "",
         "commander": "",
-        "lab11-powerwatch-parser":"0.0.5"
+        "lab11-powerwatch-parser":"0.0.6"
     },
     "scripts": {
         "start": "./powerwatch-postgres-poster.js -c /etc/config/config.json -d /etc/config/postgres.json -a /etc/config/particle/auth-token -u /etc/config/postgres/username -p /etc/config/postgres/password"
