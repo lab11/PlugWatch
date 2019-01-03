@@ -90,6 +90,9 @@ function parse_packet(event) {
                 fields['grid_voltage'] = parseInt(charge_fields[5]);
                 fields['ac_l_probe_count'] = parseInt(charge_fields[6]);
                 fields['ac_n_probe_count'] = parseInt(charge_fields[7]);
+                if(parseInt(event.version) >= 102) {
+                    fields['grid_frequency'] = (1.0/parseInt(charge_fields[8]));
+                }
             }
 
             // MPU
