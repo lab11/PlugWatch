@@ -83,8 +83,8 @@ for f in file_list:
             print('Skipping {} - not in filter list'.format(device['id']));
             continue
 
-        if('firmware_version' in device and device['firmware_version'] >= int(version_string)):
-            print('Skipping {} - already has equal or greater version'.format(device['id']));
+        if('firmware_version' in device and device['firmware_version'] > int(version_string)):
+            print('Skipping {} - already has greater version'.format(device['id']));
             continue
 
 
