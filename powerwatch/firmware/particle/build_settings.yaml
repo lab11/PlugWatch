@@ -23,3 +23,9 @@ build:
   - name: nigeria
     folder: plugwatch_C/firmware
     product_id: 7641
+  - name: jay
+    folder: plugwatch_F/firmware
+    product_id: 8605
+  - name: india
+    folder: plugwatch_F/firmware
+    product_id: 8604
