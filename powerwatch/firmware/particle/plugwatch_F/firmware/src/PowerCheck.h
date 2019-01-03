@@ -43,11 +43,13 @@ public:
     int getVoltage();
     int getLCycles();
     int getNCycles();
+    int getPeriod();
 
 	volatile unsigned long lastUnplugMillis = 0;
 	volatile int lastUnplugTime = 0;
 	volatile unsigned long lastPlugMillis = 0;
 	volatile int lastPlugTime = 0;
+	int periodMicros = 0;
 
 private:
 	void interruptHandler();

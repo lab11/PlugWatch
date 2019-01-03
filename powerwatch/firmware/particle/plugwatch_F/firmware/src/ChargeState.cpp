@@ -30,8 +30,8 @@ LoopStatus ChargeState::loop() {
   + String(powerCheck.lastPlugMillis) + String(MINOR_DLIM)
   + String(powerCheck.getVoltage()) + String(MINOR_DLIM)
   + String(powerCheck.getLCycles()) + String(MINOR_DLIM)
-  + String(powerCheck.getNCycles());
-
+  + String(powerCheck.getNCycles()) + String(MINOR_DLIM)
+  + String(powerCheck.getPeriod());
   result = power_stats;
 
   powerCheck.enableCharging();

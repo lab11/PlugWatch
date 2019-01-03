@@ -61,8 +61,12 @@ int PowerCheck::getVoltage() {
 		digitalWrite(C3, HIGH);
     int count = 0;
     int L_max = 0;
+    int L_min = 4096;
     int N_measure = 0;
+    setADCSampleTime(ADC_SampleTime_84Cycles);
 
+    //Alright take the max and min so that we can get both the magnitude
+    //and the average
     while(count < 10000) {
         int L = analogRead(B4);
         int N = analogRead(B2);
@@ -70,8 +74,30 @@ int PowerCheck::getVoltage() {
             L_max = L;
             N_measure = N;
         }
+        if(L < L_min) {
+            L_min = L;
+        }
         count++;
     }
+
+    int L_avg = (L_max + L_min)/2;
+    
+    //Use the average as our "zero point" to calculate frequency
+    //Take 5 samples at the zero point - this should give use two periods to average
+    uint8_t mcount = 0;
+    int m[5];
+    while(mcount < 5) {
+        int L = analogRead(B4);
+	if(L - L_avg < 20 and L - L_avg > 0) {
+	    m[mcount] = micros();
+	    mcount++;
+	}
+    }
+
+    //now calculate the microseconds for each period
+    int p1 = m[4] - m[2];
+    int p2 = m[2] - m[0];
+    periodMicros = (p1 + p2)/2;
 
     Serial.printlnf("L voltage count: %d", L_max);
     Serial.printlnf("N voltage count: %d", N_measure);
@@ -82,6 +108,10 @@ int PowerCheck::getVoltage() {
 		digitalWrite(C3, LOW);
 		Serial.printlnf("Calculated voltage: %d",volt);
     return volt;
+}
+
+int PowerCheck::getPeriod() {
+    return periodMicros;
 }
 
 int PowerCheck::getLCycles() {
