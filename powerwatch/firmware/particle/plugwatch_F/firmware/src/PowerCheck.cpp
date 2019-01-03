@@ -85,18 +85,22 @@ int PowerCheck::getVoltage() {
     //Use the average as our "zero point" to calculate frequency
     //Take 5 samples at the zero point - this should give use two periods to average
     uint8_t mcount = 0;
-    int m[5];
-    while(mcount < 5) {
+    int m[3];
+    bool ready = false;
+    while(mcount < 3) {
         int L = analogRead(B4);
-	if(L - L_avg < 20 and L - L_avg > 0) {
+	if(L > L_avg && ready) {
 	    m[mcount] = micros();
 	    mcount++;
+	    ready = false;
+	} else if (L < L_avg){
+	    ready = true; 
 	}
     }
 
     //now calculate the microseconds for each period
-    int p1 = m[4] - m[2];
-    int p2 = m[2] - m[0];
+    int p1 = m[2] - m[1];
+    int p2 = m[1] - m[0];
     periodMicros = (p1 + p2)/2;
 
     Serial.printlnf("L voltage count: %d", L_max);
