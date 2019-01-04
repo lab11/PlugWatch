@@ -16,8 +16,16 @@ import subprocess
 parser = argparse.ArgumentParser(description = 'Provision and deploy powerwatch backend')
 parser.add_argument('-p','--product', type=int, required=True, action='append')
 parser.add_argument('-n','--name', type=str, required=True)
-parser.add_argument('-r','--redundancy', type=int, required=False)
+parser.add_argument('-c','--cluster', type=str, required=True)
+parser.add_argument('-j','--redundancy', type=int, required=False)
+parser.add_argument('-r','--region', type=str, required=False)
 args = parser.parse_args()
+
+region = ""
+if(args.region is None):
+    region = "us-west1"
+else:
+    region = args.region
 
 # Gather/generate the necessary information
 timescale_user = str(base64.b64encode('powerwatch'.encode('ascii')), 'utf-8')
@@ -57,6 +65,7 @@ if os.path.isdir(args.name+'_deployment'):
         shutil.copytree('powerwatch-data-poster', dest + '/powerwatch-data-poster')
         shutil.copytree('powerwatch-visualization', dest + '/powerwatch-visualization')
         shutil.copytree('certificate', dest + '/certificate')
+        shutil.copytree('namespace', dest + '/namespace')
     else:
         print('Remove folder or specify a different name.')
         sys.exit(1)
@@ -70,6 +79,7 @@ else:
     shutil.copytree('powerwatch-data-poster', dest + '/powerwatch-data-poster')
     shutil.copytree('powerwatch-visualization', dest + '/powerwatch-visualization')
     shutil.copytree('certificate', dest + '/certificate')
+    shutil.copytree('namespace', dest + '/namespace')
 
 #now search and replace all of the templating variables with the generated values
 for filepath in glob.iglob('./'+dest+'/**', recursive=True):
@@ -77,6 +87,7 @@ for filepath in glob.iglob('./'+dest+'/**', recursive=True):
         with open(filepath) as file:
             s = file.read()
 
+        s = s.replace('${NAMESPACE}', args.name)
         s = s.replace('${TIMESCALE_USER}', timescale_user)
         s = s.replace('${TIMESCALE_PASSWORD}', timescale_password)
         s = s.replace('${INFLUX_USER}', influx_user)
@@ -97,10 +108,6 @@ for filepath in glob.iglob('./'+dest+'/**', recursive=True):
         with open(filepath, "w") as file:
             file.write(s)
 
-#deploy a cluster in google cloud
-print()
-print('Deploying a new google cloud container cluster (this could take several minutes)...')
-
 #Make sure the project is set correctly
 try:
     subprocess.check_call(['gcloud', 'config','set','project','powerwatch-backend'])
@@ -109,30 +116,29 @@ except Exception as e:
     shutil.rmtree(dest)
     raise e
 
-#Create a new cluster with the deployment name
+#check to see if a cluster of this name already exists or if we need to create a new one
+#to do this try to deploy a cluster of the name set by cluster
+print()
+print('Deploying a new google cloud container cluster if necessary (this could take several minutes)...')
 output = None
 try:
     if args.redundancy is None:
-        output = subprocess.check_output(['gcloud', 'container','clusters','create',args.name,
-                            '--region', 'us-west1',
+        output = subprocess.check_output(['gcloud', 'container','clusters','create',args.cluster,
+                            '--region', region,
                             '--num-nodes', '2',
                             '--disk-size', '10GB',
                             '--machine-type', 'n1-standard-1'], stderr=subprocess.STDOUT)
     else:
-        output = subprocess.check_output(['gcloud', 'container','clusters','create',args.name,
-                            '--region', 'us-west1',
+        output = subprocess.check_output(['gcloud', 'container','clusters','create',args.cluster,
+                            '--region', region,
                             '--num-nodes', str(args.redundancy),
                             '--disk-size', '10GB',
                             '--machine-type', 'n1-standard-1'], stderr=subprocess.STDOUT)
 except Exception as e:
     if type(e) is subprocess.CalledProcessError and str(e.output,'utf-8').find('Already exists') != -1:
-        answer = input('Cluster with name ' + args.name + ' already exists in this zone. Use existing cluster? [Y/n]')
-        if answer == 'y' or answer == 'Y' or answer == 'Yes' or answer == 'yes':
-            pass
-        else:
-            print('Please specify a different cluster name')
-            sys.exit(1)
+        print('Cluster with name ' + args.cluster + ' already exists in this zone. Using existing cluster.')
     else:
+        print(e.output)
         raise e
 
 #CREATE a new globally routable ip address
@@ -187,13 +193,52 @@ except Exception as e:
 
 #point the kubernetes python API at the new cluster
 try:
-    subprocess.check_call(['gcloud', 'container', 'clusters', 'get-credentials', args.name,
-                            '--region', 'us-west1',
+    subprocess.check_call(['gcloud', 'container', 'clusters', 'get-credentials', args.cluster,
+                            '--region', region,
                             '--project', 'powerwatch-backend'])
 except Exception as e:
     shutil.rmtree(dest)
     raise e
 
+#add our new namespace to the cluster
+try:
+    print("Creating deployment namespace.")
+    subprocess.check_output(['kubectl', 'create', '-f', args.name + '_deployment/namespace/deployment-namespace.yaml'], stderr=subprocess.STDOUT)
+except Exception as e:
+    print(str(e.output,'utf-8'))
+    if type(e) is subprocess.CalledProcessError and str(e.output,'utf-8').find('already exists') != -1:
+        pass
+    else:
+        raise(e)
+
+#get the cluster context. Google uses this as the cluster usename we need for the next step
+output = None
+try:
+    output = subprocess.check_output(['kubectl', 'config', 'current-context'])
+except Exception as e:
+    raise(e)
+output = str(output,'utf-8').rstrip()
+print("Received current context {}".format(output))
+
+#Create a cluster context for this deployment then start using it
+try:
+    subprocess.check_output(['kubectl', 'config', 'set-context', output + '-' + args.name, 
+                            '--cluster=' + output, 
+                            '--user=' + output, 
+                            '--namespace='+args.name])
+except Exception as e:
+    if type(e) is subprocess.CalledProcessError and str(e.output,'utf-8').find('Already exists') != -1:
+        pass
+    else:
+        raise(e)
+
+#Use the context you just created
+try:
+    subprocess.check_output(['kubectl', 'config', 'use-context', output + '-' + args.name])
+except Exception as e:
+    raise(e)
+
+#now everything we do should be namespaced to our cluster and our context
 #Add the tiller rbac role
 try:
     subprocess.check_output(['kubectl', 'apply', '-f', 'cluster-rolebinding/tiller-rolebinding.yaml'])
@@ -211,14 +256,17 @@ except Exception as e:
 
 #install the helm cert-manager
 try:
-    subprocess.check_call(['helm', 'install',
+    subprocess.check_output(['helm', 'install',
                             '--name', 'cert-manager',
                             '--namespace', 'kube-system',
                             'stable/cert-manager',
-                            '--version','v0.5.0'])
+                            '--version','v0.5.0'], stderr=subprocess.STDOUT)
 except Exception as e:
-    shutil.rmtree(dest)
-    raise e
+    if type(e) is subprocess.CalledProcessError and str(e.output,'utf-8').find('already exists') != -1:
+        pass
+    else:
+        shutil.rmtree(dest)
+        raise(e)
 
 #create the cluster issuer
 try:

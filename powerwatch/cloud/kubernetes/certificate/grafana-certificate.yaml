@@ -2,7 +2,6 @@ apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
   name: grafana-tls
-  namespace: default
 spec:
   secretName: grafana-tls
   issuerRef:
