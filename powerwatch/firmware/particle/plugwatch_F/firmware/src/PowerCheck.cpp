@@ -87,7 +87,8 @@ int PowerCheck::getVoltage() {
     uint8_t mcount = 0;
     int m[3];
     bool ready = false;
-    while(mcount < 3) {
+    int startMillis = millis();
+    while(mcount < 3 && millis() - startMillis < 1000) {
         int L = analogRead(B4);
 	if(L > L_avg && ready) {
 	    m[mcount] = micros();
@@ -97,12 +98,15 @@ int PowerCheck::getVoltage() {
 	    ready = true; 
 	}
     }
-
-    //now calculate the microseconds for each period
-    int p1 = m[2] - m[1];
-    int p2 = m[1] - m[0];
-    periodMicros = (p1 + p2)/2;
-
+    if(millis() - startMillis >= 1000) {
+	periodMicros = 1;
+    } else {
+	//now calculate the microseconds for each period
+    	int p1 = m[2] - m[1];
+    	int p2 = m[1] - m[0];
+    	periodMicros = (p1 + p2)/2;
+    }
+    
     Serial.printlnf("L voltage count: %d", L_max);
     Serial.printlnf("N voltage count: %d", N_measure);
 
