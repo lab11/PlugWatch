@@ -9,8 +9,16 @@ OneWire ds(B0);
 bool handshake_flag = false;
 SYSTEM_THREAD(ENABLED);
 #include <APNHelperRK.h>
+#include "product_id.h"
 
-PRODUCT_ID(7011); // 7008 is PowerWatch_A; 7009 is PowerWatch_B
+#ifdef PRODUCT
+int product_id = PRODUCT;
+PRODUCT_ID(PRODUCT);
+#else
+int product_id = 7011;
+PRODUCT_ID(7011);
+#endif
+
 PRODUCT_VERSION(1);
 
 int last_millis;

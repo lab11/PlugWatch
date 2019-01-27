@@ -20,7 +20,7 @@ with open("build_settings.yaml", 'r') as stream:
                         'electron',
                         build['folder'],
                         '--saveTo',
-                        'build/'+build['name']+'_'+str(build['product_id'])+'.bin'])
+                        build['output']+'/'+build['name']+'_'+str(build['product_id'])+'.bin'])
 
         #erase that header file
         header = open(build['folder'] + '/src/product_id.h', 'w')
