@@ -3,6 +3,7 @@ import sys
 import yaml
 import subprocess
 
+
 with open("build_settings.yaml", 'r') as stream:
     data = yaml.load(stream)
 
@@ -19,6 +20,8 @@ with open("build_settings.yaml", 'r') as stream:
                         'compile',
                         'electron',
                         build['folder'],
+                        '--target',
+                        '0.7.0',
                         '--saveTo',
                         build['output']+'/'+build['name']+'_'+str(build['product_id'])+'.bin'])
 
