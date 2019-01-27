@@ -98,7 +98,7 @@ while retryCount < 50 and not success:
         particle_id = version.split(",")[0]
         shield_id = version.split(",")[1]
         #sanity check the values
-        if(shield_id.find('94FF') != -1 or shield_id.find('91FF') != -1 or len(particle_id) != 24):
+        if(shield_id.find('FFFFF') != -1 or shield_id.find('91FF') != -1 or len(particle_id) != 24):
             print("Got invalid values - retrying")
             ser.close()
             retryCount += 1
