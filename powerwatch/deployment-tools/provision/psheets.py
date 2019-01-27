@@ -31,6 +31,8 @@ def append(time_str,device_id,shield_id,product_id):
     product_b_cnt = 0
     product_c_cnt = 0
     product_d_cnt = 0
+    product_e_cnt = 0
+    product_f_cnt = 0
     for row in wks: #check for duplicate device id or shield id
         d_id = row[1]
         s_id = row[2]
