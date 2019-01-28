@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.6
 import sys
 import os
 import secrets
@@ -81,33 +81,6 @@ else:
     shutil.copytree('certificate', dest + '/certificate')
     shutil.copytree('namespace', dest + '/namespace')
 
-#now search and replace all of the templating variables with the generated values
-for filepath in glob.iglob('./'+dest+'/**', recursive=True):
-    if(not os.path.isdir(filepath)):
-        with open(filepath) as file:
-            s = file.read()
-
-        s = s.replace('${NAMESPACE}', args.name)
-        s = s.replace('${TIMESCALE_USER}', timescale_user)
-        s = s.replace('${TIMESCALE_PASSWORD}', timescale_password)
-        s = s.replace('${INFLUX_USER}', influx_user)
-        s = s.replace('${INFLUX_PASSWORD}', influx_password)
-        s = s.replace('${INFLUX_ADMIN_USER}', influx_admin_user)
-        s = s.replace('${INFLUX_ADMIN_PASSWORD}', influx_admin_password)
-        s = s.replace('${GRAFANA_DATABASE_USER}', grafana_database_user)
-        s = s.replace('${GRAFANA_DATABASE_USER_CLEAR}', grafana_database_user_clear)
-        s = s.replace('${GRAFANA_DATABASE_PASSWORD}', grafana_database_password)
-        s = s.replace('${GRAFANA_DATABASE_PASSWORD_CLEAR}', grafana_database_password_clear)
-        s = s.replace('${GRAFANA_PASSWORD}', grafana_admin_password)
-        s = s.replace('${PRODUCT_IDS}', product_ids)
-        s = s.replace('${PARTICLE_AUTH_TOKEN}', access_token)
-        s = s.replace('${GRAFANA_IP_ADDRESS}', args.name+'-grafana')
-        s = s.replace('${GRAFANA_DOMAIN_NAME}', 'graphs.'+args.name+'.powerwatch.io')
-        s = s.replace('${POWERWATCH_VISUALIZATION_IP_ADDRESS}', args.name+'-powerwatch-visualization')
-        s = s.replace('${POWERWATCH_VISUALIZATION_DOMAIN_NAME}', 'vis.'+args.name+'.powerwatch.io')
-        with open(filepath, "w") as file:
-            file.write(s)
-
 #Make sure the project is set correctly
 try:
     subprocess.check_call(['gcloud', 'config','set','project','powerwatch-backend'])
@@ -140,6 +113,57 @@ except Exception as e:
     else:
         print(e.output)
         raise e
+
+#CREATE regional IP addresses for loadbalancer services
+timescale_ip_address = ''
+try:
+    subprocess.check_call(['gcloud', 'compute','addresses','create',
+                        args.name+'-timescale','--region',region])
+except Exception as e:
+    print(e)
+
+try:
+    timescale_ip_address = subprocess.check_output(['gcloud', 'compute','addresses','describe',
+                        args.name+'-timescale','--region',region])
+    timescale_ip_address = timescale_ip_address.decode('utf-8').replace('\n',' ').split(' ')[1]
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','start',
+                        '--zone','powerwatch'])
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','add',
+                        '--zone','powerwatch',
+                        '--name','timescale.'+args.name+'.powerwatch.io',
+                        '--type','A',
+                        '--ttl','300',timescale_ip_address])
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','execute',
+                        '--zone','powerwatch'])
+except Exception as e:
+    os.remove('transaction.yaml')
+    print(e)
+
+#CREATE regional IP addresses for loadbalancer services
+udp_ip_address = ''
+try:
+    subprocess.check_call(['gcloud', 'compute','addresses','create',
+                        args.name+'-udp','--region',region])
+except Exception as e:
+    print(e)
+
+try:
+    udp_ip_address = subprocess.check_output(['gcloud', 'compute','addresses','describe',
+                        args.name+'-udp','--region',region])
+    udp_ip_address = udp_ip_address.decode('utf-8').replace('\n',' ').split(' ')[1]
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','start',
+                        '--zone','powerwatch'])
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','add',
+                        '--zone','powerwatch',
+                        '--name','udp.'+args.name+'.powerwatch.io',
+                        '--type','A',
+                        '--ttl','300',udp_ip_address])
+    subprocess.check_call(['gcloud', 'dns','record-sets','transaction','execute',
+                        '--zone','powerwatch'])
+except Exception as e:
+    os.remove('transaction.yaml')
+    print(e)
+
 
 #CREATE a new globally routable ip address
 grafana_ip_address = ''
@@ -191,6 +215,39 @@ except Exception as e:
     os.remove('transaction.yaml')
     print(e)
 
+#now search and replace all of the templating variables with the generated values
+for filepath in glob.iglob('./'+dest+'/**', recursive=True):
+    if(not os.path.isdir(filepath)):
+        with open(filepath) as file:
+            s = file.read()
+
+        s = s.replace('${NAMESPACE}', args.name)
+        s = s.replace('${TIMESCALE_USER}', timescale_user)
+        s = s.replace('${TIMESCALE_PASSWORD}', timescale_password)
+        s = s.replace('${INFLUX_USER}', influx_user)
+        s = s.replace('${INFLUX_PASSWORD}', influx_password)
+        s = s.replace('${INFLUX_ADMIN_USER}', influx_admin_user)
+        s = s.replace('${INFLUX_ADMIN_PASSWORD}', influx_admin_password)
+        s = s.replace('${GRAFANA_DATABASE_USER}', grafana_database_user)
+        s = s.replace('${GRAFANA_DATABASE_USER_CLEAR}', grafana_database_user_clear)
+        s = s.replace('${GRAFANA_DATABASE_PASSWORD}', grafana_database_password)
+        s = s.replace('${GRAFANA_DATABASE_PASSWORD_CLEAR}', grafana_database_password_clear)
+        s = s.replace('${GRAFANA_PASSWORD}', grafana_admin_password)
+        s = s.replace('${PRODUCT_IDS}', product_ids)
+        s = s.replace('${PARTICLE_AUTH_TOKEN}', access_token)
+        s = s.replace('${GRAFANA_IP_ADDRESS}', args.name+'-grafana')
+        s = s.replace('${GRAFANA_DOMAIN_NAME}', 'graphs.'+args.name+'.powerwatch.io')
+        s = s.replace('${TIMESCALE_IP_ADDRESS}', timescale_ip_address)
+        s = s.replace('${TIMESCALE_DOMAIN_NAME}', 'timescale.'+args.name+'.powerwatch.io')
+        s = s.replace('${UDP_IP_ADDRESS}', udp_ip_address)
+        s = s.replace('${UDP_DOMAIN_NAME}', 'udp.'+args.name+'.powerwatch.io')
+        s = s.replace('${POWERWATCH_VISUALIZATION_IP_ADDRESS}', args.name+'-powerwatch-visualization')
+        s = s.replace('${POWERWATCH_VISUALIZATION_DOMAIN_NAME}', 'vis.'+args.name+'.powerwatch.io')
+        with open(filepath, "w") as file:
+            file.write(s)
+
+
+
 #point the kubernetes python API at the new cluster
 try:
     subprocess.check_call(['gcloud', 'container', 'clusters', 'get-credentials', args.cluster,
@@ -222,9 +279,9 @@ print("Received current context {}".format(output))
 
 #Create a cluster context for this deployment then start using it
 try:
-    subprocess.check_output(['kubectl', 'config', 'set-context', output + '-' + args.name, 
-                            '--cluster=' + output, 
-                            '--user=' + output, 
+    subprocess.check_output(['kubectl', 'config', 'set-context', output + '-' + args.name,
+                            '--cluster=' + output,
+                            '--user=' + output,
                             '--namespace='+args.name])
 except Exception as e:
     if type(e) is subprocess.CalledProcessError and str(e.output,'utf-8').find('Already exists') != -1:
@@ -374,4 +431,6 @@ print('Grafana Admin User: admin')
 print('Grafana Admin Password: ' + str(base64.b64decode(grafana_admin_password),'utf-8'))
 print('Particle access token: ' + str(base64.b64decode(access_token),'utf-8'))
 print('Grafana globally accessible IP address: ' + str(grafana_ip_address))
+print('Timescale globally accessible IP address: ' + str(timescale_ip_address))
+print('UDP globally accessible IP address: ' + str(udp_ip_address))
 print('Visualization globally accessible IP address: ' + str(visualization_ip_address))

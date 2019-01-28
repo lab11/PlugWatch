@@ -31,6 +31,8 @@ spec:
       
       - name: powerwatch-udp-receiver
         image: lab11/powerwatch-udp-receiver:production
+        ports:
+          - containerPort: 5000
         volumeMounts:
         - name: config
           mountPath: /etc/config
@@ -89,3 +91,19 @@ spec:
             path: username
           - key: password
             path: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: powerwatch-data-poster
+  labels:
+    app: powerwatch-data-poster
+spec:
+  ports:
+  - port: 5000
+    protocol: UDP
+    targetPort: 5000
+  selector:
+    app: powerwatch-data-poster
+  type: LoadBalancer
+  loadBalancerIP: "${UDP_IP_ADDRESS}"
