@@ -1,0 +1,17 @@
+{
+    "name": "powerwatch-deployment-manager",
+    "version": "0.0.1",
+    "description": "Takes surveyCTO surveys and uses them to initialize the deployment database",
+    "private": true,
+    "dependencies": {
+        "pg": "^7.3.0",
+        "pg-format": "",
+        "commander": ""
+    },
+    "scripts": {
+        "start": "./powerwatch-deployment-manager.js -d /etc/config/postgres.json -u /etc/config/postgres/username -p /etc/config/postgres/password"
+    },
+    "engines": {
+        "node": ">=4.3.2"
+    }
+}
