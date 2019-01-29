@@ -5,6 +5,7 @@
     "private": true,
     "dependencies": {
         "pg": "^7.3.0",
+        "request": "2.88.0",
         "pg-format": "",
         "commander": ""
     },
