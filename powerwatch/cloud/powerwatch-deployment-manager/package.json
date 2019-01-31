@@ -7,7 +7,9 @@
         "pg": "^7.3.0",
         "request": "2.88.0",
         "pg-format": "",
-        "commander": ""
+        "commander": "",
+        "jsqr":"1.1.1",
+        "jpeg-js":"0.3.4"
     },
     "scripts": {
         "start": "./powerwatch-deployment-manager.js -d /etc/config/postgres.json -u /etc/config/postgres/username -p /etc/config/postgres/password"
