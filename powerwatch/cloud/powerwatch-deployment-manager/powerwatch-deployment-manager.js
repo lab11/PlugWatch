@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { Pool }  = require('pg');
-var format      = require('pg-format');
+var format = require('pg-format');
 const request = require('request')
 const fs = require('fs')
 const jpeg = require('jpeg-js')
@@ -33,16 +33,111 @@ if(typeof command.surveyusername !== 'undefined') {
     survey_config = require('./survey-config.json'); 
 }
 
-/*const pg_pool = new  Pool( {
+const pg_pool = new  Pool( {
     user: timescale_config.username,
     host: timescale_config.host,
     database: timescale_config.database,
     password: timescale_config.password,
     port: timescale_config.port,
     max: 20,
-})*/
+})
+
+//given a list of particle or shield IDs, lookup in the database and see
+//how many match and if they all match the same thing
+function findValidID(idlist) {
+    //TODO: query the devices table and see that some quorum of the IDs in the
+    //list match a valid device. return device statistics if so, else return null
+}
 
 function powerwatchEntryHelper(survey) {
+    console.log("Processing survey for respondent ",survey.a_respid)
+    //Was a powerwatch device installed?
+    powerwatch_installed = false
+    if(survey.g_install == '1') {
+        powerwatch_installed = true
+        //yes -> put it in the deployment table
+        //things we care about
+        //respondent ID
+        //location
+        //installed during outage
+        //time of install
+        //device ID
+        //phone number
+        //the survey that entered this record
+       
+        //First try to determine the correct device ID and shield ID
+        //g_deviceID, g_deviceID2, processedID
+        id_list = []
+        if('processedID' in survey) {
+            var ids = suvery.processedID.split(':')
+            if(ids.length != 3) {
+                console.log("Not a valid QR code read - discarding")
+            } else {
+                id_list.push(ids[1])
+                id_list.push(ids[2])
+            }
+        } else {
+            console.log("No attached image or no valid QR found in image")
+        }
+        id_list.push(g_deviceID)
+        id_list.push(g_deviceID2)
+
+        var id = findValidID(idlist);
+        var core_id = ""
+        var shield_id = ""
+        if(id == null) {
+            //this is clearly an error and we should
+            //TODO: write the logic to the error table
+            return;
+        } else {
+            core_id = id[0]
+            shield_id = id[1]
+            //we have a valid ID and should be able to put this into
+            //the deployment table
+
+            //First query the deployment table and see if this device
+            //is already in the deployed state
+            pg_pool.query("SELECT deployment_time, end_time, FROM deployment where core_id = $1", [core_id]), (err, res) => {
+                if(err) {
+                    console.log("This is a weird error, the most that should happen is it returns no data")
+                } else {
+                    console.log(res.rows.length)
+                    if(res.rows.length == 0) {
+                        //TODO: This has never been deployed - insert it into table
+                    } else {
+                        // we need to loop through and see 1) if this has been deployed before has it ended
+                        // 2) if it's currently deployed is that this survey
+                        for(var i = 0; i < res.rows.length; i++) {
+                            if(res.rows[i].end_time == null) {
+                                //this has been deployed and that deployment isn't over
+                                if(res.rows[i].deployment_time == survey.end_time) {
+                                    //that is this survey - we don't need to insert this survey again
+                                    return;
+                                } else {
+                                    //that's not this survey - this is probably an error. We should write it all
+                                    //to the error table and maybe an endline survey will come through later
+                                    
+                                    //TODO: write the logic to the error table
+                                    return;
+                                }
+                            } else {
+                                //This deployment has ended and it's fine
+                            }
+                        }
+
+                        //TODO: We didn't run into a conflic - insert it into the table
+                    }
+
+                }
+            }
+        }
+    }
+
+    //It doesn't matter if the app was downloaded
+    //If the user consented then we should still incentivize them in OINK
+    
+    //Into the deployment table we want to p
+
     //form = {}
     //form.a_PW                      = json[i].a_PW,
     //form.g_install                 = json[i].g_install,
@@ -138,48 +233,48 @@ function processAppExitSurvey(survey) {
 
 //function to fetch surveys from surveyCTO
 function fetchSurveys(formid, date, callback) {
-   //fetch all surveys from the start of time - we prevent double writing anyways
-   var uri = ""
-   if(date == 0) {
-      uri = 'https://gridwatch.surveycto.com/api/v1/forms/data/wide/json/'
-                                          + formid
-                                          +'?r=approved|rejected|pending'
-   } else {
-      uri = 'https://gridwatch.surveycto.com/api/v1/forms/data/wide/json/'
-                                          + formid
-                                          + '?r=approved|rejected|pending'
-                                          + '?date=' + String(date)
-   }
+    //fetch all surveys from the start of time - we prevent double writing anyways
+    var uri = ""
+    if(date == 0) {
+        uri = 'https://gridwatch.surveycto.com/api/v1/forms/data/wide/json/'
+                                           + formid
+                                           +'?r=approved|rejected|pending'
+    } else {
+        uri = 'https://gridwatch.surveycto.com/api/v1/forms/data/wide/json/'
+                                           + formid
+                                           + '?r=approved|rejected|pending'
+                                           + '?date=' + String(date)
+    }
 
-   var options = {
-      uri: uri,
-      auth: {
-         user: survey_config.username,
-         pass: survey_config.password,
-         sendImmediately: false
-      }
-   }
-   data = []
-   num_images = 0
-   request(options, function(error, response, body) {
-      json = JSON.parse(body)
-      return callback(json)
-   })
+    var options = {
+        uri: uri,
+        auth: {
+            user: survey_config.username,
+            pass: survey_config.password,
+            sendImmediately: false
+        }
+    }
+    data = []
+    num_images = 0
+    request(options, function(error, response, body) {
+        json = JSON.parse(body)
+        return callback(json)
+    })
 }
 
 //function to fetch surveys from surveyCTO
 var lastSurveyFetch = 0
 function fetchNewSurveys() {
-   //fetch all surveys moving forward
-   //send the API requests to surveyCTO - we probable also need attachments to process pictures
-   fetchSurveys('Combined_Form', lastSurveyFetch, function(data) {
-      for(var i = 0; i < data.length; i++) {
-         processPowerwatchEntrySurvey(data[i])
-      }
-   })
+    //fetch all surveys moving forward
+    //send the API requests to surveyCTO - we probable also need attachments to process pictures
+    fetchSurveys('Combined_Form', lastSurveyFetch, function(data) {
+       for(var i = 0; i < data.length; i++) {
+          processPowerwatchEntrySurvey(data[i])
+       }
+    })
 
-   //update last survey fetch
-   lastSurveyFetch = Date.now()
+    //update last survey fetch
+    lastSurveyFetch = Date.now()
 }
 
 //Periodically query surveyCTO for new surveys - if you get new surveys processing them on by one
