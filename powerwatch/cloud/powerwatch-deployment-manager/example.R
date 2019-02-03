@@ -9,14 +9,19 @@ output_file <- args[2]
 
 #open the input_file
 surveys <- read.csv(file = input_file, header=TRUE)
-
+##################################################################
 ######### YOUR DOFILE/R Cleaning code goes here ##################
+
+
+
+
 #Here are some example modifications - they are totally random and should be removed
 #please TEST your Rscript! If you do something wrong it will
 #cause havoc...correctable havoc, but still not fun
 
-#example removal of a duplicate survey
-
+#example removal a single survey
+#now the trailing common and the '-' sign to invert the selected row
+surveys <- surveys[-(surveys$instanceID == "47245024-7e76-4925-ab6f-67516363142f"),]
 
 #example transformation/correction on a single cell by surveyUUID
 #Note that the comma at the end of the comparison is important to index correctly
@@ -27,15 +32,12 @@ surveys[surveys$instanceID == "uuid:81a96974-395e-4bdd-9778-64c357df4ff1",]$dura
 for (row in 1:nrow(surveys)) {
     if(!is.na(surveys[row,"e_phonenumber"]) && substring(surveys[row,"e_phonenumber"], 1, 1) == "0") {
         surveys[row,"e_phonenumber"] = substring(surveys[row,"e_phonenumber"], 2)
-        write(substring(surveys[row,"e_phonenumber"], 2),stdout())
     }
 }
 
 
 
 ###################################################################
-
 ######## DO NOT MODIFY ###########################################
-
 #write the results survey as a CSV to the output file
 write.csv(surveys,file = output_file,na="")
