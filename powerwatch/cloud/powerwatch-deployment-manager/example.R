@@ -8,7 +8,7 @@ input_file <- args[1]
 output_file <- args[2]
 
 #open the input_file
-surveys <- read.csv(file = input_file, header=TRUE)
+surveys <- read.csv(file = input_file, header=TRUE, stringsAsFactors=FALSE)
 ##################################################################
 ######### YOUR DOFILE/R Cleaning code goes here ##################
 
@@ -22,10 +22,11 @@ surveys <- read.csv(file = input_file, header=TRUE)
 #example removal a single survey
 #now the trailing common and the '!' sign to invert the selected row
 surveys <- surveys[!(surveys$instanceID == "uuid:47245024-7e76-4925-ab6f-67516363142f"),]
+surveys <- surveys[!is.na(surveys[,"a_respid"]),]
 
 #example transformation/correction on a single cell by surveyUUID
 #Note that the comma at the end of the comparison is important to index correctly
-surveys[surveys$instanceID == "uuid:81a96974-395e-4bdd-9778-64c357df4ff1",]$durationConsentV = 150
+surveys[surveys$instanceID == "uuid:e98ba8c5-a4ef-47ce-b113-7b6ca1b3a6f7",]$durationConsentV = 150
 
 #example transformation on all cells in a column
 #remove all leading zeros
