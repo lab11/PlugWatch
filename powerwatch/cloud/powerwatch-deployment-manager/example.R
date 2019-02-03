@@ -20,8 +20,8 @@ surveys <- read.csv(file = input_file, header=TRUE)
 #cause havoc...correctable havoc, but still not fun
 
 #example removal a single survey
-#now the trailing common and the '-' sign to invert the selected row
-surveys <- surveys[-(surveys$instanceID == "47245024-7e76-4925-ab6f-67516363142f"),]
+#now the trailing common and the '!' sign to invert the selected row
+surveys <- surveys[!(surveys$instanceID == "uuid:47245024-7e76-4925-ab6f-67516363142f"),]
 
 #example transformation/correction on a single cell by surveyUUID
 #Note that the comma at the end of the comparison is important to index correctly
