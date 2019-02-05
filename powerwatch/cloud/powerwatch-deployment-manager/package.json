@@ -9,7 +9,10 @@
         "pg-format": "",
         "commander": "",
         "jsqr":"1.1.1",
-        "jpeg-js":"0.3.4"
+        "jpeg-js":"0.3.4",
+        "csvtojson":"2.0.8",
+        "async":"2.6.1",
+        "deep-diff":"1.0.2"
     },
     "scripts": {
         "start": "./powerwatch-deployment-manager.js -d /etc/config/postgres.json -u /etc/config/postgres/username -p /etc/config/postgres/password"
