@@ -11,28 +11,13 @@ except:
 
 sh = gc.open('PowerWatch Devices - Deployment Table Hardware Mapping')
 
-product_a_cnt = 0
-product_b_cnt = 0
-product_c_cnt = 0
-product_d_cnt = 0
-
-product_a_id = 7008
-product_b_id = 7009
-product_c_id = 7010
-product_d_id = 7011
-product_e_id = 8462
-product_f_id = 8797
+product_cnt = 0
 
 def append(time_str,device_id,shield_id,product_id):
-    global product_a_cnt, product_b_cnt, product_c_cnt, product_d_cnt
+    #global product_a_cnt, product_b_cnt, product_c_cnt, product_d_cnt
+    global product_cnt
     wks = sh.sheet1
     cnt = 1
-    product_a_cnt = 0
-    product_b_cnt = 0
-    product_c_cnt = 0
-    product_d_cnt = 0
-    product_e_cnt = 0
-    product_f_cnt = 0
     for row in wks: #check for duplicate device id or shield id
         d_id = row[1]
         s_id = row[2]
@@ -45,48 +30,12 @@ def append(time_str,device_id,shield_id,product_id):
     for row in wks: #check for overage in product and get the index for the append
         cnt = cnt+1
         p_id = row[3]
-        if str(p_id) == str(product_a_id):
-            product_a_cnt = product_a_cnt + 1
-        if str(p_id) == str(product_b_id):
-            product_b_cnt = product_b_cnt + 1
-        if str(p_id) == str(product_c_id):
-            product_c_cnt = product_c_cnt + 1
-        if str(p_id) == str(product_d_id):
-            product_d_cnt = product_d_cnt + 1
-        if str(p_id) == str(product_e_id):
-            product_e_cnt = product_e_cnt + 1
-        if str(p_id) == str(product_f_id):
-            product_f_cnt = product_f_cnt + 1
-    if str(product_id) == str(product_a_id):
-        if product_a_cnt >= 100:
-            print "PRODUCT A LIMIT REACHED. REFLASH... EXITING"
-            return -1
-        product_a_cnt = product_a_cnt + 1
-    if str(product_id) == str(product_b_id):
-        if product_b_cnt >= 100:
-            print "PRODUCT B LIMIT REACHED. REFLASH... EXITING"
-            return -1
-        product_b_cnt = product_b_cnt + 1
-    if str(product_id) == str(product_c_id):
-        if product_c_cnt >= 100:
-            print "PRODUCT C LIMIT REACHED. REFLASH... EXITING"
-            return -1
-        product_c_cnt = product_c_cnt + 1
-    if str(product_id) == str(product_d_id):
-        if product_d_cnt >= 100:
-            print "PRODUCT D LIMIT REACHED. REFLASH... EXITING"
-            return -1
-        product_d_cnt = product_d_cnt + 1
-    if str(product_id) == str(product_e_id):
-        if product_e_cnt >= 100:
-            print "PRODUCT D LIMIT REACHED. REFLASH... EXITING"
-            return -1
-        product_e_cnt = product_e_cnt + 1
-    if str(product_id) == str(product_f_id):
-        if product_f_cnt >= 100:
-            print "PRODUCT D LIMIT REACHED. REFLASH... EXITING"
-            return -1
-        product_f_cnt = product_f_cnt + 1
+        if str(p_id) == str(product_id)
+            product_cnt += 1
+
+    if product_cnt >= 100:
+        print "PRODUCT LIMIT REACHED. REFLASH... EXITING"
+        return -1
 
     r = "A"+str(cnt)+":"+"D"+str(cnt)
     wks.update_values(crange=r,values=[[time_str, device_id, shield_id, product_id]])
