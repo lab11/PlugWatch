@@ -30,7 +30,7 @@ def append(time_str,device_id,shield_id,product_id):
     for row in wks: #check for overage in product and get the index for the append
         cnt = cnt+1
         p_id = row[3]
-        if str(p_id) == str(product_id)
+        if str(p_id) == str(product_id):
             product_cnt += 1
 
     if product_cnt >= 100:
