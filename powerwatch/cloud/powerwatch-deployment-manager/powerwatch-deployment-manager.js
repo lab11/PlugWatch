@@ -291,6 +291,9 @@ function extractQRCodes(survey, url_field, output_field, outer_callback) {
 
 }
 
+function getExitDeviceID(survey) {
+}
+
 function getEntryDeviceID(survey) {
 }
 
@@ -299,116 +302,330 @@ function getEntryCoordinates(survey) {
        return [survey['g_gps_accurate-Latitude'],survey['g_gps_accurate-Longitude']]
    } else if(survey['g_gps-Accuracy'] != '') {
        return [survey['g_gps-Latitude'],survey['g_gps-Longitude']]
-   } else {
+   } else if(survey['g_gps-Accuracy'] != '') {
        return [survey['gps-Latitude'],survey['gps-Longitude']]
-   }
+   } else {
+      return null;
+   } 
 }
 
-
 function generateTrackingTables(entrySurveys, exitSurveys) {
+    //Sort the surveys by submission time
+    //This assumption makes it easier to process the surveys
+    entrySurveys.sort(function(a,b) {
+       return Date.parse(a) - Date.parse(b);
+    });
+
+    exitSurveys.sort(function(a,b) {
+       return Date.parse(a) - Date.parse(b);
+    });
+
+
     //Okay the high level idea here is to generate a json blob describing
     //the entire deployment from the surveys. We actually want two - a respondent-centric
     //set and device-centric set
     //
     //To do that the method will be loop through entry Surveys
     //When you find a valid device deployment create entries for the respondent
-    //and entries for the device
-    //Then loop through the exit surveys trying to find a pickup for that
-    //device and that respondent ID
+    //and entries for the device - do this for all devices
+    //Then loop through all exit/redeployment surveys looking for device pickups/
+    //redeployments
+    //Then pivot back and forth between the two until you stop making progress
+    //This is the only way I can think of to ensure ordering and correctness
     //Surveys that look erroneous get flagged
     //Devices that look erroneous get flagged
     //and It all can be cleaned up by modifying the R script
     devices = []
-    respondents = []
-    for(var i = 0; i < entrySurveys.length; i++) {
-        id = entrySurvey[i].a_respid
-        console.log("Processing survey for respondent ", id)
-        
+    respondents = {}
+    still_making_progress = false; 
+    while(still_making_progress) {
+       //This will be set to true when you deploy a device or remove a device
+       still_making_progress = false; 
+       
+       surveys_to_remove = []
+       for(var i = 0; i < entrySurveys.length; i++) {
 
-        //Get the most accurate latitude and longitude possible
-        coords = getEntryCoordinates(entrySurveys[i])
+           device_info = null;
+           surveySuccess = true;
+           respondent_id = entrySurveys[i].a_respid
+           console.log("Processing entry survey for respondent ", respondent_id)
 
-        //First collect information about the respondent indexed by respondent ID
-        respondents[id] =  {
-            id: id,
-            entrySurveyTime: entrySurvey[i].starttime,
-            entrySurveyID: entrySurvey[i].instanceID,
-            phoneNumber: entrySurvey[i].e_phonenumber,
-            carrier: entrySurvey[i].e_carrier,
-            currently_active: true,
-            entryLatitude: entrySurvey[i]['g_gps-Latitude'],
-            entryLongitude: entrySurvey[i]['g_gps-Longitude'],
-        }
-    //form.a_PW                      = json[i].a_PW,
-    //form.g_install                 = json[i].g_install,
-    //form.g_plugwatch               = json[i].g_plugwatch,
-    //form.g_installoutage           = json[i].g_installoutage,
-    //form.g_noinstall               = json[i].g_noinstall,
-    //form.g_deviceID                = json[i].g_deviceID,
-    //form.g_deviceID2               = json[i].g_deviceID2,
-    //form.g_deviceQR                = json[i].g_deviceQR,
-    //form.a_respid                  = json[i].a_respid,
-    //form.g_download                = json[i].g_download,
-    //form.g_nodownload              = json[i].g_nodownload,
-    //form.g_nodownload_pic          = json[i].g_nodownload_pic,
-    //form.g_dwnumber                = json[i].g_dwnumber,
-    //form.g_nonumber                = json[i].g_nonumber,
-    //form.g_imei1                   = json[i].g_imei1,
-    //form.g_imei2                   = json[i].g_imei2,
-    //form.e_phonenumber             = json[i].e_phonenumber,
-    //form.g_imei3                   = json[i].g_imei3,
-    //form.e_carrier                 = json[i].e_carrier,
-    //form.formdef_version           = json[i].formdef_version, 
-    //form.starttime                 = json[i].starttime,
+           if(typeof entrySurveys[i].error != 'undefined' && entrySurveys[i].error) {
+               surveySuccess = false;
+           }
 
-        //Was a powerwatch device installed?
-        powerwatch_installed = false
-        if(survey.g_install == '1') {
-            powerwatch_installed = true
-            //yes -> put it in the deployment table
-            //things we care about
-            //respondent ID
-            //location
-            //installed during outage
-            //time of install
-            //device ID
-            //phone number
-            //the survey that entered this record
+           //Okay, first, have we already processed an entry survey for
+           //this respondent ID
+           if(typeof respondents[respondent_id] != 'undefined') {
+               //This is a duplicate
+               surveySuccess = false;
+               entrySurveys[i].error = true
+               entrySurveys[i].error_field = 'a_respid'
+               entrySurveys[i].error_comment = 'Duplicate respondent ID of ' + respondents[respondent_id].entrySurveyID;
+           }
+
+           //Do we already have a respondent with this phone number?
+           for(var key in respondents) {
+               if(respondents[key].phoneNumber == entrySurveys[i].e_phonenumber) {
+                   //This is a duplicate
+                   surveySuccess = false;
+                   entrySurveys[i].error = true
+                   entrySurveys[i].error_field = 'e_phonenumber'
+                   entrySurveys[i].error_comment = 'Duplicate phone number of ' + respondents[key].entrySurveyID;
+               }
+           }
+
+           //Okay this is a unique respondent with a unique phone number
+           //Process the survey
+
+           //Get the most accurate latitude and longitude possible
+           coords = getEntryCoordinates(entrySurveys[i]);
+           if(coords == null) {
+               surveySuccess = false;
+               entrySurveys[i].error = true
+               entrySurveys[i].error_field = 'g_gps_accuracy'
+               entrySurveys[i].error_comment = 'No valid GPS coordinates found'
+           }
+
+
+           //First collect information about the respondent indexed by respondent ID
+           respondent_info = {
+               respondent_id: respondent_id,
+               entrySurveyTime: entrySurvey[i].endtime,
+               entrySurveyID: entrySurvey[i].instanceID,
+               phoneNumber: entrySurvey[i].e_phonenumber,
+               carrier: entrySurvey[i].e_carrier,
+               currently_active: true,
+               entryLatitude: coords[0],
+               entryLongitude: coords[1]
+               //TODO: Add unique key retrieved from QR code of phone
+           }
+            
+           //if there is a powerwatch device collect the same information about powerwatch
+           if(enterySurveys.g_install == '1') {
+              //Process all the IDs present in a survey and cross reference it  with the device table
+              ids = getEntryDeviceID(entrySurveys[i]);
+              if(ids == null) {
+                  //This is an error, post the error
+                  surveySuccess = false;
+                  entrySurveys[i].error = true
+                  entrySurveys[i].error_field = 'deviceID'
+                  entrySurveys[i].error_comment = 'Unkown or invalid device ID'
+              } else {
+                  core_id = ids[0]
+                  shield_id = ids[1]
+                  has_been_deployed = false;
+
+                  //Make sure this is is not a duplicate device
+                  for(var j = 0; j < devices.length; j++) {
+                     if(devices[j].core_id == core_id && devices[j].currently_deployed) {
+                        //This devices is currently deployed
+                        surveySuccess = false;
+                        entrySurveys[i].error = true
+                        entrySurveys[i].error_field = 'deviceID'
+                        entrySurveys[i].error_comment = 'Device already deployed'
+                     }
+                  }
+
+                  device_info = {
+                      respondent_id: respondent_id,
+                      deploymentSurveyTime: entrySurvey[i].endtime,
+                      deploymentSurveyID: entrySurvey[i].instanceID,
+                      phoneNumber: entrySurvey[i].e_phonenumber,
+                      carrier: entrySurvey[i].e_carrier,
+                      currently_deployed: true,
+                      entryLatitude: coords[0],
+                      entryLongitude: coords[1],
+                      core_id: core_id,
+                      shield_id: shield_id,
+                      installed_outage: entrySurvey[i].g_installoutage,
+                      deployment_start_time: entrySurvey[i].endtime,
+                  };
+                  
+                  //Update the respondent to say that they do have a powerwatch
+                  respondent_info.powerwatch = true;
+                  respondent_info.powerwatch_core_id = core_id;
+                  respondent_info.powerwatch_shield_id = shield_id;
+                  respondent_info.last_deployment_time = entrySurveys[i].endtime;
+              }//end device IDs are valid
+           }//end device was installed
+
+           //If this survey was processed successfully, remove it from
+           //the set of surveys to process
+           if(surveySuccess) {
+               still_making_progress = true;
+               
+               //Add the respondent to the respondent ID table
+               respondents[respondent_id] = respondent_info;
+
+               //Add this deployment to the table
+               devices.push(device_info);
+               
+               //Add this index to the surveys to be removed
+               surveys_to_remove.push(i);
+           }
+       } // end for loop
+
+       //Actually remove the surveys
+       for(var i = 0; i < surveys_to_remove.length; i++) {
+          entrySurveys.splice(surveys_to_remove[i],1)
+       }
+
+       //Now loop through the exit surveys
+       surveys_to_remove = []
+       for(var i = 0; i < exitSurveys.length; i++) {
+           surveySuccess = true;
+           device_removal_info = null;
+           device_add_info = null;
+           respondent_id = exitSurveys[i].a_respid
+           console.log("Processing entry survey for respondent ", respondent_id)
+
+           //Does this repondent exist?
+           if(typeof respondents[respondent_id] == 'undefined') {
+               surveySuccess = false;
+               exitSurveys[i].error = true
+               exitSurveys[i].error_field = 'a_respid'
+               exitSurveys[i].error_comment = 'Unkown respondent id'
+           }
+
+           //Okay exit surveys should be all about retrieving and redeploying
+           //devices
+           // For each one we look to see if there is a device already deployed
+           // for that core_id, and if so we remove it, and update the associated
+           // respondent
+           //
+           // We also deploy a new device there if necessary
            
-            //First try to determine the correct device ID and shield ID
-            //g_deviceID, g_deviceID2, processedID
-            id_list = []
-            if('processedID' in survey) {
-                var ids = suvery.processedID.split(':')
-                if(ids.length != 3) {
-                    console.log("Not a valid QR code read - discarding")
-                } else {
-                    id_list.push(ids[1])
-                    id_list.push(ids[2])
-                }
-            } else {
-                console.log("No attached image or no valid QR found in image")
-            }
-            id_list.push(g_deviceID)
-            id_list.push(g_deviceID2)
+           //Get the most accurate latitude and longitude possible
+           coords = getExitCoordinates(exitSurveys[i]);
+           if(coords == null) {
+               surveySuccess = false;
+               exitSurveys[i].error = true
+               exitSurveys[i].error_field = 'g_gps_accuracy'
+               exitSurveys[i].error_comment = 'No valid GPS coordinates found'
+           }
 
-            var id = findValidID(idlist);
-            var core_id = ""
-            var shield_id = ""
-            if(id == null) {
-                //this is clearly an error and we should
-                //TODO: write the logic to the error table
-                entrySurveys[i].result = "Error"
-                entrySurveys[i].resultReason = "Could not get valid powerwatch ID"
-                return;
-            } else {
-                core_id = id[0]
-                shield_id = id[1]
+           //did we remove a device?
+           if(exitSurveys[i].g_remove == '1') {
+              ids = getExitDeviceID(exitSurveys[i]);
+              if(ids == null) {
+                  //This is an error, post the error
+                  surveySuccess = false;
+                  exitSurveys[i].error = true
+                  exitSurveys[i].error_field = 'g_remove_deviceID'
+                  exitSurveys[i].error_comment = 'Unkown or invalid device ID'
+              } else {
+                  core_id = ids[0]
+                  shield_id = ids[1]
 
+                  //Okay now look for that device in the devices table
+                  for(var j = 0; j < devices.length; j++) {
+                     if(devices[j].currently_deployed && devices[j].core_id == core_id) {
+                        if(devices[j].respondent_id == respondent_id) {
+                           //We are removing this device
+                           device_removal_info = {};
+                           device_removal_info.index = j;
+                           device_removal_info.removal_time = exitSurveys[i].endtime;
+                        } 
+                     }
+                  }
 
-         
+                  if(device_removal_info == null) {
+                     //We didn't fine the device to remove, which is an error
+                     surveySuccess = false;
+                     exitSurveys[i].error = true
+                     exitSurveys[i].error_field = 'g_remove_deviceID'
+                     exitSurveys[i].error_comment = 'Device not deployed'
+                  } 
+              }
+           }
 
-    }
+           //Are we still able to process this survey? Did we try to install a new device?
+           if(exitSurveys[i].g_install == '1') {
+              //Okay now we should redeploy a device if possible
+              //Process all the IDs present in a survey and cross reference it  with the device table
+              ids = getExitDeviceID(exitSurveys[i]);
+              if(ids == null) {
+                  //This is an error, post the error
+                  surveySuccess = false;
+                  exitSurveys[i].error = true
+                  exitSurveys[i].error_field = 'g_installl_deviceID'
+                  exitSurveys[i].error_comment = 'Unkown or invalid device ID'
+              } else {
+                  core_id = ids[0]
+                  shield_id = ids[1]
+                  has_been_deployed = false;
+
+                  //Make sure this is is not a duplicate device
+                  for(var j = 0; j < devices.length; j++) {
+                     if(devices[j].core_id == core_id && devices[j].currently_deployed) {
+                        //This devices is currently deployed
+                        surveySuccess = false;
+                        exitSurveys[i].error = true
+                        exitSurveys[i].error_field = 'g_install_deviceID'
+                        exitSurveys[i].error_comment = 'Device already deployed'
+                     }
+                  }
+
+                  device_add_info = {
+                      respondent_id: respondent_id,
+                      deploymentSurveyTime: exitSurvey[i].endtime,
+                      deploymentSurveyID: exitSurvey[i].instanceID,
+                      phoneNumber: respondents[respondent_id].phoneNumber,
+                      carrier: respondents[respondent_id].carrier,
+                      currently_deployed: true,
+                      entryLatitude: coords[0],
+                      entryLongitude: coords[1],
+                      core_id: core_id,
+                      shield_id: shield_id,
+                      installed_outage: exitSurvey[i].g_installoutage,
+                      deployment_start_time: exitSurvey[i].endtime,
+                  };
+                  
+   
+                  //Update the respondent to say that they do have a powerwatch
+                  respondents[respondent_id].powerwatch = true;
+                  respondents[respondent_id].powerwatch_core_id = core_id;
+                  respondents[respondent_id].powerwatch_shield_id = shield_id;
+                  respondents[respondent_id].last_deployment_time = exitSurveys[i].removal_time;
+
+           }
+
+           if(surveySuccess) {
+               still_making_progress = true;
+
+               //remove the removed device
+               devices[device_removal_info.index].currently_deployed = false;
+               devices[device_removal_info.index].deployment_end_time = device_removal_info.removal_time;
+
+               //Update the respondent
+               respondents[respondent_id].powerwatch = false;
+               respondents[respondent_id].last_removal_time = deployment_removal_info.removal_time;
+
+               //Was a device deployed
+               if(device_add_info != null) {
+                  devices.push(device_add_info)
+
+                  //Update the respondent to say that they do have a powerwatch
+                  respondents[respondent_id].powerwatch = true;
+                  respondents[respondent_id].powerwatch_core_id = device_add_info.core_id;
+                  respondents[respondent_id].powerwatch_shield_id = device_add_info.shield_id;
+                  respondents[respondent_id].last_deployment_time = device_add_info.deployment_start_time;
+               }
+
+               surveys_to_remove.push(i)
+           }
+       }
+
+       //Actually remove the surveys
+       for(var i = 0; i < surveys_to_remove.length; i++) {
+          exitSurveys.splice(surveys_to_remove[i],1)
+       }
+   }
+
+   //Okay we are done making progress
+   //We should write out any unprocessed surveys and their reasons to postgres
+   //We should also write the updated respondent and device tables to postgres
 }
 
 function processSurveys(entrySurveys, exitSurveys) {
