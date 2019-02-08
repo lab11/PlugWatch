@@ -1,0 +1,18 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: pgweb-tls
+spec:
+  secretName: pgweb-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: pgweb.powerwatch.io
+  dnsNames:
+  - pgweb.powerwatch.io
+  acme:
+    config:
+    - http01:
+        ingress: pgweb
+      domains:
+      - pgweb.powerwatch.io
