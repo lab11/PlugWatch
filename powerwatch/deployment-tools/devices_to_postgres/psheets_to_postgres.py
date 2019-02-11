@@ -14,7 +14,7 @@ connection = psycopg2.connect(dbname=config['database'], user=config['user'], ho
 cursor = connection.cursor();
 
 gc = pygsheets.authorize()
-sh = gc.open('Devices')
+sh = gc.open('PowerWatch Devices - Deployment Table Hardware Mapping')
 
 wks = sh.sheet1
 first = True;
@@ -27,6 +27,9 @@ for row in wks:
     core_id = row[1]
     shield_id = row[2]
     product_id = row[3]
+
+    if(core_id == '' or shield_id == ''):
+        continue
 
     #insert it into postgres
     print("Adding core_id: {}, shield_id: {}, product_id: {}".format(core_id, shield_id, product_id))
