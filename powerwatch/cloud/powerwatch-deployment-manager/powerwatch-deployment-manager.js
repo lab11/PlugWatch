@@ -3,13 +3,13 @@
 const { Pool }  = require('pg');
 var format = require('pg-format');
 const request = require('request')
-const fs = require('fs')
-const jpeg = require('jpeg-js')
-const jsQR = require('jsqr')
-const { exec } = require('child_process')
-const csv = require('csvtojson')
-var async = require('async')
-var diff = require('deep-diff')
+const fs = require('fs');
+const jpeg = require('jpeg-js');
+const jsQR = require('jsqr');
+const { exec } = require('child_process');
+const csv = require('csvtojson');
+var async = require('async');
+var diff = require('deep-diff');
 
 
 //get the usernames and passwords necessary for this task
@@ -17,75 +17,89 @@ var command = require('commander');
 command.option('-d, --database [database]', 'Database configuration file.')
         .option('-u, --username [username]', 'Database username file')
         .option('-p, --password [password]', 'Database password file')
+        .option('-s, --survey [survey]', 'Survey configuration file')
         .option('-U, --surveyusername [surveyusername]', 'SurveyCTO username file')
-        .option('-P, --surveypassword [surveyusername]', 'SurveyCTO passowrd file').parse(process.argv)
+        .option('-P, --surveypassword [surveypassword]', 'SurveyCTO passowrd file').parse(process.argv)
+        .option('-o, --oink [oink]', 'OINK configuration file')
+        .option('-a, --oinkusername [oinkusername]', 'OINK username file')
+        .option('-b, --oinkpassword [oinkpassword]', 'OINK password file').parse(process.argv);
 
 var timescale_config = null; 
 if(typeof command.database !== 'undefined') {
     timescale_config = require(command.database);
-    timescale_config.username = fs.readFileSync(command.username,'utf8').trim()
-    timescale_config.password = fs.readFileSync(command.password,'utf8').trim()
+    timescale_config.username = fs.readFileSync(command.username,'utf8').trim();
+    timescale_config.password = fs.readFileSync(command.password,'utf8').trim();
 } else {
-    //timescale_config = require('./postgres-config.json'); 
+    timescale_config = require('./postgres-config.json'); 
 }
 
 var survey_config = {};
 if(typeof command.surveyusername !== 'undefined') {
-    survey_config.username = fs.readFileSync(command.surveyusername,'utf8').trim()
-    survey_config.password = fs.readFileSync(command.surveypassword,'utf8').trim()
+    survey_config = require(command.survey);
+    survey_config.username = fs.readFileSync(command.surveyusername,'utf8').trim();
+    survey_config.password = fs.readFileSync(command.surveypassword,'utf8').trim();
 } else {
     survey_config = require('./survey-config.json'); 
 }
 
-/*const pg_pool = new  Pool( {
+var oink_config = {};
+if(typeof command.oinkusername !== 'undefined') {
+    //survey_config = require(command.survey);
+    //survey_config.username = fs.readFileSync(command.surveyusername,'utf8').trim()
+    //survey_config.password = fs.readFileSync(command.surveypassword,'utf8').trim()
+} else {
+    //survey_config = require('./survey-config.json'); 
+}
+
+const pg_pool = new  Pool( {
     user: timescale_config.username,
     host: timescale_config.host,
     database: timescale_config.database,
     password: timescale_config.password,
     port: timescale_config.port,
     max: 20,
-})*/
+});
 
 //This is a recurive function that we could sub in if we get a lot of image 
 //corruption. But's it's untested so let's leave it out for now
 function handleRequestResponse(options, error, response, body, depth, callback) {
     //We are doing this recursively so limit the depth
     if(depth > 4) {
-        return callback(null)
+        return callback(null);
     }
 
     if(depth > 1) {
-        console.log("Called with depth ", depth)
+        console.log("Called with depth ", depth);
     }
 
     if(error) {
-        console.log(error)
+        console.log(error);
         request(options, (function() {
            return function(error, response, body) {
               //We should just try to process this image immediately with
               //the QR code processing code
-              console.log("Got error response - calling handle Request recursively")
+              console.log("Got error response - calling handle Request recursively");
               handleRequestResponse(options, error, response, body, depth + 1, function(data) {
-                  return callback(data)
+                  return callback(data);
               });
-           }
-        })())
+           };
+        })());
     } else { 
-       console.log(response.statusCode)
-       var buf = new Buffer(body, "binary")
+       console.log(response.statusCode);
+       var buf = new Buffer(body, "binary");
        try {
            var rawImage = jpeg.decode(buf, true);
-           const code = jsQR(rawImage.data, rawImage.width, rawImage.height)
+           const code = jsQR(rawImage.data, rawImage.width, rawImage.height);
            if(code == null) {
               //There was no readable QR code here
-              return callback(null)
+              return callback(null);
            } else {
               //We have a QR code
-              return callback(code.data)
+              return callback(code.data);
            }
        } catch (error) {
            //we should just retry this request
-           console.log(error)
+           console.log(error);
            fs.writeFile("error.jpg", buf, function(err) {
            });
            
@@ -93,12 +107,12 @@ function handleRequestResponse(options, error, response, body, depth, callback) 
               return function(error, response, body) {
                  //We should just try to process this image immediately with
                  //the QR code processing code
-                 console.log("Got error response - calling handle Request recursively")
+                 console.log("Got error response - calling handle Request recursively");
                  handleRequestResponse(options, error, response, body, depth + 1, function(data) {
-                     return callback(data)
+                     return callback(data);
                  });
-              }
-           })())
+              };
+           })());
        }
     }
 }
@@ -110,8 +124,8 @@ function extractQRCodes(survey, url_field, output_field, outer_callback) {
     // You can easily start getting ECONNRESETS 
     async.forEachOfLimit(survey, 2, function(value, key, callback) {
         if(value[url_field] != '') {
-            console.log(key)
-            console.log(value[url_field])
+            console.log(key);
+            console.log(value[url_field]);
             var options = {
               uri: value[url_field],
               auth: {
@@ -123,7 +137,7 @@ function extractQRCodes(survey, url_field, output_field, outer_callback) {
                  "X-OpenRosa-Version": "1.0"
               },
               encoding: 'binary'
-           }
+           };
 
            request(options, (function() {
               return function(error, response, body) {
@@ -131,26 +145,26 @@ function extractQRCodes(survey, url_field, output_field, outer_callback) {
                  //the QR code processing code
                  
                  //Here's how you call the recursive function
-                 console.log(key)
+                 console.log(key);
                  handleRequestResponse(options, error, response, body, 1, function(data) {
                      if(data) {
-                          console.log(data)
-                          survey[key][output_field] = data
+                          console.log(data);
+                          survey[key][output_field] = data;
                      }
-                     callback()
+                     callback();
                  });
-              }
-           })())
+              };
+           })());
 
         } else {
-            callback()
+            callback();
         }
     }, function(err) {
         if(err) {
             console.log("Some error with async");
         }
         console.log("All asyncs have returned");
-        outer_callback(survey)
+        outer_callback(survey);
     });
 
 }
@@ -162,7 +176,7 @@ function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys) {
 function lookupCoreID(core_id, devices) {
 
    for(var i = 0; i < devices.length; i++) {
-       if(devices[i].shield_id == shield_id) {
+       if(devices[i].core_id == core_id) {
            return [devices[i].core_id, devices[i].shield_id];
        }
    }
@@ -194,7 +208,7 @@ function getDevicesTable(callback) {
                 return callback(null);
             }
         }
-    }
+    });
 }
 
 function getAppID(survey) {
@@ -203,25 +217,25 @@ function getAppID(survey) {
    //appQR2
 
    //First check to see if either QR is readable
-   if(appQR1 != null && appQR2 != null) {
-       if(appQR1 != appQR2) {
+   if(survey.appQR1 != null && survey.appQR2 != null) {
+       if(survey.appQR1 != survey.appQR2) {
            //two valid QRS that don't match?
            console.log('App QRs do not match');
-           if(appQR1 == survey.g_appQR_nr) {
-               return appQR1;
-           } else if (appQR2 == survey.g_appQR_nr) {
-               return appQR2;
+           if(survey.appQR1 == survey.g_appQR_nr) {
+               return survey.appQR1;
+           } else if (survey.appQR2 == survey.g_appQR_nr) {
+               return survey.appQR2;
            }
        } else {
-           return appQR1;
+           return survey.appQR1;
        }
-   } else if(appQR1 != null) {
-       if(appQR1 == survey.g_appQR_nr) {
-           return appQR1;
+   } else if(survey.appQR1 != null) {
+       if(survey.appQR1 == survey.g_appQR_nr) {
+           return survey.appQR1;
        }
-   } else if(appQR2 != null) {
-       if(appQR2 == survey.g_appQR_nr) {
-           return appQR2;
+   } else if(survey.appQR2 != null) {
+       if(survey.appQR2 == survey.g_appQR_nr) {
+           return survey.appQR2;
        }
    } else {
        //We didn't get two source of corraborating info
@@ -231,21 +245,21 @@ function getAppID(survey) {
 
 function getGenericID(survey, qrField, manualField, devices) {
    //Attempt to parse the QR code
-   parsed_core_id = null;
-   parsed_shield_id = null;
+   var parsed_core_id = null;
+   var parsed_shield_id = null;
    
    if(typeof survey[qrField] != 'undefined') {
-      var ids = survey.[qrField].split(':');
+      let ids = survey[qrField].split(':');
       if(ids.length == 3) {
          parsed_core_id = ids[1];
-         parsed_shield_id = ids[2]
+         parsed_shield_id = ids[2];
       } 
    }
 
    //Okay if we have a parsed core or shield ID, we should try looking that up
    //in the devices table
    if(parsed_core_id != null) {
-       ids = lookupCoreID(parsed_core_id, devices);
+       let ids = lookupCoreID(parsed_core_id, devices);
 
        if(ids != null) {
            return ids;
@@ -291,17 +305,17 @@ function getEntryDeviceID(survey, devices) {
 
 function getEntryCoordinates(survey) {
    if(survey['g_gps_accurate-Accuracy'] != '') {
-       return [survey['g_gps_accurate-Latitude'],survey['g_gps_accurate-Longitude']]
+       return [survey['g_gps_accurate-Latitude'],survey['g_gps_accurate-Longitude']];
    } else if(survey['g_gps-Accuracy'] != '') {
-       return [survey['g_gps-Latitude'],survey['g_gps-Longitude']]
+       return [survey['g_gps-Latitude'],survey['g_gps-Longitude']];
    } else if(survey['g_gps-Accuracy'] != '') {
-       return [survey['gps-Latitude'],survey['gps-Longitude']]
+       return [survey['gps-Latitude'],survey['gps-Longitude']];
    } else {
       return null;
    } 
 }
 
-function generateTrackingTables(entrySurveys, exitSurveys, devices) {
+function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
     //Sort the surveys by submission time
     //This assumption makes it easier to process the surveys
     entrySurveys.sort(function(a,b) {
@@ -327,21 +341,21 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
     //Surveys that look erroneous get flagged
     //Devices that look erroneous get flagged
     //and It all can be cleaned up by modifying the R script
-    devices = []
-    respondents = {}
-    still_making_progress = false; 
+    var devices = [];
+    var respondents = {};
+    var still_making_progress = false; 
     while(still_making_progress) {
        //This will be set to true when you deploy a device or remove a device
        still_making_progress = false; 
        
-       surveys_to_remove = []
-       for(var i = 0; i < entrySurveys.length; i++) {
+       var surveys_to_remove = [];
+       for(let i = 0; i < entrySurveys.length; i++) {
 
-           device_info = null;
-           respondent_info = null;
-           surveySuccess = true;
-           respondent_id = entrySurveys[i].a_respid
-           console.log("Processing entry survey for respondent ", respondent_id)
+           var device_info = null;
+           var respondent_info = null;
+           let surveySuccess = true;
+           let respondent_id = entrySurveys[i].a_respid;
+           console.log("Processing entry survey for respondent ", respondent_id);
 
            //Make sure that the R script didn't report an error for this survey
            if(typeof entrySurveys[i].error != 'undefined' && entrySurveys[i].error) {
@@ -363,8 +377,8 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
            if(typeof respondents[respondent_id] != 'undefined') {
                //This is a duplicate
                surveySuccess = false;
-               entrySurveys[i].error = true
-               entrySurveys[i].error_field = 'a_respid'
+               entrySurveys[i].error = true;
+               entrySurveys[i].error_field = 'a_respid';
                entrySurveys[i].error_comment = 'Duplicate respondent ID of ' + respondents[respondent_id].entrySurveyID;
            }
 
@@ -373,8 +387,8 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
                if(respondents[key].phoneNumber == entrySurveys[i].e_phonenumber) {
                    //This is a duplicate
                    surveySuccess = false;
-                   entrySurveys[i].error = true
-                   entrySurveys[i].error_field = 'e_phonenumber'
+                   entrySurveys[i].error = true;
+                   entrySurveys[i].error_field = 'e_phonenumber';
                    entrySurveys[i].error_comment = 'Duplicate phone number of ' + respondents[key].entrySurveyID;
                }
            }
@@ -383,24 +397,24 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
            //Process the survey
 
            //Get the most accurate latitude and longitude possible
-           coords = getEntryCoordinates(entrySurveys[i]);
+           var coords = getEntryCoordinates(entrySurveys[i]);
            if(coords == null) {
                surveySuccess = false;
-               entrySurveys[i].error = true
-               entrySurveys[i].error_field = 'g_gps_accuracy'
-               entrySurveys[i].error_comment = 'No valid GPS coordinates found'
+               entrySurveys[i].error = true;
+               entrySurveys[i].error_field = 'g_gps_accuracy';
+               entrySurveys[i].error_comment = 'No valid GPS coordinates found';
            }
            
          
            respondent_info = {
                respondent_id: respondent_id,
-               entrySurveyTime: entrySurvey[i].endtime,
-               entrySurveyID: entrySurvey[i].instanceID,
-               phoneNumber: entrySurvey[i].e_phonenumber,
-               carrier: entrySurvey[i].e_carrier,
+               entrySurveyTime: entrySurveys[i].endtime,
+               entrySurveyID: entrySurveys[i].instanceID,
+               phoneNumber: entrySurveys[i].e_phonenumber,
+               carrier: entrySurveys[i].e_carrier,
                entryLatitude: coords[0],
                entryLongitude: coords[1]
-           }
+           };
 
            //Did this user download the app?
            if(entrySurveys[i].g_download == '1') {
@@ -408,56 +422,55 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
                respondent_info.currently_active = true;
 
                //extract the unique key presented by the app
-               appID = getAppID(entrySurveys[i]);
+               var appID = getAppID(entrySurveys[i]);
                if(appID == null) {
                    surveySuccess = false;
-                   entrySurveys[i].error = true
-                   entrySurveys[i].error_field = 'g_appQR_nr'
-                   entrySurveys[i].error_comment = 'Insufficient aggreement between app QR codes'
+                   entrySurveys[i].error = true;
+                   entrySurveys[i].error_field = 'g_appQR_nr';
+                   entrySurveys[i].error_comment = 'Insufficient aggreement between app QR codes';
                } else {
                   respondent_info.appID = appID;
                }
            }
             
            //if there is a powerwatch device collect the same information about powerwatch
-           if(enterySurveys.g_install == '1') {
+           if(entrySurveys.g_install == '1') {
               //Process all the IDs present in a survey and cross reference it  with the device table
-              ids = getEntryDeviceID(entrySurveys[i], devices);
+              let ids = getEntryDeviceID(entrySurveys[i], device_table);
               if(ids == null) {
                   //This is an error, post the error
                   surveySuccess = false;
-                  entrySurveys[i].error = true
-                  entrySurveys[i].error_field = 'g_deviceID'
-                  entrySurveys[i].error_comment = 'Unkown or invalid device ID'
+                  entrySurveys[i].error = true;
+                  entrySurveys[i].error_field = 'g_deviceID';
+                  entrySurveys[i].error_comment = 'Unkown or invalid device ID';
               } else {
-                  core_id = ids[0]
-                  shield_id = ids[1]
-                  has_been_deployed = false;
+                  let core_id = ids[0];
+                  let shield_id = ids[1];
 
                   //Make sure this is is not a duplicate device
-                  for(var j = 0; j < devices.length; j++) {
+                  for(let j = 0; j < devices.length; j++) {
                      if(devices[j].core_id == core_id && devices[j].currently_deployed) {
                         //This devices is currently deployed
                         surveySuccess = false;
-                        entrySurveys[i].error = true
-                        entrySurveys[i].error_field = 'g_deviceID'
-                        entrySurveys[i].error_comment = 'Device already deployed'
+                        entrySurveys[i].error = true;
+                        entrySurveys[i].error_field = 'g_deviceID';
+                        entrySurveys[i].error_comment = 'Device already deployed';
                      }
                   }
 
                   device_info = {
                       respondent_id: respondent_id,
-                      deploymentSurveyTime: entrySurvey[i].endtime,
-                      deploymentSurveyID: entrySurvey[i].instanceID,
-                      phoneNumber: entrySurvey[i].e_phonenumber,
-                      carrier: entrySurvey[i].e_carrier,
+                      deploymentSurveyTime: entrySurveys[i].endtime,
+                      deploymentSurveyID: entrySurveys[i].instanceID,
+                      phoneNumber: entrySurveys[i].e_phonenumber,
+                      carrier: entrySurveys[i].e_carrier,
                       currently_deployed: true,
                       entryLatitude: coords[0],
                       entryLongitude: coords[1],
                       core_id: core_id,
                       shield_id: shield_id,
-                      installed_outage: entrySurvey[i].g_installoutage,
-                      deployment_start_time: entrySurvey[i].endtime,
+                      installed_outage: entrySurveys[i].g_installoutage,
+                      deployment_start_time: entrySurveys[i].endtime,
                   };
                   
                   //Update the respondent to say that they do have a powerwatch
@@ -485,26 +498,26 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
        } // end for loop
 
        //Actually remove the surveys
-       for(var i = 0; i < surveys_to_remove.length; i++) {
-          entrySurveys.splice(surveys_to_remove[i],1)
+       for(let i = 0; i < surveys_to_remove.length; i++) {
+          entrySurveys.splice(surveys_to_remove[i],1);
        }
 
        //Now loop through the exit surveys
-       surveys_to_remove = []
-       for(var i = 0; i < exitSurveys.length; i++) {
-           surveySuccess = true;
-           device_removal_info = null;
-           removed_device = null;
-           device_add_info = null;
-           respondent_id = exitSurveys[i].a_respid
-           console.log("Processing entry survey for respondent ", respondent_id)
+       surveys_to_remove = [];
+       for(let i = 0; i < exitSurveys.length; i++) {
+           let surveySuccess = true;
+           var device_removal_info = null;
+           var removed_device = null;
+           var device_add_info = null;
+           let respondent_id = exitSurveys[i].a_respid;
+           console.log("Processing entry survey for respondent ", respondent_id);
 
            //Does this repondent exist?
            if(typeof respondents[respondent_id] == 'undefined') {
                surveySuccess = false;
-               exitSurveys[i].error = true
-               exitSurveys[i].error_field = 'a_respid'
-               exitSurveys[i].error_comment = 'Unkown respondent id'
+               exitSurveys[i].error = true;
+               exitSurveys[i].error_field = 'a_respid';
+               exitSurveys[i].error_comment = 'Unkown respondent id';
            }
 
            //Okay exit surveys should be all about retrieving and redeploying
@@ -518,19 +531,18 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
 
            //did we remove a device?
            if(exitSurveys[i].a_retrieve == '1') {
-              ids = getExitRetrieveDeviceID(exitSurveys[i], devices);
+              let ids = getExitRetrieveDeviceID(exitSurveys[i], device_table);
               if(ids == null) {
                   //This is an error, post the error
                   surveySuccess = false;
-                  exitSurveys[i].error = true
-                  exitSurveys[i].error_field = 'g_deviceID_retrieve'
-                  exitSurveys[i].error_comment = 'Unkown or invalid device ID'
+                  exitSurveys[i].error = true;
+                  exitSurveys[i].error_field = 'g_deviceID_retrieve';
+                  exitSurveys[i].error_comment = 'Unkown or invalid device ID';
               } else {
-                  core_id = ids[0]
-                  shield_id = ids[1]
+                  let core_id = ids[0];
 
                   //Okay now look for that device in the devices table
-                  for(var j = 0; j < devices.length; j++) {
+                  for(let j = 0; j < devices.length; j++) {
                      if(devices[j].currently_deployed && devices[j].core_id == core_id) {
                         if(devices[j].respondent_id == respondent_id) {
                            //We are removing this device
@@ -545,9 +557,9 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
                   if(device_removal_info == null) {
                      //We didn't fine the device to remove, which is an error
                      surveySuccess = false;
-                     exitSurveys[i].error = true
-                     exitSurveys[i].error_field = 'g_deviceID_retrieve'
-                     exitSurveys[i].error_comment = 'Reported device not currently deployed with reported respondent'
+                     exitSurveys[i].error = true;
+                     exitSurveys[i].error_field = 'g_deviceID_retrieve';
+                     exitSurveys[i].error_comment = 'Reported device not currently deployed with reported respondent';
                   } 
               }
            }
@@ -556,33 +568,32 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
            if(exitSurveys[i].a_give == '1') {
               //Okay now we should redeploy a device if possible
               //Process all the IDs present in a survey and cross reference it  with the device table
-              ids = getExitDeviceID(exitSurveys[i], devices);
+              var ids = getExitGiveDeviceID(exitSurveys[i], device_table);
               if(ids == null) {
                   //This is an error, post the error
                   surveySuccess = false;
-                  exitSurveys[i].error = true
-                  exitSurveys[i].error_field = 'g_deviceID_give'
-                  exitSurveys[i].error_comment = 'Unkown or invalid device ID'
+                  exitSurveys[i].error = true;
+                  exitSurveys[i].error_field = 'g_deviceID_give';
+                  exitSurveys[i].error_comment = 'Unkown or invalid device ID';
               } else {
-                  core_id = ids[0]
-                  shield_id = ids[1]
-                  has_been_deployed = false;
+                  var core_id = ids[0];
+                  var shield_id = ids[1];
 
                   //Make sure this is is not a duplicate device
-                  for(var j = 0; j < devices.length; j++) {
+                  for(let j = 0; j < devices.length; j++) {
                      if(devices[j].core_id == core_id && devices[j].currently_deployed) {
                         //This devices is currently deployed
                         surveySuccess = false;
-                        exitSurveys[i].error = true
-                        exitSurveys[i].error_field = 'g_deviceID_give'
-                        exitSurveys[i].error_comment = 'Device already deployed. Cannot be deployed again.'
+                        exitSurveys[i].error = true;
+                        exitSurveys[i].error_field = 'g_deviceID_give';
+                        exitSurveys[i].error_comment = 'Device already deployed. Cannot be deployed again.';
                      }
                   }
 
                   device_add_info = {
                       respondent_id: respondent_id,
-                      deploymentSurveyTime: exitSurvey[i].endtime,
-                      deploymentSurveyID: exitSurvey[i].instanceID,
+                      deploymentSurveyTime: exitSurveys[i].endtime,
+                      deploymentSurveyID: exitSurveys[i].instanceID,
                       phoneNumber: respondents[respondent_id].phoneNumber,
                       carrier: respondents[respondent_id].carrier,
                       currently_deployed: true,
@@ -591,8 +602,9 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
                       core_id: core_id,
                       shield_id: shield_id,
                       installed_outage: removed_device.installed_outage,
-                      deployment_start_time: exitSurvey[i].endtime,
+                      deployment_start_time: exitSurveys[i].endtime,
                   };
+              }
            }
 
            if(surveySuccess) {
@@ -604,11 +616,11 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
 
                //Update the respondent
                respondents[respondent_id].powerwatch = false;
-               respondents[respondent_id].last_removal_time = deployment_removal_info.removal_time;
+               respondents[respondent_id].last_removal_time = device_removal_info.removal_time;
 
                //Was a device deployed
                if(device_add_info != null) {
-                  devices.push(device_add_info)
+                  devices.push(device_add_info);
 
                   //Update the respondent to say that they do have a powerwatch
                   respondents[respondent_id].powerwatch = true;
@@ -617,20 +629,20 @@ function generateTrackingTables(entrySurveys, exitSurveys, devices) {
                   respondents[respondent_id].last_deployment_time = device_add_info.deployment_start_time;
                }
 
-               surveys_to_remove.push(i)
+               surveys_to_remove.push(i);
            }
        }
 
        //Actually remove the surveys
-       for(var i = 0; i < surveys_to_remove.length; i++) {
-          exitSurveys.splice(surveys_to_remove[i],1)
+       for(let i = 0; i < surveys_to_remove.length; i++) {
+          exitSurveys.splice(surveys_to_remove[i],1);
        }
    }
 
    //Okay we are done making progress
    //We should write out any unprocessed surveys and their reasons to postgres
    //We should also write the updated respondent and device tables to postgres
-   updateTrackingTables(respondents, devices, entrySurveys, exitSurveys)
+   updateTrackingTables(respondents, devices, entrySurveys, exitSurveys);
 }
 
 function processSurveys(entrySurveys, exitSurveys) {
@@ -644,7 +656,7 @@ function processSurveys(entrySurveys, exitSurveys) {
                     extractQRCodes(exitSurveys, "g_deviceQR_give", "deviceGiveQR", function(exitSurveys) {
                         getDevicesTable(function(devices) {
                            //Okay we should not have completely processed entry and exit surveys
-                           generateTrackingTables(entrySurveys, exitSurveys, devices)
+                           generateTrackingTables(entrySurveys, exitSurveys, devices);
                         });
                     });
                 });
@@ -657,9 +669,9 @@ function processSurveys(entrySurveys, exitSurveys) {
 function fetchSurveys(formid, callback) {
 
     //fetch all surveys from the start of time - we prevent double writing anyways
-    uri = 'https://gridwatch.surveycto.com/api/v1/forms/data/wide/csv/'
-                                       + formid
-                                       +'?r=approved|rejected|pending'
+    var uri = 'https://' + survey_config.host + '/api/v1/forms/data/wide/csv/' + 
+                                                formid +
+                                                '?r=approved|rejected|pending';
 
     var options = {
         uri: uri,
@@ -668,62 +680,59 @@ function fetchSurveys(formid, callback) {
             pass: survey_config.password,
             sendImmediately: false
         }
-    }
-    data = []
-    num_images = 0
+    };
+
     request(options, function(error, response, body) {
         //Okay now we should write this out to a file and call the cleaning script 
         //on it
         fs.writeFile(formid + '.csv', body, function(err) {
             if(err) {
-                console.log("Encountered file writing error, can't clean")
-                return callback(null, "File writing error for cleaning")
+                console.log("Encountered file writing error, can't clean");
+                return callback(null, "File writing error for cleaning");
             } else {
                 //load the last file we cleaned
-                last_json = null
+                var last_json = null;
                 csv().fromFile(formid + '_cleaned.csv').then(function(json) {
-                    console.log("loaded last json")
-                    last_json = json
+                    console.log("loaded last json");
+                    last_json = json;
                     //Clean the file using the rscript
-                    exec('Rscript ' + formid + '.R ' 
-                                    + formid + '.csv ' 
-                                    + formid + '_cleaned.csv', 
-                                    function(error, stdout, stderr) {
+                    exec('Rscript ' + formid + '.R ' + formid + '.csv ' + 
+                                                       formid + '_cleaned.csv', 
+                                             function(error, stdout, stderr) {
 
                         if(error) {
-                            console.log(error, stderr)
-                            return callback(null, false, "Error cleaning file with provided script")
+                            console.log(error, stderr);
+                            return callback(null, false, "Error cleaning file with provided script");
                         } else {
                             csv().fromFile(formid + '_cleaned.csv').then(function(json) {
                                 //compare json to last json
                                 var differences = diff(last_json, json);
-                                var changed = (typeof differences != 'undefined')
-                                return callback(json, changed, null)
+                                var changed = (typeof differences != 'undefined');
+                                return callback(json, changed, null);
                             }, function(err) {
-                                console.log("Error reading file")
+                                console.log("Error reading file");
                                 return callback(null, false, err);
                             });
                         }
                     });
                 }, function(err) {
-                    console.log("error loading last json")
-                    console.log(err)
-                    last_json = null
+                    console.log("error loading last json");
+                    console.log(err);
+                    last_json = null;
 
                     //Clean the file using the rscript
-                    exec('Rscript ' + formid + '.R ' 
-                                    + formid + '.csv ' 
-                                    + formid + '_cleaned.csv', 
+                    exec('Rscript ' + formid + '.R ' + formid + '.csv ' + 
+                                    formid + '_cleaned.csv', 
                                     function(error, stdout, stderr) {
 
                         if(error) {
-                            console.log(error, stderr)
-                            return callback(null, false, "Error cleaning file with provided script")
+                            console.log(error, stderr);
+                            return callback(null, false, "Error cleaning file with provided script");
                         } else {
                             csv().fromFile(formid + '_cleaned.csv').then(function(json) {
-                                return callback(json, true, null)
+                                return callback(json, true, null);
                             }, function(err) {
-                                console.log("Error reading file")
+                                console.log("Error reading file");
                                 return callback(null, false, err);
                             });
                         }
@@ -738,17 +747,17 @@ function fetchSurveys(formid, callback) {
 function fetchNewSurveys() {
     //fetch all surveys moving forward
     //send the API requests to surveyCTO - we probable also need attachments to process pictures
-    fetchSurveys('PW_Pilot2', function(entrySurveys, entry_changed, err) {
+    fetchSurveys(survey_config.entrySurveyName, function(entrySurveys, entry_changed, err) {
         if(err) {
-            console.log("Error fetching and processing forms")
+            console.log("Error fetching and processing forms");
             console.log(err);
-            return
+            return;
         } else {
-            fetchSurveys('Pilot2_DeviceChange', function(exitSurveys, exit_changed, err) {
+            fetchSurveys(survey_config.exitSurveyName, function(exitSurveys, exit_changed, err) {
                 if(err) {
-                    console.log("Error fetching and processing forms")
+                    console.log("Error fetching and processing forms");
                     console.log(err);
-                    return
+                    return;
                 } else {
                     processSurveys(entrySurveys, exitSurveys);
                     //if(entry_changed || exit_changed) {
