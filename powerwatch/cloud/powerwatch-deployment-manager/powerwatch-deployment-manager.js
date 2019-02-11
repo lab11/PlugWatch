@@ -2,7 +2,7 @@
 
 const { Pool }  = require('pg');
 var format = require('pg-format');
-const request = require('request')
+const request = require('request');
 const fs = require('fs');
 const jpeg = require('jpeg-js');
 const jsQR = require('jsqr');
@@ -203,14 +203,16 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
     var names = [];
     names.push(table_name + '_temp');
     for(var key in objects[index]) {
-        var meas = objects[index][key];
-        var type = get_type(key, meas);
-        if(type != 'err') {
-            names.push(key);
-            names.push(type);
-            cols = cols + ", %I %s";
-        } else {
-            console.log('Error with field ' + key);
+        if(objects[index].hasOwnProperty(key)) {
+            var meas = objects[index][key];
+            var type = get_type(key, meas);
+            if(type != 'err') {
+                names.push(key);
+                names.push(type);
+                cols = cols + ", %I %s";
+            } else {
+                console.log('Error with field ' + key);
+            }
         }
     }
 
@@ -232,11 +234,13 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
                 var i = 1;
                 names.push(table_name + '_temp');
                 for (var name in value) {
-                    cols = cols + ", %I";
-                    names.push(name);
-                    vals = vals + ", $" + i.toString();
-                    values.push(value.name);
-                    i = i + 1;
+                    if(value.hasOwnProperty(name)) {
+                        cols = cols + ", %I";
+                        names.push(name);
+                        vals = vals + ", $" + i.toString();
+                        values.push(value.name);
+                        i = i + 1;
+                    }
                 }
 
                 var qstring = format.withArray("INSERT INTO %I (" + cols + ") VALUES (" + vals + ")", names);
@@ -304,7 +308,9 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
 function writeRespondentTablePostgres(respondents, outer_callback) {
    var array = [];
    for(var key in respondents) {
-       array.push(respondents[key]);
+       if(respondents.hasOwnProperty(key)) {
+           array.push(respondents[key]);
+       }
    }
 
    writeGenericTablePostgres(array, 'respondents', outer_callback);
@@ -354,8 +360,8 @@ function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys) {
 function lookupCoreID(core_id, devices) {
 
    for(var i = 0; i < devices.length; i++) {
-       if(devices[i].core_id == core_id) {
-           return [devices[i].core_id, devices[i].shield_id];
+       if(devices[i].core_id == core_id.toLowerCase) {
+           return [devices[i].core_id.toLowerCase(), devices[i].shield_id.toLowerCase()];
        }
    }
 
@@ -365,8 +371,8 @@ function lookupCoreID(core_id, devices) {
 function lookupShieldID(shield_id, devices) {
 
    for(var i = 0; i < devices.length; i++) {
-       if(devices[i].shield_id == shield_id) {
-           return [devices[i].core_id, devices[i].shield_id];
+       if(devices[i].shield_id == shield_id.toUpperCase()) {
+           return [devices[i].core_id.toLowerCase(), devices[i].shield_id.toUpperCase()];
        }
    }
 
@@ -393,27 +399,30 @@ function getAppID(survey) {
    //g_appQR_nr
    //appQR1
    //appQR2
+   var QR1 = survey.appQR1.toUpperCase();
+   var QR2 = survey.appQR2.toUpperCase();
+   var QRn = survey.g_appQR_nr.toUpperCase();
 
    //First check to see if either QR is readable
-   if(survey.appQR1 != null && survey.appQR2 != null) {
-       if(survey.appQR1 != survey.appQR2) {
+   if(QR1 != null && QR2 != null) {
+       if(QR1 != QR2) {
            //two valid QRS that don't match?
            console.log('App QRs do not match');
-           if(survey.appQR1 == survey.g_appQR_nr) {
-               return survey.appQR1;
-           } else if (survey.appQR2 == survey.g_appQR_nr) {
-               return survey.appQR2;
+           if(QR1 == QRn) {
+               return QR1;
+           } else if (QR2 == QRn) {
+               return QR2;
            }
        } else {
-           return survey.appQR1;
+           return QR1;
        }
-   } else if(survey.appQR1 != null) {
-       if(survey.appQR1 == survey.g_appQR_nr) {
-           return survey.appQR1;
+   } else if(QR1 != null) {
+       if(QR1 == QRn) {
+           return QR1;
        }
-   } else if(survey.appQR2 != null) {
-       if(survey.appQR2 == survey.g_appQR_nr) {
-           return survey.appQR2;
+   } else if(QR2 != null) {
+       if(QR2 == QRn) {
+           return QR2;
        }
    } else {
        //We didn't get two source of corraborating info
@@ -532,7 +541,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            var device_info = null;
            var respondent_info = null;
            let surveySuccess = true;
-           let respondent_id = entrySurveys[i].a_respid;
+           let respondent_id = entrySurveys[i].a_respid.toUpperCase();
            console.log("Processing entry survey for respondent ", respondent_id);
 
            //Make sure that the R script didn't report an error for this survey
@@ -586,10 +595,16 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
            respondent_info = {
                respondent_id: respondent_id,
+               respondent_firstname: entrySurveys[i].e_firstname,
+               respondent_surnname: entrySurveys[i].e_surnames,
+               respondent_popularname: entrySurveys[i].e_popularname,
                pilot_survey_time: entrySurveys[i].endtime,
                pilot_survey_id: entrySurveys[i].instanceID,
                phone_number: entrySurveys[i].e_phonenumber,
-               carrier: entrySurveys[i].e_carrier,
+               second_phone_number: entrySurveys[i].e_otherphonenumber,
+               alternate_contact_name: entrySurveys[i].e_othercontact_person_name,
+               alternate_phone_number: entrySurveys[i].e_othercontact_person_number,
+               carrier: entrySurveys[i].e_carrier.toUpperCase(),
                location_latitude: coords[0],
                location_longitude: coords[1]
            };
@@ -620,7 +635,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   surveySuccess = false;
                   entrySurveys[i].error = true;
                   entrySurveys[i].error_field = 'g_deviceID';
-                  entrySurveys[i].error_comment = 'Unkown or invalid device ID';
+                  entrySurveys[i].error_comment = 'Unknown or invalid device ID';
               } else {
                   let core_id = ids[0];
                   let shield_id = ids[1];
@@ -637,18 +652,24 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   }
 
                   device_info = {
-                      respondent_id: respondent_id,
-                      deploymentSurveyTime: entrySurveys[i].endtime,
-                      deploymentSurveyID: entrySurveys[i].instanceID,
-                      phoneNumber: entrySurveys[i].e_phonenumber,
-                      carrier: entrySurveys[i].e_carrier,
-                      currently_deployed: true,
-                      entryLatitude: coords[0],
-                      entryLongitude: coords[1],
                       core_id: core_id,
                       shield_id: shield_id,
-                      installed_outage: entrySurveys[i].g_installoutage,
+                      respondent_id: respondent_id,
+                      respondent_firstname: entrySurveys[i].e_firstname,
+                      respondent_surnname: entrySurveys[i].e_surnames,
+                      respondent_popularname: entrySurveys[i].e_popularname,
                       deployment_start_time: entrySurveys[i].endtime,
+                      phone_number: entrySurveys[i].e_phonenumber,
+                      second_phone_number: entrySurveys[i].e_otherphonenumber,
+                      alternate_contact_name: entrySurveys[i].e_othercontact_person_name,
+                      alternate_phone_number: entrySurveys[i].e_othercontact_person_number,
+                      carrier: entrySurveys[i].e_carrier.toUpperCase(),
+                      currently_deployed: true,
+                      location_latitude: coords[0],
+                      location_longitude: coords[1],
+                      installed_outage: entrySurveys[i].g_installoutage,
+                      depoyment_survey_time: entrySurveys[i].endtime,
+                      deployment_sruvey_id: entrySurveys[i].instanceID,
                   };
 
                   //Update the respondent to say that they do have a powerwatch
@@ -695,7 +716,8 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                surveySuccess = false;
                exitSurveys[i].error = true;
                exitSurveys[i].error_field = 'a_respid';
-               exitSurveys[i].error_comment = 'Unkown respondent id';
+               exitSurveys[i].error_comment = 'Unknown respondent id';
+               continue;
            }
 
            //Okay exit surveys should be all about retrieving and redeploying
@@ -715,7 +737,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   surveySuccess = false;
                   exitSurveys[i].error = true;
                   exitSurveys[i].error_field = 'g_deviceID_retrieve';
-                  exitSurveys[i].error_comment = 'Unkown or invalid device ID';
+                  exitSurveys[i].error_comment = 'Unknown or invalid device ID';
               } else {
                   let core_id = ids[0];
 
@@ -752,7 +774,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   surveySuccess = false;
                   exitSurveys[i].error = true;
                   exitSurveys[i].error_field = 'g_deviceID_give';
-                  exitSurveys[i].error_comment = 'Unkown or invalid device ID';
+                  exitSurveys[i].error_comment = 'Unknown or invalid device ID';
               } else {
                   var core_id = ids[0];
                   var shield_id = ids[1];
@@ -769,18 +791,24 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   }
 
                   device_add_info = {
-                      respondent_id: respondent_id,
-                      deploymentSurveyTime: exitSurveys[i].endtime,
-                      deploymentSurveyID: exitSurveys[i].instanceID,
-                      phoneNumber: respondents[respondent_id].phoneNumber,
-                      carrier: respondents[respondent_id].carrier,
-                      currently_deployed: true,
-                      entryLatitude: removed_device.entryLatitude,
-                      entryLongitude: removed_device.entryLongitude,
                       core_id: core_id,
                       shield_id: shield_id,
-                      installed_outage: removed_device.installed_outage,
+                      respondent_id: respondent_id,
+                      respondent_firstname: respondents[respondent_id].e_firstname,
+                      respondent_surnname: respondents[respondent_id].e_surnames,
+                      respondent_popularname: respondents[respondent_id].e_popularname,
                       deployment_start_time: exitSurveys[i].endtime,
+                      phone_number: respondents[respondent_id].phone_number,
+                      second_phone_number: respondents[respondent_id].second_phone_number,
+                      alternate_contact_name: respondents[respondent_id].alternate_contact_name,
+                      alternate_phone_number: respondents[respondent_id].alternate_phone_number,
+                      carrier: respondents[respondent_id].carrier,
+                      currently_deployed: true,
+                      location_latitude: removed_device.entryLatitude,
+                      location_longitude: removed_device.entryLongitude,
+                      installed_outage: exitSurveys[i].installed_outage,
+                      deployment_survey_time: exitSurveys[i].endtime,
+                      deployment_survey_id: exitSurveys[i].instanceID,
                   };
               }
            }
