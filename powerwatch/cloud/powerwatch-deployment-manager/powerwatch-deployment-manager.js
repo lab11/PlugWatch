@@ -24,13 +24,13 @@ command.option('-d, --database [database]', 'Database configuration file.')
         .option('-a, --oinkusername [oinkusername]', 'OINK username file')
         .option('-b, --oinkpassword [oinkpassword]', 'OINK password file').parse(process.argv);
 
-var timescale_config = null; 
+var timescale_config = null;
 if(typeof command.database !== 'undefined') {
     timescale_config = require(command.database);
     timescale_config.username = fs.readFileSync(command.username,'utf8').trim();
     timescale_config.password = fs.readFileSync(command.password,'utf8').trim();
 } else {
-    timescale_config = require('./postgres-config.json'); 
+    timescale_config = require('./postgres-config.json');
 }
 
 var survey_config = {};
@@ -39,7 +39,7 @@ if(typeof command.surveyusername !== 'undefined') {
     survey_config.username = fs.readFileSync(command.surveyusername,'utf8').trim();
     survey_config.password = fs.readFileSync(command.surveypassword,'utf8').trim();
 } else {
-    survey_config = require('./survey-config.json'); 
+    survey_config = require('./survey-config.json');
 }
 
 var oink_config = {};
@@ -48,7 +48,7 @@ if(typeof command.oinkusername !== 'undefined') {
     //survey_config.username = fs.readFileSync(command.surveyusername,'utf8').trim()
     //survey_config.password = fs.readFileSync(command.surveypassword,'utf8').trim()
 } else {
-    //survey_config = require('./survey-config.json'); 
+    //survey_config = require('./survey-config.json');
 }
 
 const pg_pool = new  Pool( {
@@ -60,7 +60,7 @@ const pg_pool = new  Pool( {
     max: 20,
 });
 
-//This is a recurive function that we could sub in if we get a lot of image 
+//This is a recurive function that we could sub in if we get a lot of image
 //corruption. But's it's untested so let's leave it out for now
 function handleRequestResponse(options, error, response, body, depth, callback) {
     //We are doing this recursively so limit the depth
@@ -84,7 +84,7 @@ function handleRequestResponse(options, error, response, body, depth, callback) 
               });
            };
         })());
-    } else { 
+    } else {
        console.log(response.statusCode);
        var buf = new Buffer(body, "binary");
        try {
@@ -102,7 +102,7 @@ function handleRequestResponse(options, error, response, body, depth, callback) 
            console.log(error);
            fs.writeFile("error.jpg", buf, function(err) {
            });
-           
+
            request(options, (function() {
               return function(error, response, body) {
                  //We should just try to process this image immediately with
@@ -119,9 +119,9 @@ function handleRequestResponse(options, error, response, body, depth, callback) 
 
 
 function extractQRCodes(survey, url_field, output_field, outer_callback) {
-   
+
     // Why 2...well emperically surveyCTO doesn't like more??
-    // You can easily start getting ECONNRESETS 
+    // You can easily start getting ECONNRESETS
     async.forEachOfLimit(survey, 2, function(value, key, callback) {
         if(value[url_field] != '') {
             console.log(key);
@@ -143,7 +143,7 @@ function extractQRCodes(survey, url_field, output_field, outer_callback) {
               return function(error, response, body) {
                  //We should just try to process this image immediately with
                  //the QR code processing code
-                 
+
                  //Here's how you call the recursive function
                  console.log(key);
                  handleRequestResponse(options, error, response, body, 1, function(data) {
@@ -166,11 +166,189 @@ function extractQRCodes(survey, url_field, output_field, outer_callback) {
         console.log("All asyncs have returned");
         outer_callback(survey);
     });
+}
 
+function get_type(name, meas) {
+    if(name.split('_')[name.split('_').length - 1] == 'time') {
+       return 'TIMESTAMPZ';
+    } else {
+        switch(typeof meas) {
+            case "string":
+                return 'TEXT';
+            case "boolean":
+                return 'BOOLEAN';
+            case "number":
+                return 'DOUBLE PRECISION';
+        }
+    }
+
+    return 'err';
+}
+
+
+
+function writeGenericTablePostgres(objects, table_name, outer_callback) {
+    //Find the object in the object array with the most fields
+    //So that we get all the fields for creating the table
+    var max = 0;
+    var index = 0;
+    for(var i = 0; i < objects.length; i++) {
+        if(Object.keys(objects[i]).length > max) {
+            max = Object.keys(objects[i]).length;
+            index = i;
+        }
+    }
+
+    var cols = "";
+    var names = [];
+    names.push(table_name + '_temp');
+    for(var key in objects[index]) {
+        var meas = objects[index][key];
+        var type = get_type(key, meas);
+        if(type != 'err') {
+            names.push(key);
+            names.push(type);
+            cols = cols + ", %I %s";
+        } else {
+            console.log('Error with field ' + key);
+        }
+    }
+
+    console.log("Trying to create table!");
+    var qstring = format.withArray('CREATE TABLE %I (' + cols + ')', names);
+    pg_pool.query(qstring, (err, res) => {
+
+        if(err) {
+            console.log("Error creating shadow table");
+            console.log(err);
+            return outer_callback(err);
+        } else {
+            //Add all the respondents
+            async.forEachLimit(objects, 10, function(value, callback) {
+                var cols = "";
+                var vals = "";
+                var names = [];
+                var values = [];
+                var i = 1;
+                names.push(table_name + '_temp');
+                for (var name in value) {
+                    cols = cols + ", %I";
+                    names.push(name);
+                    vals = vals + ", $" + i.toString();
+                    values.push(value.name);
+                    i = i + 1;
+                }
+
+                var qstring = format.withArray("INSERT INTO %I (" + cols + ") VALUES (" + vals + ")", names);
+                console.log(qstring);
+                pg_pool.query(qstring, values, (err, res) => {
+                    if(err) {
+                        console.log("Error inserting into temp table");
+                        callback(err);
+                    } else {
+                        console.log('posted successfully!');
+                        callback();
+                    }
+                });
+            }, function(err) {
+                if(err) {
+                    console.log("Some error with async");
+                }
+
+                //Okay now that we have successfully created the temp table
+                //Let's move the table that already exists and change
+                //the name of this one to the primary table
+                //is there a table that exists for this device?
+                pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name], (err, res) => {
+                    if (err) {
+                        console.log(err);
+                        return outer_callback(err);
+                    } else {
+                        if(res.rows[0].exists == false) {
+                            //Just go ahead and move the shadow table to respondnets
+                            pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
+                                if(err) {
+                                    console.log("Error renaming table");
+                                    return outer_callback(err);
+                                } else {
+                                    console.log("Created new table");
+                                    return outer_callback(null);
+                                }
+                            });
+                        } else {
+                           //Rename, then move the table
+                           pg_pool.query('ALTER TABLE ' + table_name + ' RENAME to ' + table_name + '_' + (Date.now()/1000).toString(), (err, res) => {
+                               if(err) {
+                                  console.log(err);
+                                  return outer_callback(err);
+                               } else {
+                                   pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
+                                       if(err) {
+                                           console.log("Error renaming table");
+                                           return outer_callback(err);
+                                       } else {
+                                           console.log("Created new table");
+                                           return outer_callback(null);
+                                       }
+                                   });
+                               }
+                           });
+                        }
+                    }
+                });
+            });
+        }
+    });
+}
+
+function writeRespondentTablePostgres(respondents, outer_callback) {
+   var array = [];
+   for(var key in respondents) {
+       array.push(respondents[key]);
+   }
+
+   writeGenericTablePostgres(array, 'respondents', outer_callback);
+}
+
+function writeDevicesTablePostgres(devices, outer_callback) {
+   writeGenericTablePostgres(devices, 'deployment', outer_callback);
+}
+
+function writeEntryTablePostgres(entrySurveys, outer_callback) {
+   writeGenericTablePostgres(entrySurveys, 'pilot_errors', outer_callback);
+}
+
+function writeExitTablePostgres(exitSurveys, outer_callback) {
+   writeGenericTablePostgres(exitSurveys, 'change_errors', outer_callback);
 }
 
 function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys) {
-
+   //Write the respondents and devices table to postgres
+   writeRespondentTablePostgres(respondents, function(err) {
+   if(err) {
+       console.log(err);
+   } else {
+       writeDevicesTablePostgres(devices, function(err) {
+       if(err) {
+           console.log(err);
+       } else {
+           writeEntryTablePostgres(entrySurveys, function(err) {
+           if(err) {
+               console.log(err);
+           } else {
+               writeExitTablePostgres(exitSurveys, function(err) {
+               if(err) {
+                   console.log(err);
+               } else {
+                   //This is where you should write to OINK
+               }
+               });
+           }
+           });
+       }
+       });
+   }
+   });
 }
 
 function lookupCoreID(core_id, devices) {
@@ -180,24 +358,24 @@ function lookupCoreID(core_id, devices) {
            return [devices[i].core_id, devices[i].shield_id];
        }
    }
-   
+
    return null;
 }
 
 function lookupShieldID(shield_id, devices) {
-   
+
    for(var i = 0; i < devices.length; i++) {
        if(devices[i].shield_id == shield_id) {
            return [devices[i].core_id, devices[i].shield_id];
        }
    }
-   
+
    return null;
 }
 
 function getDevicesTable(callback) {
     //Query devices table
-    pg_pool.query('SELECT core_id, shield_id, product_id FROM devices', null, (err, res) => {
+    pg_pool.query('SELECT core_id, shield_id, product_id FROM devices', (err, res) => {
         if(err) {
             console.log(err);
             return callback(null);
@@ -247,13 +425,13 @@ function getGenericID(survey, qrField, manualField, devices) {
    //Attempt to parse the QR code
    var parsed_core_id = null;
    var parsed_shield_id = null;
-   
+
    if(typeof survey[qrField] != 'undefined') {
       let ids = survey[qrField].split(':');
       if(ids.length == 3) {
          parsed_core_id = ids[1];
          parsed_shield_id = ids[2];
-      } 
+      }
    }
 
    //Okay if we have a parsed core or shield ID, we should try looking that up
@@ -264,7 +442,7 @@ function getGenericID(survey, qrField, manualField, devices) {
        if(ids != null) {
            return ids;
        } else {
-           ids = lookupShieldID(parsed_shield_id, devices); 
+           ids = lookupShieldID(parsed_shield_id, devices);
 
            if(ids != null) {
                return ids;
@@ -292,14 +470,14 @@ function getExitGiveDeviceID(survey, devices) {
 function getExitRetrieveDeviceID(survey, devices) {
    //g_deviceID_retrieve
    //deviceRetrieveQR
-   
+
    return getGenericID(survey, 'deviceRetrieveQR', 'g_deviceID_retrieve', devices);
 }
 
 function getEntryDeviceID(survey, devices) {
    //g_deviceID
    //deviceQR
-   
+
    return getGenericID(survey, 'deviceQR', 'g_deviceID', devices);
 }
 
@@ -312,7 +490,7 @@ function getEntryCoordinates(survey) {
        return [survey['gps-Latitude'],survey['gps-Longitude']];
    } else {
       return null;
-   } 
+   }
 }
 
 function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
@@ -343,11 +521,11 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
     //and It all can be cleaned up by modifying the R script
     var devices = [];
     var respondents = {};
-    var still_making_progress = false; 
+    var still_making_progress = false;
     while(still_making_progress) {
        //This will be set to true when you deploy a device or remove a device
-       still_making_progress = false; 
-       
+       still_making_progress = false;
+
        var surveys_to_remove = [];
        for(let i = 0; i < entrySurveys.length; i++) {
 
@@ -361,7 +539,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            if(typeof entrySurveys[i].error != 'undefined' && entrySurveys[i].error) {
                surveySuccess = false;
            }
-            
+
            //Make sure that we need to process this survey
            if(entrySurveys[i].g_download == '0' && entrySurveys[i].g_install == '0') {
               //This survey did not result in an app download or a powerwatch install
@@ -369,7 +547,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
               console.log('No app install or powerwatch install. Skipping survey');
               surveys_to_remove.push(i);
               continue;
-           } 
+           }
 
 
            //Okay, first, have we already processed an entry survey for
@@ -404,16 +582,16 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                entrySurveys[i].error_field = 'g_gps_accuracy';
                entrySurveys[i].error_comment = 'No valid GPS coordinates found';
            }
-           
-         
+
+
            respondent_info = {
                respondent_id: respondent_id,
-               entrySurveyTime: entrySurveys[i].endtime,
-               entrySurveyID: entrySurveys[i].instanceID,
-               phoneNumber: entrySurveys[i].e_phonenumber,
+               pilot_survey_time: entrySurveys[i].endtime,
+               pilot_survey_id: entrySurveys[i].instanceID,
+               phone_number: entrySurveys[i].e_phonenumber,
                carrier: entrySurveys[i].e_carrier,
-               entryLatitude: coords[0],
-               entryLongitude: coords[1]
+               location_latitude: coords[0],
+               location_longitude: coords[1]
            };
 
            //Did this user download the app?
@@ -429,10 +607,10 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                    entrySurveys[i].error_field = 'g_appQR_nr';
                    entrySurveys[i].error_comment = 'Insufficient aggreement between app QR codes';
                } else {
-                  respondent_info.appID = appID;
+                  respondent_info.app_id = appID;
                }
            }
-            
+
            //if there is a powerwatch device collect the same information about powerwatch
            if(entrySurveys.g_install == '1') {
               //Process all the IDs present in a survey and cross reference it  with the device table
@@ -472,12 +650,12 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                       installed_outage: entrySurveys[i].g_installoutage,
                       deployment_start_time: entrySurveys[i].endtime,
                   };
-                  
+
                   //Update the respondent to say that they do have a powerwatch
                   respondent_info.powerwatch = true;
                   respondent_info.powerwatch_core_id = core_id;
                   respondent_info.powerwatch_shield_id = shield_id;
-                  respondent_info.last_deployment_time = entrySurveys[i].endtime;
+                  respondent_info.powerwatch_deployment_time = entrySurveys[i].endtime;
               }//end device IDs are valid
            }//end device was installed
 
@@ -485,13 +663,13 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            //the set of surveys to process
            if(surveySuccess) {
                still_making_progress = true;
-               
+
                //Add the respondent to the respondent ID table
                respondents[respondent_id] = respondent_info;
 
                //Add this deployment to the table
                devices.push(device_info);
-               
+
                //Add this index to the surveys to be removed
                surveys_to_remove.push(i);
            }
@@ -527,7 +705,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            // respondent
            //
            // We also deploy a new device there if necessary
-           
+
 
            //did we remove a device?
            if(exitSurveys[i].a_retrieve == '1') {
@@ -550,7 +728,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                            device_removal_info = {};
                            device_removal_info.index = j;
                            device_removal_info.removal_time = exitSurveys[i].endtime;
-                        } 
+                        }
                      }
                   }
 
@@ -560,7 +738,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                      exitSurveys[i].error = true;
                      exitSurveys[i].error_field = 'g_deviceID_retrieve';
                      exitSurveys[i].error_comment = 'Reported device not currently deployed with reported respondent';
-                  } 
+                  }
               }
            }
 
@@ -616,7 +794,9 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
                //Update the respondent
                respondents[respondent_id].powerwatch = false;
-               respondents[respondent_id].last_removal_time = device_removal_info.removal_time;
+               respondents[respondent_id].change_survey_time = device_removal_info.removal_time;
+               respondents[respondent_id].change_survey_id = exitSurveys[i].instanceID;
+               respondents[respondent_id].powerwatch_removal_time = device_removal_info.removal_time;
 
                //Was a device deployed
                if(device_add_info != null) {
@@ -626,7 +806,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   respondents[respondent_id].powerwatch = true;
                   respondents[respondent_id].powerwatch_core_id = device_add_info.core_id;
                   respondents[respondent_id].powerwatch_shield_id = device_add_info.shield_id;
-                  respondents[respondent_id].last_deployment_time = device_add_info.deployment_start_time;
+                  respondents[respondent_id].powerwatch_deployment_time = device_add_info.deployment_start_time;
                }
 
                surveys_to_remove.push(i);
@@ -647,7 +827,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
 function processSurveys(entrySurveys, exitSurveys) {
     //This should enter a powerwatch user into the postgres deployment table and the oink table
-    
+
     // Parse out the QR codes
     extractQRCodes(entrySurveys, "g_deviceQR", "deviceQR", function(entrySurveys) {
         extractQRCodes(entrySurveys, "g_appQR_pic1", "appQR1", function(entrySurveys) {
@@ -669,7 +849,7 @@ function processSurveys(entrySurveys, exitSurveys) {
 function fetchSurveys(formid, callback) {
 
     //fetch all surveys from the start of time - we prevent double writing anyways
-    var uri = 'https://' + survey_config.host + '/api/v1/forms/data/wide/csv/' + 
+    var uri = 'https://' + survey_config.host + '/api/v1/forms/data/wide/csv/' +
                                                 formid +
                                                 '?r=approved|rejected|pending';
 
@@ -683,7 +863,7 @@ function fetchSurveys(formid, callback) {
     };
 
     request(options, function(error, response, body) {
-        //Okay now we should write this out to a file and call the cleaning script 
+        //Okay now we should write this out to a file and call the cleaning script
         //on it
         fs.writeFile(formid + '.csv', body, function(err) {
             if(err) {
@@ -696,8 +876,8 @@ function fetchSurveys(formid, callback) {
                     console.log("loaded last json");
                     last_json = json;
                     //Clean the file using the rscript
-                    exec('Rscript ' + formid + '.R ' + formid + '.csv ' + 
-                                                       formid + '_cleaned.csv', 
+                    exec('Rscript ' + formid + '.R ' + formid + '.csv ' +
+                                                       formid + '_cleaned.csv',
                                              function(error, stdout, stderr) {
 
                         if(error) {
@@ -721,8 +901,8 @@ function fetchSurveys(formid, callback) {
                     last_json = null;
 
                     //Clean the file using the rscript
-                    exec('Rscript ' + formid + '.R ' + formid + '.csv ' + 
-                                    formid + '_cleaned.csv', 
+                    exec('Rscript ' + formid + '.R ' + formid + '.csv ' +
+                                    formid + '_cleaned.csv',
                                     function(error, stdout, stderr) {
 
                         if(error) {
@@ -767,7 +947,7 @@ function fetchNewSurveys() {
                     //}
                 }
             });
-        } 
+        }
     });
 }
 
