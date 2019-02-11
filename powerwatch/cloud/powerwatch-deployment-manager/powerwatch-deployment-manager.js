@@ -46,142 +46,6 @@ if(typeof command.surveyusername !== 'undefined') {
     max: 20,
 })*/
 
-//given a list of particle or shield IDs, lookup in the database and see
-//how many match and if they all match the same thing
-function findValidID(idlist) {
-    //TODO: query the devices table and see that some quorum of the IDs in the
-    //list match a valid device. return device statistics if so, else return null
-}
-
-function powerwatchEntryHelper(survey) {
-    console.log("Processing survey for respondent ",survey.a_respid)
-    //Was a powerwatch device installed?
-    powerwatch_installed = false
-    if(survey.g_install == '1') {
-        powerwatch_installed = true
-        //yes -> put it in the deployment table
-        //things we care about
-        //respondent ID
-        //location
-        //installed during outage
-        //time of install
-        //device ID
-        //phone number
-        //the survey that entered this record
-       
-        //First try to determine the correct device ID and shield ID
-        //g_deviceID, g_deviceID2, processedID
-        id_list = []
-        if('processedID' in survey) {
-            var ids = suvery.processedID.split(':')
-            if(ids.length != 3) {
-                console.log("Not a valid QR code read - discarding")
-            } else {
-                id_list.push(ids[1])
-                id_list.push(ids[2])
-            }
-        } else {
-            console.log("No attached image or no valid QR found in image")
-        }
-        id_list.push(g_deviceID)
-        id_list.push(g_deviceID2)
-
-        var id = findValidID(idlist);
-        var core_id = ""
-        var shield_id = ""
-        if(id == null) {
-            //this is clearly an error and we should
-            //TODO: write the logic to the error table
-            return;
-        } else {
-            core_id = id[0]
-            shield_id = id[1]
-            //we have a valid ID and should be able to put this into
-            //the deployment table
-
-            //First query the deployment table and see if this device
-            //is already in the deployed state
-            pg_pool.query("SELECT deployment_time, end_time, FROM deployment where core_id = $1", [core_id]), (err, res) => {
-                if(err) {
-                    console.log("This is a weird error, the most that should happen is it returns no data")
-                } else {
-                    console.log(res.rows.length)
-                    if(res.rows.length == 0) {
-                        //TODO: This has never been deployed - insert it into table
-                    } else {
-                        // we need to loop through and see 1) if this has been deployed before has it ended
-                        // 2) if it's currently deployed is that this survey
-                        for(var i = 0; i < res.rows.length; i++) {
-                            if(res.rows[i].end_time == null) {
-                                //this has been deployed and that deployment isn't over
-                                if(res.rows[i].deployment_time == survey.end_time) {
-                                    //that is this survey - we don't need to insert this survey again
-                                    return;
-                                } else {
-                                    //that's not this survey - this is probably an error. We should write it all
-                                    //to the error table and maybe an endline survey will come through later
-                                    
-                                    //TODO: write the logic to the error table
-                                    return;
-                                }
-                            } else {
-                                //This deployment has ended and it's fine
-                            }
-                        }
-
-                        //TODO: We didn't run into a conflic - insert it into the table
-                    }
-
-                }
-            }
-        }
-    }
-
-    //It doesn't matter if the app was downloaded
-    //If the user consented then we should still incentivize them in OINK
-    
-    //Into the deployment table we want to p
-
-    //form = {}
-    //form.a_PW                      = json[i].a_PW,
-    //form.g_install                 = json[i].g_install,
-    //form.g_plugwatch               = json[i].g_plugwatch,
-    //form.g_installoutage           = json[i].g_installoutage,
-    //form.g_noinstall               = json[i].g_noinstall,
-    //form.g_deviceID                = json[i].g_deviceID,
-    //form.g_deviceID2               = json[i].g_deviceID2,
-    //form.g_deviceQR                = json[i].g_deviceQR,
-    //form.a_respid                  = json[i].a_respid,
-    //form.g_download                = json[i].g_download,
-    //form.g_nodownload              = json[i].g_nodownload,
-    //form.g_nodownload_pic          = json[i].g_nodownload_pic,
-    //form.g_dwnumber                = json[i].g_dwnumber,
-    //form.g_nonumber                = json[i].g_nonumber,
-    //form.g_imei1                   = json[i].g_imei1,
-    //form.g_imei2                   = json[i].g_imei2,
-    //form.e_phonenumber             = json[i].e_phonenumber,
-    //form.g_imei3                   = json[i].g_imei3,
-    //form.e_carrier                 = json[i].e_carrier,
-    //form.formdef_version           = json[i].formdef_version, 
-    //form.SubmissionDate            = json[i].SubmissionDate,
-    //form.starttime                 = json[i].starttime,
-    //form.endtime                   = json[i].endtime,
-    //form['g_gps-Latitude']         = json[i]['g_gps-Latitude'],
-    //form['g_gps-Longitude']           = json[i]['g_gps-Longitude'],
-    //form['g_gps-Altitude']            = json[i]['g_gps-Altitude'],
-    //form['g_gps-Accuracy']            = json[i]['g_gps-Accuracy'],
-    //form['g_gps_accurate-Latitude']   = json[i]['g_gps_accurate-Latitude'],
-    //form['g_gps_accurate-Longitude']  = json[i]['g_gps_accurate-Longitude'],
-    //form['g_gps_accurate-Altitude']   = json[i]['g_gps_accurate-Altitude'],
-    //form['g_gps_accurate-Accuracy']   = json[i]['g_gps_accurate-Accuracy'],
-    //form['gps-Latitude']              = json[i]['gps-Latitude'],
-    //form['gps-Longitude']             = json[i]['gps-Longitude'],
-    //form['gps-Altitude']              = json[i]['gps-Altitude'],
-    //form['gps-Accuracy']              = json[i]['gps-Accuracy'],
-    //data.push(form)
-
-}
-
 //This is a recurive function that we could sub in if we get a lot of image 
 //corruption. But's it's untested so let's leave it out for now
 function handleRequestResponse(options, error, response, body, depth, callback) {
@@ -291,10 +155,138 @@ function extractQRCodes(survey, url_field, output_field, outer_callback) {
 
 }
 
-function getExitDeviceID(survey) {
+function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys) {
+
 }
 
-function getEntryDeviceID(survey) {
+function lookupCoreID(core_id, devices) {
+
+   for(var i = 0; i < devices.length; i++) {
+       if(devices[i].shield_id == shield_id) {
+           return [devices[i].core_id, devices[i].shield_id];
+       }
+   }
+   
+   return null;
+}
+
+function lookupShieldID(shield_id, devices) {
+   
+   for(var i = 0; i < devices.length; i++) {
+       if(devices[i].shield_id == shield_id) {
+           return [devices[i].core_id, devices[i].shield_id];
+       }
+   }
+   
+   return null;
+}
+
+function getDevicesTable(callback) {
+    //Query devices table
+    pg_pool.query('SELECT core_id, shield_id, product_id FROM devices', null, (err, res) => {
+        if(err) {
+            console.log(err);
+            return callback(null);
+        } else {
+            if(res.rows.length > 0) {
+                return callback(res.rows);
+            } else {
+                return callback(null);
+            }
+        }
+    }
+}
+
+function getAppID(survey) {
+   //g_appQR_nr
+   //appQR1
+   //appQR2
+
+   //First check to see if either QR is readable
+   if(appQR1 != null && appQR2 != null) {
+       if(appQR1 != appQR2) {
+           //two valid QRS that don't match?
+           console.log('App QRs do not match');
+           if(appQR1 == survey.g_appQR_nr) {
+               return appQR1;
+           } else if (appQR2 == survey.g_appQR_nr) {
+               return appQR2;
+           }
+       } else {
+           return appQR1;
+       }
+   } else if(appQR1 != null) {
+       if(appQR1 == survey.g_appQR_nr) {
+           return appQR1;
+       }
+   } else if(appQR2 != null) {
+       if(appQR2 == survey.g_appQR_nr) {
+           return appQR2;
+       }
+   } else {
+       //We didn't get two source of corraborating info
+       return null;
+   }
+}
+
+function getGenericID(survey, qrField, manualField, devices) {
+   //Attempt to parse the QR code
+   parsed_core_id = null;
+   parsed_shield_id = null;
+   
+   if(typeof survey[qrField] != 'undefined') {
+      var ids = survey.[qrField].split(':');
+      if(ids.length == 3) {
+         parsed_core_id = ids[1];
+         parsed_shield_id = ids[2]
+      } 
+   }
+
+   //Okay if we have a parsed core or shield ID, we should try looking that up
+   //in the devices table
+   if(parsed_core_id != null) {
+       ids = lookupCoreID(parsed_core_id, devices);
+
+       if(ids != null) {
+           return ids;
+       } else {
+           ids = lookupShieldID(parsed_shield_id, devices); 
+
+           if(ids != null) {
+               return ids;
+           } else {
+               ids = lookupShieldID(survey[manualField] + '0000', devices);
+
+               if(ids != null) {
+                   return ids;
+               } else {
+                   //There is nothing we can do here but give up
+                   return null;
+               }
+           }
+       }
+   }
+}
+
+function getExitGiveDeviceID(survey, devices) {
+   //g_deviceID_retrieve
+   //deviceRetrieveQR
+
+   return getGenericID(survey, 'deviceGiveQR', 'g_deviceID_give', devices);
+}
+
+function getExitRetrieveDeviceID(survey, devices) {
+   //g_deviceID_retrieve
+   //deviceRetrieveQR
+   
+   return getGenericID(survey, 'deviceRetrieveQR', 'g_deviceID_retrieve', devices);
+}
+
+function getEntryDeviceID(survey, devices) {
+   //g_deviceID
+   //deviceQR
+   
+   return getGenericID(survey, 'deviceQR', 'g_deviceID', devices);
 }
 
 function getEntryCoordinates(survey) {
@@ -309,7 +301,7 @@ function getEntryCoordinates(survey) {
    } 
 }
 
-function generateTrackingTables(entrySurveys, exitSurveys) {
+function generateTrackingTables(entrySurveys, exitSurveys, devices) {
     //Sort the surveys by submission time
     //This assumption makes it easier to process the surveys
     entrySurveys.sort(function(a,b) {
@@ -346,13 +338,25 @@ function generateTrackingTables(entrySurveys, exitSurveys) {
        for(var i = 0; i < entrySurveys.length; i++) {
 
            device_info = null;
+           respondent_info = null;
            surveySuccess = true;
            respondent_id = entrySurveys[i].a_respid
            console.log("Processing entry survey for respondent ", respondent_id)
 
+           //Make sure that the R script didn't report an error for this survey
            if(typeof entrySurveys[i].error != 'undefined' && entrySurveys[i].error) {
                surveySuccess = false;
            }
+            
+           //Make sure that we need to process this survey
+           if(entrySurveys[i].g_download == '0' && entrySurveys[i].g_install == '0') {
+              //This survey did not result in an app download or a powerwatch install
+              //Exiting
+              console.log('No app install or powerwatch install. Skipping survey');
+              surveys_to_remove.push(i);
+              continue;
+           } 
+
 
            //Okay, first, have we already processed an entry survey for
            //this respondent ID
@@ -386,30 +390,44 @@ function generateTrackingTables(entrySurveys, exitSurveys) {
                entrySurveys[i].error_field = 'g_gps_accuracy'
                entrySurveys[i].error_comment = 'No valid GPS coordinates found'
            }
-
-
-           //First collect information about the respondent indexed by respondent ID
+           
+         
            respondent_info = {
                respondent_id: respondent_id,
                entrySurveyTime: entrySurvey[i].endtime,
                entrySurveyID: entrySurvey[i].instanceID,
                phoneNumber: entrySurvey[i].e_phonenumber,
                carrier: entrySurvey[i].e_carrier,
-               currently_active: true,
                entryLatitude: coords[0],
                entryLongitude: coords[1]
-               //TODO: Add unique key retrieved from QR code of phone
+           }
+
+           //Did this user download the app?
+           if(entrySurveys[i].g_download == '1') {
+               //Set the user to active
+               respondent_info.currently_active = true;
+
+               //extract the unique key presented by the app
+               appID = getAppID(entrySurveys[i]);
+               if(appID == null) {
+                   surveySuccess = false;
+                   entrySurveys[i].error = true
+                   entrySurveys[i].error_field = 'g_appQR_nr'
+                   entrySurveys[i].error_comment = 'Insufficient aggreement between app QR codes'
+               } else {
+                  respondent_info.appID = appID;
+               }
            }
             
            //if there is a powerwatch device collect the same information about powerwatch
            if(enterySurveys.g_install == '1') {
               //Process all the IDs present in a survey and cross reference it  with the device table
-              ids = getEntryDeviceID(entrySurveys[i]);
+              ids = getEntryDeviceID(entrySurveys[i], devices);
               if(ids == null) {
                   //This is an error, post the error
                   surveySuccess = false;
                   entrySurveys[i].error = true
-                  entrySurveys[i].error_field = 'deviceID'
+                  entrySurveys[i].error_field = 'g_deviceID'
                   entrySurveys[i].error_comment = 'Unkown or invalid device ID'
               } else {
                   core_id = ids[0]
@@ -422,7 +440,7 @@ function generateTrackingTables(entrySurveys, exitSurveys) {
                         //This devices is currently deployed
                         surveySuccess = false;
                         entrySurveys[i].error = true
-                        entrySurveys[i].error_field = 'deviceID'
+                        entrySurveys[i].error_field = 'g_deviceID'
                         entrySurveys[i].error_comment = 'Device already deployed'
                      }
                   }
@@ -476,6 +494,7 @@ function generateTrackingTables(entrySurveys, exitSurveys) {
        for(var i = 0; i < exitSurveys.length; i++) {
            surveySuccess = true;
            device_removal_info = null;
+           removed_device = null;
            device_add_info = null;
            respondent_id = exitSurveys[i].a_respid
            console.log("Processing entry survey for respondent ", respondent_id)
@@ -496,23 +515,15 @@ function generateTrackingTables(entrySurveys, exitSurveys) {
            //
            // We also deploy a new device there if necessary
            
-           //Get the most accurate latitude and longitude possible
-           coords = getExitCoordinates(exitSurveys[i]);
-           if(coords == null) {
-               surveySuccess = false;
-               exitSurveys[i].error = true
-               exitSurveys[i].error_field = 'g_gps_accuracy'
-               exitSurveys[i].error_comment = 'No valid GPS coordinates found'
-           }
 
            //did we remove a device?
-           if(exitSurveys[i].g_remove == '1') {
-              ids = getExitDeviceID(exitSurveys[i]);
+           if(exitSurveys[i].a_retrieve == '1') {
+              ids = getExitRetrieveDeviceID(exitSurveys[i], devices);
               if(ids == null) {
                   //This is an error, post the error
                   surveySuccess = false;
                   exitSurveys[i].error = true
-                  exitSurveys[i].error_field = 'g_remove_deviceID'
+                  exitSurveys[i].error_field = 'g_deviceID_retrieve'
                   exitSurveys[i].error_comment = 'Unkown or invalid device ID'
               } else {
                   core_id = ids[0]
@@ -523,6 +534,7 @@ function generateTrackingTables(entrySurveys, exitSurveys) {
                      if(devices[j].currently_deployed && devices[j].core_id == core_id) {
                         if(devices[j].respondent_id == respondent_id) {
                            //We are removing this device
+                           removed_device = devices[j];
                            device_removal_info = {};
                            device_removal_info.index = j;
                            device_removal_info.removal_time = exitSurveys[i].endtime;
@@ -534,22 +546,22 @@ function generateTrackingTables(entrySurveys, exitSurveys) {
                      //We didn't fine the device to remove, which is an error
                      surveySuccess = false;
                      exitSurveys[i].error = true
-                     exitSurveys[i].error_field = 'g_remove_deviceID'
-                     exitSurveys[i].error_comment = 'Device not deployed'
+                     exitSurveys[i].error_field = 'g_deviceID_retrieve'
+                     exitSurveys[i].error_comment = 'Reported device not currently deployed with reported respondent'
                   } 
               }
            }
 
            //Are we still able to process this survey? Did we try to install a new device?
-           if(exitSurveys[i].g_install == '1') {
+           if(exitSurveys[i].a_give == '1') {
               //Okay now we should redeploy a device if possible
               //Process all the IDs present in a survey and cross reference it  with the device table
-              ids = getExitDeviceID(exitSurveys[i]);
+              ids = getExitDeviceID(exitSurveys[i], devices);
               if(ids == null) {
                   //This is an error, post the error
                   surveySuccess = false;
                   exitSurveys[i].error = true
-                  exitSurveys[i].error_field = 'g_installl_deviceID'
+                  exitSurveys[i].error_field = 'g_deviceID_give'
                   exitSurveys[i].error_comment = 'Unkown or invalid device ID'
               } else {
                   core_id = ids[0]
@@ -562,8 +574,8 @@ function generateTrackingTables(entrySurveys, exitSurveys) {
                         //This devices is currently deployed
                         surveySuccess = false;
                         exitSurveys[i].error = true
-                        exitSurveys[i].error_field = 'g_install_deviceID'
-                        exitSurveys[i].error_comment = 'Device already deployed'
+                        exitSurveys[i].error_field = 'g_deviceID_give'
+                        exitSurveys[i].error_comment = 'Device already deployed. Cannot be deployed again.'
                      }
                   }
 
@@ -574,21 +586,13 @@ function generateTrackingTables(entrySurveys, exitSurveys) {
                       phoneNumber: respondents[respondent_id].phoneNumber,
                       carrier: respondents[respondent_id].carrier,
                       currently_deployed: true,
-                      entryLatitude: coords[0],
-                      entryLongitude: coords[1],
+                      entryLatitude: removed_device.entryLatitude,
+                      entryLongitude: removed_device.entryLongitude,
                       core_id: core_id,
                       shield_id: shield_id,
-                      installed_outage: exitSurvey[i].g_installoutage,
+                      installed_outage: removed_device.installed_outage,
                       deployment_start_time: exitSurvey[i].endtime,
                   };
-                  
-   
-                  //Update the respondent to say that they do have a powerwatch
-                  respondents[respondent_id].powerwatch = true;
-                  respondents[respondent_id].powerwatch_core_id = core_id;
-                  respondents[respondent_id].powerwatch_shield_id = shield_id;
-                  respondents[respondent_id].last_deployment_time = exitSurveys[i].removal_time;
-
            }
 
            if(surveySuccess) {
@@ -626,16 +630,25 @@ function generateTrackingTables(entrySurveys, exitSurveys) {
    //Okay we are done making progress
    //We should write out any unprocessed surveys and their reasons to postgres
    //We should also write the updated respondent and device tables to postgres
+   updateTrackingTables(respondents, devices, entrySurveys, exitSurveys)
 }
 
 function processSurveys(entrySurveys, exitSurveys) {
     //This should enter a powerwatch user into the postgres deployment table and the oink table
     
     // Parse out the QR codes
-    extractQRCodes(entrySurveys, "g_deviceQR", "processedID", function(entrySurveys) {
-        extractQRCodes(exitSurveys, "pluggedin_image", "followupID", function(exitSurveys) {
-            //Okay we should not have completely processed entry and exit surveys
-            generateTrackingTables(entrySurveys, exitSurveys)
+    extractQRCodes(entrySurveys, "g_deviceQR", "deviceQR", function(entrySurveys) {
+        extractQRCodes(entrySurveys, "g_appQR_pic1", "appQR1", function(entrySurveys) {
+            extractQRCodes(entrySurveys, "g_appQR_pic2", "appQR2", function(entrySurveys) {
+                extractQRCodes(exitSurveys, "g_deviceQR_retrieve", "deviceRetrieveQR", function(exitSurveys) {
+                    extractQRCodes(exitSurveys, "g_deviceQR_give", "deviceGiveQR", function(exitSurveys) {
+                        getDevicesTable(function(devices) {
+                           //Okay we should not have completely processed entry and exit surveys
+                           generateTrackingTables(entrySurveys, exitSurveys, devices)
+                        });
+                    });
+                });
+            });
         });
     });
 }
@@ -725,13 +738,13 @@ function fetchSurveys(formid, callback) {
 function fetchNewSurveys() {
     //fetch all surveys moving forward
     //send the API requests to surveyCTO - we probable also need attachments to process pictures
-    fetchSurveys('Combined_Form', function(entrySurveys, entry_changed, err) {
+    fetchSurveys('PW_Pilot2', function(entrySurveys, entry_changed, err) {
         if(err) {
             console.log("Error fetching and processing forms")
             console.log(err);
             return
         } else {
-            fetchSurveys('PW_Device_followup', function(exitSurveys, exit_changed, err) {
+            fetchSurveys('Pilot2_DeviceChange', function(exitSurveys, exit_changed, err) {
                 if(err) {
                     console.log("Error fetching and processing forms")
                     console.log(err);
