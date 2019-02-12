@@ -85,7 +85,6 @@ function handleRequestResponse(options, error, response, body, depth, callback) 
            };
         })());
     } else {
-       console.log(response.statusCode);
        var buf = new Buffer(body, "binary");
        try {
            var rawImage = jpeg.decode(buf, true);
@@ -124,8 +123,7 @@ function extractQRCodes(survey, url_field, output_field, outer_callback) {
     // You can easily start getting ECONNRESETS
     async.forEachOfLimit(survey, 2, function(value, key, callback) {
         if(value[url_field] != '') {
-            console.log(key);
-            console.log(value[url_field]);
+            console.log('Fetching QR for', url_field);
             var options = {
               uri: value[url_field],
               auth: {
@@ -145,11 +143,15 @@ function extractQRCodes(survey, url_field, output_field, outer_callback) {
                  //the QR code processing code
 
                  //Here's how you call the recursive function
-                 console.log(key);
                  handleRequestResponse(options, error, response, body, 1, function(data) {
                      if(data) {
-                          console.log(data);
+                          console.log("Processed QR code:", data);
                           survey[key][output_field] = data;
+                     } else {
+                          survey[key][output_field] = null;
+                          console.log("No processable QR code");
+                          fs.writeFile(url_field + '.jpg', new Buffer(body,'binary'), function(err) {
+                          });
                      }
                      callback();
                  });
@@ -163,14 +165,13 @@ function extractQRCodes(survey, url_field, output_field, outer_callback) {
         if(err) {
             console.log("Some error with async");
         }
-        console.log("All asyncs have returned");
         outer_callback(survey);
     });
 }
 
 function get_type(name, meas) {
     if(name.split('_')[name.split('_').length - 1] == 'time') {
-       return 'TIMESTAMPZ';
+       return 'TIMESTAMPTZ';
     } else {
         switch(typeof meas) {
             case "string":
@@ -185,127 +186,183 @@ function get_type(name, meas) {
     return 'err';
 }
 
-
-
-function writeGenericTablePostgres(objects, table_name, outer_callback) {
-    //Find the object in the object array with the most fields
-    //So that we get all the fields for creating the table
-    var max = 0;
-    var index = 0;
-    for(var i = 0; i < objects.length; i++) {
-        if(Object.keys(objects[i]).length > max) {
-            max = Object.keys(objects[i]).length;
-            index = i;
-        }
-    }
-
-    var cols = "";
-    var names = [];
-    names.push(table_name + '_temp');
-    for(var key in objects[index]) {
-        if(objects[index].hasOwnProperty(key)) {
-            var meas = objects[index][key];
-            var type = get_type(key, meas);
-            if(type != 'err') {
-                names.push(key);
-                names.push(type);
-                cols = cols + ", %I %s";
+function dropTempTableGeneric(table_name, callback) {
+    //Remove the temp table if it exists
+    pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name+'_temp'], (err, res) => {
+        if (err) {
+            console.log(err);
+            return callback(err);
+        } else {
+            if(res.rows[0].exists == true) {
+                //Just go ahead and move the shadow table to respondnets
+                pg_pool.query('DROP TABLE ' + table_name + '_temp', (err, res) => {
+                    if(err) {
+                        console.log("Error dropping temp table");
+                        return callback(err);
+                    } else {
+                        console.log("Dropped temp table");
+                        return callback(null);
+                    }
+                });
             } else {
-                console.log('Error with field ' + key);
+                console.log("Temp table doesnt exits. Proceeding");
+                callback(null);
             }
         }
+    });
+}
+
+function writeGenericTablePostgres(objects, table_name, outer_callback) {
+
+    //If we didn't get any array move on
+    if(objects.length == 0) {
+        console.log("No records to write to table");
+        return outer_callback();
     }
 
-    console.log("Trying to create table!");
-    var qstring = format.withArray('CREATE TABLE %I (' + cols + ')', names);
-    pg_pool.query(qstring, (err, res) => {
-
+    dropTempTableGeneric(table_name, function(err) {
         if(err) {
-            console.log("Error creating shadow table");
-            console.log(err);
             return outer_callback(err);
         } else {
-            //Add all the respondents
-            async.forEachLimit(objects, 10, function(value, callback) {
-                var cols = "";
-                var vals = "";
-                var names = [];
-                var values = [];
-                var i = 1;
-                names.push(table_name + '_temp');
-                for (var name in value) {
-                    if(value.hasOwnProperty(name)) {
-                        cols = cols + ", %I";
-                        names.push(name);
-                        vals = vals + ", $" + i.toString();
-                        values.push(value.name);
-                        i = i + 1;
+            //Find the object in the object array with the most fields
+            //So that we get all the fields for creating the table
+            var max = 0;
+            var index = 0;
+            for(var i = 0; i < objects.length; i++) {
+                if(Object.keys(objects[i]).length > max) {
+                    max = Object.keys(objects[i]).length;
+                    index = i;
+                }
+            }
+
+            var cols = "";
+            var names = [];
+            names.push(table_name + '_temp');
+            for(var key in objects[index]) {
+                if(objects[index].hasOwnProperty(key)) {
+                    var meas = objects[index][key];
+                    var type = get_type(key, meas);
+                    if(type != 'err') {
+                        names.push(key);
+                        names.push(type);
+                        cols = cols + "%I %s,";
+                    } else {
+                        console.log('Error with field ' + key);
                     }
                 }
+            }
+            cols = cols.substring(0, cols.length-1);
 
-                var qstring = format.withArray("INSERT INTO %I (" + cols + ") VALUES (" + vals + ")", names);
-                console.log(qstring);
-                pg_pool.query(qstring, values, (err, res) => {
-                    if(err) {
-                        console.log("Error inserting into temp table");
-                        callback(err);
-                    } else {
-                        console.log('posted successfully!');
-                        callback();
-                    }
-                });
-            }, function(err) {
+            console.log("Creating new temporary respondent table");
+            var qstring = format.withArray('CREATE TABLE %I (' + cols + ')', names);
+            //console.log("Issuing query: ", qstring);
+            pg_pool.query(qstring, (err, res) => {
+
                 if(err) {
-                    console.log("Some error with async");
-                }
+                    console.log("Error creating shadow table");
+                    console.log(err);
+                    return outer_callback(err);
+                } else {
+                    console.log("Created temp table successfully. Inserting values");
 
-                //Okay now that we have successfully created the temp table
-                //Let's move the table that already exists and change
-                //the name of this one to the primary table
-                //is there a table that exists for this device?
-                pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name], (err, res) => {
-                    if (err) {
-                        console.log(err);
-                        return outer_callback(err);
-                    } else {
-                        if(res.rows[0].exists == false) {
-                            //Just go ahead and move the shadow table to respondnets
-                            pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
-                                if(err) {
-                                    console.log("Error renaming table");
-                                    return outer_callback(err);
-                                } else {
-                                    console.log("Created new table");
-                                    return outer_callback(null);
-                                }
-                            });
-                        } else {
-                           //Rename, then move the table
-                           pg_pool.query('ALTER TABLE ' + table_name + ' RENAME to ' + table_name + '_' + (Date.now()/1000).toString(), (err, res) => {
-                               if(err) {
-                                  console.log(err);
-                                  return outer_callback(err);
-                               } else {
-                                   pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
-                                       if(err) {
-                                           console.log("Error renaming table");
-                                           return outer_callback(err);
-                                       } else {
-                                           console.log("Created new table");
-                                           return outer_callback(null);
-                                       }
-                                   });
-                               }
-                           });
+                    //Add all the respondents
+                    async.forEachLimit(objects, 10, function(value, callback) {
+                        var cols = "";
+                        var vals = "";
+                        var names = [];
+                        var values = [];
+                        var i = 1;
+                        names.push(table_name + '_temp');
+                        for (var name in value) {
+                            if(value.hasOwnProperty(name)) {
+                                cols = cols + "%I, ";
+                                names.push(name);
+                                vals = vals + "$" + i.toString() + ',';
+                                values.push(value[name]);
+                                i = i + 1;
+                            }
                         }
-                    }
-                });
+
+                        cols = cols.substring(0, cols.length-2);
+                        vals = vals.substring(0, vals.length-1);
+
+                        var qstring = format.withArray("INSERT INTO %I (" + cols + ") VALUES (" + vals + ")", names);
+                        pg_pool.query(qstring, values, (err, res) => {
+                            if(err) {
+                                console.log("Error inserting into temp table");
+                                callback(err);
+                            } else {
+                                console.log('posted successfully!');
+                                callback();
+                            }
+                        });
+                    }, function(err) {
+                        if(err) {
+                            console.log("Some error with async");
+                        }
+
+                        //Okay now that we have successfully created the temp table
+                        //Let's move the table that already exists and change
+                        //the name of this one to the primary table
+                        //is there a table that exists for this device?
+                        console.log("Checking for table existence");
+                        pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name], (err, res) => {
+                            if (err) {
+                                console.log(err);
+                                return outer_callback(err);
+                            } else {
+                                if(res.rows[0].exists == false) {
+                                    //Just go ahead and move the shadow table to respondnets
+                                    console.log("Table does not exist. Altering temp table name");
+                                    pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
+                                        if(err) {
+                                            console.log("Error renaming table");
+                                            return outer_callback(err);
+                                        } else {
+                                            console.log("Created new table");
+                                            return outer_callback(null);
+                                        }
+                                    });
+                                } else {
+                                   //Rename, then move the table
+                                   console.log("Table does exist. Renaming old table and moving it's schema");
+                                   var new_name = table_name + '_' + Math.round((Date.now()/1000)).toString();
+                                   pg_pool.query('ALTER TABLE ' + table_name + ' RENAME to ' + new_name, (err, res) => {
+                                       if(err) {
+                                          console.log(err);
+                                          return outer_callback(err);
+                                       } else {
+                                           pg_pool.query('ALTER TABLE ' + new_name + ' SET SCHEMA backup', (err, res) => {
+                                               if(err) {
+                                                   console.log(err);
+                                                   return outer_callback(err);
+                                               } else {
+                                                   pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
+                                                       if(err) {
+                                                           console.log("Error renaming table");
+                                                           return outer_callback(err);
+                                                       } else {
+                                                           console.log("Created new table");
+                                                           return outer_callback(null);
+                                                       }
+                                                   });
+                                               }
+                                           });
+                                        }
+                                   });
+                                }
+                            }
+                        });
+                    });
+                }
             });
         }
     });
 }
 
 function writeRespondentTablePostgres(respondents, outer_callback) {
+   console.log();
+   console.log("Writing respondents array to postgres.");
    var array = [];
    for(var key in respondents) {
        if(respondents.hasOwnProperty(key)) {
@@ -317,14 +374,20 @@ function writeRespondentTablePostgres(respondents, outer_callback) {
 }
 
 function writeDevicesTablePostgres(devices, outer_callback) {
+   console.log();
+   console.log("Writing deployment array to postgres.");
    writeGenericTablePostgres(devices, 'deployment', outer_callback);
 }
 
 function writeEntryTablePostgres(entrySurveys, outer_callback) {
+   console.log();
+   console.log("Writing pilot errors array to postgres.");
    writeGenericTablePostgres(entrySurveys, 'pilot_errors', outer_callback);
 }
 
 function writeExitTablePostgres(exitSurveys, outer_callback) {
+   console.log();
+   console.log("Writing change errors array to postgres.");
    writeGenericTablePostgres(exitSurveys, 'change_errors', outer_callback);
 }
 
@@ -398,35 +461,20 @@ function getDevicesTable(callback) {
 function getAppID(survey) {
    //g_appQR_nr
    //appQR1
-   //appQR2
-   var QR1 = survey.appQR1.toUpperCase();
-   var QR2 = survey.appQR2.toUpperCase();
-   var QRn = survey.g_appQR_nr.toUpperCase();
+   var QR1 = null;
+   if(survey.appQR1 != null) {
+       QR1 = survey.appQR1.toUpperCase();
+   }
 
-   //First check to see if either QR is readable
-   if(QR1 != null && QR2 != null) {
-       if(QR1 != QR2) {
-           //two valid QRS that don't match?
-           console.log('App QRs do not match');
-           if(QR1 == QRn) {
-               return QR1;
-           } else if (QR2 == QRn) {
-               return QR2;
-           }
-       } else {
-           return QR1;
-       }
-   } else if(QR1 != null) {
-       if(QR1 == QRn) {
-           return QR1;
-       }
-   } else if(QR2 != null) {
-       if(QR2 == QRn) {
-           return QR2;
-       }
+   var QRn = survey.g_appQR_nr1.toUpperCase();
+   var QRbar = survey.g_appQRbar.toUpperCase();
+
+   if(QRbar.length == 15 || QRbar.length == 16) {
+       return QRbar;
+   } else if(typeof QR1 != 'undefined' && QR1 != null && (QR1.length == 15 || QR1.length == 16)) {
+       return QR1;
    } else {
-       //We didn't get two source of corraborating info
-       return null;
+       return QRn;
    }
 }
 
@@ -491,14 +539,24 @@ function getEntryDeviceID(survey, devices) {
 }
 
 function getEntryCoordinates(survey) {
-   if(survey['g_gps_accurate-Accuracy'] != '') {
-       return [survey['g_gps_accurate-Latitude'],survey['g_gps_accurate-Longitude']];
-   } else if(survey['g_gps-Accuracy'] != '') {
-       return [survey['g_gps-Latitude'],survey['g_gps-Longitude']];
-   } else if(survey['g_gps-Accuracy'] != '') {
-       return [survey['gps-Latitude'],survey['gps-Longitude']];
+   //Which GPS numbers have been recorded
+   var gps = ['g_gps_accurate','g_gps','gps'];
+
+   var min_accuracy = null;
+   var min_index = null;
+
+   for(var i = 0; i < gps.length; i++){
+       if(survey[gps[i]].Accuracy != '') {
+           if(min_accuracy == null || parseFloat(survey[gps[i]].Accuracy) < min_accuracy) {
+               min_index = i;
+           }
+       }
+   }
+
+   if(min_index == null) {
+       return null;
    } else {
-      return null;
+       return [parseFloat(survey[gps[min_index]].Latitude),parseFloat(survey[gps[min_index]].Longitude)];
    }
 }
 
@@ -512,6 +570,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
     exitSurveys.sort(function(a,b) {
        return Date.parse(a) - Date.parse(b);
     });
+
 
 
     //Okay the high level idea here is to generate a json blob describing
@@ -530,22 +589,22 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
     //and It all can be cleaned up by modifying the R script
     var devices = [];
     var respondents = {};
-    var still_making_progress = false;
+    var still_making_progress = true;
     while(still_making_progress) {
        //This will be set to true when you deploy a device or remove a device
        still_making_progress = false;
 
        var surveys_to_remove = [];
        for(let i = 0; i < entrySurveys.length; i++) {
-
            var device_info = null;
            var respondent_info = null;
            let surveySuccess = true;
            let respondent_id = entrySurveys[i].a_respid.toUpperCase();
-           console.log("Processing entry survey for respondent ", respondent_id);
+           console.log("Processing entry survey for respondent", respondent_id);
 
            //Make sure that the R script didn't report an error for this survey
            if(typeof entrySurveys[i].error != 'undefined' && entrySurveys[i].error) {
+               console.log("Cleaning script marked survey as errored. Skipping survey.");
                surveySuccess = false;
            }
 
@@ -563,6 +622,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            //this respondent ID
            if(typeof respondents[respondent_id] != 'undefined') {
                //This is a duplicate
+               console.log("Respondent duplicate of", respondents[respondent_id].entrySurvey,"Skipping suvey.");
                surveySuccess = false;
                entrySurveys[i].error = true;
                entrySurveys[i].error_field = 'a_respid';
@@ -573,6 +633,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            for(var key in respondents) {
                if(respondents[key].phoneNumber == entrySurveys[i].e_phonenumber) {
                    //This is a duplicate
+                   console.log("Phone number duplicate of", respondents[respondent_id].entrySurvey,"Skipping suvey.");
                    surveySuccess = false;
                    entrySurveys[i].error = true;
                    entrySurveys[i].error_field = 'e_phonenumber';
@@ -586,6 +647,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            //Get the most accurate latitude and longitude possible
            var coords = getEntryCoordinates(entrySurveys[i]);
            if(coords == null) {
+               console.log("Invalid coordinates. Skipping suvey.");
                surveySuccess = false;
                entrySurveys[i].error = true;
                entrySurveys[i].error_field = 'g_gps_accuracy';
@@ -598,40 +660,45 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                respondent_firstname: entrySurveys[i].e_firstname,
                respondent_surnname: entrySurveys[i].e_surnames,
                respondent_popularname: entrySurveys[i].e_popularname,
-               pilot_survey_time: entrySurveys[i].endtime,
-               pilot_survey_id: entrySurveys[i].instanceID,
                phone_number: entrySurveys[i].e_phonenumber,
+               carrier: entrySurveys[i].e_carrier.toUpperCase(),
                second_phone_number: entrySurveys[i].e_otherphonenumber,
                alternate_contact_name: entrySurveys[i].e_othercontact_person_name,
                alternate_phone_number: entrySurveys[i].e_othercontact_person_number,
-               carrier: entrySurveys[i].e_carrier.toUpperCase(),
                location_latitude: coords[0],
-               location_longitude: coords[1]
+               location_longitude: coords[1],
+               pilot_survey_time: entrySurveys[i].endtime,
+               pilot_survey_id: entrySurveys[i].instanceID
            };
 
            //Did this user download the app?
            if(entrySurveys[i].g_download == '1') {
+               console.log("Respondent downloaded app. Processing download information.");
                //Set the user to active
                respondent_info.currently_active = true;
 
                //extract the unique key presented by the app
                var appID = getAppID(entrySurveys[i]);
                if(appID == null) {
+                   console.log("Could not get appID. Skipping survey.");
                    surveySuccess = false;
                    entrySurveys[i].error = true;
                    entrySurveys[i].error_field = 'g_appQR_nr';
-                   entrySurveys[i].error_comment = 'Insufficient aggreement between app QR codes';
+                   entrySurveys[i].error_comment = 'App QR code not recorded correctly';
                } else {
                   respondent_info.app_id = appID;
                }
            }
 
            //if there is a powerwatch device collect the same information about powerwatch
-           if(entrySurveys.g_install == '1') {
+           if(entrySurveys[i].g_install == '1') {
+              console.log("Respondent installed powerwatch. Processing powerwatch information.");
+
               //Process all the IDs present in a survey and cross reference it  with the device table
               let ids = getEntryDeviceID(entrySurveys[i], device_table);
               if(ids == null) {
                   //This is an error, post the error
+                  console.log("Did not get valid device ID. Skipping");
                   surveySuccess = false;
                   entrySurveys[i].error = true;
                   entrySurveys[i].error_field = 'g_deviceID';
@@ -644,6 +711,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   for(let j = 0; j < devices.length; j++) {
                      if(devices[j].core_id == core_id && devices[j].currently_deployed) {
                         //This devices is currently deployed
+                        console.log("Device already deployed. Skipping");
                         surveySuccess = false;
                         entrySurveys[i].error = true;
                         entrySurveys[i].error_field = 'g_deviceID';
@@ -683,13 +751,19 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            //If this survey was processed successfully, remove it from
            //the set of surveys to process
            if(surveySuccess) {
+               console.log("Success processing entry survey for respondent", respondent_id);
+               console.log(respondent_info);
+
                still_making_progress = true;
 
                //Add the respondent to the respondent ID table
                respondents[respondent_id] = respondent_info;
 
                //Add this deployment to the table
-               devices.push(device_info);
+               if(device_info != null) {
+                   console.log(device_info);
+                   devices.push(device_info);
+               }
 
                //Add this index to the surveys to be removed
                surveys_to_remove.push(i);
@@ -850,6 +924,8 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
    //Okay we are done making progress
    //We should write out any unprocessed surveys and their reasons to postgres
    //We should also write the updated respondent and device tables to postgres
+   console.log();
+   console.log("Updating tracking tables after processing surveys");
    updateTrackingTables(respondents, devices, entrySurveys, exitSurveys);
 }
 
@@ -859,13 +935,11 @@ function processSurveys(entrySurveys, exitSurveys) {
     // Parse out the QR codes
     extractQRCodes(entrySurveys, "g_deviceQR", "deviceQR", function(entrySurveys) {
         extractQRCodes(entrySurveys, "g_appQR_pic1", "appQR1", function(entrySurveys) {
-            extractQRCodes(entrySurveys, "g_appQR_pic2", "appQR2", function(entrySurveys) {
-                extractQRCodes(exitSurveys, "g_deviceQR_retrieve", "deviceRetrieveQR", function(exitSurveys) {
-                    extractQRCodes(exitSurveys, "g_deviceQR_give", "deviceGiveQR", function(exitSurveys) {
-                        getDevicesTable(function(devices) {
-                           //Okay we should not have completely processed entry and exit surveys
-                           generateTrackingTables(entrySurveys, exitSurveys, devices);
-                        });
+            extractQRCodes(exitSurveys, "g_deviceQR_retrieve", "deviceRetrieveQR", function(exitSurveys) {
+                extractQRCodes(exitSurveys, "g_deviceQR_give", "deviceGiveQR", function(exitSurveys) {
+                    getDevicesTable(function(devices) {
+                       //Okay we should not have completely processed entry and exit surveys
+                       generateTrackingTables(entrySurveys, exitSurveys, devices);
                     });
                 });
             });
@@ -893,61 +967,67 @@ function fetchSurveys(formid, callback) {
     request(options, function(error, response, body) {
         //Okay now we should write this out to a file and call the cleaning script
         //on it
-        fs.writeFile(formid + '.csv', body, function(err) {
-            if(err) {
-                console.log("Encountered file writing error, can't clean");
-                return callback(null, "File writing error for cleaning");
-            } else {
-                //load the last file we cleaned
-                var last_json = null;
-                csv().fromFile(formid + '_cleaned.csv').then(function(json) {
-                    console.log("loaded last json");
-                    last_json = json;
-                    //Clean the file using the rscript
-                    exec('Rscript ' + formid + '.R ' + formid + '.csv ' +
-                                                       formid + '_cleaned.csv',
-                                             function(error, stdout, stderr) {
+        if(body.length == 0) {
+           //We don't have any forms submitted so just return an empty array
+           return callback([], false, null);
+        } else {
+            fs.writeFile(formid + '.csv', body, function(err) {
+                if(err) {
+                    console.log("Encountered file writing error, can't clean");
+                    return callback(null, "File writing error for cleaning");
+                } else {
+                    //load the last file we cleaned
+                    var last_json = null;
+                    csv().fromFile(formid + '_cleaned.csv').then(function(json) {
+                        console.log("Loaded old file for form ", formid, " for compairson.");
+                        last_json = json;
+                        //Clean the file using the rscript
+                        exec('Rscript ' + formid + '.R ' + formid + '.csv ' +
+                                                           formid + '_cleaned.csv',
+                                                 function(error, stdout, stderr) {
 
-                        if(error) {
-                            console.log(error, stderr);
-                            return callback(null, false, "Error cleaning file with provided script");
-                        } else {
-                            csv().fromFile(formid + '_cleaned.csv').then(function(json) {
-                                //compare json to last json
-                                var differences = diff(last_json, json);
-                                var changed = (typeof differences != 'undefined');
-                                return callback(json, changed, null);
-                            }, function(err) {
-                                console.log("Error reading file");
-                                return callback(null, false, err);
-                            });
-                        }
+                            if(error) {
+                                console.log(error, stderr);
+                                return callback(null, false, "Error cleaning file with provided script");
+                            } else {
+                                csv().fromFile(formid + '_cleaned.csv').then(function(json) {
+                                    //compare json to last json
+                                    var differences = diff(last_json, json);
+                                    var changed = (typeof differences != 'undefined');
+                                    return callback(json, changed, null);
+                                }, function(err) {
+                                    console.log("Error reading file");
+                                    return callback(null, false, err);
+                                });
+                            }
+                        });
+                    }, function(err) {
+                        console.log("Error loading past file.");
+                        console.log(err);
+                        last_json = null;
+
+                        //Clean the file using the rscript
+                        exec('Rscript ' + formid + '.R ' + formid + '.csv ' +
+                                        formid + '_cleaned.csv',
+                                        function(error, stdout, stderr) {
+
+                            if(error) {
+                                console.log(error, stderr);
+                                return callback(null, false, "Error cleaning file with provided script");
+                            } else {
+                                csv().fromFile(formid + '_cleaned.csv').then(function(json) {
+                                    console.log("Proceeding assuming changes.");
+                                    return callback(json, true, null);
+                                }, function(err) {
+                                    console.log("Error reading file");
+                                    return callback(null, false, err);
+                                });
+                            }
+                        });
                     });
-                }, function(err) {
-                    console.log("error loading last json");
-                    console.log(err);
-                    last_json = null;
-
-                    //Clean the file using the rscript
-                    exec('Rscript ' + formid + '.R ' + formid + '.csv ' +
-                                    formid + '_cleaned.csv',
-                                    function(error, stdout, stderr) {
-
-                        if(error) {
-                            console.log(error, stderr);
-                            return callback(null, false, "Error cleaning file with provided script");
-                        } else {
-                            csv().fromFile(formid + '_cleaned.csv').then(function(json) {
-                                return callback(json, true, null);
-                            }, function(err) {
-                                console.log("Error reading file");
-                                return callback(null, false, err);
-                            });
-                        }
-                    });
-                });
-            }
-        });
+                }
+            });
+        }
     });
 }
 
