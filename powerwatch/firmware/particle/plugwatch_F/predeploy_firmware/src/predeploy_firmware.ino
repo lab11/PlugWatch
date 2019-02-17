@@ -23,13 +23,14 @@ PRODUCT_VERSION(1);
 
 int last_millis;
 
-const APNHelperAPN apns[6] = {
+const APNHelperAPN apns[7] = {
  {"8901260", "wireless.twilio.com"},
  {"8923301", "http://mtnplay.com.gh"},
  {"8991101", "airtelgprs.com"},
  {"8958021", "gprsweb.digitel.ve"},
  {"8958021", "internet.digitel.ve"},
- {"8923400", "9mobile"}
+ {"8923400", "9mobile"},
+ {"8918500", "iot-eu.aer.net"}
 };
 APNHelper apnHelper(apns, sizeof(apns)/sizeof(apns[0]));
 

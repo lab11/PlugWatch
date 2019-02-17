@@ -53,8 +53,8 @@ int product_id = 7010;
 PRODUCT_ID(7010);
 #endif
 
-int version_int = 103; 
-PRODUCT_VERSION(103);
+int version_int = 104; 
+PRODUCT_VERSION(104);
 
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
@@ -248,13 +248,14 @@ ParticleCloudState cloudState = ParticleConnectionCheck;
 retained SystemState state = CheckCloudEvent;
 retained SystemState lastState = Wait;
 
-const APNHelperAPN apns[6] = {
+const APNHelperAPN apns[7] = {
   {"8901260", "wireless.twilio.com"},
   {"8923301", "http://mtnplay.com.gh"},
   {"8991101", "airtelgprs.com"},
   {"8958021", "gprsweb.digitel.ve"},
   {"8958021", "internet.digitel.ve"},
-  {"8923400", "9mobile"}
+  {"8923400", "9mobile"},
+  {"8918500", "iot-eu.aer.net"}
 };
 APNHelper apnHelper(apns, sizeof(apns)/sizeof(apns[0]));
 
