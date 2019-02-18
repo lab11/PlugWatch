@@ -49,12 +49,12 @@
 int product_id = PRODUCT;
 PRODUCT_ID(PRODUCT);
 #else
-int product_id = 7010;
-PRODUCT_ID(7010);
+int product_id = 8462;
+PRODUCT_ID(8462);
 #endif
 
-int version_int = 104; 
-PRODUCT_VERSION(104);
+int version_int = 108; 
+PRODUCT_VERSION(108);
 
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
