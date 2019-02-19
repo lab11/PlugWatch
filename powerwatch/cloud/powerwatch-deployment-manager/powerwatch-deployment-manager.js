@@ -256,8 +256,25 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
                         names.push(key);
                         names.push(type);
                         cols = cols + "%I %s,";
+                    } else if (typeof meas == 'object') {
+                        console.log(meas);
+                        for(var subkey in meas) {
+                            if(meas.hasOwnProperty(subkey)) {
+                                var submeas = meas[subkey];
+                                var type = get_type(subkey, submeas);
+                                if(type != 'err') {
+                                    names.push(key + '_' + subkey);
+                                    names.push(type);
+                                    cols = cols + "%I %s,";
+                                } else {
+                                    console.log('Error with field', key, 'and subkey', subkey);
+                                    console.log('With value', submeas);
+                                }
+                            }
+                        }
                     } else {
                         console.log('Error with field ' + key);
+                        console.log('With value', meas);
                     }
                 }
             }
@@ -285,11 +302,23 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
                         names.push(table_name + '_temp');
                         for (var name in value) {
                             if(value.hasOwnProperty(name)) {
-                                cols = cols + "%I, ";
-                                names.push(name);
-                                vals = vals + "$" + i.toString() + ',';
-                                values.push(value[name]);
-                                i = i + 1;
+                                if(typeof value[name] == 'object') {
+                                    for(var subname in value[name]) {
+                                        if(value[name].hasOwnProperty(subname)) {
+                                            cols = cols + "%I, ";
+                                            names.push(name + '_' + subname);
+                                            vals = vals + "$" + i.toString() + ',';
+                                            values.push(value[name][subname]);
+                                            i = i + 1;
+                                        }
+                                    }
+                                } else {
+                                    cols = cols + "%I, ";
+                                    names.push(name);
+                                    vals = vals + "$" + i.toString() + ',';
+                                    values.push(value[name]);
+                                    i = i + 1;
+                                }
                             }
                         }
 
@@ -392,13 +421,51 @@ function writeDevicesTablePostgres(devices, outer_callback) {
 function writeEntryTablePostgres(entrySurveys, outer_callback) {
     console.log();
     console.log("Writing pilot errors array to postgres.");
-    writeGenericTablePostgres(entrySurveys, 'pilot_errors', outer_callback);
+    error_table = [];
+    for(var i = 0; i < entrySurveys.length; i++) {
+        error_table.push({
+               respondent_id: entrySurveys[i].a_respid,
+               respondent_firstname: entrySurveys[i].e_firstname,
+               respondent_surnname: entrySurveys[i].e_surnames,
+               respondent_popularname: entrySurveys[i].e_popularname,
+               phone_number: entrySurveys[i].e_phonenumber,
+               error: entrySurveys[i].error,
+               error_field: entrySurveys[i].error_field,
+               error_comment: entrySurveys[i].error_comment,
+               value_of_error_field: entrySurveys[i][entrySurveys[i].error_field],
+               fo_name: entrySurveys[i].surveyor_name,
+               gps: entrySurveys[i].gps,
+               gps_accurate: entrySurveys[i].g_gps_accurate,
+               carrier: entrySurveys[i].e_carrier,
+               second_phone_number: entrySurveys[i].e_otherphonenumber,
+               alternate_contact_name: entrySurveys[i].e_othercontact_person_name,
+               alternate_phone_number: entrySurveys[i].e_othercontact_person_number,
+               survey_time: entrySurveys[i].endtime,
+               survey_id: entrySurveys[i].instanceID
+        });
+    }
+    writeGenericTablePostgres(error_table, 'pilot_errors', outer_callback);
 }
 
 function writeExitTablePostgres(exitSurveys, outer_callback) {
     console.log();
     console.log("Writing change errors array to postgres.");
-    writeGenericTablePostgres(exitSurveys, 'change_errors', outer_callback);
+    error_table = [];
+    for(var i = 0; i < exitSurveys.length; i++) {
+        error_table.push({
+               respondent_id: exitSurveys[i].a_respid,
+               error: exitSurveys[i].error,
+               error_field: exitSurveys[i].error_field,
+               error_comment: exitSurveys[i].error_comment,               
+               value_of_error_field: exitSurveys[i][exitSurveys[i].error_field],
+               fo_name: exitSurveys[i].surveyor_name,
+               gps: entrySurveys[i].gps,
+               gps_accurate: entrySurveys[i].g_gps_accurate,
+               survey_time: exitSurveys[i].endtime,
+               survey_id: exitSurveys[i].instanceID
+        });
+    }
+    writeGenericTablePostgres(error_table, 'change_errors', outer_callback);
 }
 
 function writeRespondentTableOINK(respondents, callback) {
@@ -414,6 +481,7 @@ function writeRespondentTableOINK(respondents, callback) {
     
     //Okay first loop through the respondents and add/merge them
     //into OINK
+    console.log();
     console.log("Adding respondent list to OINK");
     var batch = db.batch();
     for(var key in respondents) {
@@ -573,7 +641,7 @@ function getGenericID(survey, qrField, qrBarField, manualField, devices) {
     var parsed_shield_id = null;
 
     //If the qrbar field is good we should just go with that
-    if(typeof survey[qrBarField] != 'undefined' && survey[qrBarField] != '') {
+    if(typeof survey[qrBarField] != 'undefined' && survey[qrBarField] != null) {
        let id_to_parse = survey[qrBarField].split(':');
        if(id_to_parse.length == 3) {
           parsed_core_id = id_to_parse[1];
@@ -586,7 +654,7 @@ function getGenericID(survey, qrField, qrBarField, manualField, devices) {
     }
 
     //Now lets try the normal QR field
-    if(typeof survey[qrField] != 'undefined') {
+    if(typeof survey[qrField] != 'undefined' && survey[qrField] != null) {
        let id_to_parse = survey[qrField].split(':');
        if(id_to_parse.length == 3) {
           parsed_core_id = id_to_parse[1];
@@ -647,6 +715,13 @@ function getEntryCoordinates(survey) {
         return [parseFloat(survey[gps[min_index]].Latitude),parseFloat(survey[gps[min_index]].Longitude)];
     }
 }
+
+var carrier_map = {};
+carrier_map['1'] = 'MTN';
+carrier_map['2'] = 'Airtel';
+carrier_map['3'] = 'Vodaphone';
+carrier_map['4'] = 'Tigo';
+carrier_map['5'] = 'GLO';
 
 function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
     //Sort the surveys by submission time
@@ -755,7 +830,18 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                entrySurveys[i].error_comment = 'No valid GPS coordinates found';
                continue;
            }
-
+            
+           var carrier = ''
+           if(typeof carrier_map[entrySurveys[i].e_carrier] != 'undefined') {
+               carrier = carrier_map[entrySurveys[i].e_carrier]
+           } else {
+               carrier = 'Unkown';
+               surveySuccess = false;
+               entrySurveys[i].error = true;
+               entrySurveys[i].error_field = 'e_carrier';
+               entrySurveys[i].error_comment = 'Unkown/other carrier. Respondent cannot be paid.';
+               continue;
+           }
 
            respondent_info = {
                respondent_id: respondent_id,
@@ -764,7 +850,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                respondent_popularname: entrySurveys[i].e_popularname,
                fo_name: entrySurveys[i].surveyor_name,
                phone_number: entrySurveys[i].e_phonenumber,
-               carrier: entrySurveys[i].e_carrier.toUpperCase(),
+               carrier: carrier,
                second_phone_number: entrySurveys[i].e_otherphonenumber,
                alternate_contact_name: entrySurveys[i].e_othercontact_person_name,
                alternate_phone_number: entrySurveys[i].e_othercontact_person_number,
@@ -841,7 +927,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                       second_phone_number: entrySurveys[i].e_otherphonenumber,
                       alternate_contact_name: entrySurveys[i].e_othercontact_person_name,
                       alternate_phone_number: entrySurveys[i].e_othercontact_person_number,
-                      carrier: entrySurveys[i].e_carrier.toUpperCase(),
+                      carrier: carrier,
                       currently_deployed: true,
                       location_latitude: coords[0],
                       location_longitude: coords[1],
@@ -1049,13 +1135,12 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
 function processSurveys(entrySurveys, exitSurveys) {
     //This should enter a powerwatch user into the postgres deployment table and the oink table
-    //TODO uncomment code below and remove one line
     //getDevicesTable(function(devices) {
     //   //Okay we should not have completely processed entry and exit surveys
     //   generateTrackingTables(entrySurveys, exitSurveys, devices);
     //});
 
-    // Parse out the QR codes
+    //Parse out the QR codes
     extractQRCodes(entrySurveys, "g_deviceQR", "deviceQR", function(entrySurveys) {
         extractQRCodes(entrySurveys, "g_appQR_pic1", "appQR1", function(entrySurveys) {
             extractQRCodes(exitSurveys, "g_deviceQR_retrieve", "deviceRetrieveQR", function(exitSurveys) {
