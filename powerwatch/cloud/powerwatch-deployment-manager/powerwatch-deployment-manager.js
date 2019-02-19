@@ -923,6 +923,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                       respondent_popularname: entrySurveys[i].e_popularname,
                       fo_name: entrySurveys[i].surveyor_name,
                       deployment_start_time: entrySurveys[i].endtime,
+                      deployment_end_time: null,
                       phone_number: entrySurveys[i].e_phonenumber,
                       second_phone_number: entrySurveys[i].e_otherphonenumber,
                       alternate_contact_name: entrySurveys[i].e_othercontact_person_name,
