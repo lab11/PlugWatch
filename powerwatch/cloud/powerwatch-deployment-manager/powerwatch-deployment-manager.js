@@ -10,7 +10,8 @@ const { exec } = require('child_process');
 const csv = require('csvtojson');
 var async = require('async');
 var diff = require('deep-diff');
-
+var admin = require('firebase-admin');
+   
 
 //get the usernames and passwords necessary for this task
 var command = require('commander');
@@ -20,9 +21,7 @@ command.option('-d, --database [database]', 'Database configuration file.')
         .option('-s, --survey [survey]', 'Survey configuration file')
         .option('-U, --surveyusername [surveyusername]', 'SurveyCTO username file')
         .option('-P, --surveypassword [surveypassword]', 'SurveyCTO passowrd file').parse(process.argv)
-        .option('-o, --oink [oink]', 'OINK configuration file')
-        .option('-a, --oinkusername [oinkusername]', 'OINK username file')
-        .option('-b, --oinkpassword [oinkpassword]', 'OINK password file').parse(process.argv);
+        .option('-o, --oink [oink]', 'OINK configuration file').parse(process.argv);
 
 var timescale_config = null;
 if(typeof command.database !== 'undefined') {
@@ -42,15 +41,16 @@ if(typeof command.surveyusername !== 'undefined') {
     survey_config = require('./survey-config.json');
 }
 
+//The only valid way to do this is through a service account ID
+//So we will start by
 var oink_config = {};
-if(typeof command.oinkusername !== 'undefined') {
-    //survey_config = require(command.survey);
-    //survey_config.username = fs.readFileSync(command.surveyusername,'utf8').trim()
-    //survey_config.password = fs.readFileSync(command.surveypassword,'utf8').trim()
+if(typeof command.oink !== 'undefined') {
+    oink_config = require(command.oink);
 } else {
-    //survey_config = require('./survey-config.json');
+    oink_config = require('./oink-config.json');
 }
 
+//Initialize the postgres information
 const pg_pool = new  Pool( {
     user: timescale_config.username,
     host: timescale_config.host,
@@ -59,6 +59,16 @@ const pg_pool = new  Pool( {
     port: timescale_config.port,
     max: 20,
 });
+
+//Initialize the firebase project
+var serviceAccount = require(oink_config.service_account);
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: oink_config.database
+});
+
+//Get the database object
+var db = admin.firestore();
 
 //This is a recurive function that we could sub in if we get a lot of image
 //corruption. But's it's untested so let's leave it out for now
@@ -253,7 +263,7 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
             }
             cols = cols.substring(0, cols.length-1);
 
-            console.log("Creating new temporary respondent table");
+            console.log("Creating new temporary table");
             var qstring = format.withArray('CREATE TABLE %I (' + cols + ')', names);
             //console.log("Issuing query: ", qstring);
             pg_pool.query(qstring, (err, res) => {
@@ -361,85 +371,164 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
 }
 
 function writeRespondentTablePostgres(respondents, outer_callback) {
-   console.log();
-   console.log("Writing respondents array to postgres.");
-   var array = [];
-   for(var key in respondents) {
-       if(respondents.hasOwnProperty(key)) {
-           array.push(respondents[key]);
-       }
-   }
+    console.log();
+    console.log("Writing respondents array to postgres.");
+    var array = [];
+    for(var key in respondents) {
+        if(respondents.hasOwnProperty(key)) {
+            array.push(respondents[key]);
+        }
+    }
 
-   writeGenericTablePostgres(array, 'respondents', outer_callback);
+    writeGenericTablePostgres(array, 'respondents', outer_callback);
 }
 
 function writeDevicesTablePostgres(devices, outer_callback) {
-   console.log();
-   console.log("Writing deployment array to postgres.");
-   writeGenericTablePostgres(devices, 'deployment', outer_callback);
+    console.log();
+    console.log("Writing deployment array to postgres.");
+    writeGenericTablePostgres(devices, 'deployment', outer_callback);
 }
 
 function writeEntryTablePostgres(entrySurveys, outer_callback) {
-   console.log();
-   console.log("Writing pilot errors array to postgres.");
-   writeGenericTablePostgres(entrySurveys, 'pilot_errors', outer_callback);
+    console.log();
+    console.log("Writing pilot errors array to postgres.");
+    writeGenericTablePostgres(entrySurveys, 'pilot_errors', outer_callback);
 }
 
 function writeExitTablePostgres(exitSurveys, outer_callback) {
-   console.log();
-   console.log("Writing change errors array to postgres.");
-   writeGenericTablePostgres(exitSurveys, 'change_errors', outer_callback);
+    console.log();
+    console.log("Writing change errors array to postgres.");
+    writeGenericTablePostgres(exitSurveys, 'change_errors', outer_callback);
+}
+
+function writeRespondentTableOINK(respondents, callback) {
+    //Okay this needs to write respondents to OINK
+    //Some users may already exits, and they should not be removed
+    //But they may need to be mark as inactive or such
+
+    //Then oink needs a way of reprocessing updated users based on unique
+    //attributes
+
+    //If there is a user in OINK that no longer exists in our script,
+    //we should process that too
+    
+    //Okay first loop through the respondents and add/merge them
+    //into OINK
+    console.log("Adding respondent list to OINK");
+    var batch = db.batch();
+    for(var key in respondents) {
+        if(respondents.hasOwnProperty(key)) {
+            //Okay what fields need to be set for oink
+            
+            //name of doc-respondent ID
+            //active true/false
+            //first survey true/false
+            //incentivized true/false
+            //user_id - respondent_id
+            //phone_number
+            //timestamp
+            //payment_service
+            //app id
+            //powerwatch true/false
+            //powerwatch install time
+            var oink_user = {
+                user_id: respondents[key].respondent_id,
+                active: respondents[key].currently_active,
+                firstSurvey: true,
+                incentivized: respondents[key].currently_active,
+                payment_service: "korba",
+                phone_number: respondents[key].phone_number,
+                phone_carrier: respondents[key].carrier,
+                timestamp: Date.now(),
+                app_id: respondents[key].app_id,
+                powerwatch: respondents[key].powerwatch
+            };
+
+            if(oink_user.powerwatch) {
+                oink_user.powerwatch_install_time = respondents[key].pilot_survey_time;
+            }
+
+            if(oink_user.currently_active) {
+                oink_user.dwapp_install_time = respondents[key].pilot_survey_time;
+            }
+
+            //get the doc
+            console.log(key);
+            var docRef = db.collection('OINK_user_list').doc(key);
+            batch.set(docRef, oink_user, {merge: true});
+        }
+    }
+   
+    console.log("Committing respondent list");
+    batch.commit().then(function() {
+        console.log("Successfully updated oink user list");
+        callback();
+    }).catch(function(error) {
+        console.loog("Error updating oink user list:", error);
+        callback(error);
+    });
+
+    //Okay now, if there are any users not in our current respondent list
+    // (like there was an error and the cleaning script removed them)
+    // Set them to not active, not incentivized, no powerwatch
+    //TODO
 }
 
 function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys) {
-   //Write the respondents and devices table to postgres
-   writeRespondentTablePostgres(respondents, function(err) {
-   if(err) {
-       console.log(err);
-   } else {
-       writeDevicesTablePostgres(devices, function(err) {
+    //Write the respondents and devices table to postgres
+    writeRespondentTablePostgres(respondents, function(err) {
+    if(err) {
+        console.log(err);
+    } else {
+       writeRespondentTableOINK(respondents, function(err) {
        if(err) {
-           console.log(err);
+          console.log(err);
        } else {
-           writeEntryTablePostgres(entrySurveys, function(err) {
-           if(err) {
-               console.log(err);
-           } else {
-               writeExitTablePostgres(exitSurveys, function(err) {
-               if(err) {
-                   console.log(err);
-               } else {
-                   //This is where you should write to OINK
-               }
-               });
-           }
-           });
+            writeDevicesTablePostgres(devices, function(err) {
+            if(err) {
+                console.log(err);
+            } else {
+                writeEntryTablePostgres(entrySurveys, function(err) {
+                if(err) {
+                    console.log(err);
+                } else {
+                    writeExitTablePostgres(exitSurveys, function(err) {
+                    if(err) {
+                        console.log(err);
+                    } else {
+                        //This is where you should write to OINK
+                    }
+                    });
+                }
+                });
+            }
+            });
        }
        });
-   }
-   });
+    }
+    });
 }
 
 function lookupCoreID(core_id, devices) {
 
-   for(var i = 0; i < devices.length; i++) {
-       if(devices[i].core_id == core_id.toLowerCase) {
-           return [devices[i].core_id.toLowerCase(), devices[i].shield_id.toLowerCase()];
-       }
-   }
+    for(var i = 0; i < devices.length; i++) {
+        if(devices[i].core_id == core_id.toLowerCase) {
+            return [devices[i].core_id.toLowerCase(), devices[i].shield_id.toLowerCase()];
+        }
+    }
 
-   return null;
+    return null;
 }
 
 function lookupShieldID(shield_id, devices) {
 
-   for(var i = 0; i < devices.length; i++) {
-       if(devices[i].shield_id == shield_id.toUpperCase()) {
-           return [devices[i].core_id.toLowerCase(), devices[i].shield_id.toUpperCase()];
-       }
-   }
+    for(var i = 0; i < devices.length; i++) {
+        if(devices[i].shield_id == shield_id.toUpperCase()) {
+            return [devices[i].core_id.toLowerCase(), devices[i].shield_id.toUpperCase()];
+        }
+    }
 
-   return null;
+    return null;
 }
 
 function getDevicesTable(callback) {
@@ -459,105 +548,104 @@ function getDevicesTable(callback) {
 }
 
 function getAppID(survey) {
-   //g_appQR_nr
-   //appQR1
-   var QR1 = null;
-   if(survey.appQR1 != null) {
-       QR1 = survey.appQR1.toUpperCase();
-   }
+    //g_appQR_nr
+    //appQR1
+    var QR1 = null;
+    if(survey.appQR1 != null) {
+        QR1 = survey.appQR1.toUpperCase();
+    }
 
-   var QRn = survey.g_appQR_nr1.toUpperCase();
-   var QRbar = survey.g_appQRbar.toUpperCase();
+    var QRn = survey.g_appQR_nr1.toUpperCase();
+    var QRbar = survey.g_appQRbar.toUpperCase();
 
-   if(QRbar.length == 15 || QRbar.length == 16) {
-       return QRbar;
-   } else if(typeof QR1 != 'undefined' && QR1 != null && (QR1.length == 15 || QR1.length == 16)) {
-       return QR1;
-   } else {
-       return QRn;
-   }
+    if(QRbar.length == 15 || QRbar.length == 16) {
+        return QRbar;
+    } else if(typeof QR1 != 'undefined' && QR1 != null && (QR1.length == 15 || QR1.length == 16)) {
+        return QR1;
+    } else {
+        return QRn;
+    }
 }
 
-function getGenericID(survey, qrField, manualField, devices) {
-   //Attempt to parse the QR code
-   var parsed_core_id = null;
-   var parsed_shield_id = null;
+function getGenericID(survey, qrField, qrBarField, manualField, devices) {
+    //Attempt to parse the QR code
+    var parsed_core_id = null;
+    var parsed_shield_id = null;
 
-   if(typeof survey[qrField] != 'undefined') {
-      let ids = survey[qrField].split(':');
-      if(ids.length == 3) {
-         parsed_core_id = ids[1];
-         parsed_shield_id = ids[2];
-      }
-   }
-
-   //Okay if we have a parsed core or shield ID, we should try looking that up
-   //in the devices table
-   if(parsed_core_id != null) {
-       let ids = lookupCoreID(parsed_core_id, devices);
-
-       if(ids != null) {
-           return ids;
-       } else {
-           ids = lookupShieldID(parsed_shield_id, devices);
-
-           if(ids != null) {
-               return ids;
-           } else {
-               ids = lookupShieldID(survey[manualField] + '0000', devices);
-
-               if(ids != null) {
-                   return ids;
-               } else {
-                   //There is nothing we can do here but give up
-                   return null;
-               }
-           }
+    //If the qrbar field is good we should just go with that
+    if(typeof survey[qrBarField] != 'undefined' && survey[qrBarField] != '') {
+       let id_to_parse = survey[qrBarField].split(':');
+       if(id_to_parse.length == 3) {
+          parsed_core_id = id_to_parse[1];
+          parsed_shield_id = id_to_parse[2];
+          let ids = lookupCoreID(parsed_core_id, devices);
+          if(ids != null) {
+             return ids;
+          }
        }
-   }
+    }
+
+    //Now lets try the normal QR field
+    if(typeof survey[qrField] != 'undefined') {
+       let id_to_parse = survey[qrField].split(':');
+       if(id_to_parse.length == 3) {
+          parsed_core_id = id_to_parse[1];
+          parsed_shield_id = id_to_parse[2];
+          let ids = lookupCoreID(parsed_core_id, devices);
+          if(ids != null) {
+             return ids;
+          }
+       }
+    }
+
+    //Okay lastly try the manually entered field
+    let ids = lookupShieldID(survey[manualField] + '0000', devices);
+
+    //This could be null but it's all we could do
+    return ids;
 }
 
 function getExitGiveDeviceID(survey, devices) {
-   //g_deviceID_retrieve
-   //deviceRetrieveQR
+    //g_deviceID_retrieve
+    //deviceRetrieveQR
 
-   return getGenericID(survey, 'deviceGiveQR', 'g_deviceID_give', devices);
+    return getGenericID(survey, 'deviceGiveQR', 'g_deviceQRbar_give', 'g_deviceID_give', devices);
 }
 
 function getExitRetrieveDeviceID(survey, devices) {
-   //g_deviceID_retrieve
-   //deviceRetrieveQR
+    //g_deviceID_retrieve
+    //deviceRetrieveQR
 
-   return getGenericID(survey, 'deviceRetrieveQR', 'g_deviceID_retrieve', devices);
+    return getGenericID(survey, 'deviceRetrieveQR', 'g_deviceQRbar_retrieve', 'g_deviceID_retrieve', devices);
 }
 
 function getEntryDeviceID(survey, devices) {
-   //g_deviceID
-   //deviceQR
+    //g_deviceID
+    //deviceQR
 
-   return getGenericID(survey, 'deviceQR', 'g_deviceID', devices);
+    return getGenericID(survey, 'deviceQR', 'g_deviceQRbar', 'g_deviceID', devices);
 }
 
 function getEntryCoordinates(survey) {
-   //Which GPS numbers have been recorded
-   var gps = ['g_gps_accurate','g_gps','gps'];
+    //Which GPS numbers have been recorded
+    var gps = ['g_gps_accurate','g_gps','gps'];
 
-   var min_accuracy = null;
-   var min_index = null;
+    var min_accuracy = null;
+    var min_index = null;
 
-   for(var i = 0; i < gps.length; i++){
-       if(survey[gps[i]].Accuracy != '') {
-           if(min_accuracy == null || parseFloat(survey[gps[i]].Accuracy) < min_accuracy) {
-               min_index = i;
-           }
-       }
-   }
+    for(var i = 0; i < gps.length; i++){
+        if(survey[gps[i]].Accuracy != '') {
+            if(min_accuracy == null || parseFloat(survey[gps[i]].Accuracy) < min_accuracy) {
+                min_index = i;
+            }
+        }
+    }
 
-   if(min_index == null) {
-       return null;
-   } else {
-       return [parseFloat(survey[gps[min_index]].Latitude),parseFloat(survey[gps[min_index]].Longitude)];
-   }
+    if(min_index == null) {
+        return null;
+    } else {
+        return [parseFloat(survey[gps[min_index]].Latitude),parseFloat(survey[gps[min_index]].Longitude)];
+    }
 }
 
 function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
@@ -606,38 +694,51 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            if(typeof entrySurveys[i].error != 'undefined' && entrySurveys[i].error) {
                console.log("Cleaning script marked survey as errored. Skipping survey.");
                surveySuccess = false;
+               continue;
            }
 
            //Make sure that we need to process this survey
-           if(entrySurveys[i].g_download == '0' && entrySurveys[i].g_install == '0') {
-              //This survey did not result in an app download or a powerwatch install
-              //Exiting
-              console.log('No app install or powerwatch install. Skipping survey');
-              surveys_to_remove.push(i);
-              continue;
-           }
-
+           //if(entrySurveys[i].g_download == '0' && entrySurveys[i].g_install == '0') {
+           //   //This survey did not result in an app download or a powerwatch install
+           //   //Exiting
+           //   console.log('No app install or powerwatch install. Skipping survey');
+           //   surveys_to_remove.push(i);
+           //   continue;
+           //}
+            
+           //Is the respondent ID valid?
+          if(respondent_id.length != 8) {
+               //This is a duplicate
+               console.log("Invalid respondent ID for", entrySurveys[i].instanceID,"Skipping suvey.");
+               surveySuccess = false;
+               entrySurveys[i].error = true;
+               entrySurveys[i].error_field = 'a_respid';
+               entrySurveys[i].error_comment = 'Invalid Respondent ID';
+               continue;
+          }
 
            //Okay, first, have we already processed an entry survey for
            //this respondent ID
            if(typeof respondents[respondent_id] != 'undefined') {
                //This is a duplicate
-               console.log("Respondent duplicate of", respondents[respondent_id].entrySurvey,"Skipping suvey.");
+               console.log("Respondent duplicate of", respondents[respondent_id].pilot_survey_id,"Skipping suvey.");
                surveySuccess = false;
                entrySurveys[i].error = true;
                entrySurveys[i].error_field = 'a_respid';
-               entrySurveys[i].error_comment = 'Duplicate respondent ID of ' + respondents[respondent_id].entrySurveyID;
+               entrySurveys[i].error_comment = 'Duplicate respondent ID of ' + respondents[respondent_id].pilot_survey_id;
+               continue;
            }
 
            //Do we already have a respondent with this phone number?
            for(var key in respondents) {
                if(respondents[key].phoneNumber == entrySurveys[i].e_phonenumber) {
                    //This is a duplicate
-                   console.log("Phone number duplicate of", respondents[respondent_id].entrySurvey,"Skipping suvey.");
+                   console.log("Phone number duplicate of respondent", key, "Skipping suvey.");
                    surveySuccess = false;
                    entrySurveys[i].error = true;
                    entrySurveys[i].error_field = 'e_phonenumber';
-                   entrySurveys[i].error_comment = 'Duplicate phone number of ' + respondents[key].entrySurveyID;
+                   entrySurveys[i].error_comment = 'Duplicate phone number of respondent ' + key;
+                   continue;
                }
            }
 
@@ -652,6 +753,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                entrySurveys[i].error = true;
                entrySurveys[i].error_field = 'g_gps_accuracy';
                entrySurveys[i].error_comment = 'No valid GPS coordinates found';
+               continue;
            }
 
 
@@ -660,6 +762,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                respondent_firstname: entrySurveys[i].e_firstname,
                respondent_surnname: entrySurveys[i].e_surnames,
                respondent_popularname: entrySurveys[i].e_popularname,
+               fo_name: entrySurveys[i].surveyor_name,
                phone_number: entrySurveys[i].e_phonenumber,
                carrier: entrySurveys[i].e_carrier.toUpperCase(),
                second_phone_number: entrySurveys[i].e_otherphonenumber,
@@ -688,6 +791,10 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                } else {
                   respondent_info.app_id = appID;
                }
+           } else {
+               console.log("Respondent did not download the app. Set currently active to false.");
+               //Set the user to active
+               respondent_info.currently_active = false;
            }
 
            //if there is a powerwatch device collect the same information about powerwatch
@@ -703,6 +810,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   entrySurveys[i].error = true;
                   entrySurveys[i].error_field = 'g_deviceID';
                   entrySurveys[i].error_comment = 'Unknown or invalid device ID';
+                  continue;
               } else {
                   let core_id = ids[0];
                   let shield_id = ids[1];
@@ -716,6 +824,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                         entrySurveys[i].error = true;
                         entrySurveys[i].error_field = 'g_deviceID';
                         entrySurveys[i].error_comment = 'Device already deployed';
+                        continue;
                      }
                   }
 
@@ -726,6 +835,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                       respondent_firstname: entrySurveys[i].e_firstname,
                       respondent_surnname: entrySurveys[i].e_surnames,
                       respondent_popularname: entrySurveys[i].e_popularname,
+                      fo_name: entrySurveys[i].surveyor_name,
                       deployment_start_time: entrySurveys[i].endtime,
                       phone_number: entrySurveys[i].e_phonenumber,
                       second_phone_number: entrySurveys[i].e_otherphonenumber,
@@ -746,7 +856,10 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   respondent_info.powerwatch_shield_id = shield_id;
                   respondent_info.powerwatch_deployment_time = entrySurveys[i].endtime;
               }//end device IDs are valid
-           }//end device was installed
+           } else {//end device was installed
+               //User did not get a powerwatch
+               respondent_info.powerwatch = false;
+           }
 
            //If this survey was processed successfully, remove it from
            //the set of surveys to process
@@ -812,6 +925,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   exitSurveys[i].error = true;
                   exitSurveys[i].error_field = 'g_deviceID_retrieve';
                   exitSurveys[i].error_comment = 'Unknown or invalid device ID';
+                  continue;
               } else {
                   let core_id = ids[0];
 
@@ -834,6 +948,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                      exitSurveys[i].error = true;
                      exitSurveys[i].error_field = 'g_deviceID_retrieve';
                      exitSurveys[i].error_comment = 'Reported device not currently deployed with reported respondent';
+                     continue;
                   }
               }
            }
@@ -849,6 +964,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   exitSurveys[i].error = true;
                   exitSurveys[i].error_field = 'g_deviceID_give';
                   exitSurveys[i].error_comment = 'Unknown or invalid device ID';
+                  continue;
               } else {
                   var core_id = ids[0];
                   var shield_id = ids[1];
@@ -861,6 +977,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                         exitSurveys[i].error = true;
                         exitSurveys[i].error_field = 'g_deviceID_give';
                         exitSurveys[i].error_comment = 'Device already deployed. Cannot be deployed again.';
+                        continue;
                      }
                   }
 
@@ -871,6 +988,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                       respondent_firstname: respondents[respondent_id].e_firstname,
                       respondent_surnname: respondents[respondent_id].e_surnames,
                       respondent_popularname: respondents[respondent_id].e_popularname,
+                      fo_name: exitSurveys[i].surveyor_name,
                       deployment_start_time: exitSurveys[i].endtime,
                       phone_number: respondents[respondent_id].phone_number,
                       second_phone_number: respondents[respondent_id].second_phone_number,
@@ -931,6 +1049,11 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
 function processSurveys(entrySurveys, exitSurveys) {
     //This should enter a powerwatch user into the postgres deployment table and the oink table
+    //TODO uncomment code below and remove one line
+    //getDevicesTable(function(devices) {
+    //   //Okay we should not have completely processed entry and exit surveys
+    //   generateTrackingTables(entrySurveys, exitSurveys, devices);
+    //});
 
     // Parse out the QR codes
     extractQRCodes(entrySurveys, "g_deviceQR", "deviceQR", function(entrySurveys) {

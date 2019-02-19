@@ -1,0 +1,4 @@
+{
+    "database": "database.url",
+    "service_account": "/path/to/service/account/file"
+}

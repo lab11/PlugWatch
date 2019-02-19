@@ -12,10 +12,11 @@
         "jpeg-js":"0.3.4",
         "csvtojson":"2.0.8",
         "async":"2.6.1",
-        "deep-diff":"1.0.2"
+        "deep-diff":"1.0.2",
+        "firebase-admin":"7.0.0"
     },
     "scripts": {
-        "start": "./powerwatch-deployment-manager.js -d /etc/config/postgres.json -u /etc/config/postgres/username -p /etc/config/postgres/password"
+        "start": "./powerwatch-deployment-manager.js -d /etc/config/postgres-config.json -u /etc/config/postgres/username -p /etc/config/postgres/password -s /etc/config/survey-config.json -U /etc/config/survey/username -P /etc/config/survey/passowrd -o /etc/config/oink-config.json"
     },
     "engines": {
         "node": ">=4.3.2"
