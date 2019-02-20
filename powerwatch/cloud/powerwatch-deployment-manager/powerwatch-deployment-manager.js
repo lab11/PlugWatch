@@ -526,20 +526,40 @@ function writeRespondentTableOINK(respondents, callback) {
             batch.set(docRef, oink_user, {merge: true});
         }
     }
-   
-    console.log("Committing respondent list");
-    batch.commit().then(function() {
-        console.log("Successfully updated oink user list");
-        callback();
-    }).catch(function(error) {
-        console.loog("Error updating oink user list:", error);
-        callback(error);
-    });
-
+    
     //Okay now, if there are any users not in our current respondent list
     // (like there was an error and the cleaning script removed them)
     // Set them to not active, not incentivized, no powerwatch
-    //TODO
+    db.collection('OINK_user_list').get().then(users => {
+        users.forEach(doc => {
+            //If the user ID is not in our respondent list just set it to not
+            //incentivized
+            if(typeof respondents[doc.id] == 'undefined' && (doc.data().active == true || doc.data().incentivized == true)) {
+                console.log('Removing user with ID', doc.id, 'from incentivized list');
+                var docRef = db.collection('OINK_user_list').doc(doc.id);
+                batch.set(docRef, {
+                    active: false,
+                    incentivized: false
+                }, {
+                    merge: true
+                });
+            }
+        });
+
+        console.log("Committing respondent list and deactivation list");
+        batch.commit().then(function() {
+            console.log("Successfully updated oink user list");
+            return callback();
+        }).catch(function(error) {
+            console.loog("Error updating oink user list:", error);
+            return callback(error);
+        });
+
+    }).catch(err => {
+        console.log(err);
+        console.log("error reading oink user list");
+        return callback(error);
+    });
 }
 
 function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys) {
@@ -631,7 +651,11 @@ function getAppID(survey) {
     } else if(typeof QR1 != 'undefined' && QR1 != null && (QR1.length == 15 || QR1.length == 16)) {
         return QR1;
     } else {
-        return QRn;
+        if(QRn.length == 15 || QRn.length == 16) {
+            return QRn;
+        } else {
+            return null;
+        }
     }
 }
 
@@ -835,6 +859,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            if(typeof carrier_map[entrySurveys[i].e_carrier] != 'undefined') {
                carrier = carrier_map[entrySurveys[i].e_carrier]
            } else {
+               console.log('Unkown carrier. Skipping survey');
                carrier = 'Unkown';
                surveySuccess = false;
                entrySurveys[i].error = true;
