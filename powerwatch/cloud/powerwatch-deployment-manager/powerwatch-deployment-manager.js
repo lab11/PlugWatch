@@ -501,23 +501,22 @@ function writeRespondentTableOINK(respondents, callback) {
             //powerwatch install time
             var oink_user = {
                 user_id: respondents[key].respondent_id,
-                active: respondents[key].currently_active,
-                firstSurvey: true,
                 incentivized: respondents[key].currently_active,
+                app_installed: respondents[key].currently_active,
+                powerwatch_installed: respondents[key].powerwatch,
                 payment_service: "korba",
                 phone_number: respondents[key].phone_number,
                 phone_carrier: respondents[key].carrier,
-                timestamp: Date.now(),
-                app_id: respondents[key].app_id,
-                powerwatch: respondents[key].powerwatch
             };
 
-            if(oink_user.powerwatch) {
+            if(oink_user.powerwatch_installed) {
                 oink_user.powerwatch_install_time = respondents[key].pilot_survey_time;
+                oink_user.powerwatch_core_id = respondents[key].powerwatch_core_id;
             }
 
-            if(oink_user.currently_active) {
-                oink_user.dwapp_install_time = respondents[key].pilot_survey_time;
+            if(oink_user.app_installed) {
+                oink_user.app_install_time = respondents[key].pilot_survey_time;
+                app_id: respondents[key].app_id;
             }
 
             //get the doc
@@ -600,7 +599,7 @@ function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys) {
 function lookupCoreID(core_id, devices) {
 
     for(var i = 0; i < devices.length; i++) {
-        if(devices[i].core_id == core_id.toLowerCase) {
+        if(devices[i].core_id == core_id.toLowerCase()) {
             return [devices[i].core_id.toLowerCase(), devices[i].shield_id.toLowerCase()];
         }
     }
@@ -899,6 +898,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                    entrySurveys[i].error = true;
                    entrySurveys[i].error_field = 'g_appQR_nr';
                    entrySurveys[i].error_comment = 'App QR code not recorded correctly';
+                   continue;
                } else {
                   respondent_info.app_id = appID;
                }
@@ -996,7 +996,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
        } // end for loop
 
        //Actually remove the surveys
-       for(let i = 0; i < surveys_to_remove.length; i++) {
+       for(let i = surveys_to_remove.length -1; i >= 0; i--) {
           entrySurveys.splice(surveys_to_remove[i],1);
        }
 
