@@ -423,7 +423,7 @@ function writeEntryTablePostgres(entrySurveys, outer_callback) {
     console.log("Writing pilot errors array to postgres.");
     error_table = [];
     for(var i = 0; i < entrySurveys.length; i++) {
-        error_table.push({
+        var entry = {
                respondent_id: entrySurveys[i].a_respid,
                respondent_firstname: entrySurveys[i].e_firstname,
                respondent_surnname: entrySurveys[i].e_surnames,
@@ -432,8 +432,9 @@ function writeEntryTablePostgres(entrySurveys, outer_callback) {
                error: entrySurveys[i].error,
                error_field: entrySurveys[i].error_field,
                error_comment: entrySurveys[i].error_comment,
-               value_of_error_field: entrySurveys[i][entrySurveys[i].error_field],
+               value_of_error_field: null,
                fo_name: entrySurveys[i].surveyor_name,
+               site_id: entrySurveys[i].site_id,
                gps: entrySurveys[i].gps,
                gps_accurate: entrySurveys[i].g_gps_accurate,
                carrier: entrySurveys[i].e_carrier,
@@ -442,7 +443,13 @@ function writeEntryTablePostgres(entrySurveys, outer_callback) {
                alternate_phone_number: entrySurveys[i].e_othercontact_person_number,
                survey_time: entrySurveys[i].endtime,
                survey_id: entrySurveys[i].instanceID
-        });
+        };
+
+        if(typeof entrySurveys[i][entrySurveys[i].error_field] != 'undefined') {
+            entry.value_of_error_field = entrySurveys[i][entrySurveys[i].error_field];  
+        }
+
+        error_table.push(entry);
     }
     writeGenericTablePostgres(error_table, 'pilot_errors', outer_callback);
 }
@@ -452,18 +459,24 @@ function writeExitTablePostgres(exitSurveys, outer_callback) {
     console.log("Writing change errors array to postgres.");
     error_table = [];
     for(var i = 0; i < exitSurveys.length; i++) {
-        error_table.push({
+         var entry = {
                respondent_id: exitSurveys[i].a_respid,
                error: exitSurveys[i].error,
                error_field: exitSurveys[i].error_field,
                error_comment: exitSurveys[i].error_comment,               
-               value_of_error_field: exitSurveys[i][exitSurveys[i].error_field],
+               value_of_error_field: null,
                fo_name: exitSurveys[i].surveyor_name,
                gps: entrySurveys[i].gps,
                gps_accurate: entrySurveys[i].g_gps_accurate,
                survey_time: exitSurveys[i].endtime,
                survey_id: exitSurveys[i].instanceID
-        });
+        };
+
+        if(typeof exitSurveys[i][exitSurveys[i].error_field] != 'undefined') {
+            entry.value_of_error_field = exitSurveys[i][exitSurveys[i].error_field];  
+        }
+
+        error_table.push(entry);
     }
     writeGenericTablePostgres(error_table, 'change_errors', outer_callback);
 }
@@ -516,7 +529,7 @@ function writeRespondentTableOINK(respondents, callback) {
 
             if(oink_user.app_installed) {
                 oink_user.app_install_time = respondents[key].pilot_survey_time;
-                app_id: respondents[key].app_id;
+                oink_user.app_id = respondents[key].app_id;
             }
 
             //get the doc
@@ -873,6 +886,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                respondent_surnname: entrySurveys[i].e_surnames,
                respondent_popularname: entrySurveys[i].e_popularname,
                fo_name: entrySurveys[i].surveyor_name,
+               site_id: entrySurveys[i].site_id,
                phone_number: entrySurveys[i].e_phonenumber,
                carrier: carrier,
                second_phone_number: entrySurveys[i].e_otherphonenumber,
@@ -947,6 +961,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                       respondent_surnname: entrySurveys[i].e_surnames,
                       respondent_popularname: entrySurveys[i].e_popularname,
                       fo_name: entrySurveys[i].surveyor_name,
+                      site_id: entrySurveys[i].site_id,
                       deployment_start_time: entrySurveys[i].endtime,
                       deployment_end_time: null,
                       phone_number: entrySurveys[i].e_phonenumber,
@@ -1101,6 +1116,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                       respondent_surnname: respondents[respondent_id].e_surnames,
                       respondent_popularname: respondents[respondent_id].e_popularname,
                       fo_name: exitSurveys[i].surveyor_name,
+                      site_id: respondents[respondent_id].site_id,
                       deployment_start_time: exitSurveys[i].endtime,
                       phone_number: respondents[respondent_id].phone_number,
                       second_phone_number: respondents[respondent_id].second_phone_number,
