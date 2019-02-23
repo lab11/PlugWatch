@@ -257,7 +257,6 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
                         names.push(type);
                         cols = cols + "%I %s,";
                     } else if (typeof meas == 'object') {
-                        console.log(meas);
                         for(var subkey in meas) {
                             if(meas.hasOwnProperty(subkey)) {
                                 var submeas = meas[subkey];
@@ -447,6 +446,16 @@ function writeEntryTablePostgres(entrySurveys, outer_callback) {
 
         if(typeof entrySurveys[i][entrySurveys[i].error_field] != 'undefined') {
             entry.value_of_error_field = entrySurveys[i][entrySurveys[i].error_field];  
+        } else {
+            entry.value_of_error_field = '';
+        }
+
+        if(typeof entrySurveys[i].error_extra != 'undefined') {
+            entry.error_extra = entrySurveys[i].error_extra;
+        }
+
+        if(typeof entrySurveys[i].error_extra2 != 'undefined') {
+            entry.error_extra2 = entrySurveys[i].error_extra2;
         }
 
         error_table.push(entry);
@@ -802,7 +811,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            console.log("Processing entry survey for respondent", respondent_id);
 
            //Make sure that the R script didn't report an error for this survey
-           if(typeof entrySurveys[i].error != 'undefined' && entrySurveys[i].error) {
+           if(typeof entrySurveys[i].error != 'undefined' && entrySurveys[i].error == true) {
                console.log("Cleaning script marked survey as errored. Skipping survey.");
                surveySuccess = false;
                continue;
@@ -935,6 +944,8 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   entrySurveys[i].error = true;
                   entrySurveys[i].error_field = 'g_deviceID';
                   entrySurveys[i].error_comment = 'Unknown or invalid device ID';
+                  entrySurveys[i].error_extra = entrySurveys[i].g_deviceQR;
+                  entrySurveys[i].error_extra2 = entrySurveys[i].g_deviceQRbar;
                   continue;
               } else {
                   let core_id = ids[0];
@@ -1217,6 +1228,10 @@ function fetchSurveys(formid, callback) {
     request(options, function(error, response, body) {
         //Okay now we should write this out to a file and call the cleaning script
         //on it
+        if(error) {
+           return callback([], false, error);
+        }
+
         if(body.length == 0) {
            //We don't have any forms submitted so just return an empty array
            return callback([], false, null);
