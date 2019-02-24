@@ -17,7 +17,7 @@
         "isomorphic-git": "0.51.12"
     },
     "scripts": {
-        "start": "./powerwatch-deployment-manager.js -d /etc/config/postgres-config.json -u /etc/config/postgres/username -p /etc/config/postgres/password -s /etc/config/survey-config.json -U /etc/config/survey/username -P /etc/config/survey/passowrd -o /etc/config/oink-config.json"
+        "start": "./powerwatch-deployment-manager.js -d /etc/config/postgres-config.json -u /etc/config/postgres/username -p /etc/config/postgres/password -s /etc/config/survey-config.json -U /etc/config/survey/username -P /etc/config/survey/passowrd -o /etc/config/oink-config.json -a /etc/config/oink_service_account.json"
     },
     "engines": {
         "node": ">=4.3.2"

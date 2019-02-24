@@ -21,8 +21,9 @@ command.option('-d, --database [database]', 'Database configuration file.')
         .option('-p, --password [password]', 'Database password file')
         .option('-s, --survey [survey]', 'Survey configuration file')
         .option('-U, --surveyusername [surveyusername]', 'SurveyCTO username file')
-        .option('-P, --surveypassword [surveypassword]', 'SurveyCTO passowrd file').parse(process.argv)
-        .option('-o, --oink [oink]', 'OINK configuration file').parse(process.argv);
+        .option('-P, --surveypassword [surveypassword]', 'SurveyCTO passowrd file')
+        .option('-o, --oink [oink]', 'OINK configuration file')
+        .option('-a, --service_acount [oink_service_account]', 'OINK service account file').parse(process.argv);
 
 var timescale_config = null;
 if(typeof command.database !== 'undefined') {
@@ -61,8 +62,12 @@ const pg_pool = new  Pool( {
     max: 20,
 });
 
-//Initialize the firebase project
-var serviceAccount = require(oink_config.service_account);
+if(typeof command.service_account !== 'undefined') {
+    //Initialize the firebase project
+    var serviceAccount = require(command.service_account);
+} else {
+    var serviceAccount = require('./oink_service_account.json');
+}
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: oink_config.database
