@@ -1391,12 +1391,12 @@ function fetchNewSurveys() {
                     console.log(err);
                     return;
                 } else {
-                    processSurveys(entrySurveys, exitSurveys);
-                    //if(entry_changed || exit_changed) {
-                    //    processSurveys(entrySurveys, exitSurveys);
-                    //} else {
-                    //    console.log("No new surveys, no new processing scripts. Exiting.")
-                    //}
+                    //processSurveys(entrySurveys, exitSurveys);
+                    if(entry_changed || exit_changed) {
+                        processSurveys(entrySurveys, exitSurveys);
+                    } else {
+                        console.log("No new surveys, no new processing scripts. Exiting.")
+                    }
                 }
             });
         }
@@ -1404,11 +1404,10 @@ function fetchNewSurveys() {
 }
 
 //Periodically query surveyCTO for new surveys - if you get new surveys processing them on by one
-///setInterval(fetchNewSurveys, 600000)
-pullGitRepo(survey_config.gitRepoURL, survey_config.gitRepoPath, function(err) {
+setInterval(pullGitRepo(survey_config.gitRepoURL, survey_config.gitRepoPath, function(err) {
     if(err) {
         console.log('Error pulling git repo');
     } else {
         fetchNewSurveys();
     }
-});
+}), 120000);
