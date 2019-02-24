@@ -11,6 +11,7 @@ const csv = require('csvtojson');
 var async = require('async');
 var diff = require('deep-diff');
 var admin = require('firebase-admin');
+const git  = require('isomorphic-git');
    
 
 //get the usernames and passwords necessary for this task
@@ -811,7 +812,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            console.log("Processing entry survey for respondent", respondent_id);
 
            //Make sure that the R script didn't report an error for this survey
-           if(typeof entrySurveys[i].error != 'undefined' && entrySurveys[i].error == true) {
+           if(typeof entrySurveys[i].error != 'undefined' && (entrySurveys[i].error == true || entrySurveys[i].error == 'TRUE')) {
                console.log("Cleaning script marked survey as errored. Skipping survey.");
                surveySuccess = false;
                continue;
@@ -1208,8 +1209,37 @@ function processSurveys(entrySurveys, exitSurveys) {
     });
 }
 
+function gitAddCommitPush(file, repoPath, callback) {
+    //add the file
+    //remove the first directory from the filePath
+    file_split = file.split('/');
+    file_split.shift();
+    file = file_split.join('/');
+
+    git.add({fs, dir: repoPath, filepath: file}).then(function(result) {
+        git.commit({fs, dir: repoPath, message: "Auto updating newly cleaned file", 
+                        author:{name: "Deployment_Management_Service", email: "adkins@berkeley.edu"}}).then(function(result) {
+            exec('git -C ' + repoPath + ' push origin master', (error, stdout, stderr) => {
+                if(error) {
+                    console.log('Error pushing file')
+                    callback(error);
+                } else {
+                    console.log("Pushed new", file)
+                    callback();
+                }
+            });
+        }, function(err) {
+            console.log("Error committing file");
+            callback(err);
+        });
+    }, function(err) {
+        console.log("Error adding file");
+        callback(err);
+    });
+}
+
 //function to fetch surveys from surveyCTO
-function fetchSurveys(formid, callback) {
+function fetchSurveys(formid, cleaning_path, repoPath, callback) {
 
     //fetch all surveys from the start of time - we prevent double writing anyways
     var uri = 'https://' + survey_config.host + '/api/v1/forms/data/wide/csv/' +
@@ -1236,30 +1266,40 @@ function fetchSurveys(formid, callback) {
            //We don't have any forms submitted so just return an empty array
            return callback([], false, null);
         } else {
-            fs.writeFile(formid + '.csv', body, function(err) {
+            //get the root of the cleaning path
+            var path_parts = cleaning_path.split('/')
+            path_parts.pop();
+            var path = path_parts.join('/');
+            path = path + '/';
+
+            fs.writeFile(path + formid + '.csv', body, function(err) {
                 if(err) {
                     console.log("Encountered file writing error, can't clean");
                     return callback(null, "File writing error for cleaning");
                 } else {
                     //load the last file we cleaned
                     var last_json = null;
-                    csv().fromFile(formid + '_cleaned.csv').then(function(json) {
+                    csv().fromFile(path + formid + '_cleaned.csv').then(function(json) {
                         console.log("Loaded old file for form ", formid, " for compairson.");
                         last_json = json;
                         //Clean the file using the rscript
-                        exec('Rscript ' + formid + '.R ' + formid + '.csv ' +
-                                                           formid + '_cleaned.csv',
+                        exec('Rscript ' + cleaning_path + ' ' + path + formid + '.csv ' +
+                                                           path + formid + '_cleaned.csv',
                                                  function(error, stdout, stderr) {
 
                             if(error) {
                                 console.log(error, stderr);
                                 return callback(null, false, "Error cleaning file with provided script");
                             } else {
-                                csv().fromFile(formid + '_cleaned.csv').then(function(json) {
+                                csv().fromFile(path + formid + '_cleaned.csv').then(function(json) {
                                     //compare json to last json
                                     var differences = diff(last_json, json);
                                     var changed = (typeof differences != 'undefined');
-                                    return callback(json, changed, null);
+                                    //commit cleaned file 
+                                    console.log("Committing cleaned file");
+                                    gitAddCommitPush(path + formid + '_cleaned.csv', repoPath, function(err) {
+                                        return callback(json, changed, err);
+                                    });
                                 }, function(err) {
                                     console.log("Error reading file");
                                     return callback(null, false, err);
@@ -1272,17 +1312,20 @@ function fetchSurveys(formid, callback) {
                         last_json = null;
 
                         //Clean the file using the rscript
-                        exec('Rscript ' + formid + '.R ' + formid + '.csv ' +
-                                        formid + '_cleaned.csv',
+                        exec('Rscript ' + cleaning_path + ' ' + path + formid + '.csv ' +
+                                        path + formid + '_cleaned.csv',
                                         function(error, stdout, stderr) {
 
                             if(error) {
                                 console.log(error, stderr);
                                 return callback(null, false, "Error cleaning file with provided script");
                             } else {
-                                csv().fromFile(formid + '_cleaned.csv').then(function(json) {
+                                csv().fromFile(path + formid + '_cleaned.csv').then(function(json) {
+                                    console.log('Committing cleaned file');
+                                    gitAddCommitPush(path + formid + '_cleaned.csv', repoPath, function(err) {
+                                        return callback(json, changed, err);
+                                    });
                                     console.log("Proceeding assuming changes.");
-                                    return callback(json, true, null);
                                 }, function(err) {
                                     console.log("Error reading file");
                                     return callback(null, false, err);
@@ -1296,17 +1339,48 @@ function fetchSurveys(formid, callback) {
     });
 }
 
+function pullGitRepo(repoURL, repoPath, callback) {
+    git.log({fs, dir: repoPath}).then(function(paths) {
+        console.log("Get repo exists - moving on to pull");
+        exec('git -C ' + repoPath + ' pull', (error, stdout, stderr) => {
+            if(error) {
+                console.log("Error pulling git repo")
+                console.log(error);
+                callback(error);
+            } else {
+                console.log(stdout);
+                console.log("Pulled repo successfully")
+                callback();
+            }
+        });
+
+    }, function(err) {
+        if(err.name == 'ResolveRefError') {
+            exec('git clone ' + repoURL, (error, stdout, stderr) => {
+                if(error) {
+                    console.log("Error cloning git repo")
+                    console.log(error);
+                    callback(error);
+                } else {
+                    console.log("Repo cloned successfully")
+                    callback();
+                }
+            });
+        }
+    });
+}
+
 //function to fetch surveys from surveyCTO
 function fetchNewSurveys() {
     //fetch all surveys moving forward
     //send the API requests to surveyCTO - we probable also need attachments to process pictures
-    fetchSurveys(survey_config.entrySurveyName, function(entrySurveys, entry_changed, err) {
+    fetchSurveys(survey_config.entrySurveyName, survey_config.entryCleaningPath, survey_config.gitRepoPath, function(entrySurveys, entry_changed, err) {
         if(err) {
             console.log("Error fetching and processing forms");
             console.log(err);
             return;
         } else {
-            fetchSurveys(survey_config.exitSurveyName, function(exitSurveys, exit_changed, err) {
+            fetchSurveys(survey_config.exitSurveyName, survey_config.exitCleaningPath, survey_config.gitRepoPath, function(exitSurveys, exit_changed, err) {
                 if(err) {
                     console.log("Error fetching and processing forms");
                     console.log(err);
@@ -1326,4 +1400,10 @@ function fetchNewSurveys() {
 
 //Periodically query surveyCTO for new surveys - if you get new surveys processing them on by one
 ///setInterval(fetchNewSurveys, 600000)
-fetchNewSurveys();
+pullGitRepo(survey_config.gitRepoURL, survey_config.gitRepoPath, function(err) {
+    if(err) {
+        console.log('Error pulling git repo');
+    } else {
+        fetchNewSurveys();
+    }
+});
