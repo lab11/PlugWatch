@@ -66,7 +66,7 @@ if(typeof command.service_account !== 'undefined') {
     //Initialize the firebase project
     var serviceAccount = require(command.service_account);
 } else {
-    var serviceAccount = require('./oink_service_account.json');
+    var serviceAccount = require('./oink-service-account.json');
 }
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
