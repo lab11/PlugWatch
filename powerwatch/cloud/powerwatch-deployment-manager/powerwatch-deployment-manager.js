@@ -1403,11 +1403,23 @@ function fetchNewSurveys() {
     });
 }
 
-//Periodically query surveyCTO for new surveys - if you get new surveys processing them on by one
-setInterval(pullGitRepo(survey_config.gitRepoURL, survey_config.gitRepoPath, function(err) {
+//Call it once to start
+pullGitRepo(survey_config.gitRepoURL, survey_config.gitRepoPath, function(err) {
     if(err) {
         console.log('Error pulling git repo');
     } else {
         fetchNewSurveys();
     }
-}), 120000);
+});
+
+//Periodically query surveyCTO for new surveys - if you get new surveys processing them on by one
+setInterval(function() {
+    console.log("Starting survey processing");
+    pullGitRepo(survey_config.gitRepoURL, survey_config.gitRepoPath, function(err) {
+        if(err) {
+            console.log('Error pulling git repo');
+        } else {
+            fetchNewSurveys();
+        }
+    });
+}, 120000);
