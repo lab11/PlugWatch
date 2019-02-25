@@ -1422,4 +1422,4 @@ setInterval(function() {
             fetchNewSurveys();
         }
     });
-}, 120000);
+}, 1200000);
