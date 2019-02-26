@@ -6,6 +6,7 @@ RUN apt-get update
 RUN apt-get install -y nodejs npm
 
 #install keybase
+RUN apt-get install -y curl
 RUN curl --remote-name https://prerelease.keybase.io/keybase_amd64.deb
 RUN dpkg -i keybase_amd64.deb
 RUN apt-get install -f
