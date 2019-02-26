@@ -1,5 +1,5 @@
 #start from r-base because we need to run rscripts
-FROM node:6.3.0
+FROM node:11.10.0
 
 #install R
 RUN apt-get update
