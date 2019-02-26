@@ -44,6 +44,9 @@ spec:
             secretKeyRef:
               name: keybase-paperkey
               key: paperkey
+
+        - name: KEYBASE_ALLOW_ROOT
+          value: '1'
       
       volumes:
       - name: deployment-manager-config
