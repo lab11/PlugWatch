@@ -1,9 +1,9 @@
 #start from r-base because we need to run rscripts
-FROM r-base:3.5.2
+FROM node:6.3.0
 
-#install node
+#install R
 RUN apt-get update
-RUN apt-get install -y nodejs npm
+RUN apt-get install -y r-base
 
 #install keybase
 RUN apt-get install -y curl
