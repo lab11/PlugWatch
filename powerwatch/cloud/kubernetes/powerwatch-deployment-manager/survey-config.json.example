@@ -1,0 +1,11 @@
+{
+    "host": "domain.surveyCTO.com",
+    "entrySurveyName": "Entry",
+    "entryCleaningPath": "path/to/a_private_PII_repo/entry_example.R",
+    "exitSurveyName": "Exit",
+    "exitCleaningPath": "path/to/a_private_PII_repo/exit_example.R",
+    "gitRepoURL": "keybase://a_private_PII_repo",
+    "gitRepoPath": "a_private_PII_repo",
+    "username": "email@berkeley.edu",
+    "password": "password"
+}

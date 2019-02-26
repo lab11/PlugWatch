@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: survey-user-pass
+type: Opaque
+data:
+  username:
+  password:
