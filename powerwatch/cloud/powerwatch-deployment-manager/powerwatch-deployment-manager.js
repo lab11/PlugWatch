@@ -754,17 +754,11 @@ function getEntryCoordinates(survey) {
 
     for(var i = 0; i < gps.length; i++){
         if(survey[gps[i]].Accuracy != '') {
-            if(min_accuracy == null || parseFloat(survey[gps[i]].Accuracy) < min_accuracy) {
-                min_index = i;
-            }
+            return [parseFloat(survey[gps[i]].Latitude),parseFloat(survey[gps[i]].Longitude)];
         }
     }
 
-    if(min_index == null) {
-        return null;
-    } else {
-        return [parseFloat(survey[gps[min_index]].Latitude),parseFloat(survey[gps[min_index]].Longitude)];
-    }
+    return null;
 }
 
 var carrier_map = {};
