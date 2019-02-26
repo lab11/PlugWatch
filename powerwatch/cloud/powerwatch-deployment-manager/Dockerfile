@@ -3,7 +3,7 @@ FROM r-base:3.5.2
 
 #install node
 RUN apt-get update
-RUN apt-get install nodejs npm
+RUN apt-get install -y nodejs npm
 
 #install keybase
 RUN curl --remote-name https://prerelease.keybase.io/keybase_amd64.deb
