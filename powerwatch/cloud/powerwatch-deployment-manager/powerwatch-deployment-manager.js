@@ -23,7 +23,7 @@ command.option('-d, --database [database]', 'Database configuration file.')
         .option('-U, --surveyusername [surveyusername]', 'SurveyCTO username file')
         .option('-P, --surveypassword [surveypassword]', 'SurveyCTO passowrd file')
         .option('-o, --oink [oink]', 'OINK configuration file')
-        .option('-a, --service_acount [oink_service_account]', 'OINK service account file').parse(process.argv);
+        .option('-a, --service_account [oink_service_account]', 'OINK service account file').parse(process.argv);
 
 var timescale_config = null;
 if(typeof command.database !== 'undefined') {
