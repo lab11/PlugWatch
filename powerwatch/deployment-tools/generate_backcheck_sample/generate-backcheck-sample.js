@@ -182,11 +182,27 @@ function fetchNewSurveys() {
 
             //output any less than our length
             var list = 1;
+            var group_1 = []
+            var group_2 = []
             for(let i = 0; i < entrySurveys.length; i++) {
                 if(array.includes(i)) {
-                    console.log(i,entrySurveys[i].a_respid, list);
                     list ^= 1;
+                    if(list == 0) {
+                        group_1.push(entrySurveys[i].a_respid)
+                    } else {
+                        group_2.push(entrySurveys[i].a_respid)
+                    }
                 } 
+            }
+
+            console.log("Group 1")
+            for(let i = 0; i < group_1.length; i++) {
+                console.log(group_1[i].toUpperCase())
+            }
+            console.log();
+            console.log("Group 2")
+            for(let i = 0; i < group_2.length; i++) {
+                console.log(group_2[i].toUpperCase())
             }
         }
     });
