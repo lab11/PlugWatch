@@ -47,6 +47,18 @@ spec:
 
         - name: KEYBASE_ALLOW_ROOT
           value: '1'
+
+        - name: GIT_AUTHOR_NAME
+          value: 'Powerwatch Deployment Manager'
+
+        - name: GIT_COMMITTER_NAME
+          value: 'Powerwatch Deployment Manager'
+
+        - name: GIT_AUTHOR_EMAIL
+          value: 'adkins@berkeley.edu'
+
+        - name: GIT_COMMITTER_EMAIL
+          value: 'adkins@berkeley.edu'
       
       volumes:
       - name: deployment-manager-config
