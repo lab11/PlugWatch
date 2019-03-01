@@ -469,6 +469,35 @@ function writeEntryTablePostgres(entrySurveys, outer_callback) {
     writeGenericTablePostgres(error_table, 'pilot_errors', outer_callback);
 }
 
+function writeBackcheckTablePostgres(entrySurveys, outer_callback) {
+    console.log();
+    console.log("Writing backcheck table to postgres.");
+    backcheck_table = [];
+    for(var i = 0; i < entrySurveys.length; i++) {
+        var entry = {
+               respondent_id: entrySurveys[i].a_respid,
+               backcheck_group: entrySurveys[i].backcheck_group,
+               respondent_firstname: entrySurveys[i].e_firstname,
+               respondent_surnname: entrySurveys[i].e_surnames,
+               respondent_popularname: entrySurveys[i].e_popularname,
+               phone_number: entrySurveys[i].e_phonenumber,
+               fo_name: entrySurveys[i].surveyor_name,
+               site_id: entrySurveys[i].site_id,
+               gps: entrySurveys[i].gps,
+               gps_accurate: entrySurveys[i].g_gps_accurate,
+               carrier: entrySurveys[i].e_carrier,
+               second_phone_number: entrySurveys[i].e_otherphonenumber,
+               alternate_contact_name: entrySurveys[i].e_othercontact_person_name,
+               alternate_phone_number: entrySurveys[i].e_othercontact_person_number,
+               survey_time: entrySurveys[i].endtime,
+               survey_id: entrySurveys[i].instanceID
+        };
+
+        backcheck_table.push(entry);
+    }
+    writeGenericTablePostgres(backcheck_table, 'backcheck', outer_callback);
+}
+
 function writeExitTablePostgres(exitSurveys, outer_callback) {
     console.log();
     console.log("Writing change errors array to postgres.");
@@ -1369,6 +1398,76 @@ function pullGitRepo(repoURL, repoPath, callback) {
     });
 }
 
+var seed = 1;
+function random() {
+    var x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
+
+function generateBackcheckList(entrySurveys) {
+    //remove all surveys without g_install
+    surveys_to_remove = []
+    for(let i = 0; i < entrySurveys.length; i++) {
+        if(entrySurveys[i]['g_install'] != '1') {
+            surveys_to_remove.push(i)
+        }
+    }
+
+    for(let i = surveys_to_remove.length -1; i >= 0; i--) {
+       entrySurveys.splice(surveys_to_remove[i],1);
+    }
+
+    //Sort the array by time
+    entrySurveys.sort(function(a,b) {
+       return Date.parse(a['endtime']) - Date.parse(['endtime']);
+    });
+    
+    //Now draw from 10% from this list using a stable seed
+
+    //The methodology here will be to generate the complete list of
+    //random numbers - more than we need, then draw from them in order
+    //until we reach 10% of the current sample size
+    var array = []
+    var count = 0;
+    while(true) {
+        num = Math.round(random()*207);
+        if(!array.includes(num)) {
+            array.push(num);
+            count++;
+        }
+
+        if(count >= 21) {
+            break;
+        }
+    }
+    
+    //sort the array
+    array.sort();
+
+    //output any less than our length
+    var list = 1;
+    backcheck_surveys = [];
+    for(let i = 0; i < entrySurveys.length; i++) {
+        if(array.includes(i)) {
+            list ^= 1;
+            if(list == 0) {
+                entrySurveys[i].backcheck_group = 1;
+            } else {
+                entrySurveys[i].backcheck_group = 2;
+            }
+            backcheck_surveys.push(entrySurveys[i]);
+        } 
+    }
+
+    writeBackcheckTablePostgres(backcheck_surveys, function(err) {
+        if(err) {
+            console.log("Error writing backcheck table")
+        } else {
+            console.log("Success writing backcheck table")
+        }
+    })
+}
+
 //function to fetch surveys from surveyCTO
 function fetchNewSurveys() {
     //fetch all surveys moving forward
@@ -1379,6 +1478,11 @@ function fetchNewSurveys() {
             console.log(err);
             return;
         } else {
+            //We can go ahead and generate the backcheck table here
+            //We need to recreate the object so it doesn't mess up future asynchronous processing
+            newEntrySurveys = JSON.parse(JSON.stringify(entrySurveys));
+            generateBackcheckList(newEntrySurveys);
+            
             fetchSurveys(survey_config.exitSurveyName, survey_config.exitCleaningPath, survey_config.gitRepoPath, function(exitSurveys, exit_changed, err) {
                 if(err) {
                     console.log("Error fetching and processing forms");
