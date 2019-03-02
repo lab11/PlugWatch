@@ -1468,6 +1468,64 @@ function generateBackcheckList(entrySurveys) {
     })
 }
 
+function generateSiteSummary(entrySurveys) {
+    //remove all surveys without g_install
+    surveys_to_remove = []
+    for(let i = 0; i < entrySurveys.length; i++) {
+        if(entrySurveys[i]['g_install'] != '1') {
+            surveys_to_remove.push(i)
+        }
+    }
+
+    for(let i = surveys_to_remove.length -1; i >= 0; i--) {
+       entrySurveys.splice(surveys_to_remove[i],1);
+    }
+
+    //Now count the surveys per site
+    site_summary = {};
+    for(let i = 0; i < entrySurveys.length; i++) {
+        if(typeof site_summary[entrySurveys[i].site_id] == 'undefined') {
+            site_summary[entrySurveys[i].site_id] = {};
+            site_summary[entrySurveys[i].site_id].deployed_total = 0;
+            site_summary[entrySurveys[i].site_id].deployed_without_error = 0;
+            site_summary[entrySurveys[i].site_id].deployed_with_error = 0;
+        }
+
+        if(typeof entrySurveys[i].error != 'undefined' && entrySurveys[i].error == 'TRUE') {
+            site_summary[entrySurveys[i].site_id].deployed_with_error += 1;
+        } else if(typeof entrySurveys[i].error != 'undefined' && entrySurveys[i].error == 'FALSE') {
+            site_summary[entrySurveys[i].site_id].deployed_without_error += 1;
+        } else {
+            site_summary[entrySurveys[i].site_id].deployed_without_error += 1;
+        }
+
+        site_summary[entrySurveys[i].site_id].deployed_total += 1;
+    }
+
+    //now convert this to an array
+    table_array = [];
+    for(var site in site_summary) {
+        if(site_summary.hasOwnProperty(site)) {
+            entry = {
+                site: site,
+                deployed_total: site_summary[site].deployed_total,
+                deployed_without_error: site_summary[site].deployed_without_error,
+                deployed_with_error: site_summary[site].deployed_with_error,
+            }
+
+            table_array.push(entry)
+        }
+    }
+
+    writeGenericTablePostgres(table_array, 'site_summary', function(err) {
+        if(err) {
+            console.log('Error writing site summary:', err);
+        } else {
+            console.log('Wrote site summary successfully');
+        }
+    });
+}
+
 //function to fetch surveys from surveyCTO
 function fetchNewSurveys() {
     //fetch all surveys moving forward
@@ -1482,6 +1540,10 @@ function fetchNewSurveys() {
             //We need to recreate the object so it doesn't mess up future asynchronous processing
             newEntrySurveys = JSON.parse(JSON.stringify(entrySurveys));
             generateBackcheckList(newEntrySurveys);
+
+            //Do the same with summaries
+            newEntrySurveys = JSON.parse(JSON.stringify(entrySurveys));
+            generateSiteSummary(newEntrySurveys);
             
             fetchSurveys(survey_config.exitSurveyName, survey_config.exitCleaningPath, survey_config.gitRepoPath, function(exitSurveys, exit_changed, err) {
                 if(err) {
