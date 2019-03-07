@@ -1,4 +1,3 @@
-        "qrcode-reader":"1.0.4",
 #!/usr/bin/env python
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, window, asc, desc, lead, lag, udf, hour, month, dayofmonth, collect_list, lit
