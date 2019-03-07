@@ -67,7 +67,7 @@ int PowerCheck::getVoltage() {
 
     //Alright take the max and min so that we can get both the magnitude
     //and the average
-    while(count < 10000) {
+    while(count < 4000) {
         int L = analogRead(B4);
         int N = analogRead(B2);
         if(L > L_max) {
@@ -82,6 +82,23 @@ int PowerCheck::getVoltage() {
 
     int L_avg = (L_max + L_min)/2;
     
+    int larray[10];
+    int narray[10];
+    for(uint8_t i = 0; i < 10; i++) {
+	count = 0;
+	L_max = 0;
+	while(count < 2000) {
+    	    int L = analogRead(B4);
+    	    int N = analogRead(B2);
+    	    if(L > L_max) {
+    	        larray[i] = L;
+    	        narray[i] = N;
+		L_max = L;
+    	    }
+    	    count++;
+    	}
+    }
+
     //Use the average as our "zero point" to calculate frequency
     //Take 5 samples at the zero point - this should give use two periods to average
     uint8_t mcount = 0;
@@ -110,11 +127,16 @@ int PowerCheck::getVoltage() {
     Serial.printlnf("L voltage count: %d", L_max);
     Serial.printlnf("N voltage count: %d", N_measure);
 
-    float L_volt = ((L_max/4096.0 * 3.3) - (3.3/2))*(953/4.99);
-    float N_volt = ((N_measure/4096.0 * 3.3) - (3.3/2))*(953/4.99);
-		int volt = (int)(L_volt - N_volt);
-		digitalWrite(C3, LOW);
-		Serial.printlnf("Calculated voltage: %d",volt);
+    int vtotal = 0;
+    for(uint8_t i = 0; i < 10; i++) {
+	float L_volt = ((larray[i]/4096.0 * 3.3) - (3.3/2))*(953/4.99);
+    	float N_volt = ((narray[i]/4096.0 * 3.3) - (3.3/2))*(953/4.99);
+	vtotal += (int)(L_volt - N_volt);
+    }
+
+    int volt = (int)(vtotal/10.0);
+    digitalWrite(C3, LOW);
+    Serial.printlnf("Calculated voltage: %d",volt);
     return volt;
 }
 

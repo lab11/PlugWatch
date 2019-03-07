@@ -20,7 +20,7 @@ build:
     product_id: 7010
     output: build
   - name: predeploy
-    folder: plugwatch_C/predeploy_firmware
+    folder: plugwatch_F/predeploy_firmware
     product_id: 7010
     output: ../../deployment-tools/provision
   - name: ghana
@@ -28,7 +28,7 @@ build:
     product_id: 7011
     output: build
   - name: predeploy
-    folder: plugwatch_C/predeploy_firmware
+    folder: plugwatch_F/predeploy_firmware
     product_id: 7011
     output: ../../deployment-tools/provision
   - name: ghana
@@ -36,7 +36,7 @@ build:
     product_id: 8462
     output: build
   - name: predeploy
-    folder: plugwatch_C/predeploy_firmware
+    folder: plugwatch_F/predeploy_firmware
     product_id: 8462
     output: ../../deployment-tools/provision
   - name: ghana
@@ -44,7 +44,7 @@ build:
     product_id: 8797
     output: build
   - name: predeploy
-    folder: plugwatch_C/predeploy_firmware
+    folder: plugwatch_F/predeploy_firmware
     product_id: 8798
     output: ../../deployment-tools/provision
   - name: testbed
@@ -60,7 +60,7 @@ build:
     product_id: 7456
     output: ../../deployment-tools/provision
   - name: predeploy
-    folder: plugwatch_C/predeploy_firmware
+    folder: plugwatch_F/predeploy_firmware
     product_id: 8379
     output: ../../deployment-tools/provision
   - name: venezuela

@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: powerwatch-deployment-manager
+  labels:
+    app: powerwatch-deployment-manager
+spec:
+  selector:
+    matchLabels:
+      app: powerwatch-deployment-manager
+  template:
+    metadata:
+      labels:
+        app: powerwatch-deployment-manager
+    spec:
+      containers:
+      - name: powerwatch-deployment-manager
+        image: lab11/powerwatch-deployment-manager:production
+        volumeMounts:
+        - name: deployment-manager-config
+          mountPath: /etc/config
+          readOnly: true
+
+        - name: oink-secret
+          mountPath: /etc/config/oink
+          readOnly: true
+
+        - name: postgres-secret
+          mountPath: /etc/config/postgres
+          readOnly: true
+
+        - name: survey-secret
+          mountPath: /etc/config/survey
+          readOnly: true
+
+        env:
+        - name: KEYBASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: keybase-paperkey
+              key: username
+        - name: KEYBASE_PAPERKEY
+          valueFrom:
+            secretKeyRef:
+              name: keybase-paperkey
+              key: paperkey
+
+        - name: KEYBASE_ALLOW_ROOT
+          value: '1'
+
+        - name: GIT_AUTHOR_NAME
+          value: 'Powerwatch Deployment Manager'
+
+        - name: GIT_COMMITTER_NAME
+          value: 'Powerwatch Deployment Manager'
+
+        - name: GIT_AUTHOR_EMAIL
+          value: 'adkins@berkeley.edu'
+
+        - name: GIT_COMMITTER_EMAIL
+          value: 'adkins@berkeley.edu'
+      
+      volumes:
+      - name: deployment-manager-config
+        configMap:
+          name: deployment-manager-config
+          items:
+          - key: postgres-config.json
+            path: postgres-config.json
+
+          - key: survey-config.json
+            path: survey-config.json
+
+          - key: oink-config.json
+            path: oink-config.json
+
+      - name: postgres-secret
+        secret:
+          secretName: postgres-user-pass
+          items:
+          - key: username
+            path: username
+          - key: password
+            path: password
+
+      - name: survey-secret
+        secret:
+          secretName: survey-user-pass
+          items:
+          - key: username
+            path: username
+          - key: password
+            path: password
+
+      - name: oink-secret
+        secret:
+          secretName: oink-service-account
+          items:
+          - key: oink-service-account.json
+            path: oink-service-account.json

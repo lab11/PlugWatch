@@ -7,22 +7,32 @@ import argparse
 import json
 
 parser = argparse.ArgumentParser(description = 'Deploy particle firmware')
-parser.add_argument('-f','--fname', type=str, required=True)
-parser.add_argument('-k','--key', type=str, required=True)
+parser.add_argument('-f','--fname', type=str, required=True,action='append')
 parser.add_argument('-t','--title', type=str, required=True)
 parser.add_argument('-d','--filter',type=str,required=False)
 
 args = parser.parse_args()
 
+#get the key from the particle file/login
+key_file = open(os.environ['HOME'] + '/.particle/particle.config.json','r')
+particle_key = None
+try:
+    keys = json.loads(key_file.read())
+    particle_key = keys['access_token']
+except:
+    print("Install particle CLI and login with 'particle login' to generate a key file. Exiting.")
+    sys.exit(1)
+
 #check the file name to see if it is a file or folder
 file_list = []
-if os.path.isfile(args.fname):
-    file_list.append(args.fname)
-elif os.path.isdir(args.fname):
-    file_list = [args.fname + '/' + f for f in os.listdir(args.fname)]
-else:
-    print("Fname is neither a file nor directory - exiting")
-    sys.exit(1)
+for f in args.fname:
+    if os.path.isfile(f):
+        file_list.append(f)
+    elif os.path.isdir(f):
+        file_list = [f + '/' + f for f in os.listdir(f)]
+    else:
+        print("Fname is neither a file nor directory - exiting")
+        sys.exit(1)
 
 print()
 for f in file_list:
@@ -48,8 +58,8 @@ for f in file_list:
     print()
     print('Uploading firmware to the particle cloud...')
     #first upload the binary file to the cloud
-    r = requests.post("https://api.particle.io/v1/products/" + product_string + "/firmware?access_token=" + args.key,
-            data = {'version': version_string, 'title':args.title}, files=dict(binary=open(args.fname, 'rb')))
+    r = requests.post("https://api.particle.io/v1/products/" + product_string + "/firmware?access_token=" + particle_key,
+            data = {'version': version_string, 'title':args.title}, files=dict(binary=open(f, 'rb')))
 
     resp = json.loads(r.text)
     if 'ok' in resp:
@@ -62,7 +72,7 @@ for f in file_list:
 
     #now get a list of devices in the product
     print('Getting list of devices in product...')
-    r = requests.get("https://api.particle.io/v1/products/" + product_string + "/devices?access_token=" + args.key + '&perPage=1000&sortAttr=firmwareVersion&sortDir=desc')
+    r = requests.get("https://api.particle.io/v1/products/" + product_string + "/devices?access_token=" + particle_key + '&perPage=1000&sortAttr=firmwareVersion&sortDir=desc')
 
     resp = json.loads(r.text)
     if 'ok' in resp:
@@ -89,7 +99,7 @@ for f in file_list:
 
 
         r = requests.put("https://api.particle.io/v1/products/" + product_string + "/devices/" + device['id'],
-            data = {'desired_firmware_version': version_string, 'access_token':args.key, 'flash':'true'})
+            data = {'desired_firmware_version': version_string, 'access_token':particle_key, 'flash':'true'})
         resp = json.loads(r.text)
         if 'ok' in resp:
             if(resp['ok'] is False):
@@ -102,17 +112,14 @@ for f in file_list:
 
     print()
 
-    #Ask if the user would like to release this firmware
-    inp = input('Would you like to release this firmware [Y/n]: ')
-    if(inp == 'Y'):
-        #now release the version to the product
-        print('Releasing firmware...')
-        r = requests.put("https://api.particle.io/v1/products/" + product_string + "/firmware/release",
-                data = {'version': version_string, 'access_token':args.key, 'product_default':'true'})
-        resp = json.loads(r.text)
-        if 'ok' in resp:
-            if(resp['ok'] is False):
-                print('Releasing firmware failed: ' + resp['error'])
-        else:
-            print('Releasing firmware succeeded')
+    #now release the version to the product
+    print('Releasing firmware...')
+    r = requests.put("https://api.particle.io/v1/products/" + product_string + "/firmware/release",
+            data = {'version': version_string, 'access_token':particle_key, 'product_default':'true'})
+    resp = json.loads(r.text)
+    if 'ok' in resp:
+        if(resp['ok'] is False):
+            print('Releasing firmware failed: ' + resp['error'])
+    else:
+        print('Releasing firmware succeeded')
 

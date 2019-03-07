@@ -25,3 +25,22 @@ table along with whether the survey was correctly processed or had an error some
 Deployment managers can view surveys that are erroring and correct them in
 the Rscript until they stop erroring or simply lookup which respondent has which
 powerwatch at the moment.
+
+Container Requirements
+======================
+
+This container expects the following files:
+
+/etc/config/postgres-config.json
+/etc/config/postgres/username
+/etc/config/postgres/password
+/etc/config/survey-config.json
+/etc/config/survey/username
+/etc/config/survey/password
+/etc/config/oink-config.json
+/etc/config/oink-service-account-credentials.json (whatever the filename is)
+
+
+and the following environment variables:
+KEYBASE_USERNAME
+KEYBASE_PAPERKEY

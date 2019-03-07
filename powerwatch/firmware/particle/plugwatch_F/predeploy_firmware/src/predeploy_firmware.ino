@@ -38,7 +38,6 @@ const int WIFI_ENABLE_PIN = B1;
 const int AUDIO_ENABLE_PIN = B4;
 const int BLE_ENABLE_PIN = B5;
 SYSTEM_MODE(MANUAL);
-int reset_btn = A0;
 
 
 int force_handshake(String cmd) {
@@ -50,9 +49,6 @@ void setup() {
   Serial.begin(9600);
 
   apnHelper.setCredentials();
-
-  pinMode(reset_btn, INPUT);
-  attachInterrupt(reset_btn, reset_helper, RISING, 3);
 
   pinMode(WIFI_ENABLE_PIN, OUTPUT);
   pinMode(AUDIO_ENABLE_PIN, OUTPUT);
