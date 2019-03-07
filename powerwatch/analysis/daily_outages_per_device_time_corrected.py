@@ -112,6 +112,6 @@ pw_df = pw_df.withColumn("outage_cluster_size", udfFilterTransition("outage_time
 
 pw_df = pw_df.filter("outage_cluster_size > 1")
 pw_df = pw_df.withColumn("outage_number",lit(1))
-pw_df = pw_df.select("time","core_id","outage_duration","outage_events")
+pw_df = pw_df.select("time","core_id","outage_duration","outage_number")
 pw_df = pw_df.groupBy("core_id",month("time"),dayofmonth("time")).sum().orderBy("core_id",month("time"),dayofmonth("time"))
 pw_cp.repartition(1).write.format("com.databricks.spark.csv").option("header", "true").save("daily_outage_per_device_time_corrected")
