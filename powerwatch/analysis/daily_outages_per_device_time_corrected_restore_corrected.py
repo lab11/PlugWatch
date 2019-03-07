@@ -110,6 +110,10 @@ def filterOutage(time, core_id, timeList):
 udfFilterTransition = udf(filterOutage, IntegerType())
 pw_df = pw_df.withColumn("outage_cluster_size", udfFilterTransition("outage_time","core_id","outage_window_list"))
 
+window_size = 150
+w = Window.orderBy(asc("restore_time")).rowsBetween(-1*window_size,window_size)
+pw_df = pw_df.withColumn("restore_window_list",collect_list(F.struct("restore_time","core_id")).over(w))
+
 def filterOutage2(time, core_id, timeList):
     count = 1
     used = []
