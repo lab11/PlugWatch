@@ -14,7 +14,8 @@
         "async": "2.6.1",
         "deep-diff": "1.0.2",
         "firebase-admin": "7.0.0",
-        "isomorphic-git": "0.51.12"
+        "isomorphic-git": "0.51.12",
+        "moment": "2.24.0"
     },
     "scripts": {
         "start": "./powerwatch-deployment-manager.js -d /etc/config/postgres-config.json -u /etc/config/postgres/username -p /etc/config/postgres/password -s /etc/config/survey-config.json -U /etc/config/survey/username -P /etc/config/survey/password -o /etc/config/oink-config.json -a /etc/config/oink/oink-service-account.json"

@@ -12,7 +12,8 @@ var async = require('async');
 var diff = require('deep-diff');
 var admin = require('firebase-admin');
 const git  = require('isomorphic-git');
-   
+var moment = require('moment');
+
 
 //get the usernames and passwords necessary for this task
 var command = require('commander');
@@ -451,7 +452,7 @@ function writeEntryTablePostgres(entrySurveys, outer_callback) {
         };
 
         if(typeof entrySurveys[i][entrySurveys[i].error_field] != 'undefined') {
-            entry.value_of_error_field = entrySurveys[i][entrySurveys[i].error_field];  
+            entry.value_of_error_field = entrySurveys[i][entrySurveys[i].error_field];
         } else {
             entry.value_of_error_field = '';
         }
@@ -507,7 +508,7 @@ function writeExitTablePostgres(exitSurveys, outer_callback) {
                respondent_id: exitSurveys[i].a_respid,
                error: exitSurveys[i].error,
                error_field: exitSurveys[i].error_field,
-               error_comment: exitSurveys[i].error_comment,               
+               error_comment: exitSurveys[i].error_comment,
                value_of_error_field: null,
                fo_name: exitSurveys[i].surveyor_name,
                gps: entrySurveys[i].gps,
@@ -517,7 +518,7 @@ function writeExitTablePostgres(exitSurveys, outer_callback) {
         };
 
         if(typeof exitSurveys[i][exitSurveys[i].error_field] != 'undefined') {
-            entry.value_of_error_field = exitSurveys[i][exitSurveys[i].error_field];  
+            entry.value_of_error_field = exitSurveys[i][exitSurveys[i].error_field];
         }
 
         error_table.push(entry);
@@ -535,7 +536,7 @@ function writeRespondentTableOINK(respondents, callback) {
 
     //If there is a user in OINK that no longer exists in our script,
     //we should process that too
-    
+
     //Okay first loop through the respondents and add/merge them
     //into OINK
     console.log();
@@ -544,7 +545,7 @@ function writeRespondentTableOINK(respondents, callback) {
     for(var key in respondents) {
         if(respondents.hasOwnProperty(key)) {
             //Okay what fields need to be set for oink
-            
+
             //name of doc-respondent ID
             //active true/false
             //first survey true/false
@@ -567,12 +568,12 @@ function writeRespondentTableOINK(respondents, callback) {
             };
 
             if(oink_user.powerwatch_installed) {
-                oink_user.powerwatch_install_time = respondents[key].pilot_survey_time;
+                oink_user.powerwatch_install_time = moment(respondents[key].pilot_survey_time, "MMM D, YYYY hh:mm:SS a").toDate();
                 oink_user.powerwatch_core_id = respondents[key].powerwatch_core_id;
             }
 
             if(oink_user.app_installed) {
-                oink_user.app_install_time = respondents[key].pilot_survey_time;
+                oink_user.app_install_time = moment(respondents[key].pilot_survey_time, "MMM D, YYYY hh:mm:SS a").toDate();
                 oink_user.app_id = respondents[key].app_id;
             }
 
@@ -582,7 +583,7 @@ function writeRespondentTableOINK(respondents, callback) {
             batch.set(docRef, oink_user, {merge: true});
         }
     }
-    
+
     //Okay now, if there are any users not in our current respondent list
     // (like there was an error and the cleaning script removed them)
     // Set them to not active, not incentivized, no powerwatch
@@ -840,7 +841,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            console.log("Processing entry survey for respondent", respondent_id);
 
            //Make sure that the R script didn't report an error for this survey
-           if(typeof entrySurveys[i].error != 'undefined' && (entrySurveys[i].error == true || entrySurveys[i].error == 'TRUE')) {
+           if(typeof entrySurveys[i].error != 'undefined' && (entrySurveys[i].error == 'TRUE')) {
                console.log("Cleaning script marked survey as errored. Skipping survey.");
                surveySuccess = false;
                continue;
@@ -854,7 +855,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            //   surveys_to_remove.push(i);
            //   continue;
            //}
-            
+
            //Is the respondent ID valid?
           if(respondent_id.length != 8) {
                //This is a duplicate
@@ -904,7 +905,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                entrySurveys[i].error_comment = 'No valid GPS coordinates found';
                continue;
            }
-            
+
            var carrier = ''
            if(typeof carrier_map[entrySurveys[i].e_carrier] != 'undefined') {
                carrier = carrier_map[entrySurveys[i].e_carrier]
@@ -1063,7 +1064,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            var removed_device = null;
            var device_add_info = null;
            let respondent_id = exitSurveys[i].a_respid;
-           console.log("Processing entry survey for respondent ", respondent_id);
+           console.log("Processing exit survey for respondent ", respondent_id);
 
            //Does this repondent exist?
            if(typeof respondents[respondent_id] == 'undefined') {
@@ -1085,9 +1086,11 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
            //did we remove a device?
            if(exitSurveys[i].a_retrieve == '1') {
+              console.log('Device was retrieved - processing');
               let ids = getExitRetrieveDeviceID(exitSurveys[i], device_table);
               if(ids == null) {
                   //This is an error, post the error
+                  console.log("Error processing device retrieval ID");
                   surveySuccess = false;
                   exitSurveys[i].error = true;
                   exitSurveys[i].error_field = 'g_deviceID_retrieve';
@@ -1111,6 +1114,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
                   if(device_removal_info == null) {
                      //We didn't fine the device to remove, which is an error
+                     console.log("Device does not exist to remove");
                      surveySuccess = false;
                      exitSurveys[i].error = true;
                      exitSurveys[i].error_field = 'g_deviceID_retrieve';
@@ -1124,9 +1128,11 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            if(exitSurveys[i].a_give == '1') {
               //Okay now we should redeploy a device if possible
               //Process all the IDs present in a survey and cross reference it  with the device table
+              console.log('Providing repsondent with new device');
               var ids = getExitGiveDeviceID(exitSurveys[i], device_table);
               if(ids == null) {
                   //This is an error, post the error
+                  console.log('Error with new device ID');
                   surveySuccess = false;
                   exitSurveys[i].error = true;
                   exitSurveys[i].error_field = 'g_deviceID_give';
@@ -1140,6 +1146,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                   for(let j = 0; j < devices.length; j++) {
                      if(devices[j].core_id == core_id && devices[j].currently_deployed) {
                         //This devices is currently deployed
+                        console.log("Device already deployed, skipping");
                         surveySuccess = false;
                         exitSurveys[i].error = true;
                         exitSurveys[i].error_field = 'g_deviceID_give';
@@ -1177,17 +1184,23 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                still_making_progress = true;
 
                //remove the removed device
+               console.log("Updating device to be removed with following info");
+               console.log(device_removal_info);
                devices[device_removal_info.index].currently_deployed = false;
                devices[device_removal_info.index].deployment_end_time = device_removal_info.removal_time;
+               console.log("Updated device info:", devices[device_removal_info.index])
 
                //Update the respondent
                respondents[respondent_id].powerwatch = false;
                respondents[respondent_id].change_survey_time = device_removal_info.removal_time;
                respondents[respondent_id].change_survey_id = exitSurveys[i].instanceID;
                respondents[respondent_id].powerwatch_removal_time = device_removal_info.removal_time;
+               console.log("Updated respondent info:", respondents[respondent_id])
 
                //Was a device deployed
                if(device_add_info != null) {
+                  console.log("Adding device with info");
+                  console.log(device_add_info);
                   devices.push(device_add_info);
 
                   //Update the respondent to say that they do have a powerwatch
@@ -1245,7 +1258,7 @@ function gitAddCommitPush(file, repoPath, callback) {
     file = file_split.join('/');
 
     git.add({fs, dir: repoPath, filepath: file}).then(function(result) {
-        git.commit({fs, dir: repoPath, message: "Auto updating newly cleaned file", 
+        git.commit({fs, dir: repoPath, message: "Auto updating newly cleaned file",
                         author:{name: "Deployment_Management_Service", email: "adkins@berkeley.edu"}}).then(function(result) {
             exec('git -C ' + repoPath + ' push origin master', (error, stdout, stderr) => {
                 if(error) {
@@ -1323,7 +1336,7 @@ function fetchSurveys(formid, cleaning_path, repoPath, callback) {
                                     //compare json to last json
                                     var differences = diff(last_json, json);
                                     var changed = (typeof differences != 'undefined');
-                                    //commit cleaned file 
+                                    //commit cleaned file
                                     console.log("Committing cleaned file");
                                     gitAddCommitPush(path + formid + '_cleaned.csv', repoPath, function(err) {
                                         return callback(json, changed, err);
@@ -1368,6 +1381,7 @@ function fetchSurveys(formid, cleaning_path, repoPath, callback) {
 }
 
 function pullGitRepo(repoURL, repoPath, callback) {
+    console.log('Pulling git repo');
     git.log({fs, dir: repoPath}).then(function(paths) {
         console.log("Get repo exists - moving on to pull");
         exec('git -C ' + repoPath + ' pull', (error, stdout, stderr) => {
@@ -1383,7 +1397,9 @@ function pullGitRepo(repoURL, repoPath, callback) {
         });
 
     }, function(err) {
+        console.log('Error pulling git repo');
         if(err.name == 'ResolveRefError') {
+            console.log('Cloning new repo', repoURL);
             exec('git clone ' + repoURL, (error, stdout, stderr) => {
                 if(error) {
                     console.log("Error cloning git repo")
@@ -1421,7 +1437,7 @@ function generateBackcheckList(entrySurveys) {
     entrySurveys.sort(function(a,b) {
        return Date.parse(a['endtime']) - Date.parse(['endtime']);
     });
-    
+
     //Now draw from 10% from this list using a stable seed
 
     //The methodology here will be to generate the complete list of
@@ -1440,7 +1456,7 @@ function generateBackcheckList(entrySurveys) {
             break;
         }
     }
-    
+
     //sort the array
     array.sort();
 
@@ -1456,7 +1472,7 @@ function generateBackcheckList(entrySurveys) {
                 entrySurveys[i].backcheck_group = 2;
             }
             backcheck_surveys.push(entrySurveys[i]);
-        } 
+        }
     }
 
     writeBackcheckTablePostgres(backcheck_surveys, function(err) {
@@ -1544,7 +1560,7 @@ function fetchNewSurveys() {
             //Do the same with summaries
             newEntrySurveys = JSON.parse(JSON.stringify(entrySurveys));
             generateSiteSummary(newEntrySurveys);
-            
+
             fetchSurveys(survey_config.exitSurveyName, survey_config.exitCleaningPath, survey_config.gitRepoPath, function(exitSurveys, exit_changed, err) {
                 if(err) {
                     console.log("Error fetching and processing forms");
@@ -1564,6 +1580,7 @@ function fetchNewSurveys() {
 }
 
 //Call it once to start
+console.log("Starting survey processing");
 pullGitRepo(survey_config.gitRepoURL, survey_config.gitRepoPath, function(err) {
     if(err) {
         console.log('Error pulling git repo');
