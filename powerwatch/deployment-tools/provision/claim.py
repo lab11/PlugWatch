@@ -16,6 +16,15 @@ import serial
 import datetime
 import struct
 from psheets import *
+import psycopg2
+import yaml
+
+with open('postgres_config.json') as config_file:
+    config = yaml.safe_load(config_file)
+
+connection = psycopg2.connect(dbname=config['database'], user=config['user'], host=config['host'], password=config['password'])
+cursor = connection.cursor();
+
 
 shield_fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', 14)
 case_fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', 30)
@@ -115,16 +124,7 @@ if retryCount == 50:
 print("Found particle:shield " + particle_id+":"+shield_id)
 print("")
 
-time_str = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
-
-with open("device_list.txt", "a") as myfile:
-        myfile.write(particle_id + "," + shield_id + "," + time_str + "\n")
-print("Wrote to local log")
-print("")
-print("Appending to google devices list...")
-append(time_str,particle_id,shield_id, str(args.product))
-print("Success.")
-print("")
+#Add the devices to the particle cloud in the correct product
 with open('particle-config.json') as config_file:
     particle_config = yaml.safe_load(config_file)
 
@@ -147,6 +147,53 @@ else:
     print("Adding device to product failed")
     print(resp)
     sys.exit(1)
+time_str = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+
+#update the devices table in gsheets
+print("Appending to google devices list...")
+result = append(time_str,particle_id,shield_id, str(args.product))
+if(result == -1):
+    answer = raw_input("Device already in google sheet. Continue? [Y/n]")
+    if(answer == 'Y' or answer == 'Yes' or answer == 'y' or answer == 'yes'):
+        pass
+    else:
+        sys.exit(1)
+elif(result == -2):
+    answer = raw_input("Failed to add device to google sheets. Continue? [Y/n]")
+    if(answer == 'Y' or answer == 'Yes' or answer == 'y' or answer == 'yes'):
+        pass
+    else:
+        sys.exit(1)
+
+#update the postgres devices table
+#check to see if the device already exists
+cursor.execute('SELECT core_id, shield_id, product_id from devices where core_id = %s',(particle_id,))
+result = cursor.fetchone()
+if(result == None):
+    #it's not already in the table so append it
+    cursor.execute('INSERT INTO devices (core_id, shield_id, product_id) VALUES (%s, %s, %s)', (particle_id, shield_id, product_id))
+else:
+    #it is already in the table - is it the same
+    if(result[1] == shield_id and result[2] == product_id):
+        #this is the same device - skip
+        answer = raw_input("Device already in postgres. Continue? [Y/n]")
+        if(answer == 'Y' or answer == 'Yes' or answer == 'y' or answer == 'yes'):
+            pass
+        else:
+            sys.exit(1)
+    else:
+        print("Device ID already in devices table with different values")
+        print("Old shield ID: {}\tNew shield ID: {}".format(result[1],shield_id))
+        print("Old product ID: {}\tNew product ID: {}".format(result[2],product_id))
+        answer = raw_input("Would you like to update this device? [Y/n]")
+        if(answer == 'Y' or answer == 'Yes' or answer == 'y' or answer == 'yes'):
+            cursor.execute('UPDATE devices SET (core_id, shield_id, product_id)  = (%s, %s, %s) WHERE core_id = %s', (particle_id, shield_id, product_id, particle_id))
+        else:
+            sys.exit(1)
+
+connection.commit();
+cursor.close();
+cursor.close();
 
 print("")
 print("Printing stickers...")
