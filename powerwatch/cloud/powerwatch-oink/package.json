@@ -14,7 +14,7 @@
         "twilio": "3.29.2"
     },
     "scripts": {
-        "start": "./powerwatch-oink.js -d /etc/config/postgres-config.json -u /etc/config/postgres/username -p /etc/config/postgres/password -s /etc/config/korba/secret -c /etc/config/korba/client"
+        "start": "./powerwatch-oink.js -d /etc/config/postgres-config.json -u /etc/config/postgres/username -p /etc/config/postgres/password -s /etc/config/korba/secret -c /etc/config/korba/client -t /etc/config/twilio/account_sid -a /etc/config/twilio/api_key -o /etc/config/oink-config.json"
     },
     "engines": {
         "node": ">=4.3.2"
