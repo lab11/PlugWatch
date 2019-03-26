@@ -327,7 +327,7 @@ function update_payment_status(new_status, transaction_id, callback) {
     });
 }
 
-function update_payment_state_from_status(error, result, body, id, callback) {
+function update_payment_state_from_status(error, result, body, transaction, callback) {
     //update it's state
 
     var new_payment_state = "";
@@ -357,15 +357,15 @@ function update_payment_state_from_status(error, result, body, id, callback) {
 
     if(new_payment_state == 'complete') {
         async.series([
-            async.apply(update_payment_status, new_payment_state, id),
-            //async.apply(send_sms, id)
+            async.apply(update_payment_status, new_payment_state, transaction.external_transaction_id),
+            //async.apply(send_sms, transaction.phone_number, transaction.amount, transaction.incentive_type)
         ], function(err, results) {
             callback(err);
         });
     } else {
         async.series([
-            async.apply(update_payment_status, new_payment_state, id),
-            async.apply(retry_payment, id)
+            async.apply(update_payment_status, new_payment_state, transaction.external_transaction_id),
+            async.apply(retry_payment, transaction.external_transaction_id)
         ], function(err, results) {
             callback(err);
         });
@@ -379,7 +379,7 @@ function check_status(callback) {
     //If failed generate a new payment with the attempt number incremented
     
     function get_pending_transactions(callback) {
-        qstring = format.withArray("SELECT external_transaction_id from %I WHERE status = 'pending'", [PAYMENTS_TABLE]);
+        qstring = format.withArray("SELECT * from %I WHERE status = 'pending'", [PAYMENTS_TABLE]);
         pg_pool.query(qstring, (err, res) => {
             callback(err, res);
         });            
@@ -391,7 +391,7 @@ function check_status(callback) {
             //for each row
             //send it to korba
             check_korba_status(row.external_transaction_id, function(error, result, body) {
-                update_payment_state_from_status(error, result, body, row.external_transaction_id, function(err) {
+                update_payment_state_from_status(error, result, body, row, function(err) {
                     callback(err);
                 });
             });
@@ -408,7 +408,17 @@ function check_status(callback) {
     });
 }
 
-function send_sms(phone_number, message) {
+function send_sms(phone_number, amount, stimulus_type, callback) {
+   
+    message = "";
+    if(stimulus_type == 'complianceApp') {
+        message = "Thank you for participating in GridWatch. We have sent you airtime for your participation. If you have questions please contact 024 6536896";
+    } else if (stimulus_type == 'compliancePowerwatch') {
+        message = "Thank you for participating in GridWatch. We have sent you airtime for your participation. If you have questions please contact 024 6536896";
+    } else {
+        callback("Can't send message for that stimulus");
+    }
+
     //send sms to the user
     console.log("Sending message to", phone_number, "with message", message);
 
@@ -418,9 +428,9 @@ function send_sms(phone_number, message) {
             body: message,
             statusCallback: "",
      }).then(message => {
-        //Write the result of that request to a final table about user notification
         console.log(message.status)
         console.log(message.error_code)
+        callback(null, message.error_code);
     });
 }
 
