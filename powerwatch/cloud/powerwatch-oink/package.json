@@ -1,0 +1,19 @@
+{
+    "name": "powerwatch-deployment-manager",
+    "version": "0.0.1",
+    "description": "Pays powerwatch users",
+    "private": true,
+    "dependencies": {
+        "pg": "^7.3.0",
+        "request": "2.88.0",
+        "pg-format": "",
+        "commander": "",
+        "async": "2.6.1"
+    },
+    "scripts": {
+        "start": "./powerwatch-oink.js -d /etc/config/postgres-config.json -u /etc/config/postgres/username -p /etc/config/postgres/password"
+    },
+    "engines": {
+        "node": ">=4.3.2"
+    }
+}
