@@ -8,10 +8,12 @@
         "request": "2.88.0",
         "pg-format": "",
         "commander": "",
-        "async": "2.6.1"
+        "async": "2.6.1",
+        "sort-object": "3.0.2",
+        "body-parser": "^1.18.3"
     },
     "scripts": {
-        "start": "./powerwatch-oink.js -d /etc/config/postgres-config.json -u /etc/config/postgres/username -p /etc/config/postgres/password"
+        "start": "./powerwatch-oink.js -d /etc/config/postgres-config.json -u /etc/config/postgres/username -p /etc/config/postgres/password -s /etc/config/korba/secret -c /etc/config/korba/client"
     },
     "engines": {
         "node": ">=4.3.2"
