@@ -358,7 +358,7 @@ function update_payment_state_from_status(error, result, body, transaction, call
     if(new_payment_state == 'complete') {
         async.series([
             async.apply(update_payment_status, new_payment_state, transaction.external_transaction_id),
-            //async.apply(send_sms, transaction.phone_number, transaction.amount, transaction.incentive_type)
+            async.apply(send_sms, transaction.phone_number, transaction.amount, transaction.incentive_type)
         ], function(err, results) {
             callback(err);
         });
