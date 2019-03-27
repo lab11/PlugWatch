@@ -85,7 +85,7 @@ function incentivize_users(incentive_function, callback) {
             callback(err, res);
         });
     }
-    
+
     function generate_incentives(incentive_function, respondents_list, callback) {
         var payments = []
         for(let i = 0; i < respondents_list.rows.length; i++) {
@@ -95,22 +95,22 @@ function incentivize_users(incentive_function, callback) {
             }
             payments = payments.concat(pay);
         }
-    
+
         callback(null, payments);
     }
-    
+
     function write_incentives(payments_to_write, callback) {
         async.forEachLimit(payments_to_write, 1, function(item, inner_callback) {
             var r = item.respondent_info;
             var transaction_id = [r.phone_number, r.carrier, item.incentive_type, item.incentive_id, 1].join('-');
-    
-            var qstring = format.withArray('INSERT INTO %I (phone_number, carrier, respondent_id, ' + 
-                'time_created, amount, incentive_id, incentive_type, payment_attempt, ' + 
-                'status, external_transaction_id) VALUES (%L, %L, %L, NOW(), %L, %L, ' + 
-                '%L, %L, %L, %L) ON CONFLICT (external_transaction_id) DO NOTHING', 
-                [PAYMENTS_TABLE, r.phone_number, r.carrier, item.respondent_id, 
+
+            var qstring = format.withArray('INSERT INTO %I (phone_number, carrier, respondent_id, ' +
+                'time_created, amount, incentive_id, incentive_type, payment_attempt, ' +
+                'status, external_transaction_id) VALUES (%L, %L, %L, NOW(), %L, %L, ' +
+                '%L, %L, %L, %L) ON CONFLICT (external_transaction_id) DO NOTHING',
+                [PAYMENTS_TABLE, r.phone_number, r.carrier, r.respondent_id,
                  item.amount, item.incentive_id, item.incentive_type, 1, 'waiting', transaction_id]);
-    
+
             console.log(qstring);
             pg_pool.query(qstring, (err, res) => {
                 inner_callback(err, res);
@@ -121,7 +121,7 @@ function incentivize_users(incentive_function, callback) {
     }
 
     async.waterfall([
-        get_respondents, 
+        get_respondents,
         async.apply(generate_incentives, incentive_function),
         write_incentives
     ], function(err, result) {
@@ -259,7 +259,7 @@ function issue_payments(callback) {
             async.forEachLimit(res.rows, 1, function(row, callback) {
                 //for each row
                 //send it to korba
-                var qstring = format.withArray("UPDATE %I SET status = 'pending', time_submitted = NOW() " + 
+                var qstring = format.withArray("UPDATE %I SET status = 'pending', time_submitted = NOW() " +
                               "WHERE external_transaction_id = %L",[PAYMENTS_TABLE, row.external_transaction_id]);
                 async.series([
                     async.apply(send_to_korba, row.phone_number, row.carrier, row.amount, row.external_transaction_id),
@@ -269,7 +269,7 @@ function issue_payments(callback) {
                     //everyone from being paid
                     console.log(err);
                     callback();
-                }); 
+                });
             }, function(err) {
                 callback(err)
             });
@@ -278,7 +278,7 @@ function issue_payments(callback) {
 }
 
 function retry_payment(external_transaction_id, callback) {
-    
+
     function get_payment_number(transaction_id, callback) {
         qstring = format.withArray('SELECT * from %I WHERE external_transaction_id = %L', [PAYMENTS_TABLE, transaction_id]);
         pg_pool.query(qstring, (err, res) => {
@@ -297,11 +297,11 @@ function retry_payment(external_transaction_id, callback) {
             new_transaction_id[new_transaction_id.length-1] = attempt
             new_transaction_id = new_transaction_id.join('-');
 
-            var qstring = format.withArray('INSERT INTO %I (phone_number, carrier, respondent_id, ' + 
+            var qstring = format.withArray('INSERT INTO %I (phone_number, carrier, respondent_id, ' +
                 'time_created, amount, incentive_id, incentive_type, payment_attempt, ' +
                 'status, external_transaction_id) VALUES (%L, %L, %L, NOW(), %L, %L, ' +
-                '%L, %L, %L, %L) ON CONFLICT (external_transaction_id) DO NOTHING', 
-                [PAYMENTS_TABLE, prev.phone_number, prev.carrier, prev.respondent_id, 
+                '%L, %L, %L, %L) ON CONFLICT (external_transaction_id) DO NOTHING',
+                [PAYMENTS_TABLE, prev.phone_number, prev.carrier, prev.respondent_id,
                     prev.amount, prev.incentive_id, prev.incentive_type, attempt, 'waiting', new_transaction_id]);
 
             console.log(qstring);
@@ -377,12 +377,12 @@ function check_status(callback) {
     //update it if necessary
     //IF successful send a text message to the user
     //If failed generate a new payment with the attempt number incremented
-    
+
     function get_pending_transactions(callback) {
         qstring = format.withArray("SELECT * from %I WHERE status = 'pending'", [PAYMENTS_TABLE]);
         pg_pool.query(qstring, (err, res) => {
             callback(err, res);
-        });            
+        });
     }
 
     function check_and_update_transactions(transactions, callback) {
@@ -409,7 +409,7 @@ function check_status(callback) {
 }
 
 function send_sms(phone_number, amount, stimulus_type, callback) {
-   
+
     message = "";
     if(stimulus_type == 'complianceApp') {
         message = "Thank you for participating in GridWatch. We have sent you airtime for your participation. If you have questions please contact 024 6536896";
