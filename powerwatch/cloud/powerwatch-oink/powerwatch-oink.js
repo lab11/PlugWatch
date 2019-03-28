@@ -438,46 +438,6 @@ function send_sms(phone_number, amount, stimulus_type, callback) {
 // We could imagine these in a separate file where each exported function
 // is automatically run ///////////////////////////////////////////////
 
-//will incentivize every user for complianceApp-30 for 4 Cedis
-function complianceApp(args) {
-    compliance_list = [];
-
-    if(args.currently_active == true) {
-        //calculate the number of days between deployment and now
-        days = ((((Date.now() - args.pilot_survey_time)/1000)/3600)/24)
-        compliances_to_issue = Math.floor(days/30);
-        for(let i = 0; i < compliances_to_issue; i++) {
-            var obj = {};
-            obj.amount = oink_config.complianceAppAmount;
-            obj.incentive_type = 'complianceApp';
-            obj.incentive_id = (i+1)*30;
-            compliance_list.push(obj);
-        }
-    }
-
-    return compliance_list;
-}
-
-//will incentivize every user for complianceApp-30 for 4 Cedis
-function compliancePowerwatch(args) {
-    compliance_list = [];
-
-    if(args.powerwatch == true) {
-        //calculate the number of days between deployment and now
-        days = ((((Date.now() - args.pilot_survey_time)/1000)/3600)/24)
-        compliances_to_issue = Math.floor(days/30);
-        for(let i = 0; i < compliances_to_issue; i++) {
-            var obj = {};
-            obj.amount = oink_config.compliancePowerwatchAmount;
-            obj.incentive_type = 'compliancePowerwatch';
-            obj.incentive_id = (i+1)*30;
-            compliance_list.push(obj);
-        }
-    }
-
-    return compliance_list;
-}
-
 //Start the program
 // 1) check status of pending payments with korba
 //    - send SMS if success
@@ -485,14 +445,18 @@ function compliancePowerwatch(args) {
 // 2) incentivize new users
 // 3) issue payments that need to be issued
 
+var incentive_funcs = require(oink_config.incentives_file);
+
+var incentive_list = []
+for (var func in incentive_funcs) {
+    incentive_list.push(async.apply(incentivize_users,func));
+}
+
+var to_call_list = [];
+to_call_list = to_call_list.concat([check_status],incentive_list,[issue_payments]);
+
 //we need to run our functions in series
-async.series([
-    check_status,
-    //To ADD more incentives, add new incentivize user functions with new lambda functions to this list
-    async.apply(incentivize_users, complianceApp),
-    async.apply(incentivize_users, compliancePowerwatch),
-    issue_payments,
-], function(err, results) {
+async.series(to_call_list, function(err, results) {
     if(err) {
         console.log("Error running OINK payment functions:", err)
     } else {

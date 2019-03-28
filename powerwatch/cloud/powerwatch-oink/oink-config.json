@@ -1,6 +1,6 @@
 {
     "respondents_table": "respondents",
     "payments_table": "payments",
-    "complianceAppAmount": 4,
-    "compliancePowerwatchAmount": 5
+    "incentives_file": "./incentives.js"
 }
+
