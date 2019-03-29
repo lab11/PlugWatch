@@ -10,6 +10,7 @@
 // Our code
 #include "CellStatus.h"
 #include "ChargeState.h"
+#include "PowerCheck.h"
 #include "Cloud.h"
 #include "ESP8266.h"
 #include "FileLog.h"
@@ -98,6 +99,11 @@ auto cellStatus = CellStatus();
 //* Charge state
 //***********************************
 auto chargeStateSubsystem = ChargeState();
+
+//***********************************
+//* PowerCheck
+//***********************************
+PowerCheck powercheck;
 
 //***********************************
 //* IMU
@@ -414,6 +420,41 @@ String stringifyResults(ResultStruct r) {
   result += MAJOR_DLIM;
   result += String(r.SDstat);
   return result;
+}
+
+void system_sleep() {
+  //turn off the GPS
+  digitalWrite(D3, LOW);
+
+  //turn off the SD Card
+  SD.PowerOff();
+
+  //toggle the watchdog before we sleep so it doesn't reset us
+  //we have about 1000s before it needs to be retoggled
+  digitalWrite(DAC, HIGH);
+  delay(1000);
+  digitalWrite(DAC, LOW);
+
+  //make sure the rtc interrupt is clear so that we wake up
+  //we can do this by reinitializing the RTC
+  timeSyncSubsystem.setup();
+
+  //now sleep for ten minutes unless we get a power change
+  System.sleep(D7, FALLING, 600);
+}
+
+void system_wake() {
+  //turn on the GPS
+  digitalWrite(D3, LOW);
+  
+  //turn on the SD Card
+  SD.PowerOn();
+
+  //toggle the watchdog before we sleep so it doesn't reset us
+  //we have about 1000s before it needs to be retoggled
+  digitalWrite(DAC, HIGH);
+  delay(1000);
+  digitalWrite(DAC, LOW);
 }
 
 // retain this so that on the next iteration we still get results on hang
@@ -857,89 +898,47 @@ void loop() {
       break;
     }
 
-    /*case CheckSMS: {
-      manageStateTimer(120000);
-
-      SINGLE_THREADED_BLOCK() {
-        if(uCmd.checkMessages(10000) == RESP_OK) {
-          uCmd.smsPtr = uCmd.smsResults;
-          Serial.printlnf("Got %d messages",uCmd.numMessages);
-          bool first = true;
-
-          for(unsigned int i = 0; i < uCmd.numMessages; i++) {
-            Serial.printlnf("Got message: %s from %s",uCmd.smsPtr->sms,uCmd.smsPtr->phone);
-            String message = String(uCmd.smsPtr->sms);
-            String phone = String(uCmd.smsPtr->phone);
-
-            // Delete the message
-            if(uCmd.deleteMessage(uCmd.smsPtr->mess,10000) == RESP_OK) {
-              Serial.println("Deleted message");
-            } else {
-              Serial.println("Error deleting message");
-            }
-
-            if(first) {
-              // Respond to the message
-              first = false;
-              if(message == "!Status") {
-                Serial.println("About to send status response");
-                String packet = stringifyResults(sensingResults);
-                if(!uCmd.sendMessage((char*)packet.substring(0,100).c_str(), (char*)phone.c_str(), 10000) == RESP_OK) {
-                  Serial.println("Error sending message");
-                }
-                if(!uCmd.sendMessage((char*)packet.substring(100,200).c_str(), (char*)phone.c_str(), 10000) == RESP_OK) {
-                  Serial.println("Error sending message");
-                }
-                if(packet.length() > 200) {
-                  if(!uCmd.sendMessage((char*)packet.substring(200).c_str(), (char*)phone.c_str(), 10000) == RESP_OK) {
-                    Serial.println("Error sending message");
-                  }
-                }
-              } else if(message == "!Reset") {
-                Serial.println("About to send reset response");
-                char stat[140] = "ACK";
-                if(!uCmd.sendMessage(stat, (char*)phone.c_str(), 10000) == RESP_OK) {
-                  Serial.println("Error sending message");
-                }
-                delay(10000);
-                reset_helper();
-              }
-            }
-          }
-
-          state = nextState(state);
-        } else {
-          handle_error("SMS Check error", false);
-          state = nextState(state);
-        }
-      }
-
-      break;
-    }*/
-
     case Wait: {
-      manageStateTimer(1200000);
-
+      //if we don't have power right now we should sleep
       static bool first = false;
-      static unsigned long mill = 0;
-      if(!first) {
-        mill = millis();
-        first = true;
-        SD.PowerOff();
-      }
 
-      if(millis() - mill > 60000) {
-        clearResults(&sensingResults);
-        system_cnt++;
-        SD.PowerOn();
+      //Do we have power, or did we lose power while in this state
+      //If so just wait and we'll hit it the next time
+      if(powercheck.getHasPower() || first) {
+        manageStateTimer(1200000);
+
+        static unsigned long mill = 0;
+        if(!first) {
+          mill = millis();
+          first = true;
+          SD.PowerOff();
+        }
+
+        if(millis() - mill > 60000) {
+          clearResults(&sensingResults);
+          system_cnt++;
+          SD.PowerOn();
+          state = CheckCloudEvent;
+          first = false;
+
+          // Toggle the watchdog
+          digitalWrite(DAC, HIGH);
+          delay(1000);
+          digitalWrite(DAC, LOW);
+        }
+
+      } else {
+        //if we don't have power we want to turn everything off
+        //and put the system to sleep for 10 minutes (where we will go
+        //around the loop again and send a status update)
+        //or until power restores
+        system_sleep();
+        system_wake();
         state = CheckCloudEvent;
-        first = false;
-
-        // Toggle the watchdog
-        digitalWrite(DAC, HIGH);
-        delay(1000);
-        digitalWrite(DAC, LOW);
       }
+
+
+      
       break;
     }
 

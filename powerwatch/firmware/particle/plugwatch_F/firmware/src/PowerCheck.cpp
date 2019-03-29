@@ -6,7 +6,9 @@ void PowerCheck::setup() {
 	// This can't be part of the constructor because it's initialized too early.
 	// Call this from setup() instead.
 
-	// BATT_INT_PC13
+	// the LOW_BAT_UC pin interrupts on power change and some other 
+	// causes so we filter out those other causes in the interrupt
+	// handler
 	attachInterrupt(LOW_BAT_UC, &PowerCheck::interruptHandler, this, FALLING);
 
 	//Drive the pin low

@@ -15,8 +15,8 @@ class Timesync: public Subsystem {
   typedef Subsystem super;
 
   const int TWELVE_HOURS = 1000 * 60 * 60 * 12;
-  AB1815 rtc;
 
+  AB1815 rtc;
 public:
   void setup();
   LoopStatus loop();

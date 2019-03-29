@@ -3,15 +3,88 @@
 #include "time.h"
 
 void AB1815::init() {
+    //oring with 0x80 starts a write to the CFG reg
     uint8_t start_reg = AB1815_CFG_KEY_REG | 0x80;
 
     //Start the SPI transaction
     SPI.begin(AB1815_CS);
     SPI.beginTransaction(__SPISettings(1*MHZ,MSBFIRST,SPI_MODE0));
     digitalWrite(AB1815_CS, LOW);
+
+    //writes to the configuration key register and then the trickle charge
+    //register to charge the RTC battery
     SPI.transfer(start_reg);
     SPI.transfer(0x9D);
     SPI.transfer(0xA5);
+
+    //end SPI transaction
+    SPI.endTransaction();
+    digitalWrite(AB1815_CS, HIGH);
+    SPI.end();
+
+    //delay 1s
+    delay(20);
+
+    //we also want the RTC to cause an EXTI interrupt on power restoration
+    // that is a RISING edge of EXTI
+    // This means we need to set 0x17:4 = 1 to set the rising edge
+    // and 0x12:0 = 1 to enable the interrupt
+    // 0x11:1:0 already = 00 by default, which is necessary to generate the
+    // falling edge interrupt
+    start_reg = AB1815_INT_MASK_REG | 0x80;
+
+    //Start the SPI transaction
+    SPI.begin(AB1815_CS);
+    SPI.beginTransaction(__SPISettings(1*MHZ,MSBFIRST,SPI_MODE0));
+    digitalWrite(AB1815_CS, LOW);
+
+    //writes to the configuration key register and then the trickle charge
+    //register to charge the RTC battery
+    SPI.transfer(start_reg);
+    SPI.transfer(0xE1);
+
+    //end SPI transaction
+    SPI.endTransaction();
+    digitalWrite(AB1815_CS, HIGH);
+    SPI.end();
+
+    //delay 1s
+    delay(20);
+
+    start_reg = AB1815_SLEEP_CTRL_REG | 0x80;
+
+    //Start the SPI transaction
+    SPI.begin(AB1815_CS);
+    SPI.beginTransaction(__SPISettings(1*MHZ,MSBFIRST,SPI_MODE0));
+    digitalWrite(AB1815_CS, LOW);
+
+    //writes to the configuration key register and then the trickle charge
+    //register to charge the RTC battery
+    SPI.transfer(start_reg);
+    SPI.transfer(0x10);
+
+    //end SPI transaction
+    SPI.endTransaction();
+    digitalWrite(AB1815_CS, HIGH);
+    SPI.end();
+
+    //now clear the status register
+    //delay 1s
+    delay(20);
+
+    start_reg = AB1815_STATUS_REG | 0x80;
+
+    //Start the SPI transaction
+    SPI.begin(AB1815_CS);
+    SPI.beginTransaction(__SPISettings(1*MHZ,MSBFIRST,SPI_MODE0));
+    digitalWrite(AB1815_CS, LOW);
+
+    //writes to the configuration key register and then the trickle charge
+    //register to charge the RTC battery
+    SPI.transfer(start_reg);
+    SPI.transfer(0x00);
+
+    //end SPI transaction
     SPI.endTransaction();
     digitalWrite(AB1815_CS, HIGH);
     SPI.end();
