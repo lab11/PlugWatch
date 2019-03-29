@@ -38,31 +38,11 @@ void SDCard::PowerOff() {
 }
 
 bool SDCard::Write(String filename, String to_write) {
-  /*
-  log.debug("write begin: " + filename);
-	if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
-		log.debug("CAN'T OPEN SD");
-		//Cloud::Publish(SD_ERROR_EVENT, "init");
-    return;
-	}
-	File file_to_write;
-	String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
-	String final_to_write = time_str + String("|") + to_write;
-	if (!file_to_write.open(filename, O_WRITE | O_CREAT | O_APPEND)) {
-		//sd.errorHalt("opening for write failed");
-		Serial.println(String("opening ") + String(filename) + String(" for write failed"));
-		Cloud::Publish(SD_ERROR_EVENT, String(filename) + String(" write"));
-		return;
-	}
-	file_to_write.println(final_to_write);
-	file_to_write.close();
-	log.debug(String("wrote : ") + String(filename) + String(":") + to_write);
-  */
 
   // Let's just make sure the SD card is plugged in
   if(digitalRead(SD_INT_PIN)) {
     // This means the card is not present
-		Serial.println("SD Card Not Present");
+    Serial.println("SD Card Not Present");
     result = "0";
     return 1;
   } else {
@@ -70,21 +50,21 @@ bool SDCard::Write(String filename, String to_write) {
   }
 
   if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
-		Serial.println("CAN'T OPEN SD");
+    Serial.println("CAN'T OPEN SD");
     return 1;
-	}
-	File file_to_write;
-	String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
-	String final_to_write = time_str + String("|") + String(to_write);
-	if (!file_to_write.open(filename, O_WRITE | O_CREAT | O_AT_END)) {
-		Serial.println(String("opening ") + String(filename) + String(" for write failed"));
-		return 1;
-	}
-	int r = file_to_write.write(final_to_write.c_str());
+  }
+
+  File file_to_write;
+  if (!file_to_write.open(filename, O_WRITE | O_CREAT | O_AT_END)) {
+    Serial.println(String("opening ") + String(filename) + String(" for write failed"));
+    return 1;
+  }
+
+  int r = file_to_write.write(to_write.c_str());
   if (r < 0) {
     Serial.println("Writing to file failed");
     file_to_write.flush();
-	  file_to_write.close();
+    file_to_write.close();
     return 1;
   } else {
     Serial.printlnf("Successfully wrote %d bytes to file", r);
@@ -95,7 +75,7 @@ bool SDCard::Write(String filename, String to_write) {
   file_to_write.close();
   delay(1000);
 
-	Serial.println(String("wrote : ") + String(filename) + String(":") + to_write);
+  Serial.println(String("wrote : ") + String(filename) + String(":") + to_write);
   return 0;
 }
 
@@ -103,70 +83,230 @@ int SDCard::getSize(String filename) {
 
   if(digitalRead(SD_INT_PIN)) {
     // This means the card is not present
-		Serial.println("SD Card Not Present");
+    Serial.println("SD Card Not Present");
     return -1;
   }
 
   if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
-		Serial.println("CAN'T OPEN SD");
+    Serial.println("CAN'T OPEN SD");
     return -1;
-	}
-	File f;
-	if (!f.open(filename, O_RDONLY)) {
-		Serial.println(String("opening ") + String(filename) + String(" to read filesize failed"));
-		return -1;
-	}
+  }
+
+  File f;
+  if (!f.open(filename, O_RDONLY)) {
+    Serial.println(String("opening ") + String(filename) + String(" to read filesize failed"));
+    return -1;
+  }
+
   int size = f.fileSize();
-	f.close();
+  f.close();
 
   return size;
 }
 
-String SDCard::Read(String filename) {
-  //log.debug("read begin: " + filename);
+//reads a file starting at position until a newline
+String SDCard::ReadLine(String filename, uint32_t position) {
 	File myFile;
 	if (!myFile.open(filename, O_READ)) {
-		//sd.errorHalt(String("opening ") + String(filename) + String(" for read failed"));
 		Serial.println(String("opening ") + String(filename) + String(" for read failed"));
 		Cloud::Publish(SD_ERROR_EVENT, String(filename) + String(" read"));
 		return "string err";
 	}
 	Serial.println(String(filename) + String(" content:"));
+	
+	//seek to position
+	myFile.seek(position);
+
 	String res = "";
-	res += String(myFile.fileSize());
-	res += "\n";
 	while (myFile.available()) {
 		char cur = myFile.read();
-		res += String(cur);
-		Serial.write(cur);
+		if(cur == '\n') {
+		  break;
+		} else {
+		  res += String(cur);
+		}
 	}
-	/*
-	   int data;
-	   while ((data = myFile.read()) >= 0) {
-	   Serial.write(data);
-	   res += String(data);
-	   }
-	   Serial.println(res);
-	 */
 	myFile.close();
 	return res;
 }
 
+String SDCard::getLastLine(String filename) {
+  // Let's just make sure the SD card is plugged in
+  if(digitalRead(SD_INT_PIN)) {
+    // This means the card is not present
+    Serial.println("SD Card Not Present");
+    result = "0";
+    return "";
+  } else {
+    result = "1";
+  }
 
-/*
-void volDmp() {
-  cout << F("\nVolume is FAT") << int(sd.vol()->fatType()) << endl;
-  cout << F("blocksPerCluster: ") << int(sd.vol()->blocksPerCluster()) << endl;
-  cout << F("clusterCount: ") << sd.vol()->clusterCount() << endl;
-  cout << F("freeClusters: ");
-  uint32_t volFree = sd.vol()->freeClusterCount();
-  cout <<  volFree << endl;
-  float fs = 0.000512*volFree*sd.vol()->blocksPerCluster();
-  cout << F("freeSpace: ") << fs << F(" MB (MB = 1,000,000 bytes)\n");
-  cout << F("fatStartBlock: ") << sd.vol()->fatStartBlock() << endl;
-  cout << F("fatCount: ") << int(sd.vol()->fatCount()) << endl;
-  cout << F("blocksPerFat: ") << sd.vol()->blocksPerFat() << endl;
-  cout << F("rootDirStart: ") << sd.vol()->rootDirStart() << endl;
-  cout << F("dataStartBlock: ") << sd.vol()->dataStartBlock() << endl;
+  if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
+    Serial.println("CAN'T OPEN SD");
+    return "";
+  }
+
+  File file_to_write;
+  if (!file_to_write.open(filename, O_READ)) {
+    Serial.println(String("opening ") + String(filename) + String(" for write failed"));
+    return "";
+  }
+
+  //get the length of the file
+  int current_length = file_to_write.fileSize();
+
+  //now seek from the end an appropriate amount
+  //reading forward and recording the position of the last newline
+  
+  if(current_length > 0) {
+    //seek backwards either 2KB or to the beginning of the file
+    if(current_length > 2000) {
+      if(!file_to_write.seekEnd(2000)) {
+	Serial.println("Seek failed");
+	file_to_write.close();
+	return "";
+      }
+    } else {
+      //seek to beginning
+      if(!file_to_write.seekSet(0)) {
+	Serial.println("Seek failed");
+	file_to_write.close();
+	return "";
+      }
+    }
+   
+    int newline_pos = 0;
+    int last_newline_pos = 0;
+
+    //okay now linearly scan recording the last newline before the end
+    while (file_to_write.available()) {
+      char cur = file_to_write.read();
+      if(cur == '\n') {
+	if(last_newline_pos == 0) {
+	  last_newline_pos = file_to_write.position();
+	} else {
+	  newline_pos = last_newline_pos;
+	  last_newline_pos = file_to_write.position();
+	}
+      }
+    }
+    
+    //now return from newline_pos to EOF
+    file_to_write.seekSet(newline_pos);
+    String res = "";
+    while (file_to_write.available()) {
+      char cur = file_to_write.read();
+      res += String(cur); 
+    }
+
+    file_to_write.close();
+    return res;
+
+  } else {
+    Serial.println("empty file - nothing to return");
+    file_to_write.close();
+    return "";
+  }
 }
-*/
+
+bool SDCard::removeLastLine(String filename) {
+  // Let's just make sure the SD card is plugged in
+  if(digitalRead(SD_INT_PIN)) {
+    // This means the card is not present
+    Serial.println("SD Card Not Present");
+    result = "0";
+    return 1;
+  } else {
+    result = "1";
+  }
+
+  if (!sd.begin(SD_CHIP_SELECT, SPI_HALF_SPEED)) {
+    Serial.println("CAN'T OPEN SD");
+    return 1;
+  }
+
+  File file_to_write;
+  if (!file_to_write.open(filename, O_WRITE | O_AT_END)) {
+    Serial.println(String("opening ") + String(filename) + String(" for write failed"));
+    return 1;
+  }
+
+  //get the length of the file
+  int current_length = file_to_write.fileSize();
+
+  //now seek from the end an appropriate amount
+  //reading forward and recording the position of the last newline
+  
+  if(current_length > 0) {
+    //seek backwards either 2KB or to the beginning of the file
+    if(current_length > 2000) {
+      if(!file_to_write.seekEnd(2000)) {
+	Serial.println("Seek failed");
+	file_to_write.close();
+	return 1;
+      }
+    } else {
+      //seek to beginning
+      if(!file_to_write.seekSet(0)) {
+	Serial.println("Seek failed");
+	file_to_write.close();
+	return 1;
+      }
+    }
+   
+    int newline_pos = 0;
+    int last_newline_pos = 0;
+
+    //okay now linearly scan recording the last newline before the end
+    while (file_to_write.available()) {
+      char cur = file_to_write.read();
+      if(cur == '\n') {
+	if(last_newline_pos == 0) {
+	  last_newline_pos = file_to_write.position();
+	} else {
+	  newline_pos = last_newline_pos;
+	  last_newline_pos = file_to_write.position();
+	}
+      }
+    }
+
+    //okay truncate the file to the newline pos
+    if(!file_to_write.truncate(newline_pos)) {
+      Serial.println("Error truncating");
+      file_to_write.close();
+      return 1;
+    }
+
+    delay(1000);
+    file_to_write.flush();
+    file_to_write.close();
+    return 0;
+
+  } else {
+    Serial.println("empty file - nothing to remove");
+    file_to_write.close();
+    return 1;
+  }
+}
+
+String SDCard::Read(String filename) {
+  File myFile;
+  if (!myFile.open(filename, O_READ)) {
+  	//sd.errorHalt(String("opening ") + String(filename) + String(" for read failed"));
+  	Serial.println(String("opening ") + String(filename) + String(" for read failed"));
+  	Cloud::Publish(SD_ERROR_EVENT, String(filename) + String(" read"));
+  	return "string err";
+  }
+  Serial.println(String(filename) + String(" content:"));
+  String res = "";
+  res += String(myFile.fileSize());
+  res += "\n";
+  while (myFile.available()) {
+    char cur = myFile.read();
+    res += String(cur);
+    Serial.write(cur);
+  }
+  
+  myFile.close();
+  return res;
+}

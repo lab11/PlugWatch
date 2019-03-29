@@ -19,7 +19,7 @@ class FileLog {
   std::queue<String> isr_queue;
 
 public:
-	FileLog(SDCard &sd, String filename, char* current_name) : sd{sd}, filename{filename}, current_name{current_name} {}
+  FileLog(SDCard &sd, String filename) : sd{sd}, filename{filename} {}
 
   // Only print to Serial
   void debugFromISR(String str);
@@ -27,7 +27,19 @@ public:
 
   // Print to serial and log to SD
   void appendFromISR(String str);
+
+  //appends to the running log of name filename
   bool append(String str);
+
+  //appends to a log of name year-month-day_filename
+  bool appendAndRotate(String str, uint32_t unixTime);
+
+  //these two functions allow us to easily make a dequeue out of an SD card file
+  //gets the last line of a log
+  String getLastLine();
+
+  //removes last line of a log
+  bool removeLastLine();
 
   // Print to serial, log to SD, publish to cloud
   void errorFromISR(String str);
@@ -35,10 +47,8 @@ public:
 
   // Get size
   int getFileSize();
-
-  String getCurrentName();
+  int getRotatedFileSize(uint32_t unitTime);
 
 private:
   void processIsrQueue();
-  char* current_name;
 };

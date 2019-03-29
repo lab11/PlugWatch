@@ -36,9 +36,13 @@ public:
 	 */
 	void PowerOn();
 	void PowerOff();
-
+	
+	String getLastLine(String filename);
+	bool removeLastLine(String filename);
+	bool readLastLine(String filename);
  	bool Write(String filename, String to_write);
 	int getSize(String filename);
 
+	String ReadLine(String filename, uint32_t position);
 	String Read(String filename);
 };

@@ -128,11 +128,9 @@ auto gpsSubsystem = Gps();
 //***********************************
 //* System Events
 //***********************************
-retained char event_log_name[50];
-auto EventLog = FileLog(SD, "event_log.txt", event_log_name);
+auto EventLog = FileLog(SD, "event_log.txt");
 std::queue<String> EventQueue;
 std::queue<String> CloudQueue;
-std::deque<String> DataDeque;
 
 //***********************************
 //* Battery check
@@ -144,7 +142,8 @@ unsigned long last_cloud_event = 0;
 //* System Data
 //***********************************
 retained char data_log_name[50];
-auto DataLog = FileLog(SD, "data_log.txt", data_log_name);
+auto DataLog = FileLog(SD, "data_log.txt");
+auto DataDequeue = FileLog(SD, "data_dequeue.txt");
 unsigned long last_logging_event  = 0;
 
 //***********************************
@@ -273,6 +272,7 @@ int reset_state(String cmd) {
   state = CheckCloudEvent;
   lastState = Wait;
   System.reset();
+  return 0;
 }
 
 //***********************************
@@ -712,15 +712,15 @@ void loop() {
       SD.PowerOn();
 
       //We should get the sd stat before logging the packet to the sd card
-      int size = DataLog.getFileSize();
+      int size = DataLog.getRotatedFileSize(Time.now());
       if(size == -1) {
         handle_error("Data logging size error", false);
       } else {
-        snprintf(sensingResults.SDstat, RESULT_LEN-1, "%d|%d|%s", sd_cnt, size, DataLog.getCurrentName().c_str());
+        snprintf(sensingResults.SDstat, RESULT_LEN-1, "%u|%d", sd_cnt, size);
       }
 
       String packet = stringifyResults(sensingResults);
-      if(DataLog.append(packet)) {
+      if(DataLog.appendAndRotate(packet, Time.now())) {
         handle_error("Data logging error", true);
       } else {
         sd_cnt++;
@@ -735,57 +735,70 @@ void loop() {
       manageStateTimer(40000);
 
       static int count = 0;
-
+     
+      String packet = "";
       if(count == 0) {
         String packet = stringifyResults(sensingResults);
-
-        // Add the packet to the data queue
-        if(DataDeque.size() < 200) {
-          DataDeque.push_front(packet);
-        } else {
-          DataDeque.pop_back();
-          DataDeque.push_front(packet);
-        }
+      } else {
+        String packet = DataDequeue.getLastLine();
       }
-      count++;
-
-
-      Serial.printlnf("Data Queue size %d",DataDeque.size());
-
+      
       if(Particle.connected()) {
-        if(!DataDeque.empty() && count < 5) {
+        if(packet != "" && count < 4) {
 
-          Serial.printlnf("Sending data - size %d",DataDeque.size());
-          String toSend = DataDeque.front();
+          if(packet.length() > 240) {
+            if(!Cloud::Publish("g",packet.substring(0,240))) {
+              //log the packet because it failed to send
+              DataDequeue.append(packet);
 
-          if(toSend.length() > 240) {
-            if(!Cloud::Publish("g",toSend.substring(0,240))) {
               handle_error("Data publishing error", true);
             } else {
-              if(!Cloud::Publish("g",toSend.substring(240))) {
+              if(!Cloud::Publish("g",packet.substring(240))) {
+                //log the packet because it failed to send
+                DataDequeue.append(packet);
+
                 handle_error("Data publishing error", true);
               } else {
-                DataDeque.pop_front();
+                if(count != 0) {
+                  //this came from the dequeue and sent
+                  //so remove the last line
+                  DataDequeue.removeLastLine();
+                }
               }
             }
           } else {
-            if(!Cloud::Publish("g",toSend)) {
+            if(!Cloud::Publish("g",packet)) {
+              //log the packet because it failed to send
+              DataDequeue.append(packet);
+
               handle_error("Data publishing error", true);
             } else {
-              DataDeque.pop_front();
+              if(count != 0) {
+                //this came from the dequeue and sent
+                //so remove the last line
+                DataDequeue.removeLastLine();
+              }
+
               last_cloud_event = millis();
             }
           }
         } else {
+          //great our log is empty!
           count = 0;
           state = nextState(state);
         }
-
       } else {
+        //add the packet to the queue
+        if(count == 0) {
+          DataDequeue.append(packet);
+        }
+
         handle_error("Data publishing error", true);
         count = 0;
         state = nextState(state);
       }
+
+      count++;
 
       break;
     }
@@ -796,8 +809,6 @@ void loop() {
       static int count = 0;
       count++;
 
-      Serial.printlnf("Data Queue size %d",DataDeque.size());
-
       if(Cellular.ready()) {
         UDP udp;
 
@@ -805,13 +816,12 @@ void loop() {
           Serial.println("UDP Begin error");
         }
 
-        if(!DataDeque.empty() && count < 5) {
+        String packet = DataDequeue.getLastLine();
 
-          Serial.printlnf("Sending data - size %d",DataDeque.size());
-          String toSend = DataDeque.front();
+        if(packet != "" && count < 4) {
 
           //construct some json
-          String data = "\"data\": \"" + toSend + "\", ";
+          String data = "\"data\": \"" + packet + "\", ";
           String version = "\"version\": " + String(version_int) + ", ";
           String product = "\"productID\": " + String(product_id) + ", ";
           String core = "\"coreid\": \"" + System.deviceID() + "\"";
@@ -838,21 +848,25 @@ void loop() {
             handle_error("Data publishing error", false);
             Serial.printlnf("Got error code: %d",r);
           } else {
-            DataDeque.pop_front();
+            DataDequeue.removeLastLine();
             last_cloud_event = millis();
           }
 
         } else {
+          //great our log is empty
           count = 0;
           state = nextState(state);
         }
 
         udp.stop();
+
       } else {
         handle_error("Data publishing error", false);
         count = 0;
         state = nextState(state);
       }
+
+      count++;
 
       break;
     }

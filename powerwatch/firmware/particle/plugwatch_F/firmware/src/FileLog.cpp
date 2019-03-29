@@ -28,18 +28,36 @@ void FileLog::appendFromISR(String str) {
 bool FileLog::append(String str) {
   processIsrQueue();
 
-  String fname = String(current_name) + String('_') + filename;
-  int size = sd.getSize(fname);
-  if(current_name[0] == 0 || size == -1 || size > 65000) {
-    //generate a new filename
-    randomSeed(millis());
-    int r = random(100000000);
-    snprintf(current_name,50,"%d",r);
-  }
+  String fname = filename;
 
-  fname = String(current_name) + String('_') + filename;
   Serial.println(fname + ": " + str);
   return sd.Write(fname, str + "\n");
+}
+
+bool FileLog::appendAndRotate(String str, uint32_t unixTime) {
+  processIsrQueue();
+
+  //rotate logs every day
+  //get the day month year
+  struct tm  * time;
+  time = gmtime((time_t*)&unixTime);
+
+  String fname = String(1900 + time->tm_year) + String('-') + 
+                 String(time->tm_mon + 1) + String('-') + 
+                 String(time->tm_mday) + String('_') + filename;
+
+  Serial.println(fname + ": " + str);
+  return sd.Write(fname, str + "\n");
+}
+
+String FileLog::getLastLine() {
+  processIsrQueue();
+  return sd.getLastLine(filename);
+}
+
+bool FileLog::removeLastLine() {
+  processIsrQueue();
+  return sd.removeLastLine(filename);
 }
 
 void FileLog::errorFromISR(String str) {
@@ -67,10 +85,17 @@ void FileLog::debug(String str) {
 }
 
 int FileLog::getFileSize() {
-  String fname = String(current_name) + String('_') + filename;
-  return sd.getSize(fname);
+  return sd.getSize(filename);
 }
 
-String FileLog::getCurrentName() {
-  return String(current_name);
+int FileLog::getRotatedFileSize(uint32_t unixTime) {
+  struct tm  * time;
+  time = gmtime((time_t*)&unixTime);
+
+  String fname = String(1900 + time->tm_year) + String('-') + 
+                 String(time->tm_mon + 1) + String('-') + 
+                 String(time->tm_mday) + String('_') + filename;
+
+
+  return sd.getSize(fname);
 }
