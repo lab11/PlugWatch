@@ -155,20 +155,23 @@ String SDCard::getLastLine(String filename) {
   //get the length of the file
   int current_length = file_to_write.fileSize();
 
+  Serial.print("Current file size: ");
+  Serial.println(current_length);
+
   //now seek from the end an appropriate amount
   //reading forward and recording the position of the last newline
 
   if(current_length > 0) {
     //seek backwards either 2KB or to the beginning of the file
     if(current_length > 2000) {
-      if(!file_to_write.seekEnd(2000)) {
+      if(!file_to_write.seek(current_length - 2000)) {
 	Serial.println("Seek failed");
 	file_to_write.close();
 	return "";
       }
     } else {
       //seek to beginning
-      if(!file_to_write.seekSet(0)) {
+      if(!file_to_write.seek(0)) {
 	Serial.println("Seek failed");
 	file_to_write.close();
 	return "";
@@ -264,7 +267,6 @@ bool SDCard::removeLastLine(String filename) {
     //okay now linearly scan recording the last newline before the end
     Serial.println("Scanning file for newlines");
     while (file_to_write.available()) {
-      Serial.println(file_to_write.available());
       char cur = file_to_write.read();
       if(cur == '\n') {
 	int pos = file_to_write.position();
