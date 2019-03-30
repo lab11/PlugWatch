@@ -42,8 +42,8 @@ bool FileLog::appendAndRotate(String str, uint32_t unixTime) {
   struct tm  * time;
   time = gmtime((time_t*)&unixTime);
 
-  String fname = String(1900 + time->tm_year) + String('-') + 
-                 String(time->tm_mon + 1) + String('-') + 
+  String fname = String(1900 + time->tm_year) + String('-') +
+                 String(time->tm_mon + 1) + String('-') +
                  String(time->tm_mday) + String('_') + filename;
 
   Serial.println(fname + ": " + str);
@@ -57,6 +57,10 @@ String FileLog::getLastLine() {
 
 bool FileLog::removeLastLine() {
   processIsrQueue();
+
+  Serial.print("removing last line of: ");
+  Serial.println(filename.c_str());
+
   return sd.removeLastLine(filename);
 }
 
@@ -92,8 +96,8 @@ int FileLog::getRotatedFileSize(uint32_t unixTime) {
   struct tm  * time;
   time = gmtime((time_t*)&unixTime);
 
-  String fname = String(1900 + time->tm_year) + String('-') + 
-                 String(time->tm_mon + 1) + String('-') + 
+  String fname = String(1900 + time->tm_year) + String('-') +
+                 String(time->tm_mon + 1) + String('-') +
                  String(time->tm_mday) + String('_') + filename;
 
 

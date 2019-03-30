@@ -113,7 +113,7 @@ String SDCard::ReadLine(String filename, uint32_t position) {
 		return "string err";
 	}
 	Serial.println(String(filename) + String(" content:"));
-	
+
 	//seek to position
 	myFile.seek(position);
 
@@ -157,7 +157,7 @@ String SDCard::getLastLine(String filename) {
 
   //now seek from the end an appropriate amount
   //reading forward and recording the position of the last newline
-  
+
   if(current_length > 0) {
     //seek backwards either 2KB or to the beginning of the file
     if(current_length > 2000) {
@@ -174,7 +174,7 @@ String SDCard::getLastLine(String filename) {
 	return "";
       }
     }
-   
+
     int newline_pos = 0;
     int last_newline_pos = 0;
 
@@ -190,13 +190,13 @@ String SDCard::getLastLine(String filename) {
 	}
       }
     }
-    
+
     //now return from newline_pos to EOF
     file_to_write.seekSet(newline_pos);
     String res = "";
     while (file_to_write.available()) {
       char cur = file_to_write.read();
-      res += String(cur); 
+      res += String(cur);
     }
 
     file_to_write.close();
@@ -226,49 +226,61 @@ bool SDCard::removeLastLine(String filename) {
   }
 
   File file_to_write;
-  if (!file_to_write.open(filename, O_WRITE | O_AT_END)) {
+  if (!file_to_write.open(filename, O_WRITE | O_READ)) {
     Serial.println(String("opening ") + String(filename) + String(" for write failed"));
     return 1;
   }
 
   //get the length of the file
   int current_length = file_to_write.fileSize();
+  Serial.print("Current length: ");
+  Serial.println(current_length);
 
   //now seek from the end an appropriate amount
   //reading forward and recording the position of the last newline
-  
+
   if(current_length > 0) {
     //seek backwards either 2KB or to the beginning of the file
     if(current_length > 2000) {
-      if(!file_to_write.seekEnd(2000)) {
+      Serial.println("Setting seek to end minus 2000 chars");
+      if(!file_to_write.seek(current_length - 2000)) {
 	Serial.println("Seek failed");
 	file_to_write.close();
 	return 1;
       }
     } else {
       //seek to beginning
-      if(!file_to_write.seekSet(0)) {
+      Serial.println("Setting seek to beginning of file");
+      if(!file_to_write.seek(0)) {
 	Serial.println("Seek failed");
 	file_to_write.close();
 	return 1;
       }
     }
-   
+
     int newline_pos = 0;
     int last_newline_pos = 0;
 
     //okay now linearly scan recording the last newline before the end
+    Serial.println("Scanning file for newlines");
     while (file_to_write.available()) {
+      Serial.println(file_to_write.available());
       char cur = file_to_write.read();
       if(cur == '\n') {
+	int pos = file_to_write.position();
+	Serial.print("Found newline at ");
+        Serial.println(pos);
 	if(last_newline_pos == 0) {
-	  last_newline_pos = file_to_write.position();
+	  last_newline_pos = pos;
 	} else {
 	  newline_pos = last_newline_pos;
-	  last_newline_pos = file_to_write.position();
+	  last_newline_pos = pos;
 	}
       }
     }
+
+    Serial.print("truncating file at ");
+    Serial.println(newline_pos);
 
     //okay truncate the file to the newline pos
     if(!file_to_write.truncate(newline_pos)) {
@@ -306,7 +318,7 @@ String SDCard::Read(String filename) {
     res += String(cur);
     Serial.write(cur);
   }
-  
+
   myFile.close();
   return res;
 }

@@ -423,6 +423,8 @@ String stringifyResults(ResultStruct r) {
 }
 
 void system_sleep() {
+  Serial.println("Starting putting the system to sleep");
+
   //turn off the GPS
   digitalWrite(D3, LOW);
 
@@ -441,9 +443,9 @@ void system_sleep() {
 
   //now sleep for ten minutes unless we get a power change
   System.sleep(D7, FALLING, 600);
-}
 
-void system_wake() {
+  Serial.println("Waking up from sleep");
+
   //turn on the GPS
   digitalWrite(D3, LOW);
   
@@ -455,6 +457,7 @@ void system_wake() {
   digitalWrite(DAC, HIGH);
   delay(1000);
   digitalWrite(DAC, LOW);
+
 }
 
 // retain this so that on the next iteration we still get results on hang
@@ -738,42 +741,48 @@ void loop() {
      
       String packet = "";
       if(count == 0) {
-        String packet = stringifyResults(sensingResults);
+        packet = stringifyResults(sensingResults);
       } else {
-        String packet = DataDequeue.getLastLine();
+        packet = DataDequeue.getLastLine();
       }
+
+      Serial.print("Attempting to write: ");
+      Serial.print(packet.c_str());
+      Serial.print(" on attempt ");
+      Serial.println(count);
       
       if(Particle.connected()) {
+        Serial.println("Particle connected");
         if(packet != "" && count < 4) {
 
           if(packet.length() > 240) {
             if(!Cloud::Publish("g",packet.substring(0,240))) {
               //log the packet because it failed to send
+
+              Serial.println("Failed to send packet. Appending to dequeue.");
               DataDequeue.append(packet);
 
               handle_error("Data publishing error", true);
             } else {
-              if(!Cloud::Publish("g",packet.substring(240))) {
-                //log the packet because it failed to send
-                DataDequeue.append(packet);
-
-                handle_error("Data publishing error", true);
-              } else {
-                if(count != 0) {
-                  //this came from the dequeue and sent
-                  //so remove the last line
-                  DataDequeue.removeLastLine();
-                }
+              Serial.println("Sent packet successfully");
+              if(count != 0) {
+                Serial.println("This was from the dequeue, so removing");
+                //this came from the dequeue and sent
+                //so remove the last line
+                DataDequeue.removeLastLine();
               }
             }
           } else {
             if(!Cloud::Publish("g",packet)) {
               //log the packet because it failed to send
+              Serial.println("Failed to send packet. Appending to dequeue.");
               DataDequeue.append(packet);
 
               handle_error("Data publishing error", true);
             } else {
+              Serial.println("Sent packet successfully");
               if(count != 0) {
+                Serial.println("This was from the dequeue, so removing");
                 //this came from the dequeue and sent
                 //so remove the last line
                 DataDequeue.removeLastLine();
@@ -784,12 +793,15 @@ void loop() {
           }
         } else {
           //great our log is empty!
+          Serial.println("Log empty or count too high");
           count = 0;
           state = nextState(state);
         }
       } else {
         //add the packet to the queue
+        Serial.println("Particle not connected");
         if(count == 0) {
+          Serial.println("appending packet to the dequeue");
           DataDequeue.append(packet);
         }
 
@@ -797,8 +809,10 @@ void loop() {
         count = 0;
         state = nextState(state);
       }
-
-      count++;
+      
+      if(state == SendPacket) {
+        count++;
+      }
 
       break;
     }
@@ -921,14 +935,16 @@ void loop() {
       if(powercheck.getHasPower() || first) {
         manageStateTimer(1200000);
 
+
         static unsigned long mill = 0;
         if(!first) {
+          Serial.println("Looping in wait state");
           mill = millis();
           first = true;
           SD.PowerOff();
         }
 
-        if(millis() - mill > 60000) {
+        if(millis() - mill > 6000) {
           clearResults(&sensingResults);
           system_cnt++;
           SD.PowerOn();
@@ -947,7 +963,9 @@ void loop() {
         //around the loop again and send a status update)
         //or until power restores
         system_sleep();
-        system_wake();
+        clearResults(&sensingResults);
+        first = false;
+        system_cnt++;
         state = CheckCloudEvent;
       }
 
