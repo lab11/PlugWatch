@@ -6,10 +6,14 @@ void PowerCheck::setup() {
 	// This can't be part of the constructor because it's initialized too early.
 	// Call this from setup() instead.
 
-	// the LOW_BAT_UC pin interrupts on power change and some other 
+	// the LOW_BAT_UC pin interrupts on power change and some other
 	// causes so we filter out those other causes in the interrupt
 	// handler
 	attachInterrupt(LOW_BAT_UC, &PowerCheck::interruptHandler, this, FALLING);
+
+	//by adding D7 we should also catch the interrupt happening on power
+	//restoration from sleep
+	attachInterrupt(D7, &PowerCheck::interruptHandler, this, FALLING);
 
 	//Drive the pin low
 	pinMode(C3, OUTPUT);
@@ -83,7 +87,7 @@ int PowerCheck::getVoltage() {
     }
 
     int L_avg = (L_max + L_min)/2;
-    
+
     int larray[10];
     int narray[10];
     for(uint8_t i = 0; i < 10; i++) {
@@ -114,7 +118,7 @@ int PowerCheck::getVoltage() {
 	    mcount++;
 	    ready = false;
 	} else if (L < L_avg){
-	    ready = true; 
+	    ready = true;
 	}
     }
     if(millis() - startMillis >= 1000) {
@@ -125,7 +129,7 @@ int PowerCheck::getVoltage() {
     	int p2 = m[1] - m[0];
     	periodMicros = (p1 + p2)/2;
     }
-    
+
     Serial.printlnf("L voltage count: %d", L_max);
     Serial.printlnf("N voltage count: %d", N_measure);
 

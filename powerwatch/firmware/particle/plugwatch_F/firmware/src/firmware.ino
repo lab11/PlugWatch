@@ -50,12 +50,12 @@
 int product_id = PRODUCT;
 PRODUCT_ID(PRODUCT);
 #else
-int product_id = 8462;
-PRODUCT_ID(8462);
+int product_id = 8379;
+PRODUCT_ID(8379);
 #endif
 
-int version_int = 108; 
-PRODUCT_VERSION(108);
+int version_int = 109; 
+PRODUCT_VERSION(109);
 
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
@@ -238,6 +238,12 @@ enum SystemState {
 };
 
 SystemState nextState(SystemState s) {
+    pinMode(D7, OUTPUT);
+    digitalWrite(D7, LOW);
+    delay(1000);
+    pinMode(D7, INPUT);
+    delay(1000);
+
     return static_cast<SystemState>(static_cast<int>(s) + 1);
 }
 
@@ -373,7 +379,7 @@ void manageStateTimer(unsigned long period) {
 
 //This structure is what all of the drivers will return. It will
 //be packetized and send to the cloud in the sendPacket state
-#define RESULT_LEN 80
+#define RESULT_LEN 100
 struct ResultStruct {
   char chargeStateResult[RESULT_LEN];
   char mpuResult[RESULT_LEN];
@@ -442,12 +448,28 @@ void system_sleep() {
   timeSyncSubsystem.setup();
 
   //now sleep for ten minutes unless we get a power change
-  System.sleep(D7, FALLING, 600);
+
+  //apparently we need to do some stuff to the cellular radio first
+  Particle.disconnect();
+  //0 is the disconnected state
+  while(cloud_state != 0) {
+    Particle.process();
+  };
+
+  Cellular.off();
+  while(network_state != network_status_off) {
+    Particle.process();
+  };
+
+  System.sleep(D7, FALLING, 45);
+
+  //reset to clear the interrupt
+  timeSyncSubsystem.setup();
 
   Serial.println("Waking up from sleep");
 
   //turn on the GPS
-  digitalWrite(D3, LOW);
+  digitalWrite(D3, HIGH);
   
   //turn on the SD Card
   SD.PowerOn();
@@ -515,7 +537,7 @@ void loop() {
               Serial.println("Particle cloud connection failed");
               //Stop trying to connect to the cloud
               Particle.disconnect();
-               //0 is the disconnected state
+              //0 is the disconnected state
               while(cloud_state != 0) {
                 Particle.process();
               };
@@ -667,7 +689,7 @@ void loop() {
 
     case SenseSDPresent: {
       //This should just be a GPIO pin
-      manageStateTimer(1000);
+      manageStateTimer(10000);
 
       LoopStatus result = SD.loop();
 
@@ -703,8 +725,10 @@ void loop() {
     }
 
     case UpdateSystemStat: {
-      manageStateTimer(1000);
+      manageStateTimer(10000);
+      Serial.println("Writing system stats");
       snprintf(sensingResults.systemStat, RESULT_LEN-1, "%lu|%s|%u", system_cnt, shield_id.c_str(), reboot_cnt);
+      Serial.println("Transitioning to next state");
       state = nextState(state);
       break;
     }
@@ -735,7 +759,7 @@ void loop() {
     }
 
     case SendPacket: {
-      manageStateTimer(40000);
+      manageStateTimer(60000);
 
       static int count = 0;
      
@@ -818,12 +842,12 @@ void loop() {
     }
 
     case SendUDP: {
-      manageStateTimer(40000);
+      manageStateTimer(60000);
 
       static int count = 0;
       count++;
 
-      if(Cellular.ready()) {
+      if(Cellular.ready() && !Particle.connected()) {
         UDP udp;
 
         if(udp.begin(8888) != true) {
@@ -886,7 +910,7 @@ void loop() {
     }
 
     case LogError: {
-      manageStateTimer(30000);
+      manageStateTimer(60000);
       static int count = 0;
 
       SD.PowerOn();
@@ -906,7 +930,7 @@ void loop() {
     }
 
     case SendError: {
-      manageStateTimer(30000);
+      manageStateTimer(60000);
       static int count = 0;
 
       if(Particle.connected()) {
@@ -962,14 +986,15 @@ void loop() {
         //and put the system to sleep for 10 minutes (where we will go
         //around the loop again and send a status update)
         //or until power restores
+
+        //if we can't sleep in 30 seconds just reset
+        manageStateTimer(30000);
         system_sleep();
         clearResults(&sensingResults);
         first = false;
         system_cnt++;
         state = CheckCloudEvent;
       }
-
-
       
       break;
     }
@@ -989,7 +1014,12 @@ void loop() {
 void soft_watchdog_reset() {
   //reset_flag = true; //let the reset subsystem shutdown gracefully
   //TODO change to system reset after a certain number of times called
-  System.reset();
+
+  //This function won't work from an ISR??
+  //System.reset();
+  
+  //Rick suggests this one
+  HAL_Core_System_Reset();
 }
 
 String id() {
