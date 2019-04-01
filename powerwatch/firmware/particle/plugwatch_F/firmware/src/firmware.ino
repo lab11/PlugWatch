@@ -173,7 +173,123 @@ void handle_all_system_events(system_event_t event, int param) {
     network_state = param;
   }
 
-  Serial.printlnf("got event H: %lu event L: %lu with value %d", (uint32_t)(event>>32), (uint32_t)event, param);
+  String event_type;
+  String event_param;
+
+  switch((uint32_t) event) {
+  case setup_begin:
+    event_type = "setup_begin";
+  break;
+  case setup_update:
+    event_type = "setup_update";
+  break;
+  case setup_end:
+    event_type = "setup_end";
+  break;
+  case network_credentials:
+    event_type = "network_credentials";
+    switch(param) {
+    case network_credentials_added:
+      event_param = "added";
+    break;
+    case network_credentials_cleared:
+      event_param = "cleared";
+    break;
+    }
+  break;
+  case network_status:
+    event_type = "network_status";
+    switch(param) {
+    case network_status_powering_on:
+      event_param = "network_status_powering_on";
+    break;
+    case network_status_on:
+      event_param = "on";
+    break;
+    case network_status_powering_off:
+      event_param = "powering_off";
+    break;
+    case network_status_off:
+      event_param = "off";
+    break;
+    case network_status_connecting:
+      event_param = "connecting";
+    break;
+    case network_status_connected: 
+      event_param = "connected";
+    break;
+    }
+  break;
+  case cloud_status:
+    event_type = "cloud_status";
+    switch(param) {
+    case cloud_status_disconnecting:
+      event_param = "disconnecting";
+    break;
+    case cloud_status_disconnected: 
+      event_param = "disconnected";
+    break;
+    case cloud_status_connecting:
+      event_param = "connecting";
+    break;
+    case cloud_status_connected: 
+      event_param = "connected";
+    break;
+    }
+  break;
+  case button_status:
+    event_type = "button_status";
+  break;
+  case firmware_update:
+    event_type = "firmware_update";
+    switch(param) {
+    case firmware_update_begin:
+      event_param = "begin";
+    break;
+    case firmware_update_progress: 
+      event_param = "progress";
+    break;
+    case firmware_update_complete:
+      event_param = "complete";
+    break;
+    case firmware_update_failed: 
+      event_param = "failed";
+    break;
+    }
+  break;
+  case firmware_update_pending:
+    event_type = "firmware_update_pending";
+  break;
+  case reset_pending:
+    event_type = "reset_pending";
+  break;
+  case reset:
+    event_type = "reset";
+  break;
+  case button_click:
+    event_type = "button_click";
+  break;
+  case button_final_click:
+    event_type = "button_final_click";
+  break;
+  case time_changed:
+    event_type = "time_changed";
+    switch(param) {
+    case time_changed_manually:
+      event_param = "manual";
+    break;
+    case time_changed_sync:
+      event_param = "sync";
+    break;
+    }
+  break;
+  case low_battery:
+    event_type = "low_battery";
+  break;
+  }
+
+
+  Serial.printlnf("got event %s with param %s", event_type.c_str(), event_param.c_str());
   String system_event_str = String((int)event) + "|" + String(param);
   String time_str = String(Time.format(Time.now(), TIME_FORMAT_ISO8601_FULL));
   last_system_event_time = time_str;
@@ -450,18 +566,30 @@ void system_sleep() {
   //now sleep for ten minutes unless we get a power change
 
   //apparently we need to do some stuff to the cellular radio first
-  Particle.disconnect();
-  //0 is the disconnected state
-  while(cloud_state != 0) {
-    Particle.process();
-  };
-
+  Serial.println("Disconnecting from cloud"); 
+  if(Particle.connected()) {
+    Particle.disconnect();
+    //0 is the disconnected state
+    while(cloud_state != 0) {
+      Particle.process();
+    };
+  }
+  
+  Serial.println("Powering off cellular"); 
+  //we must issue the disconnect command just so that it tries to stop connecting
+  //or I think sleep will hang
+  Cellular.disconnect();
   Cellular.off();
   while(network_state != network_status_off) {
     Particle.process();
   };
 
+  delay(6000);
+
   System.sleep(D7, FALLING, 45);
+
+  //setup serial again
+  Serial.begin(9600);
 
   //reset to clear the interrupt
   timeSyncSubsystem.setup();
@@ -748,7 +876,7 @@ void loop() {
 
       String packet = stringifyResults(sensingResults);
       if(DataLog.appendAndRotate(packet, Time.now())) {
-        handle_error("Data logging error", true);
+        handle_error("Data logging error", false);
       } else {
         sd_cnt++;
         last_logging_event = millis();
@@ -786,7 +914,7 @@ void loop() {
               Serial.println("Failed to send packet. Appending to dequeue.");
               DataDequeue.append(packet);
 
-              handle_error("Data publishing error", true);
+              handle_error("Data publishing error", false);
             } else {
               Serial.println("Sent packet successfully");
               if(count != 0) {
@@ -802,7 +930,7 @@ void loop() {
               Serial.println("Failed to send packet. Appending to dequeue.");
               DataDequeue.append(packet);
 
-              handle_error("Data publishing error", true);
+              handle_error("Data publishing error", false);
             } else {
               Serial.println("Sent packet successfully");
               if(count != 0) {
@@ -829,7 +957,7 @@ void loop() {
           DataDequeue.append(packet);
         }
 
-        handle_error("Data publishing error", true);
+        handle_error("Data publishing error", false);
         count = 0;
         state = nextState(state);
       }
@@ -917,7 +1045,7 @@ void loop() {
       if(!EventQueue.empty() && count < 4) {
         count++;
         if(EventLog.append(EventQueue.front())) {
-          handle_error("Event logging error", true);
+          handle_error("Event logging error", false);
         } else {
           EventQueue.pop();
         }
@@ -956,7 +1084,8 @@ void loop() {
 
       //Do we have power, or did we lose power while in this state
       //If so just wait and we'll hit it the next time
-      if(powercheck.getHasPower() || first) {
+      //if(powercheck.getHasPower() || first) {
+      if(0) {
         manageStateTimer(1200000);
 
 
@@ -1019,7 +1148,8 @@ void soft_watchdog_reset() {
   //System.reset();
   
   //Rick suggests this one
-  HAL_Core_System_Reset();
+  Serial.println("Trying to reset");
+  System.sleep(SLEEP_MODE_DEEP, 60);
 }
 
 String id() {

@@ -2,11 +2,19 @@
 
 void Timesync::setup() {
   rtc.init();
+
+  //it seems smart to aggressively rely on the RTC for time sync
+  Serial.println("Syncing to RTC");
+  uint32_t t = rtc.getTime();
+  Serial.printlnf("Setting time to %lu from RTC", t);
+  Time.setTime(t);
 }
 
 LoopStatus Timesync::loop() {
 
   if(Particle.connected()) {
+    Serial.println("Particle connected, trying to sync");
+
     if (Particle.syncTimePending()) {
       return NotFinished;
     } else {
@@ -81,21 +89,11 @@ LoopStatus Timesync::loop() {
     udp.stop();
     return FinishedError;
   } else {
-    // Do we need to sync?
-    Serial.println("Not connected - checking last sync time");
-    unsigned long now = millis();
-    static unsigned long last = 0;
-    //unsigned long last = Particle.timeSyncedLast();
-
-    //We don't have a cellular connection so rely on the RTC
-    if ((now - last) > Timesync::TWELVE_HOURS || last == 0) { // been a while
-        //set the time
-        Serial.println("Syncing to RTC");
-        uint32_t t = rtc.getTime();
-        Serial.printlnf("Setting time to %lu from RTC", t);
-        Time.setTime(t);
-        last = millis();
-    }
+    //set the time
+    Serial.println("Syncing to RTC");
+    uint32_t t = rtc.getTime();
+    Serial.printlnf("Setting time to %lu from RTC", t);
+    Time.setTime(t);
 
     return FinishedSuccess;
   }
