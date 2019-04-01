@@ -587,7 +587,20 @@ void system_sleep() {
 
   delay(6000);
 
-  System.sleep(D7, FALLING, 45);
+  //sleep for ten minutes, three times
+  static uint8_t sleep_count = 0;
+  for(sleep_count = 0; sleep_count < 3; sleep_count++) {
+    System.sleep(D7, FALLING, 600);
+    
+    //if we have power break and take a sample
+    if(powercheck.getHasPower()) {
+      break;
+    }
+
+    digitalWrite(DAC, HIGH);
+    delay(1000);
+    digitalWrite(DAC, LOW);
+  }
 
   //setup serial again
   Serial.begin(9600);
@@ -602,13 +615,6 @@ void system_sleep() {
   
   //turn on the SD Card
   SD.PowerOn();
-
-  //toggle the watchdog before we sleep so it doesn't reset us
-  //we have about 1000s before it needs to be retoggled
-  digitalWrite(DAC, HIGH);
-  delay(1000);
-  digitalWrite(DAC, LOW);
-
 }
 
 // retain this so that on the next iteration we still get results on hang
@@ -1085,8 +1091,7 @@ void loop() {
 
       //Do we have power, or did we lose power while in this state
       //If so just wait and we'll hit it the next time
-      //if(powercheck.getHasPower() || first) {
-      if(0) {
+      if(powercheck.getHasPower() || first) {
         manageStateTimer(1200000);
 
 
