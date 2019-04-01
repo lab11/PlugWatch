@@ -2,7 +2,7 @@
 function complianceApp(args) {
     compliance_list = [];
 
-    compliances_to_issue = 2 - args.compliance_app_payments;
+    compliances_to_issue = 1 - args.compliance_app_payments;
     for(let i = 0; i < compliances_to_issue; i++) {
         var obj = {};
         obj.amount = 4;
@@ -20,7 +20,7 @@ function compliancePowerwatch(args) {
 
     if(args.powerwatch == true) {
 
-        compliances_to_issue = 2 - compliance_powerwatch_payments;
+        compliances_to_issue = 1 - args.compliance_powerwatch_payments;
         for(let i = 0; i < compliances_to_issue; i++) {
             var obj = {};
             obj.amount = 5;
@@ -34,6 +34,6 @@ function compliancePowerwatch(args) {
 }
 
 module.exports = {
-    complianceApp: complianceApp,
-    compliacnePowerwatch: compliancePowerwatch,
+    complianceApp,
+    compliancePowerwatch,
 };

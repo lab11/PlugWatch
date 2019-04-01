@@ -39,6 +39,6 @@ function compliancePowerwatch(args) {
 }
 
 module.exports = {
-    complianceApp: complianceApp,
-    compliacnePowerwatch: compliancePowerwatch,
+    complianceApp,
+    compliancePowerwatch,
 };

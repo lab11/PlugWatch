@@ -157,6 +157,7 @@ function check_korba_status(external_transaction_id, callback) {
     request({
       uri: 'https://xchange.korbaweb.com/api/v1.0/transaction_status/',
       method: 'POST',
+      timeout: 60000,
       headers:{
         'Content-Type':'application/json',
         'Authorization':`HMAC ${client_key}:${hash}`
@@ -166,9 +167,11 @@ function check_korba_status(external_transaction_id, callback) {
       resolveWithFullResponse: true,
     },function(error, response, bodyKorba){
       console.log('error: ', error);
-      console.log('statusCode: ', response.statusCode);
+      if(typeof response != 'undefined') {
+          console.log('statusCode: ', response.statusCode);
+      }
       console.log(bodyKorba);
-      callback(error, response, bodyKorba);
+      callback(null, response, bodyKorba);
     });
 }
 
@@ -226,6 +229,7 @@ function send_to_korba(phone_number, carrier, amount, external_transaction_id, c
     request({
       uri: 'https://xchange.korbaweb.com/api/v1.0/topup/',
       method: 'POST',
+      timeout: 60000,
       headers:{
         'Content-Type':'application/json',
         'Authorization':`HMAC ${client_key}:${hash}`
@@ -235,9 +239,16 @@ function send_to_korba(phone_number, carrier, amount, external_transaction_id, c
       resolveWithFullResponse: true,
     },function(error, response, bodyKorba){
       console.log('error: ', error);
-      console.log('statusCode: ', response.statusCode);
+      if(typeof response != 'undefined') {
+          console.log('statusCode: ', response.statusCode);
+      }
       console.log(bodyKorba);
-      callback(error, response.statusCode);
+      //no matter an error, set it to pending and fix on the next try
+      if(typeof response != 'undefined') {
+          callback(null, response.statusCode);
+      } else {
+          callback(null, null);
+      }
     });
 }
 
@@ -391,11 +402,15 @@ function check_status(callback) {
             //for each row
             //send it to korba
             check_korba_status(row.external_transaction_id, function(error, result, body) {
-                update_payment_state_from_status(error, result, body, row, function(err) {
-                    callback(err);
-                });
+                if(result) {
+                    update_payment_state_from_status(error, result, body, row, function(err) {
+                        callback(err);
+                    });
+                }
             });
         }, function(err) {
+            //iff there is an error just ignore it for now
+            console.log("Got korba status check error:", err)
             callback(err)
         });
     }
@@ -449,7 +464,7 @@ var incentive_funcs = require(oink_config.incentives_file);
 
 var incentive_list = []
 for (var func in incentive_funcs) {
-    incentive_list.push(async.apply(incentivize_users,func));
+    incentive_list.push(async.apply(incentivize_users,incentive_funcs[func]));
 }
 
 var to_call_list = [];
