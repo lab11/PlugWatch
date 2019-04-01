@@ -567,8 +567,9 @@ void system_sleep() {
 
   //apparently we need to do some stuff to the cellular radio first
   Serial.println("Disconnecting from cloud"); 
-  if(Particle.connected()) {
-    Particle.disconnect();
+  bool connected = Particle.connected();
+  Particle.disconnect();
+  if(connected) {
     //0 is the disconnected state
     while(cloud_state != 0) {
       Particle.process();
