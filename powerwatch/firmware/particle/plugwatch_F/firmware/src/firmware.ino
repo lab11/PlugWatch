@@ -447,12 +447,6 @@ void setup() {
   //Timesync
   timeSyncSubsystem.setup();
 
-  if(uCmd.setSMSMode(1) == RESP_OK) {
-    Serial.println("Set up SMS mode");
-  } else {
-    handle_error("SMS Mode failed", false);
-  }
-
   LEDStatus status;
   status.off();
 
@@ -591,6 +585,8 @@ void system_sleep() {
   static uint8_t sleep_count = 0;
   for(sleep_count = 0; sleep_count < 3; sleep_count++) {
     System.sleep(D7, FALLING, 600);
+
+    delay(1000);
     
     //if we have power break and take a sample
     if(powercheck.getHasPower()) {
