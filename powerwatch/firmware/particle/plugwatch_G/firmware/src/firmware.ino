@@ -54,8 +54,8 @@ int product_id = 8379;
 PRODUCT_ID(8379);
 #endif
 
-int version_int = 110; 
-PRODUCT_VERSION(110);
+int version_int = 200; 
+PRODUCT_VERSION(200);
 
 SYSTEM_THREAD(ENABLED);
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
@@ -397,10 +397,29 @@ int reset_state(String cmd) {
   return 0;
 }
 
-//***********************************
-//* ye-old Arduino
-//***********************************
+//make a retained variable for wakeup
+retained uint8_t sleep_count = 0;
+
 void setup() {
+  
+  delay(1000);
+  //if we need to sleep again AND we still don't have power
+  if(sleep_count > 0 && !powercheck.getHasPower()) {
+    //tickle watchdog
+    pinMode(DAC, OUTPUT);
+    digitalWrite(DAC, LOW);
+    delay(1000);
+    digitalWrite(DAC, HIGH);
+    delay(1000);
+    digitalWrite(DAC, LOW);
+
+    //decrement sleep count
+    sleep_count -= 1;
+    System.sleep(SLEEP_MODE_DEEP, 600);
+  } else {
+    sleep_count = 0;
+  }
+
   // The first thing we do is to check the battery
   batteryCheck.checkAndSleepIfNecessary();
 
@@ -556,61 +575,12 @@ void system_sleep() {
   //make sure the rtc interrupt is clear so that we wake up
   //we can do this by reinitializing the RTC
   timeSyncSubsystem.setup();
-
-  //now sleep for ten minutes unless we get a power change
-
-  //apparently we need to do some stuff to the cellular radio first
-  Serial.println("Disconnecting from cloud"); 
-  bool connected = Particle.connected();
-  Particle.disconnect();
-  if(connected) {
-    //0 is the disconnected state
-    while(cloud_state != 0) {
-      Particle.process();
-    };
-  }
   
-  Serial.println("Powering off cellular"); 
-  //we must issue the disconnect command just so that it tries to stop connecting
-  //or I think sleep will hang
-  Cellular.disconnect();
-  Cellular.off();
-  while(network_state != network_status_off) {
-    Particle.process();
-  };
-
-  delay(6000);
-
-  //sleep for ten minutes, three times
-  static uint8_t sleep_count = 0;
-  for(sleep_count = 0; sleep_count < 3; sleep_count++) {
-    System.sleep(D7, FALLING, 600);
-
-    delay(1000);
-    
-    //if we have power break and take a sample
-    if(powercheck.getHasPower()) {
-      break;
-    }
-
-    digitalWrite(DAC, HIGH);
-    delay(1000);
-    digitalWrite(DAC, LOW);
-  }
-
-  //setup serial again
-  Serial.begin(9600);
-
-  //reset to clear the interrupt
-  timeSyncSubsystem.setup();
-
-  Serial.println("Waking up from sleep");
-
-  //turn on the GPS
-  digitalWrite(D3, HIGH);
-  
-  //turn on the SD Card
-  SD.PowerOn();
+  Serial.flush();
+  Serial.end();
+ 
+  sleep_count = 3;
+  System.sleep(SLEEP_MODE_DEEP, 600);
 }
 
 // retain this so that on the next iteration we still get results on hang
@@ -1151,6 +1121,7 @@ void soft_watchdog_reset() {
   
   //Rick suggests this one
   Serial.println("Trying to reset");
+  sleep_count = 0;
   System.sleep(SLEEP_MODE_DEEP, 60);
 }
 
