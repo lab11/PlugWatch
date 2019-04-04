@@ -234,7 +234,7 @@ var incentive_funcs = require(oink_config.incentives_file);
 
 var incentive_list = []
 for (var func in incentive_funcs) {
-    incentive_list.push(async.apply(incentivize_users,func));
+    incentive_list.push(async.apply(incentivize_users,incentive_funcs[func]));
 }
 
 var to_call_list = [];
