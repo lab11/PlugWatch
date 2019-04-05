@@ -17,9 +17,10 @@ var command = require('commander');
 command.option('-d, --database [database]', 'Database configuration file.')
         .option('-u, --username [username]', 'Database username file')
         .option('-p, --password [password]', 'Database password file')
+        .option('-c, --config [config]', 'Deployment management configuration file')
         .option('-s, --survey [survey]', 'Survey configuration file')
         .option('-U, --surveyusername [surveyusername]', 'SurveyCTO username file')
-        .option('-P, --surveypassword [surveypassword]', 'SurveyCTO passowrd file')
+        .option('-P, --surveypassword [surveypassword]', 'SurveyCTO passowrd file').parse(process.argv);
 
 var timescale_config = null;
 if(typeof command.database !== 'undefined') {
@@ -28,6 +29,13 @@ if(typeof command.database !== 'undefined') {
     timescale_config.password = fs.readFileSync(command.password,'utf8').trim();
 } else {
     timescale_config = require('./postgres-config.json');
+}
+
+var config = null;
+if(typeof command.config !== 'undefined') {
+    config = require(command.config);
+} else {
+    config = require('./deployment-manager-config.json');
 }
 
 var survey_config = {};
@@ -420,7 +428,7 @@ function getDevicesTable(callback) {
     pg_pool.query('SELECT core_id, shield_id, product_id FROM devices', callback);
 }
 
-function getAppID(survey) {
+function getAppID(id_list) {
     //g_appQR_nr
     //appQR1
     var QR1 = null;
@@ -444,7 +452,7 @@ function getAppID(survey) {
     }
 }
 
-function getGenericID(survey, qrField, qrBarField, manualField, devices) {
+function getDeviceID(id_list, devices) {
     //Attempt to parse the QR code
     var parsed_core_id = null;
     var parsed_shield_id = null;
@@ -617,7 +625,7 @@ function generateTrackingTables(deployment, redeployment, pickup, devices) {
 
            respondent_info = {
                respondent_id: item.respondent_id,
-               respondent_firstname: item.respondent_firstname
+               respondent_firstname: item.respondent_firstname,
                respondent_surname: item.respondent_surname,
                respondent_popularname: item.respondent_popularname,
                fo_name: item.surveyor_name,
@@ -921,7 +929,7 @@ function generateTrackingTables(deployment, redeployment, pickup, devices) {
    //We should also write the updated respondent and device tables to postgres
    console.log();
    console.log("Updating tracking tables after processing surveys");
-   updateTrackingTables(respondents, devices, entrySurveys, exitSurveys);
+   //updateTrackingTables(respondents, devices, entrySurveys, exitSurveys);
 }
 
 var seed = 1;
@@ -1059,6 +1067,8 @@ function gitAddCommitPush(file, repoPath, callback) {
     file_split.shift();
     file = file_split.join('/');
 
+    console.log("Committing",file,"in repo",repoPath);
+
     git.add({fs, dir: repoPath, filepath: file}).then(function(result) {
         git.commit({fs, dir: repoPath, message: "Auto updating newly cleaned file",
                         author:{name: "Deployment_Management_Service", email: "adkins@berkeley.edu"}}).then(function(result) {
@@ -1086,7 +1096,12 @@ function pullGitRepo(repoURL, repoName, callback) {
 }
 
 function getDataFromSource(source, callback) {
+
+    console.log("Fetching data");
+
     if(source.type == "surveyCTO") {
+
+       console.log("From surveyCTO");
 
         var options = {
             uri: source.url,
@@ -1099,18 +1114,20 @@ function getDataFromSource(source, callback) {
 
         function saveOutput(outputFileName, response, body, callback) {
             //get the root of the cleaning path
-            fs.writeFile(outputFileName + '.csv', body, callback);
+            fs.writeFile(outputFileName + '.csv', body, function(err) {
+               callback(err, outputFileName + '.csv');
+            });
         }
 
         async.waterfall([
             async.apply(request, options),
             async.apply(saveOutput, source.name)
-        ], function(err) {
-            console.log("Error fetching and saving survey data");
-            callback(err);
+        ], function(err, result) {
+            callback(err, result);
         });
 
     } else if(source.type == "git") {
+        console.log("From git repo");
         pullGitRepo(source.url, source.name, callback);
     }
 }
@@ -1119,30 +1136,36 @@ function cleanSource(cleaning, inputFileName, callback) {
     //here we need to loop through the cleaning, executing
     //the cleaning scripts on the prior step and running it on the next step
 
+    console.log("Cleaning input data starting from", inputFileName);
+
     function runCleaningScript(cleaning, inputName, outputName, callback) {
 
         //we need to contstruct the input path relative to the execution script,
         //the output path relative to the execution script
         //then execute
         //exution path
-        fileToExecute = cleaning[i].name + '/' + cleaning[i].subdirectory + '/' + cleaning[i].script;
+        fileToExecute = cleaning.name + '/' + cleaning.subdirectory + '/' + cleaning.script;
+        console.log("Executing: ", fileToExecute, inputName, outputName);
         exec(fileToExecute, inputName, outputName, callback);
     }
 
     //one unit of cleaning
     function pullCleanCommit(cleaning, inputName, callback) {
 
+
         var outputName = cleaning.name + '/' +
                          cleaning.subdirectory + '/' +
                          'output_' + cleaning.stepname + '.csv';
+
+        console.log("Cleaning file", inputName, "and saving to", outputName);
 
         if(cleaning.type == "git") {
 
             async.series([
                 async.apply(pullGitRepo, cleaning.url, cleaning.name),
                 async.apply(runCleaningScript, cleaning, inputName, outputName),
-                async.apply(gitAddCommitPush, , outputName, cleaning.name, cleaning.name)
-            ], fucntion(err) {
+                async.apply(gitAddCommitPush, outputName, cleaning.name, cleaning.name)
+            ], function(err) {
                 callback(err, outputName);
             });
         }
@@ -1151,9 +1174,9 @@ function cleanSource(cleaning, inputFileName, callback) {
     var currentName = inputFileName;
 
     //create a list of the cleaning steps to be done. Th
-    clean_list = [];
+    var clean_list = [];
     if(cleaning.length > 0) {
-        clean_list.push(async.apply(pullCleanCommit, cleaning[i], currentName));
+        clean_list.push(async.apply(pullCleanCommit, cleaning[0], currentName));
     }
 
     for(var i = 1; i < cleaning.length; i++) {
@@ -1177,9 +1200,11 @@ function getOutput(output, outputFileName, callback) {
             }
             data_to_output.push(obj);
         }
-    }
 
-    callback(null, output.type, output.name, data_to_output);
+        callback(null, output.type, output.name, data_to_output);
+    }, function(err) {
+       callback(err);
+    });
 }
 
 
@@ -1191,9 +1216,10 @@ function getCleanProcessData() {
         "auxillary" : {}
     };
 
+    console.log("Starting data processing");
+
     //iterative processing of the data sources list
-    data_sources = require('deployment-management-config.json');
-    async.eachSeries(data_sources, function(item) {
+    async.eachSeries(config.data_sources, function(item) {
         async.waterfall([
                 async.apply(getDataFromSource, item.source),
                 async.apply(cleanSource, item.cleaning),
@@ -1222,6 +1248,7 @@ function getCleanProcessData() {
     });
 }
 
+getCleanProcessData();
 
 //Periodically query surveyCTO for new surveys - if you get new surveys processing them on by one
 setInterval(getCleanProcessData, 1200000);
