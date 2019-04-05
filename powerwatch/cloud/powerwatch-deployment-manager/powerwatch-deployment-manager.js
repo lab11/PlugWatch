@@ -10,7 +10,6 @@ const { exec } = require('child_process');
 const csv = require('csvtojson');
 var async = require('async');
 var diff = require('deep-diff');
-var admin = require('firebase-admin');
 const git  = require('isomorphic-git');
 var moment = require('moment');
 
@@ -23,8 +22,6 @@ command.option('-d, --database [database]', 'Database configuration file.')
         .option('-s, --survey [survey]', 'Survey configuration file')
         .option('-U, --surveyusername [surveyusername]', 'SurveyCTO username file')
         .option('-P, --surveypassword [surveypassword]', 'SurveyCTO passowrd file')
-        .option('-o, --oink [oink]', 'OINK configuration file')
-        .option('-a, --service_account [oink_service_account]', 'OINK service account file').parse(process.argv);
 
 var timescale_config = null;
 if(typeof command.database !== 'undefined') {
@@ -62,20 +59,6 @@ const pg_pool = new  Pool( {
     port: timescale_config.port,
     max: 20,
 });
-
-if(typeof command.service_account !== 'undefined') {
-    //Initialize the firebase project
-    var serviceAccount = require(command.service_account);
-} else {
-    var serviceAccount = require('./oink-service-account.json');
-}
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: oink_config.database
-});
-
-//Get the database object
-var db = admin.firestore();
 
 //This is a recurive function that we could sub in if we get a lot of image
 //corruption. But's it's untested so let's leave it out for now
@@ -204,28 +187,32 @@ function get_type(name, meas) {
 }
 
 function dropTempTableGeneric(table_name, callback) {
-    //Remove the temp table if it exists
-    pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name+'_temp'], (err, res) => {
-        if (err) {
-            console.log(err);
-            return callback(err);
+
+    function tableExists(table_name, callback) {
+        //Remove the temp table if it exists
+        pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",
+                        [table_name+'_temp'], (err, res) => {
+            callback(err, res.rows[0]);
+        });
+    }
+
+    function dropTable(table_name, row, callback) {
+        if(rows.exists == true) {
+            //Just go ahead and move the shadow table to respondnets
+            pg_pool.query('DROP TABLE ' + table_name + '_temp', (err, res) => {
+                callback(err);
+            });
         } else {
-            if(res.rows[0].exists == true) {
-                //Just go ahead and move the shadow table to respondnets
-                pg_pool.query('DROP TABLE ' + table_name + '_temp', (err, res) => {
-                    if(err) {
-                        console.log("Error dropping temp table");
-                        return callback(err);
-                    } else {
-                        console.log("Dropped temp table");
-                        return callback(null);
-                    }
-                });
-            } else {
-                console.log("Temp table doesnt exits. Proceeding");
-                callback(null);
-            }
+            console.log("Temp table doesnt exits. Proceeding");
+            callback();
         }
+    }
+
+    async.waterfall([
+            async.apply(tableExists, table_name),
+            async.apply(dropTable, table_name)
+    ], function(err) {
+        callback(err);
     });
 }
 
@@ -526,131 +513,15 @@ function writeExitTablePostgres(exitSurveys, outer_callback) {
     writeGenericTablePostgres(error_table, 'change_errors', outer_callback);
 }
 
-function writeRespondentTableOINK(respondents, callback) {
-    //Okay this needs to write respondents to OINK
-    //Some users may already exits, and they should not be removed
-    //But they may need to be mark as inactive or such
-
-    //Then oink needs a way of reprocessing updated users based on unique
-    //attributes
-
-    //If there is a user in OINK that no longer exists in our script,
-    //we should process that too
-
-    //Okay first loop through the respondents and add/merge them
-    //into OINK
-    console.log();
-    console.log("Adding respondent list to OINK");
-    var batch = db.batch();
-    for(var key in respondents) {
-        if(respondents.hasOwnProperty(key)) {
-            //Okay what fields need to be set for oink
-
-            //name of doc-respondent ID
-            //active true/false
-            //first survey true/false
-            //incentivized true/false
-            //user_id - respondent_id
-            //phone_number
-            //timestamp
-            //payment_service
-            //app id
-            //powerwatch true/false
-            //powerwatch install time
-            var oink_user = {
-                user_id: respondents[key].respondent_id,
-                incentivized: respondents[key].currently_active,
-                app_installed: respondents[key].currently_active,
-                powerwatch_installed: respondents[key].powerwatch,
-                payment_service: "korba",
-                phone_number: respondents[key].phone_number,
-                phone_carrier: respondents[key].carrier,
-            };
-
-            if(oink_user.powerwatch_installed) {
-                oink_user.powerwatch_install_time = moment(respondents[key].pilot_survey_time, "MMM D, YYYY hh:mm:SS a").toDate();
-                oink_user.powerwatch_core_id = respondents[key].powerwatch_core_id;
-            }
-
-            if(oink_user.app_installed) {
-                oink_user.app_install_time = moment(respondents[key].pilot_survey_time, "MMM D, YYYY hh:mm:SS a").toDate();
-                oink_user.app_id = respondents[key].app_id;
-            }
-
-            //get the doc
-            console.log(key);
-            var docRef = db.collection('OINK_user_list').doc(key);
-            batch.set(docRef, oink_user, {merge: true});
-        }
-    }
-
-    //Okay now, if there are any users not in our current respondent list
-    // (like there was an error and the cleaning script removed them)
-    // Set them to not active, not incentivized, no powerwatch
-    db.collection('OINK_user_list').get().then(users => {
-        users.forEach(doc => {
-            //If the user ID is not in our respondent list just set it to not
-            //incentivized
-            if(typeof respondents[doc.id] == 'undefined' && (doc.data().active == true || doc.data().incentivized == true)) {
-                console.log('Removing user with ID', doc.id, 'from incentivized list');
-                var docRef = db.collection('OINK_user_list').doc(doc.id);
-                batch.set(docRef, {
-                    active: false,
-                    incentivized: false
-                }, {
-                    merge: true
-                });
-            }
-        });
-
-        console.log("Committing respondent list and deactivation list");
-        batch.commit().then(function() {
-            console.log("Successfully updated oink user list");
-            return callback();
-        }).catch(function(error) {
-            console.loog("Error updating oink user list:", error);
-            return callback(error);
-        });
-
-    }).catch(err => {
-        console.log(err);
-        console.log("error reading oink user list");
-        return callback(error);
-    });
-}
-
 function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys) {
     //Write the respondents and devices table to postgres
-    writeRespondentTablePostgres(respondents, function(err) {
-    if(err) {
+    async.series([
+           async.apply(writeRespondentTablePostgres, respondents),
+           async.apply(writeDevicesTablePostgres, devices),
+           async.apply(writeEntryTablePostgres, entrySurveys),
+           async.apply(writeExitTablePostgres, exitSurveys)
+    ], function(err, result) {
         console.log(err);
-    } else {
-       writeRespondentTableOINK(respondents, function(err) {
-       if(err) {
-          console.log(err);
-       } else {
-            writeDevicesTablePostgres(devices, function(err) {
-            if(err) {
-                console.log(err);
-            } else {
-                writeEntryTablePostgres(entrySurveys, function(err) {
-                if(err) {
-                    console.log(err);
-                } else {
-                    writeExitTablePostgres(exitSurveys, function(err) {
-                    if(err) {
-                        console.log(err);
-                    } else {
-                        //This is where you should write to OINK
-                    }
-                    });
-                }
-                });
-            }
-            });
-       }
-       });
-    }
     });
 }
 
@@ -1578,6 +1449,50 @@ function fetchNewSurveys() {
         }
     });
 }
+
+function getDataFromSource(source, callback) {
+    if(source.type == "surveyCTO") {
+
+        var options = {
+            uri: source.url,
+            auth: {
+                user: source.username,
+                pass: source.password,
+                sendImmediately: false
+            }
+        };
+
+        function saveOutput(outputData, outputFileName) {
+        }
+
+        async.waterfall(
+        request(options, callback)
+    } else if(source.type == "git") {
+    }
+}
+
+function cleanSource() {
+}
+
+function getOutput() {
+}
+
+//iterative processing of the data sources list
+data_sources = require('deployment-management-config.json');
+for(var i = 0; i < data_sources.length; i++) {
+    //for each data source we need to
+    // 1) pull the data
+    // 2) clean the data
+    // 3) concatenate and process the data
+    async.waterfall([
+            async.apply(getDataFromSource, data_sources[i].source),
+            async.apply(cleanSource, data_source[i].cleaning),
+            async.apply(getOutput, data_source[i].output)
+    ], function(err, result) {
+
+    });
+}
+
 
 //Call it once to start
 console.log("Starting survey processing");
