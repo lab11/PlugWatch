@@ -4,15 +4,13 @@ const { Pool }  = require('pg');
 var format = require('pg-format');
 const request = require('request');
 const fs = require('fs');
-const jpeg = require('jpeg-js');
-const jsQR = require('jsqr');
 const { exec } = require('child_process');
 const csv = require('csvtojson');
 var async = require('async');
 var diff = require('deep-diff');
 const git  = require('isomorphic-git');
 var moment = require('moment');
-
+var path = require('path');
 
 //get the usernames and passwords necessary for this task
 var command = require('commander');
@@ -41,15 +39,6 @@ if(typeof command.surveyusername !== 'undefined') {
     survey_config = require('./survey-config.json');
 }
 
-//The only valid way to do this is through a service account ID
-//So we will start by
-var oink_config = {};
-if(typeof command.oink !== 'undefined') {
-    oink_config = require(command.oink);
-} else {
-    oink_config = require('./oink-config.json');
-}
-
 //Initialize the postgres information
 const pg_pool = new  Pool( {
     user: timescale_config.username,
@@ -60,114 +49,6 @@ const pg_pool = new  Pool( {
     max: 20,
 });
 
-//This is a recurive function that we could sub in if we get a lot of image
-//corruption. But's it's untested so let's leave it out for now
-function handleRequestResponse(options, error, response, body, depth, callback) {
-    //We are doing this recursively so limit the depth
-    if(depth > 4) {
-        return callback(null);
-    }
-
-    if(depth > 1) {
-        console.log("Called with depth ", depth);
-    }
-
-    if(error) {
-        console.log(error);
-        request(options, (function() {
-           return function(error, response, body) {
-              //We should just try to process this image immediately with
-              //the QR code processing code
-              console.log("Got error response - calling handle Request recursively");
-              handleRequestResponse(options, error, response, body, depth + 1, function(data) {
-                  return callback(data);
-              });
-           };
-        })());
-    } else {
-       var buf = new Buffer(body, "binary");
-       try {
-           var rawImage = jpeg.decode(buf, true);
-           const code = jsQR(rawImage.data, rawImage.width, rawImage.height);
-           if(code == null) {
-              //There was no readable QR code here
-              return callback(null);
-           } else {
-              //We have a QR code
-              return callback(code.data);
-           }
-       } catch (error) {
-           //we should just retry this request
-           console.log(error);
-           fs.writeFile("error.jpg", buf, function(err) {
-           });
-
-           request(options, (function() {
-              return function(error, response, body) {
-                 //We should just try to process this image immediately with
-                 //the QR code processing code
-                 console.log("Got error response - calling handle Request recursively");
-                 handleRequestResponse(options, error, response, body, depth + 1, function(data) {
-                     return callback(data);
-                 });
-              };
-           })());
-       }
-    }
-}
-
-
-function extractQRCodes(survey, url_field, output_field, outer_callback) {
-
-    // Why 2...well emperically surveyCTO doesn't like more??
-    // You can easily start getting ECONNRESETS
-    async.forEachOfLimit(survey, 2, function(value, key, callback) {
-        if(value[url_field] != '') {
-            console.log('Fetching QR for', url_field);
-            var options = {
-              uri: value[url_field],
-              auth: {
-                 user: survey_config.username,
-                 pass: survey_config.password,
-                 sendImmediately: false
-              },
-              headers: {
-                 "X-OpenRosa-Version": "1.0"
-              },
-              encoding: 'binary'
-           };
-
-           request(options, (function() {
-              return function(error, response, body) {
-                 //We should just try to process this image immediately with
-                 //the QR code processing code
-
-                 //Here's how you call the recursive function
-                 handleRequestResponse(options, error, response, body, 1, function(data) {
-                     if(data) {
-                          console.log("Processed QR code:", data);
-                          survey[key][output_field] = data;
-                     } else {
-                          survey[key][output_field] = null;
-                          console.log("No processable QR code");
-                          fs.writeFile(url_field + '.jpg', new Buffer(body,'binary'), function(err) {
-                          });
-                     }
-                     callback();
-                 });
-              };
-           })());
-
-        } else {
-            callback();
-        }
-    }, function(err) {
-        if(err) {
-            console.log("Some error with async");
-        }
-        outer_callback(survey);
-    });
-}
 
 function get_type(name, meas) {
     if(name.split('_')[name.split('_').length - 1] == 'time') {
@@ -224,171 +105,158 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
         return outer_callback();
     }
 
-    dropTempTableGeneric(table_name, function(err) {
-        if(err) {
-            return outer_callback(err);
-        } else {
-            //Find the object in the object array with the most fields
-            //So that we get all the fields for creating the table
-            var max = 0;
-            var index = 0;
-            for(var i = 0; i < objects.length; i++) {
-                if(Object.keys(objects[i]).length > max) {
-                    max = Object.keys(objects[i]).length;
-                    index = i;
-                }
+    function createTempTableFromObject(objects, table_name, callback) {
+        //Find the object in the object array with the most fields
+        //So that we get all the fields for creating the table
+        var max = 0;
+        var index = 0;
+        for(var i = 0; i < objects.length; i++) {
+            if(Object.keys(objects[i]).length > max) {
+                max = Object.keys(objects[i]).length;
+                index = i;
             }
-
-            var cols = "";
-            var names = [];
-            names.push(table_name + '_temp');
-            for(var key in objects[index]) {
-                if(objects[index].hasOwnProperty(key)) {
-                    var meas = objects[index][key];
-                    var type = get_type(key, meas);
-                    if(type != 'err') {
-                        names.push(key);
-                        names.push(type);
-                        cols = cols + "%I %s,";
-                    } else if (typeof meas == 'object') {
-                        for(var subkey in meas) {
-                            if(meas.hasOwnProperty(subkey)) {
-                                var submeas = meas[subkey];
-                                var type = get_type(subkey, submeas);
-                                if(type != 'err') {
-                                    names.push(key + '_' + subkey);
-                                    names.push(type);
-                                    cols = cols + "%I %s,";
-                                } else {
-                                    console.log('Error with field', key, 'and subkey', subkey);
-                                    console.log('With value', submeas);
-                                }
-                            }
-                        }
-                    } else {
-                        console.log('Error with field ' + key);
-                        console.log('With value', meas);
-                    }
-                }
-            }
-            cols = cols.substring(0, cols.length-1);
-
-            console.log("Creating new temporary table");
-            var qstring = format.withArray('CREATE TABLE %I (' + cols + ')', names);
-            //console.log("Issuing query: ", qstring);
-            pg_pool.query(qstring, (err, res) => {
-
-                if(err) {
-                    console.log("Error creating shadow table");
-                    console.log(err);
-                    return outer_callback(err);
-                } else {
-                    console.log("Created temp table successfully. Inserting values");
-
-                    //Add all the respondents
-                    async.forEachLimit(objects, 10, function(value, callback) {
-                        var cols = "";
-                        var vals = "";
-                        var names = [];
-                        var values = [];
-                        var i = 1;
-                        names.push(table_name + '_temp');
-                        for (var name in value) {
-                            if(value.hasOwnProperty(name)) {
-                                if(typeof value[name] == 'object') {
-                                    for(var subname in value[name]) {
-                                        if(value[name].hasOwnProperty(subname)) {
-                                            cols = cols + "%I, ";
-                                            names.push(name + '_' + subname);
-                                            vals = vals + "$" + i.toString() + ',';
-                                            values.push(value[name][subname]);
-                                            i = i + 1;
-                                        }
-                                    }
-                                } else {
-                                    cols = cols + "%I, ";
-                                    names.push(name);
-                                    vals = vals + "$" + i.toString() + ',';
-                                    values.push(value[name]);
-                                    i = i + 1;
-                                }
-                            }
-                        }
-
-                        cols = cols.substring(0, cols.length-2);
-                        vals = vals.substring(0, vals.length-1);
-
-                        var qstring = format.withArray("INSERT INTO %I (" + cols + ") VALUES (" + vals + ")", names);
-                        pg_pool.query(qstring, values, (err, res) => {
-                            if(err) {
-                                console.log("Error inserting into temp table");
-                                callback(err);
-                            } else {
-                                console.log('posted successfully!');
-                                callback();
-                            }
-                        });
-                    }, function(err) {
-                        if(err) {
-                            console.log("Some error with async");
-                        }
-
-                        //Okay now that we have successfully created the temp table
-                        //Let's move the table that already exists and change
-                        //the name of this one to the primary table
-                        //is there a table that exists for this device?
-                        console.log("Checking for table existence");
-                        pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name], (err, res) => {
-                            if (err) {
-                                console.log(err);
-                                return outer_callback(err);
-                            } else {
-                                if(res.rows[0].exists == false) {
-                                    //Just go ahead and move the shadow table to respondnets
-                                    console.log("Table does not exist. Altering temp table name");
-                                    pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
-                                        if(err) {
-                                            console.log("Error renaming table");
-                                            return outer_callback(err);
-                                        } else {
-                                            console.log("Created new table");
-                                            return outer_callback(null);
-                                        }
-                                    });
-                                } else {
-                                   //Rename, then move the table
-                                   console.log("Table does exist. Renaming old table and moving it's schema");
-                                   var new_name = table_name + '_' + Math.round((Date.now()/1000)).toString();
-                                   pg_pool.query('ALTER TABLE ' + table_name + ' RENAME to ' + new_name, (err, res) => {
-                                       if(err) {
-                                          console.log(err);
-                                          return outer_callback(err);
-                                       } else {
-                                           pg_pool.query('ALTER TABLE ' + new_name + ' SET SCHEMA backup', (err, res) => {
-                                               if(err) {
-                                                   console.log(err);
-                                                   return outer_callback(err);
-                                               } else {
-                                                   pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
-                                                       if(err) {
-                                                           console.log("Error renaming table");
-                                                           return outer_callback(err);
-                                                       } else {
-                                                           console.log("Created new table");
-                                                           return outer_callback(null);
-                                                       }
-                                                   });
-                                               }
-                                           });
-                                        }
-                                   });
-                                }
-                            }
-                        });
-                    });
-                }
-            });
         }
+
+        var cols = "";
+        var names = [];
+        names.push(table_name + '_temp');
+        for(var key in objects[index]) {
+            if(objects[index].hasOwnProperty(key)) {
+                var meas = objects[index][key];
+                var type = get_type(key, meas);
+                if(type != 'err') {
+                    names.push(key);
+                    names.push(type);
+                    cols = cols + "%I %s,";
+                } else if (typeof meas == 'object') {
+                    for(var subkey in meas) {
+                        if(meas.hasOwnProperty(subkey)) {
+                            var submeas = meas[subkey];
+                            var type = get_type(subkey, submeas);
+                            if(type != 'err') {
+                                names.push(key + '_' + subkey);
+                                names.push(type);
+                                cols = cols + "%I %s,";
+                            } else {
+                                console.log('Error with field', key, 'and subkey', subkey);
+                                console.log('With value', submeas);
+                            }
+                        }
+                    }
+                } else {
+                    console.log('Error with field ' + key);
+                    console.log('With value', meas);
+                }
+            }
+        }
+        cols = cols.substring(0, cols.length-1);
+
+        console.log("Creating new temporary table");
+        var qstring = format.withArray('CREATE TABLE %I (' + cols + ')', names);
+        //console.log("Issuing query: ", qstring);
+        pg_pool.query(qstring, callback);
+    }
+
+    function insertValueInTable(objects, table_name, outer_callback) {
+         console.log("Created temp table successfully. Inserting values");
+
+         //Add all the respondents
+         async.forEachLimit(objects, 10, function(value, callback) {
+             var cols = "";
+             var vals = "";
+             var names = [];
+             var values = [];
+             var i = 1;
+             names.push(table_name + '_temp');
+             for (var name in value) {
+                 if(value.hasOwnProperty(name)) {
+                     if(typeof value[name] == 'object') {
+                         for(var subname in value[name]) {
+                             if(value[name].hasOwnProperty(subname)) {
+                                 cols = cols + "%I, ";
+                                 names.push(name + '_' + subname);
+                                 vals = vals + "$" + i.toString() + ',';
+                                 values.push(value[name][subname]);
+                                 i = i + 1;
+                             }
+                         }
+                     } else {
+                         cols = cols + "%I, ";
+                         names.push(name);
+                         vals = vals + "$" + i.toString() + ',';
+                         values.push(value[name]);
+                         i = i + 1;
+                     }
+                 }
+             }
+
+             cols = cols.substring(0, cols.length-2);
+             vals = vals.substring(0, vals.length-1);
+
+             var qstring = format.withArray("INSERT INTO %I (" + cols + ") VALUES (" + vals + ")", names);
+             pg_pool.query(qstring, values, callback);
+         } , function(err) {
+             outer_callback(err);
+         });
+    }
+
+    function checkTableExists(table_name, callback) {
+        //Okay now that we have successfully created the temp table
+        //Let's move the table that already exists and change
+        //the name of this one to the primary table
+        //is there a table that exists for this device?
+        console.log("Checking for table existence");
+        pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name], callback);
+
+    }
+
+    function renameTables(table_name, res, callback) {
+        if(res.rows[0].exists == false) {
+            //Just go ahead and move the shadow table to respondnets
+            console.log("Table does not exist. Altering temp table name");
+            pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, callback);
+        } else {
+
+           function renameOldTable(new_name, callback) {
+               //Rename, then move the table
+               console.log("Table does exist. Renaming old table and moving it's schema");
+               pg_pool.query('ALTER TABLE ' + table_name + ' RENAME to ' + new_name, callback);
+           }
+
+           function changeSchema(new_name, callback) {
+               pg_pool.query('ALTER TABLE ' + new_name + ' SET SCHEMA backup', callback);
+           }
+
+           function renameNewTable(table_name, callback) {
+               pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, callback);
+           }
+
+           var new_name = table_name + '_' + Math.round((Date.now()/1000)).toString();
+
+           async.series([
+                async.apply(renameOldTable, new_name),
+                async.apply(changeSchema, new_name),
+                async.apply(renameNewTable, table_name)
+           ] , function(err) {
+                console.log("Error renaming tables");
+                callback(err);
+           });
+        }
+    }
+
+    async.series([
+            async.apply(dropTempTableGeneric, table_name),
+            async.apply(createTempTableFromObject, objects, table_name),
+            async.apply(insertValueInTable, objects, table_name),
+            async.waterfall([
+                async.apply(checkTableExists, table_name),
+                async.apply(renameTables, table_name)
+            ], function(err) {
+                console.log("Error checking and renaming tables");
+            }),
+    ], function(err) {
+        console.log("Error adding data to generic table");
+        outer_callback(err);
     });
 }
 
@@ -549,18 +417,7 @@ function lookupShieldID(shield_id, devices) {
 
 function getDevicesTable(callback) {
     //Query devices table
-    pg_pool.query('SELECT core_id, shield_id, product_id FROM devices', (err, res) => {
-        if(err) {
-            console.log(err);
-            return callback(null);
-        } else {
-            if(res.rows.length > 0) {
-                return callback(res.rows);
-            } else {
-                return callback(null);
-            }
-        }
-    });
+    pg_pool.query('SELECT core_id, shield_id, product_id FROM devices', callback);
 }
 
 function getAppID(survey) {
@@ -625,27 +482,6 @@ function getGenericID(survey, qrField, qrBarField, manualField, devices) {
     return ids;
 }
 
-function getExitGiveDeviceID(survey, devices) {
-    //g_deviceID_retrieve
-    //deviceRetrieveQR
-
-    return getGenericID(survey, 'deviceGiveQR', 'g_deviceQRbar_give', 'g_deviceID_give', devices);
-}
-
-function getExitRetrieveDeviceID(survey, devices) {
-    //g_deviceID_retrieve
-    //deviceRetrieveQR
-
-    return getGenericID(survey, 'deviceRetrieveQR', 'g_deviceQRbar_retrieve', 'g_deviceID_retrieve', devices);
-}
-
-function getEntryDeviceID(survey, devices) {
-    //g_deviceID
-    //deviceQR
-
-    return getGenericID(survey, 'deviceQR', 'g_deviceQRbar', 'g_deviceID', devices);
-}
-
 function getEntryCoordinates(survey) {
     //Which GPS numbers have been recorded
     var gps = ['g_gps_accurate','g_gps','gps'];
@@ -662,24 +498,20 @@ function getEntryCoordinates(survey) {
     return null;
 }
 
-var carrier_map = {};
-carrier_map['1'] = 'MTN';
-carrier_map['2'] = 'Airtel';
-carrier_map['3'] = 'Vodaphone';
-carrier_map['4'] = 'Tigo';
-carrier_map['5'] = 'GLO';
-
-function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
+function generateTrackingTables(deployment, redeployment, pickup, devices) {
     //Sort the surveys by submission time
     //This assumption makes it easier to process the surveys
-    entrySurveys.sort(function(a,b) {
-       return Date.parse(a) - Date.parse(b);
+    deployment.sort(function(a,b) {
+       return Date.parse(a.survey_time) - Date.parse(b.survey_time);
     });
 
-    exitSurveys.sort(function(a,b) {
-       return Date.parse(a) - Date.parse(b);
+    redeployment.sort(function(a,b) {
+       return Date.parse(a.survey_time) - Date.parse(b.survey_time);
     });
 
+    pickup.sort(function(a,b) {
+       return Date.parse(a.survey_time) - Date.parse(b.survey_time);
+    });
 
 
     //Okay the high level idea here is to generate a json blob describing
@@ -704,37 +536,31 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
        still_making_progress = false;
 
        var surveys_to_remove = [];
-       for(let i = 0; i < entrySurveys.length; i++) {
+       for(let i = 0; i < deployment.length; i++) {
+
+           var item = deployment[i];
+
            var device_info = null;
            var respondent_info = null;
            let surveySuccess = true;
-           let respondent_id = entrySurveys[i].a_respid.toUpperCase();
+           let respondent_id = item.respondent_id.toUpperCase();
            console.log("Processing entry survey for respondent", respondent_id);
 
            //Make sure that the R script didn't report an error for this survey
-           if(typeof entrySurveys[i].error != 'undefined' && (entrySurveys[i].error == 'TRUE')) {
+           if(typeof item.error != 'undefined' && (item.error == 'TRUE')) {
                console.log("Cleaning script marked survey as errored. Skipping survey.");
                surveySuccess = false;
                continue;
            }
 
-           //Make sure that we need to process this survey
-           //if(entrySurveys[i].g_download == '0' && entrySurveys[i].g_install == '0') {
-           //   //This survey did not result in an app download or a powerwatch install
-           //   //Exiting
-           //   console.log('No app install or powerwatch install. Skipping survey');
-           //   surveys_to_remove.push(i);
-           //   continue;
-           //}
-
-           //Is the respondent ID valid?
+          //Is the respondent ID valid?
           if(respondent_id.length != 8) {
                //This is a duplicate
-               console.log("Invalid respondent ID for", entrySurveys[i].instanceID,"Skipping suvey.");
+               console.log("Invalid respondent ID for", item.survey_id,"Skipping suvey.");
                surveySuccess = false;
-               entrySurveys[i].error = true;
-               entrySurveys[i].error_field = 'a_respid';
-               entrySurveys[i].error_comment = 'Invalid Respondent ID';
+               item.error = true;
+               item.error_field = 'a_respid';
+               item.error_comment = 'Invalid Respondent ID';
                continue;
           }
 
@@ -742,23 +568,23 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            //this respondent ID
            if(typeof respondents[respondent_id] != 'undefined') {
                //This is a duplicate
-               console.log("Respondent duplicate of", respondents[respondent_id].pilot_survey_id,"Skipping suvey.");
+               console.log("Respondent duplicate of", respondents[respondent_id].survey_id,"Skipping suvey.");
                surveySuccess = false;
-               entrySurveys[i].error = true;
-               entrySurveys[i].error_field = 'a_respid';
-               entrySurveys[i].error_comment = 'Duplicate respondent ID of ' + respondents[respondent_id].pilot_survey_id;
+               item.error = true;
+               item.error_field = 'a_respid';
+               item.error_comment = 'Duplicate respondent ID of ' + respondents[respondent_id].survey_id;
                continue;
            }
 
            //Do we already have a respondent with this phone number?
            for(var key in respondents) {
-               if(respondents[key].phoneNumber == entrySurveys[i].e_phonenumber) {
+               if(respondents[key].phoneNumber == item.phone_number) {
                    //This is a duplicate
                    console.log("Phone number duplicate of respondent", key, "Skipping suvey.");
                    surveySuccess = false;
-                   entrySurveys[i].error = true;
-                   entrySurveys[i].error_field = 'e_phonenumber';
-                   entrySurveys[i].error_comment = 'Duplicate phone number of respondent ' + key;
+                   item.error = true;
+                   item.error_field = 'e_phonenumber';
+                   item.error_comment = 'Duplicate phone number of respondent ' + key;
                    continue;
                }
            }
@@ -767,45 +593,44 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
            //Process the survey
 
            //Get the most accurate latitude and longitude possible
-           var coords = getEntryCoordinates(entrySurveys[i]);
+           var coords = getEntryCoordinates(item);
            if(coords == null) {
                console.log("Invalid coordinates. Skipping suvey.");
                surveySuccess = false;
-               entrySurveys[i].error = true;
-               entrySurveys[i].error_field = 'g_gps_accuracy';
-               entrySurveys[i].error_comment = 'No valid GPS coordinates found';
+               item.error = true;
+               item.error_field = 'g_gps_accuracy';
+               item.error_comment = 'No valid GPS coordinates found';
                continue;
            }
 
-           var carrier = ''
-           if(typeof carrier_map[entrySurveys[i].e_carrier] != 'undefined') {
-               carrier = carrier_map[entrySurveys[i].e_carrier]
+           if(typeof item.carrier == 'undefined') {
+               carrier = carrier_map[item.carrier]
            } else {
                console.log('Unkown carrier. Skipping survey');
                carrier = 'Unkown';
                surveySuccess = false;
-               entrySurveys[i].error = true;
-               entrySurveys[i].error_field = 'e_carrier';
-               entrySurveys[i].error_comment = 'Unkown/other carrier. Respondent cannot be paid.';
+               item.error = true;
+               item.error_field = 'e_carrier';
+               item.error_comment = 'Unkown/other carrier. Respondent cannot be paid.';
                continue;
            }
 
            respondent_info = {
-               respondent_id: respondent_id,
-               respondent_firstname: entrySurveys[i].e_firstname,
-               respondent_surnname: entrySurveys[i].e_surnames,
-               respondent_popularname: entrySurveys[i].e_popularname,
-               fo_name: entrySurveys[i].surveyor_name,
-               site_id: entrySurveys[i].site_id,
-               phone_number: entrySurveys[i].e_phonenumber,
+               respondent_id: item.respondent_id,
+               respondent_firstname: item.respondent_firstname
+               respondent_surname: item.respondent_surname,
+               respondent_popularname: item.respondent_popularname,
+               fo_name: item.surveyor_name,
+               site_id: item.site_id,
+               phone_number: item.phone_number,
                carrier: carrier,
-               second_phone_number: entrySurveys[i].e_otherphonenumber,
-               alternate_contact_name: entrySurveys[i].e_othercontact_person_name,
-               alternate_phone_number: entrySurveys[i].e_othercontact_person_number,
+               second_phone_number: item.second_phone_number,
+               alternate_contact_name: item.alternate_contact_name,
+               alternate_phone_number: item.alternatE_phone_number,
                location_latitude: coords[0],
                location_longitude: coords[1],
-               pilot_survey_time: entrySurveys[i].endtime,
-               pilot_survey_id: entrySurveys[i].instanceID
+               pilot_survey_time: item.survey_time,
+               pilot_survey_id: item.survey_id
            };
 
            //Did this user download the app?
@@ -1099,192 +924,6 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
    updateTrackingTables(respondents, devices, entrySurveys, exitSurveys);
 }
 
-function processSurveys(entrySurveys, exitSurveys) {
-    //This should enter a powerwatch user into the postgres deployment table and the oink table
-    //getDevicesTable(function(devices) {
-    //   //Okay we should not have completely processed entry and exit surveys
-    //   generateTrackingTables(entrySurveys, exitSurveys, devices);
-    //});
-
-    //Parse out the QR codes
-    extractQRCodes(entrySurveys, "g_deviceQR", "deviceQR", function(entrySurveys) {
-        extractQRCodes(entrySurveys, "g_appQR_pic1", "appQR1", function(entrySurveys) {
-            extractQRCodes(exitSurveys, "g_deviceQR_retrieve", "deviceRetrieveQR", function(exitSurveys) {
-                extractQRCodes(exitSurveys, "g_deviceQR_give", "deviceGiveQR", function(exitSurveys) {
-                    getDevicesTable(function(devices) {
-                       //Okay we should not have completely processed entry and exit surveys
-                       generateTrackingTables(entrySurveys, exitSurveys, devices);
-                    });
-                });
-            });
-        });
-    });
-}
-
-function gitAddCommitPush(file, repoPath, callback) {
-    //add the file
-    //remove the first directory from the filePath
-    file_split = file.split('/');
-    file_split.shift();
-    file = file_split.join('/');
-
-    git.add({fs, dir: repoPath, filepath: file}).then(function(result) {
-        git.commit({fs, dir: repoPath, message: "Auto updating newly cleaned file",
-                        author:{name: "Deployment_Management_Service", email: "adkins@berkeley.edu"}}).then(function(result) {
-            exec('git -C ' + repoPath + ' push origin master', (error, stdout, stderr) => {
-                if(error) {
-                    console.log('Error pushing file')
-                    callback(error);
-                } else {
-                    console.log("Pushed new", file)
-                    callback();
-                }
-            });
-        }, function(err) {
-            console.log("Error committing file");
-            callback(err);
-        });
-    }, function(err) {
-        console.log("Error adding file");
-        callback(err);
-    });
-}
-
-//function to fetch surveys from surveyCTO
-function fetchSurveys(formid, cleaning_path, repoPath, callback) {
-
-    //fetch all surveys from the start of time - we prevent double writing anyways
-    var uri = 'https://' + survey_config.host + '/api/v1/forms/data/wide/csv/' +
-                                                formid +
-                                                '?r=approved|rejected|pending';
-
-    var options = {
-        uri: uri,
-        auth: {
-            user: survey_config.username,
-            pass: survey_config.password,
-            sendImmediately: false
-        }
-    };
-
-    request(options, function(error, response, body) {
-        //Okay now we should write this out to a file and call the cleaning script
-        //on it
-        if(error) {
-           return callback([], false, error);
-        }
-
-        if(body.length == 0) {
-           //We don't have any forms submitted so just return an empty array
-           return callback([], false, null);
-        } else {
-            //get the root of the cleaning path
-            var path_parts = cleaning_path.split('/')
-            path_parts.pop();
-            var path = path_parts.join('/');
-            path = path + '/';
-
-            fs.writeFile(path + formid + '.csv', body, function(err) {
-                if(err) {
-                    console.log("Encountered file writing error, can't clean");
-                    return callback(null, "File writing error for cleaning");
-                } else {
-                    //load the last file we cleaned
-                    var last_json = null;
-                    csv().fromFile(path + formid + '_cleaned.csv').then(function(json) {
-                        console.log("Loaded old file for form ", formid, " for compairson.");
-                        last_json = json;
-                        //Clean the file using the rscript
-                        exec('Rscript ' + cleaning_path + ' ' + path + formid + '.csv ' +
-                                                           path + formid + '_cleaned.csv',
-                                                 function(error, stdout, stderr) {
-
-                            if(error) {
-                                console.log(error, stderr);
-                                return callback(null, false, "Error cleaning file with provided script");
-                            } else {
-                                csv().fromFile(path + formid + '_cleaned.csv').then(function(json) {
-                                    //compare json to last json
-                                    var differences = diff(last_json, json);
-                                    var changed = (typeof differences != 'undefined');
-                                    //commit cleaned file
-                                    console.log("Committing cleaned file");
-                                    gitAddCommitPush(path + formid + '_cleaned.csv', repoPath, function(err) {
-                                        return callback(json, changed, err);
-                                    });
-                                }, function(err) {
-                                    console.log("Error reading file");
-                                    return callback(null, false, err);
-                                });
-                            }
-                        });
-                    }, function(err) {
-                        console.log("Error loading past file.");
-                        console.log(err);
-                        last_json = null;
-
-                        //Clean the file using the rscript
-                        exec('Rscript ' + cleaning_path + ' ' + path + formid + '.csv ' +
-                                        path + formid + '_cleaned.csv',
-                                        function(error, stdout, stderr) {
-
-                            if(error) {
-                                console.log(error, stderr);
-                                return callback(null, false, "Error cleaning file with provided script");
-                            } else {
-                                csv().fromFile(path + formid + '_cleaned.csv').then(function(json) {
-                                    console.log('Committing cleaned file');
-                                    gitAddCommitPush(path + formid + '_cleaned.csv', repoPath, function(err) {
-                                        return callback(json, changed, err);
-                                    });
-                                    console.log("Proceeding assuming changes.");
-                                }, function(err) {
-                                    console.log("Error reading file");
-                                    return callback(null, false, err);
-                                });
-                            }
-                        });
-                    });
-                }
-            });
-        }
-    });
-}
-
-function pullGitRepo(repoURL, repoPath, callback) {
-    console.log('Pulling git repo');
-    git.log({fs, dir: repoPath}).then(function(paths) {
-        console.log("Get repo exists - moving on to pull");
-        exec('git -C ' + repoPath + ' pull', (error, stdout, stderr) => {
-            if(error) {
-                console.log("Error pulling git repo")
-                console.log(error);
-                callback(error);
-            } else {
-                console.log(stdout);
-                console.log("Pulled repo successfully")
-                callback();
-            }
-        });
-
-    }, function(err) {
-        console.log('Error pulling git repo');
-        if(err.name == 'ResolveRefError') {
-            console.log('Cloning new repo', repoURL);
-            exec('git clone ' + repoURL, (error, stdout, stderr) => {
-                if(error) {
-                    console.log("Error cloning git repo")
-                    console.log(error);
-                    callback(error);
-                } else {
-                    console.log("Repo cloned successfully")
-                    callback();
-                }
-            });
-        }
-    });
-}
-
 var seed = 1;
 function random() {
     var x = Math.sin(seed++) * 10000;
@@ -1413,39 +1052,35 @@ function generateSiteSummary(entrySurveys) {
     });
 }
 
-//function to fetch surveys from surveyCTO
-function fetchNewSurveys() {
-    //fetch all surveys moving forward
-    //send the API requests to surveyCTO - we probable also need attachments to process pictures
-    fetchSurveys(survey_config.entrySurveyName, survey_config.entryCleaningPath, survey_config.gitRepoPath, function(entrySurveys, entry_changed, err) {
-        if(err) {
-            console.log("Error fetching and processing forms");
-            console.log(err);
-            return;
-        } else {
-            //We can go ahead and generate the backcheck table here
-            //We need to recreate the object so it doesn't mess up future asynchronous processing
-            newEntrySurveys = JSON.parse(JSON.stringify(entrySurveys));
-            generateBackcheckList(newEntrySurveys);
+function gitAddCommitPush(file, repoPath, callback) {
+    //add the file
+    //remove the first directory from the filePath
+    file_split = file.split('/');
+    file_split.shift();
+    file = file_split.join('/');
 
-            //Do the same with summaries
-            newEntrySurveys = JSON.parse(JSON.stringify(entrySurveys));
-            generateSiteSummary(newEntrySurveys);
-
-            fetchSurveys(survey_config.exitSurveyName, survey_config.exitCleaningPath, survey_config.gitRepoPath, function(exitSurveys, exit_changed, err) {
-                if(err) {
-                    console.log("Error fetching and processing forms");
-                    console.log(err);
-                    return;
-                } else {
-                    //processSurveys(entrySurveys, exitSurveys);
-                    if(entry_changed || exit_changed) {
-                        processSurveys(entrySurveys, exitSurveys);
-                    } else {
-                        console.log("No new surveys, no new processing scripts. Exiting.")
-                    }
-                }
+    git.add({fs, dir: repoPath, filepath: file}).then(function(result) {
+        git.commit({fs, dir: repoPath, message: "Auto updating newly cleaned file",
+                        author:{name: "Deployment_Management_Service", email: "adkins@berkeley.edu"}}).then(function(result) {
+                exec('git -C ' + repoPath + ' push origin master', callback);
+            } , function(err) {
+                callback(err);
             });
+    }, function(err) {
+        callback(err);
+    });
+}
+
+function pullGitRepo(repoURL, repoName, callback) {
+    console.log('Pulling git repo');
+    git.log({fs, dir: repoName}).then(function(paths) {
+        console.log("Get repo exists - moving on to pull");
+        exec('git -C ' + repoName + ' pull',  callback);
+    } , function(err) {
+        console.log('Error pulling git repo');
+        if(err.name == 'ResolveRefError') {
+            console.log('Cloning new repo', repoURL);
+            exec('git clone ' + repoURL, callback);
         }
     });
 }
@@ -1462,56 +1097,131 @@ function getDataFromSource(source, callback) {
             }
         };
 
-        function saveOutput(outputData, outputFileName) {
+        function saveOutput(outputFileName, response, body, callback) {
+            //get the root of the cleaning path
+            fs.writeFile(outputFileName + '.csv', body, callback);
         }
 
-        async.waterfall(
-        request(options, callback)
+        async.waterfall([
+            async.apply(request, options),
+            async.apply(saveOutput, source.name)
+        ], function(err) {
+            console.log("Error fetching and saving survey data");
+            callback(err);
+        });
+
     } else if(source.type == "git") {
+        pullGitRepo(source.url, source.name, callback);
     }
 }
 
-function cleanSource() {
-}
+function cleanSource(cleaning, inputFileName, callback) {
+    //here we need to loop through the cleaning, executing
+    //the cleaning scripts on the prior step and running it on the next step
 
-function getOutput() {
-}
+    function runCleaningScript(cleaning, inputName, outputName, callback) {
 
-//iterative processing of the data sources list
-data_sources = require('deployment-management-config.json');
-for(var i = 0; i < data_sources.length; i++) {
-    //for each data source we need to
-    // 1) pull the data
-    // 2) clean the data
-    // 3) concatenate and process the data
-    async.waterfall([
-            async.apply(getDataFromSource, data_sources[i].source),
-            async.apply(cleanSource, data_source[i].cleaning),
-            async.apply(getOutput, data_source[i].output)
-    ], function(err, result) {
+        //we need to contstruct the input path relative to the execution script,
+        //the output path relative to the execution script
+        //then execute
+        //exution path
+        fileToExecute = cleaning[i].name + '/' + cleaning[i].subdirectory + '/' + cleaning[i].script;
+        exec(fileToExecute, inputName, outputName, callback);
+    }
 
+    //one unit of cleaning
+    function pullCleanCommit(cleaning, inputName, callback) {
+
+        var outputName = cleaning.name + '/' +
+                         cleaning.subdirectory + '/' +
+                         'output_' + cleaning.stepname + '.csv';
+
+        if(cleaning.type == "git") {
+
+            async.series([
+                async.apply(pullGitRepo, cleaning.url, cleaning.name),
+                async.apply(runCleaningScript, cleaning, inputName, outputName),
+                async.apply(gitAddCommitPush, , outputName, cleaning.name, cleaning.name)
+            ], fucntion(err) {
+                callback(err, outputName);
+            });
+        }
+    }
+
+    var currentName = inputFileName;
+
+    //create a list of the cleaning steps to be done. Th
+    clean_list = [];
+    if(cleaning.length > 0) {
+        clean_list.push(async.apply(pullCleanCommit, cleaning[i], currentName));
+    }
+
+    for(var i = 1; i < cleaning.length; i++) {
+        clean_list.push(async.apply(pullCleanCommit, cleaning[i]));
+    }
+
+    async.waterfall(clean_list, function(err, result) {
+        callback(err, result);
     });
 }
 
-
-//Call it once to start
-console.log("Starting survey processing");
-pullGitRepo(survey_config.gitRepoURL, survey_config.gitRepoPath, function(err) {
-    if(err) {
-        console.log('Error pulling git repo');
-    } else {
-        fetchNewSurveys();
+function getOutput(output, outputFileName, callback) {
+    //read the csv from the file name
+    var data_to_output = [];
+    csv().fromFile(outputFileName).then(function(json) {
+        //map the fields of the csv to the correct fields in the json
+        for(var i = 0; i < json.length; i++) {
+            var obj = {};
+            for(var item in output.field_mapping) {
+                obj[item] = json[i][output.field_mapping[item]];
+            }
+            data_to_output.push(obj);
+        }
     }
-});
+
+    callback(null, output.type, output.name, data_to_output);
+}
+
+
+function getCleanProcessData() {
+    var dataToProcess = {
+        "deployment" : [],
+        "redeployment" : [],
+        "pickup" : [],
+        "auxillary" : {}
+    };
+
+    //iterative processing of the data sources list
+    data_sources = require('deployment-management-config.json');
+    async.eachSeries(data_sources, function(item) {
+        async.waterfall([
+                async.apply(getDataFromSource, item.source),
+                async.apply(cleanSource, item.cleaning),
+                async.apply(getOutput, item.output)
+        ], function(err, type, name, data) {
+            //append the result to the master data log
+            if(type == "device_deployment") {
+                dataToProcess.deployment.push(data);
+            } else if (type == "device_redeployment") {
+                dataToProcess.redeployment.push(data);
+            } else if (type == "device_pickup") {
+                dataToProcess.pickup.push(data);
+            } else if (type == "auxillary") {
+                dataToProcess.auxillary[name] = [];
+                dataToProcess.auxillary[name].push(data);
+            }
+        });
+    } , function(err) {
+        async.waterfall([
+                getDeviceTable,
+                async.apply(generateTrackingTables, dataToProcess.deployment,
+                                                    dataToProcess.redeployment,
+                                                    dataToProcess.pickup)
+        ], function(err) {
+        });
+    });
+}
+
 
 //Periodically query surveyCTO for new surveys - if you get new surveys processing them on by one
-setInterval(function() {
-    console.log("Starting survey processing");
-    pullGitRepo(survey_config.gitRepoURL, survey_config.gitRepoPath, function(err) {
-        if(err) {
-            console.log('Error pulling git repo');
-        } else {
-            fetchNewSurveys();
-        }
-    });
-}, 1200000);
+setInterval(getCleanProcessData, 1200000);

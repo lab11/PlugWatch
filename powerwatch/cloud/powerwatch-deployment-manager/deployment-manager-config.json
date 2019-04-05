@@ -2,6 +2,7 @@
     {
         "source": {
             "type" : "surveyCTO",
+            "name" : "PW_Pilot2",
             "url" : "https://gridwatch.surveyCTO.com/api/v1/forms/wide/csv/PW_Pilot2/?r=approved|rejected|pending",
             "username": "username",
             "password": "password"
@@ -9,18 +10,13 @@
         "cleaning":  [ {
                 "type" : "git",
                 "url" : "keybase://team/gridwatch/deployment_management",
+                "name" : "deployment_management",
+                "stepname" : "rscript",
                 "subdirectory": "PW_pilot2/",
-                "cleaning_script": "PW_Pilot2.R",
-                "output" : "PW_pilot2_cleaned.csv"
-            }, {
-                "type" : "git",
-                "url" : "keybase://team/gridwatch/deployment_management",
-                "subdirectory" : "PW_pilot2/",
-                "cleaning_script" : "get_qr_codes.js",
-                "output" : "PW_pilot2_cleaned2.csv"
+                "script": "PW_Pilot2.R"
             }
         ],
-        "output": [ {
+        "output": {
                 "type": "device_deployment",
                 "field_mapping" : {
                    "respondent_id": "a_respid",
@@ -40,37 +36,14 @@
                    "survey_id": "instanceID",
                    "installed_outage" : "g_installoutage",
                    "device_installed" : "g_install",
-                   "device_id" : ["g_deviceQR","g_deviceQRbar", "g_deviceID"],
-                   "error" : "error",
-                   "error_field" : "error_field",
-                   "error_comment" : "error_comment"
-                }
-            }, {
-                "type": "app_deployment",
-                "field_mapping" : {
-                   "respondent_id": "a_respid",
-                   "respondent_firstname": "e_firstname",
-                   "respondent_surname": "e_surnames",
-                   "respondent_popularname": "e_popularname",
-                   "fo_name": "surveyor_name",
-                   "site_id": "site_id",
-                   "phone_number": "e_phonenumber",
-                   "carrier": "carrier",
-                   "second_phone_number": "e_otherphonenumber",
-                   "alternate_contact_name": "e_othercontact_person_name",
-                   "alternate_phone_number": "e_othercontact_person_number",
-                   "location_latitude": "final_latitude",
-                   "location_longitude": "final_longitude",
-                   "survey_time": "endtime",
-                   "survey_id": "instanceID",
+                   "device_id" : ["g_deviceQRbar", "g_deviceID"],
                    "app_installed" : "g_download",
-                   "app_id" : ["g_appQR1","g_appQRbar", "g_appQR_nr1"],
+                   "app_id" : ["g_appQRbar", "g_appQR_nr1"],
                    "error" : "error",
                    "error_field" : "error_field",
                    "error_comment" : "error_comment"
                 }
             }
-        ]
     },{
         "source": {
             "type" : "surveyCTO",
@@ -84,12 +57,6 @@
                 "subdirectory": "Pilot2_DeviceChange/",
                 "cleaning_script": "Pilot2_DeviceChange.R",
                 "output" : "Pilot2_DeviceChange_cleaned.csv"
-            }, {
-                "type" : "git",
-                "url" : "keybase://team/gridwatch/deployment_management",
-                "subdirectory" : "Pilot2_DeviceChange/",
-                "cleaning_script" : "get_qr_codes.js",
-                "output" : "PW_pilot2_cleaned2.csv"
             }
         ],
         "output": [ {
