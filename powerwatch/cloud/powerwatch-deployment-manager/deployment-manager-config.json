@@ -3,16 +3,17 @@
         "source": {
             "type" : "surveyCTO",
             "name" : "PW_Pilot2",
-            "url" : "https://gridwatch.surveyCTO.com/api/v1/forms/wide/csv/PW_Pilot2/?r=approved|rejected|pending",
-            "username": "username",
-            "password": "password"
+            "host" : "https://gridwatch.surveyCTO.com",
+            "form_id": "PW_Pilot2",
+            "username": "adkins@berkeley.edu",
+            "password": "InnsurveyCTO"
         },
         "cleaning":  [ {
                 "type" : "git",
                 "url" : "keybase://team/gridwatch/deployment_management",
                 "name" : "deployment_management",
                 "stepname" : "rscript",
-                "subdirectory": "PW_pilot2/",
+                "subdirectory": "PW_Pilot2",
                 "script": "PW_Pilot2.R"
             }
         ],
@@ -26,7 +27,7 @@
                    "fo_name": "surveyor_name",
                    "site_id": "site_id",
                    "phone_number": "e_phonenumber",
-                   "carrier": "carrier",
+                   "carrier": "g_carrier",
                    "second_phone_number": "e_otherphonenumber",
                    "alternate_contact_name": "e_othercontact_person_name",
                    "alternate_phone_number": "e_othercontact_person_number",
@@ -47,16 +48,19 @@
     },{
         "source": {
             "type" : "surveyCTO",
-            "url" : "https://gridwatch.surveyCTO.com/api/v1/forms/wide/csv/Pilot2_DeviceChange/?r=approved|rejected|pending",
+            "name" : "Pilot2_DeviceChange",
+            "host" : "https://gridwatch.surveyCTO.com",
+            "form_id": "Pilot2_DeviceChange",
             "username": "username",
             "password": "password"
         },
         "cleaning":  [ {
                 "type" : "git",
                 "url" : "keybase://team/gridwatch/deployment_management",
-                "subdirectory": "Pilot2_DeviceChange/",
-                "cleaning_script": "Pilot2_DeviceChange.R",
-                "output" : "Pilot2_DeviceChange_cleaned.csv"
+                "name" : "deployment_management",
+                "stepname" : "rscript",
+                "subdirectory": "Pilot2_DeviceChange",
+                "script": "Pilot2_DeviceChange.R"
             }
         ],
         "output": [ {

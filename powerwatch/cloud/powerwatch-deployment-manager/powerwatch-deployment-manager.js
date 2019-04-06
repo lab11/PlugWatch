@@ -1070,8 +1070,10 @@ function gitAddCommitPush(file, repoPath, callback) {
     console.log("Committing",file,"in repo",repoPath);
 
     git.add({fs, dir: repoPath, filepath: file}).then(function(result) {
+        console.log("added file");
         git.commit({fs, dir: repoPath, message: "Auto updating newly cleaned file",
                         author:{name: "Deployment_Management_Service", email: "adkins@berkeley.edu"}}).then(function(result) {
+                console.log("committed file");
                 exec('git -C ' + repoPath + ' push origin master', callback);
             } , function(err) {
                 callback(err);
@@ -1101,10 +1103,11 @@ function getDataFromSource(source, callback) {
 
     if(source.type == "surveyCTO") {
 
-       console.log("From surveyCTO");
+       console.log("From surveyCTO", source.form_id);
 
         var options = {
-            uri: source.url,
+            uri: source.host + '/api/v1/forms/data/wide/csv/' +
+                                 source.form_id + '?r=approved|rejected|pending',
             auth: {
                 user: source.username,
                 pass: source.password,
@@ -1114,9 +1117,15 @@ function getDataFromSource(source, callback) {
 
         function saveOutput(outputFileName, response, body, callback) {
             //get the root of the cleaning path
-            fs.writeFile(outputFileName + '.csv', body, function(err) {
-               callback(err, outputFileName + '.csv');
-            });
+            if(response.statusCode != 200) {
+               console.log("Error getting data");
+               callback(response);
+            } else {
+               fs.writeFile(outputFileName + '.csv', body, function(err) {
+                  callback(err, outputFileName + '.csv');
+               });
+
+            }
         }
 
         async.waterfall([
@@ -1146,7 +1155,7 @@ function cleanSource(cleaning, inputFileName, callback) {
         //exution path
         fileToExecute = cleaning.name + '/' + cleaning.subdirectory + '/' + cleaning.script;
         console.log("Executing: ", fileToExecute, inputName, outputName);
-        exec(fileToExecute, inputName, outputName, callback);
+        exec(fileToExecute + ' ' + inputName + ' ' + outputName, callback);
     }
 
     //one unit of cleaning
@@ -1164,8 +1173,11 @@ function cleanSource(cleaning, inputFileName, callback) {
             async.series([
                 async.apply(pullGitRepo, cleaning.url, cleaning.name),
                 async.apply(runCleaningScript, cleaning, inputName, outputName),
-                async.apply(gitAddCommitPush, outputName, cleaning.name, cleaning.name)
+                async.apply(gitAddCommitPush, outputName, cleaning.name)
             ], function(err) {
+                if(err) {
+                   console.log("Error cleaning file",err);
+                }
                 callback(err, outputName);
             });
         }
