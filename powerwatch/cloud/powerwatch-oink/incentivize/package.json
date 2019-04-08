@@ -13,7 +13,7 @@
         "body-parser": "^1.18.3"
     },
     "scripts": {
-        "start": "./powerwatch-oink.js -d /etc/config/postgres-config.json -u /etc/config/postgres/username -p /etc/config/postgres/password -s /etc/config/korba/secret -c /etc/config/korba/client -o /etc/config/oink-config.json"
+        "start": "./powerwatch-oink-incentivize-pay.js -d /etc/config/postgres.json -u /etc/config/postgres/username -p /etc/config/postgres/password -s /etc/config/korba/secret -c /etc/config/korba/client -o /etc/config/oink.json"
     },
     "engines": {
         "node": ">=4.3.2"

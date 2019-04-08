@@ -1,0 +1,6 @@
+{
+    "respondents_table": "respondents",
+    "payments_table": "payments",
+    "incentives_file": "./incentives.js"
+}
+

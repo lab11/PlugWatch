@@ -1,0 +1,129 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: powerwatch-oink-incentivize
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 10 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: powerwatch-oink-incentivize
+            image: lab11/powerwatch-oink-incentivize:production
+            volumnMounts:
+            - name: postgres-secret
+              mountPath: /etc/config/postgres
+              readOnly: true
+
+            - name: korba-secret
+              mountPath: /etc/config/korba
+              readOnly: true
+
+            - name: config
+              mountPath: /etc/config
+              readOnly: true
+
+          restartPolicy: OnFailure
+          
+          volumes:
+          - name: config
+            configMap:
+              name: oink-config
+              items:
+              - key: postgres.json
+                path: postgres.json
+
+              - key: oink.json
+                path: oink.json
+
+          - name: postgres-secret
+            secret:
+              secretName: postgres-user-pass
+              items:
+              - key: username
+                path: username
+              - key: password
+                path: password
+
+          - name: korba-secret
+            secret:
+              secretName: korba-key
+              items:
+              - key: secret
+                path: secret
+              - key: client
+                path: client
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: powerwatch-oink-update
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 16 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: powerwatch-oink-update
+            image: lab11/powerwatch-oink-update:production
+
+            volumnMounts:
+            - name: postgres-secret
+              mountPath: /etc/config/postgres
+              readOnly: true
+
+            - name: korba-secret
+              mountPath: /etc/config/korba
+              readOnly: true
+
+            - name: twilio-secret
+              mountPath: /etc/config/twilio
+              readOnly: true
+
+            - name: config
+              mountPath: /etc/config
+              readOnly: true
+
+          restartPolicy: OnFailure
+          
+          volumes:
+          - name: config
+            configMap:
+              name: config
+              items:
+              - key: postgres.json
+                path: postgres.json
+
+              - key: oink.json
+                path: oink.json
+
+          - name: postgres-secret
+            secret:
+              secretName: postgres-user-pass
+              items:
+              - key: username
+                path: username
+              - key: password
+                path: password
+
+          - name: korba-secret
+            secret:
+              secretName: korba-key
+              items:
+              - key: secret
+                path: secret
+              - key: client
+                path: client
+
+          - name: twilio-secret
+            secret:
+              secretName: twilio-key
+              items:
+              - key: account_sid
+                path: account_sid
+              - key: api_key
+                path: api_key
