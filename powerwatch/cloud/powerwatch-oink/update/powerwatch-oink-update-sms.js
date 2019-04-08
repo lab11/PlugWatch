@@ -226,7 +226,7 @@ function check_status(callback) {
 
     function check_and_update_transactions(transactions, callback) {
         console.log(transactions.rows.length);
-        async.forEachLimit(transactions.rows, 1, function(row, callback) {
+        async.forEachLimit(transactions.rows, 10, function(row, callback) {
             //for each row
             //send it to korba
             check_korba_status(row.external_transaction_id, function(error, result, body) {

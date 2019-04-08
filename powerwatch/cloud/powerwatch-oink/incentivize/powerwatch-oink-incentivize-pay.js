@@ -198,7 +198,7 @@ function issue_payments(callback) {
         if(err) {
             console.log("Error getting waiting payments:",err);
         } else {
-            async.forEachLimit(res.rows, 1, function(row, callback) {
+            async.forEachLimit(res.rows, 10, function(row, callback) {
                 //for each row
                 //send it to korba
                 var qstring = format.withArray("UPDATE %I SET status = 'pending', time_submitted = NOW() " +
