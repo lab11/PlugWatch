@@ -27,6 +27,8 @@ spec:
               readOnly: true
 
           restartPolicy: OnFailure
+          nodeSelector:
+            korba-node: 'true'
           
           volumes:
           - name: config
@@ -90,11 +92,13 @@ spec:
               readOnly: true
 
           restartPolicy: OnFailure
+          nodeSelector:
+            korba-node: 'true'
           
           volumes:
           - name: config
             configMap:
-              name: config
+              name: oink-config
               items:
               - key: postgres.json
                 path: postgres.json

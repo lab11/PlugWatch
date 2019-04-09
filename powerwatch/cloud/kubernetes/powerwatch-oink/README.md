@@ -21,3 +21,9 @@ $ kubectl create -f ./postgres-user-pass.yaml
 ```
 $ kubectl create -f powerwatch-oink.yaml
 ```
+
+##getting the whitelisted IP
+Korba needs a whitelisted IP. You need to set a label on a node in your pool
+```korba-node=true```
+Then assign that node as static IP described here:
+https://stackoverflow.com/questions/41133755/static-outgoing-ip-in-kubernetes
