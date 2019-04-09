@@ -11,8 +11,9 @@ spec:
         spec:
           containers:
           - name: powerwatch-oink-incentivize
-            image: lab11/powerwatch-oink-incentivize:production
-            volumnMounts:
+            image: lab11/powerwatch-oink-incentivize:latest
+
+            volumeMounts:
             - name: postgres-secret
               mountPath: /etc/config/postgres
               readOnly: true
@@ -69,9 +70,9 @@ spec:
         spec:
           containers:
           - name: powerwatch-oink-update
-            image: lab11/powerwatch-oink-update:production
+            image: lab11/powerwatch-oink-update:latest
 
-            volumnMounts:
+            volumeMounts:
             - name: postgres-secret
               mountPath: /etc/config/postgres
               readOnly: true
