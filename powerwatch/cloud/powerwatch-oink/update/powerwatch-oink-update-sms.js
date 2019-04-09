@@ -53,6 +53,7 @@ if(typeof command.secret !== 'undefined') {
 
 var twilio_config = null;
 if(typeof command.twilio !== 'undefined') {
+    twilio_config = {};
     twilio_config.account_sid = fs.readFileSync(command.twilio,'utf8').trim();
     twilio_config.api_key = fs.readFileSync(command.api_key,'utf8').trim();
 } else {
