@@ -1,5 +1,5 @@
 {
-    "name": "powerwatch-deployment-manager",
+    "name": "powerwatch-oink-update",
     "version": "0.0.1",
     "description": "Pays powerwatch users",
     "private": true,

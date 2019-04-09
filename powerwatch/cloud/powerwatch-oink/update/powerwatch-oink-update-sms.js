@@ -44,6 +44,7 @@ const pg_pool = new  Pool( {
 
 var korba_config = null;
 if(typeof command.secret !== 'undefined') {
+    korba_config = {};
     korba_config.secret_key = fs.readFileSync(command.secret,'utf8').trim();
     korba_config.client_key = fs.readFileSync(command.client,'utf8').trim();
 } else {
