@@ -11,7 +11,7 @@ spec:
         spec:
           containers:
           - name: powerwatch-oink-incentivize
-            image: lab11/powerwatch-oink-incentivize:latest
+            image: lab11/powerwatch-oink-incentivize:production
 
             volumeMounts:
             - name: postgres-secret
@@ -70,7 +70,7 @@ spec:
         spec:
           containers:
           - name: powerwatch-oink-update
-            image: lab11/powerwatch-oink-update:latest
+            image: lab11/powerwatch-oink-update:production
 
             volumeMounts:
             - name: postgres-secret
