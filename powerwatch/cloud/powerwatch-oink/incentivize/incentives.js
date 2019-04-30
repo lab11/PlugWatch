@@ -26,6 +26,12 @@ function compliancePowerwatch(args) {
         //calculate the number of days between deployment and now
         days = ((((Date.now() - args.pilot_survey_time)/1000)/3600)/24)
         compliances_to_issue = Math.floor(days/30);
+
+        if(args.pilot_survey_id == null) {
+            //we have already paid all of the achimota people 7 times
+            compliances_to_issue -= 7;
+        }
+
         for(let i = 0; i < compliances_to_issue; i++) {
             var obj = {};
             obj.amount = 5;
