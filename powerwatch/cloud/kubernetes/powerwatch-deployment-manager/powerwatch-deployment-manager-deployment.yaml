@@ -21,10 +21,6 @@ spec:
           mountPath: /etc/config
           readOnly: true
 
-        - name: oink-secret
-          mountPath: /etc/config/oink
-          readOnly: true
-
         - name: postgres-secret
           mountPath: /etc/config/postgres
           readOnly: true
@@ -71,9 +67,6 @@ spec:
           - key: survey-config.json
             path: survey-config.json
 
-          - key: oink-config.json
-            path: oink-config.json
-
       - name: postgres-secret
         secret:
           secretName: postgres-user-pass
@@ -91,10 +84,3 @@ spec:
             path: username
           - key: password
             path: password
-
-      - name: oink-secret
-        secret:
-          secretName: oink-service-account
-          items:
-          - key: oink-service-account.json
-            path: oink-service-account.json
