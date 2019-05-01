@@ -191,15 +191,23 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
                         for (var name in value) {
                             if(value.hasOwnProperty(name)) {
                                 if(typeof value[name] == 'object') {
-                                    for(var subname in value[name]) {
-                                        if(value[name].hasOwnProperty(subname)) {
-                                            cols = cols + "%I, ";
-                                            names.push(name + '_' + subname);
-                                            vals = vals + "$" + i.toString() + ',';
-                                            values.push(value[name][subname]);
-                                            i = i + 1;
+                                   if(Array.isArray(value[name])) {
+                                       cols = cols + "%I, ";
+                                       names.push(name);
+                                       vals = vals + "$" + i.toString() + ',';
+                                       values.push(value[name]);
+                                       i = i + 1;
+                                   } else {
+                                       for(var subname in value[name]) {
+                                            if(value[name].hasOwnProperty(subname)) {
+                                                cols = cols + "%I, ";
+                                                names.push(name + '_' + subname);
+                                                vals = vals + "$" + i.toString() + ',';
+                                                values.push(value[name][subname]);
+                                                i = i + 1;
+                                            }
                                         }
-                                    }
+                                   }
                                 } else {
                                     cols = cols + "%I, ";
                                     names.push(name);
@@ -1299,12 +1307,12 @@ function fetchNewSurveys() {
                             //now append the json arrays to the entry and exit surveys
                             entrySurveys = entrySurveys.concat(deployment);
                             exitSurveys = exitSurveys.concat(removal);
-                            processSurveys(entrySurveys, exitSurveys);
-                            /*if(entry_changed || exit_changed) {
+                            //processSurveys(entrySurveys, exitSurveys);
+                            if(entry_changed || exit_changed) {
                                 processSurveys(entrySurveys, exitSurveys);
                             } else {
                                 console.log("No new surveys, no new processing scripts. Exiting.")
-                            }*/
+                            }
                         });
                     });
                 }
