@@ -52,6 +52,8 @@ const pg_pool = new  Pool( {
 function get_type(name, meas) {
     if(name.split('_')[name.split('_').length - 1] == 'time') {
        return 'TIMESTAMPTZ';
+    } else if (name.split('_')[name.split('_').length - 1] == 'times') {
+       return 'TIMESTAMPTZ[]';
     } else {
         switch(typeof meas) {
             case "string":
@@ -60,6 +62,17 @@ function get_type(name, meas) {
                 return 'BOOLEAN';
             case "number":
                 return 'DOUBLE PRECISION';
+            default:
+                if(Array.isArray(meas)) {
+                     switch(typeof meas[0]) {
+                        case "string":
+                            return 'TEXT[]';
+                        case "boolean":
+                            return 'BOOLEAN[]';
+                        case "number":
+                            return 'DOUBLE PRECISION[]';
+                     }
+                }
         }
     }
 
@@ -67,31 +80,28 @@ function get_type(name, meas) {
 }
 
 function dropTempTableGeneric(table_name, callback) {
-    function tableExists(table_name, callback) {
-        //Remove the temp table if it exists
-        pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",
-                        [table_name+'_temp'], (err, res) => {
-            callback(err, res.rows[0]);
-        });
-    }
-
-    function dropTable(table_name, row, callback) {
-        if(rows.exists == true) {
-            //Just go ahead and move the shadow table to respondnets
-            pg_pool.query('DROP TABLE ' + table_name + '_temp', (err, res) => {
-                callback(err);
-            });
+    //Remove the temp table if it exists
+    pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name+'_temp'], (err, res) => {
+        if (err) {
+            console.log(err);
+            return callback(err);
         } else {
-            console.log("Temp table doesnt exits. Proceeding");
-            callback();
+            if(res.rows[0].exists == true) {
+                //Just go ahead and move the shadow table to respondnets
+                pg_pool.query('DROP TABLE ' + table_name + '_temp', (err, res) => {
+                    if(err) {
+                        console.log("Error dropping temp table");
+                        return callback(err);
+                    } else {
+                        console.log("Dropped temp table");
+                        return callback(null);
+                    }
+                });
+            } else {
+                console.log("Temp table doesnt exits. Proceeding");
+                callback(null);
+            }
         }
-    }
-
-    async.waterfall([
-            async.apply(tableExists, table_name),
-            async.apply(dropTable, table_name)
-    ], function(err) {
-        callback(err);
     });
 }
 
@@ -103,167 +113,179 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
         return outer_callback();
     }
 
-    function createTempTableFromObject(objects, table_name, callback) {
-        //Find the object in the object array with the most fields
-        //So that we get all the fields for creating the table
-        var max = 0;
-        var index = 0;
-        for(var i = 0; i < objects.length; i++) {
-            var count = 0;
-            for(var key in objects[i]) {
-                if(objects[i][key] != null) {
-                    count++;
+    dropTempTableGeneric(table_name, function(err) {
+        if(err) {
+            return outer_callback(err);
+        } else {
+            //Find the object in the object array with the most fields that are not null
+            //So that we get all the fields for creating the table
+            var max = 0;
+            var index = 0;
+            for(var i = 0; i < objects.length; i++) {
+                var count = 0;
+                for(var key in objects[i]) {
+                    if(objects[i][key] != null) {
+                        count++;
+                    }
+                }
+
+                if(count > max) {
+                    max = count;
+                    index = i;
                 }
             }
 
-            if(count > max) {
-                max = count;
-                index = i;
-            }
-        }
-
-        var cols = "";
-        var names = [];
-        names.push(table_name + '_temp');
-        for(var key in objects[index]) {
-            if(objects[index].hasOwnProperty(key)) {
-                var meas = objects[index][key];
-                var type = get_type(key, meas);
-                if(type != 'err') {
-                    names.push(key);
-                    names.push(type);
-                    cols = cols + "%I %s,";
-                } else if (typeof meas == 'object') {
-                    for(var subkey in meas) {
-                        if(meas.hasOwnProperty(subkey)) {
-                            var submeas = meas[subkey];
-                            var type = get_type(subkey, submeas);
-                            if(type != 'err') {
-                                names.push(key + '_' + subkey);
-                                names.push(type);
-                                cols = cols + "%I %s,";
-                            } else {
-                                console.log('Error with field', key, 'and subkey', subkey);
-                                console.log('With value', submeas);
+            var cols = "";
+            var names = [];
+            names.push(table_name + '_temp');
+            for(var key in objects[index]) {
+                if(objects[index].hasOwnProperty(key)) {
+                    var meas = objects[index][key];
+                    var type = get_type(key, meas);
+                    if(type != 'err') {
+                        names.push(key);
+                        names.push(type);
+                        cols = cols + "%I %s,";
+                    } else if (typeof meas == 'object') {
+                        for(var subkey in meas) {
+                            if(meas.hasOwnProperty(subkey)) {
+                                var submeas = meas[subkey];
+                                var type = get_type(subkey, submeas);
+                                if(type != 'err') {
+                                    names.push(key + '_' + subkey);
+                                    names.push(type);
+                                    cols = cols + "%I %s,";
+                                } else {
+                                    console.log('Error with field', key, 'and subkey', subkey);
+                                    console.log('With value', submeas);
+                                }
                             }
                         }
+                    } else {
+                        console.log('Error with field ' + key);
+                        console.log('With value', meas);
                     }
-                } else {
-                    console.log('Error with field ' + key);
-                    console.log('With value', meas);
                 }
             }
+            cols = cols.substring(0, cols.length-1);
+
+            console.log("Creating new temporary table");
+            var qstring = format.withArray('CREATE TABLE %I (' + cols + ')', names);
+            pg_pool.query(qstring, (err, res) => {
+
+                if(err) {
+                    console.log("Error creating shadow table");
+                    console.log(err);
+                    return outer_callback(err);
+                } else {
+                    console.log("Created temp table successfully. Inserting values");
+
+                    //Add all the respondents
+                    async.forEachLimit(objects, 10, function(value, callback) {
+                        var cols = "";
+                        var vals = "";
+                        var names = [];
+                        var values = [];
+                        var i = 1;
+                        names.push(table_name + '_temp');
+                        for (var name in value) {
+                            if(value.hasOwnProperty(name)) {
+                                if(typeof value[name] == 'object') {
+                                    for(var subname in value[name]) {
+                                        if(value[name].hasOwnProperty(subname)) {
+                                            cols = cols + "%I, ";
+                                            names.push(name + '_' + subname);
+                                            vals = vals + "$" + i.toString() + ',';
+                                            values.push(value[name][subname]);
+                                            i = i + 1;
+                                        }
+                                    }
+                                } else {
+                                    cols = cols + "%I, ";
+                                    names.push(name);
+                                    vals = vals + "$" + i.toString() + ',';
+                                    values.push(value[name]);
+                                    i = i + 1;
+                                }
+                            }
+                        }
+
+                        cols = cols.substring(0, cols.length-2);
+                        vals = vals.substring(0, vals.length-1);
+
+                        var qstring = format.withArray("INSERT INTO %I (" + cols + ") VALUES (" + vals + ")", names);
+                        pg_pool.query(qstring, values, (err, res) => {
+                            if(err) {
+                                console.log("Error inserting into temp table");
+                                console.log(err);
+                                callback(err);
+                            } else {
+                                console.log('posted successfully!');
+                                callback();
+                            }
+                        });
+                    }, function(err) {
+                        if(err) {
+                            console.log("Some error with async");
+                        }
+
+                        //Okay now that we have successfully created the temp table
+                        //Let's move the table that already exists and change
+                        //the name of this one to the primary table
+                        //is there a table that exists for this device?
+                        console.log("Checking for table existence");
+                        pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name], (err, res) => {
+                            if (err) {
+                                console.log(err);
+                                return outer_callback(err);
+                            } else {
+                                if(res.rows[0].exists == false) {
+                                    //Just go ahead and move the shadow table to respondnets
+                                    console.log("Table does not exist. Altering temp table name");
+                                    pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
+                                        if(err) {
+                                            console.log("Error renaming table");
+                                            return outer_callback(err);
+                                        } else {
+                                            console.log("Created new table");
+                                            return outer_callback(null);
+                                        }
+                                    });
+                                } else {
+                                   //Rename, then move the table
+                                   console.log("Table does exist. Renaming old table and moving it's schema");
+                                   var new_name = table_name + '_' + Math.round((Date.now()/1000)).toString();
+                                   pg_pool.query('ALTER TABLE ' + table_name + ' RENAME to ' + new_name, (err, res) => {
+                                       if(err) {
+                                          console.log(err);
+                                          return outer_callback(err);
+                                       } else {
+                                           pg_pool.query('ALTER TABLE ' + new_name + ' SET SCHEMA backup', (err, res) => {
+                                               if(err) {
+                                                   console.log(err);
+                                                   return outer_callback(err);
+                                               } else {
+                                                   pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
+                                                       if(err) {
+                                                           console.log("Error renaming table");
+                                                           return outer_callback(err);
+                                                       } else {
+                                                           console.log("Created new table");
+                                                           return outer_callback(null);
+                                                       }
+                                                   });
+                                               }
+                                           });
+                                        }
+                                   });
+                                }
+                            }
+                        });
+                    });
+                }
+            });
         }
-        cols = cols.substring(0, cols.length-1);
-
-        console.log("Creating new temporary table");
-        var qstring = format.withArray('CREATE TABLE %I (' + cols + ')', names);
-        //console.log("Issuing query: ", qstring);
-        pg_pool.query(qstring, callback);
-    }
-
-    function insertValueInTable(objects, table_name, outer_callback) {
-         console.log("Created temp table successfully. Inserting values");
-
-         //Add all the respondents
-         async.forEachLimit(objects, 10, function(value, callback) {
-             var cols = "";
-             var vals = "";
-             var names = [];
-             var values = [];
-             var i = 1;
-             names.push(table_name + '_temp');
-             for (var name in value) {
-                 if(value.hasOwnProperty(name)) {
-                     if(typeof value[name] == 'object') {
-                         for(var subname in value[name]) {
-                             if(value[name].hasOwnProperty(subname)) {
-                                 cols = cols + "%I, ";
-                                 names.push(name + '_' + subname);
-                                 vals = vals + "$" + i.toString() + ',';
-                                 values.push(value[name][subname]);
-                                 i = i + 1;
-                             }
-                         }
-                     } else {
-                         cols = cols + "%I, ";
-                         names.push(name);
-                         vals = vals + "$" + i.toString() + ',';
-                         values.push(value[name]);
-                         i = i + 1;
-                     }
-                 }
-             }
-
-             cols = cols.substring(0, cols.length-2);
-             vals = vals.substring(0, vals.length-1);
-
-             var qstring = format.withArray("INSERT INTO %I (" + cols + ") VALUES (" + vals + ")", names);
-             pg_pool.query(qstring, values, callback);
-         } , function(err) {
-             outer_callback(err);
-         });
-    }
-
-    function checkTableExists(table_name, callback) {
-        //Okay now that we have successfully created the temp table
-        //Let's move the table that already exists and change
-        //the name of this one to the primary table
-        //is there a table that exists for this device?
-        console.log("Checking for table existence");
-        pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name], callback);
-
-    }
-
-    function renameTables(table_name, res, callback) {
-        if(res.rows[0].exists == false) {
-            //Just go ahead and move the shadow table to respondnets
-            console.log("Table does not exist. Altering temp table name");
-            pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, callback);
-        } else {
-
-           function renameOldTable(new_name, callback) {
-               //Rename, then move the table
-               console.log("Table does exist. Renaming old table and moving it's schema");
-               pg_pool.query('ALTER TABLE ' + table_name + ' RENAME to ' + new_name, callback);
-           }
-
-           function changeSchema(new_name, callback) {
-               pg_pool.query('ALTER TABLE ' + new_name + ' SET SCHEMA backup', callback);
-           }
-
-           function renameNewTable(table_name, callback) {
-               pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, callback);
-           }
-
-           var new_name = table_name + '_' + Math.round((Date.now()/1000)).toString();
-
-           async.series([
-                async.apply(renameOldTable, new_name),
-                async.apply(changeSchema, new_name),
-                async.apply(renameNewTable, table_name)
-           ] , function(err) {
-                console.log("Error renaming tables");
-                callback(err);
-           });
-        }
-    }
-
-    async.series([
-            async.apply(dropTempTableGeneric, table_name),
-            async.apply(createTempTableFromObject, objects, table_name),
-            async.apply(insertValueInTable, objects, table_name),
-            async.waterfall([
-                async.apply(checkTableExists, table_name),
-                async.apply(renameTables, table_name)
-            ], function(err) {
-                console.log("Error checking and renaming tables");
-            }),
-    ], function(err) {
-        console.log("Error adding data to generic table");
-        outer_callback(err);
     });
-
 }
 
 function writeRespondentTablePostgres(respondents, outer_callback) {
@@ -770,12 +792,10 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
                   //Update the respondent to say that they do have a powerwatch
                   respondent_info.powerwatch = true;
-                  respondent_info.number_of_deployments = 1;
+                  respondent_info.deployment_number = 1;
                   respondent_info.powerwatch_core_ids = [core_id];
                   respondent_info.powerwatch_shield_ids = [shield_id];
-                  respondent_info.powerwatch_deployment_start_times = [entrySurveys[i].endtime;];
-                  respondent_info.powerwatch_deployment_end_times = [];
-                  respondent_info.change_survey_ids = [];
+                  respondent_info.powerwatch_deployment_start_times = [entrySurveys[i].endtime];
               }//end device IDs are valid
            } else {//end device was installed
                //User did not get a powerwatch
@@ -954,8 +974,17 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
                    //Update the respondent
                    respondents[respondent_id].powerwatch = false;
-                   respondents[respondent_id].change_survey_ids.append(exitSurveys[i].instanceID);
-                   respondents[respondent_id].powerwatch_deployment_end_times.append(device_removal_info.removal_time);
+
+                   if(typeof respondents[respondent_id].change_survey_ids == 'undefined') {
+                      respondents[respondent_id].change_survey_ids = [];
+                   }
+
+                   if(typeof respondents[respondent_id].deployment_end_times == 'undefined') {
+                      respondents[respondent_id].powerwatch_deployment_end_times = [];
+                   }
+
+                   respondents[respondent_id].change_survey_ids.push(exitSurveys[i].instanceID);
+                   respondents[respondent_id].powerwatch_deployment_end_times.push(device_removal_info.removal_time);
                    console.log("Updated respondent info:", respondents[respondent_id])
                }
 
@@ -968,9 +997,14 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
                   //Update the respondent to say that they do have a powerwatch
                   respondents[respondent_id].powerwatch = true;
-                  respondents[respondent_id].powerwatch_core_ids.append(device_add_info.core_id);
-                  respondents[respondent_id].powerwatch_shield_ids.append(device_add_info.shield_id);
-                  respondents[respondent_id].powerwatch_deployment_start_times.append(device_add_info.deployment_start_time);
+                  respondents[respondent_id].deployment_number += 1;
+                  respondents[respondent_id].powerwatch_core_ids.push(device_add_info.core_id);
+                  respondents[respondent_id].powerwatch_shield_ids.push(device_add_info.shield_id);
+                  respondents[respondent_id].powerwatch_deployment_start_times.push(device_add_info.deployment_start_time);
+
+                  if(respondents[respondent_id].change_survey_ids.indexOf(exitSurveys[i].instanceID) == -1) {
+                      respondents[respondent_id].change_survey_ids.push(exitSurveys[i].instanceID);
+                  }
                }
 
                surveys_to_remove.push(i);
@@ -1265,12 +1299,12 @@ function fetchNewSurveys() {
                             //now append the json arrays to the entry and exit surveys
                             entrySurveys = entrySurveys.concat(deployment);
                             exitSurveys = exitSurveys.concat(removal);
-                            //processSurveys(entrySurveys, exitSurveys);
-                            if(entry_changed || exit_changed) {
+                            processSurveys(entrySurveys, exitSurveys);
+                            /*if(entry_changed || exit_changed) {
                                 processSurveys(entrySurveys, exitSurveys);
                             } else {
                                 console.log("No new surveys, no new processing scripts. Exiting.")
-                            }
+                            }*/
                         });
                     });
                 }
