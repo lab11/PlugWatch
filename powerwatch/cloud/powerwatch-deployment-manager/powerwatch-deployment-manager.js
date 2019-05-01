@@ -4,8 +4,6 @@ const { Pool }  = require('pg');
 var format = require('pg-format');
 const request = require('request');
 const fs = require('fs');
-const jpeg = require('jpeg-js');
-const jsQR = require('jsqr');
 const { exec } = require('child_process');
 const csv = require('csvtojson');
 var async = require('async');
@@ -51,118 +49,11 @@ const pg_pool = new  Pool( {
     max: 20,
 });
 
-//This is a recurive function that we could sub in if we get a lot of image
-//corruption. But's it's untested so let's leave it out for now
-function handleRequestResponse(options, error, response, body, depth, callback) {
-    //We are doing this recursively so limit the depth
-    if(depth > 4) {
-        return callback(null);
-    }
-
-    if(depth > 1) {
-        console.log("Called with depth ", depth);
-    }
-
-    if(error) {
-        console.log(error);
-        request(options, (function() {
-           return function(error, response, body) {
-              //We should just try to process this image immediately with
-              //the QR code processing code
-              console.log("Got error response - calling handle Request recursively");
-              handleRequestResponse(options, error, response, body, depth + 1, function(data) {
-                  return callback(data);
-              });
-           };
-        })());
-    } else {
-       var buf = new Buffer(body, "binary");
-       try {
-           var rawImage = jpeg.decode(buf, true);
-           const code = jsQR(rawImage.data, rawImage.width, rawImage.height);
-           if(code == null) {
-              //There was no readable QR code here
-              return callback(null);
-           } else {
-              //We have a QR code
-              return callback(code.data);
-           }
-       } catch (error) {
-           //we should just retry this request
-           console.log(error);
-           fs.writeFile("error.jpg", buf, function(err) {
-           });
-
-           request(options, (function() {
-              return function(error, response, body) {
-                 //We should just try to process this image immediately with
-                 //the QR code processing code
-                 console.log("Got error response - calling handle Request recursively");
-                 handleRequestResponse(options, error, response, body, depth + 1, function(data) {
-                     return callback(data);
-                 });
-              };
-           })());
-       }
-    }
-}
-
-
-function extractQRCodes(survey, url_field, output_field, outer_callback) {
-
-    // Why 2...well emperically surveyCTO doesn't like more??
-    // You can easily start getting ECONNRESETS
-    async.forEachOfLimit(survey, 2, function(value, key, callback) {
-        if(value[url_field] != '' && typeof value[url_field] != 'undefined') {
-            console.log('Fetching QR for', url_field);
-            var options = {
-              uri: value[url_field],
-              auth: {
-                 user: survey_config.username,
-                 pass: survey_config.password,
-                 sendImmediately: false
-              },
-              headers: {
-                 "X-OpenRosa-Version": "1.0"
-              },
-              encoding: 'binary'
-           };
-
-           request(options, (function() {
-              return function(error, response, body) {
-                 //We should just try to process this image immediately with
-                 //the QR code processing code
-
-                 //Here's how you call the recursive function
-                 handleRequestResponse(options, error, response, body, 1, function(data) {
-                     if(data) {
-                          console.log("Processed QR code:", data);
-                          survey[key][output_field] = data;
-                     } else {
-                          survey[key][output_field] = null;
-                          console.log("No processable QR code");
-                          fs.writeFile(url_field + '.jpg', new Buffer(body,'binary'), function(err) {
-                          });
-                     }
-                     callback();
-                 });
-              };
-           })());
-
-        } else {
-            callback();
-        }
-    }, function(err) {
-        if(err) {
-            console.log("Some error with async");
-        }
-        outer_callback(survey);
-    });
-}
-
 function get_type(name, meas) {
     if(name.split('_')[name.split('_').length - 1] == 'time') {
        return 'TIMESTAMPTZ';
+    } else if (name.split('_')[name.split('_').length - 1] == 'times') {
+       return 'TIMESTAMPTZ[]';
     } else {
         switch(typeof meas) {
             case "string":
@@ -171,6 +62,17 @@ function get_type(name, meas) {
                 return 'BOOLEAN';
             case "number":
                 return 'DOUBLE PRECISION';
+            default:
+                if(Array.isArray(meas)) {
+                     switch(typeof meas[0]) {
+                        case "string":
+                            return 'TEXT[]';
+                        case "boolean":
+                            return 'BOOLEAN[]';
+                        case "number":
+                            return 'DOUBLE PRECISION[]';
+                     }
+                }
         }
     }
 
@@ -289,15 +191,23 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
                         for (var name in value) {
                             if(value.hasOwnProperty(name)) {
                                 if(typeof value[name] == 'object') {
-                                    for(var subname in value[name]) {
-                                        if(value[name].hasOwnProperty(subname)) {
-                                            cols = cols + "%I, ";
-                                            names.push(name + '_' + subname);
-                                            vals = vals + "$" + i.toString() + ',';
-                                            values.push(value[name][subname]);
-                                            i = i + 1;
+                                   if(Array.isArray(value[name])) {
+                                       cols = cols + "%I, ";
+                                       names.push(name);
+                                       vals = vals + "$" + i.toString() + ',';
+                                       values.push(value[name]);
+                                       i = i + 1;
+                                   } else {
+                                       for(var subname in value[name]) {
+                                            if(value[name].hasOwnProperty(subname)) {
+                                                cols = cols + "%I, ";
+                                                names.push(name + '_' + subname);
+                                                vals = vals + "$" + i.toString() + ',';
+                                                values.push(value[name][subname]);
+                                                i = i + 1;
+                                            }
                                         }
-                                    }
+                                   }
                                 } else {
                                     cols = cols + "%I, ";
                                     names.push(name);
@@ -504,7 +414,7 @@ function writeExitTablePostgres(exitSurveys, outer_callback) {
                survey_time: exitSurveys[i].endtime,
                survey_id: exitSurveys[i].instanceID
         };
-        
+
         if(entry.gps == null) {
             entry.gps = {};
         }
@@ -514,7 +424,7 @@ function writeExitTablePostgres(exitSurveys, outer_callback) {
         } else {
             entry.value_of_error_field = '';
         }
-        
+
         if(typeof exitSurveys[i].error_extra != 'undefined') {
             entry.error_extra = exitSurveys[i].error_extra;
         }
@@ -530,30 +440,13 @@ function writeExitTablePostgres(exitSurveys, outer_callback) {
 
 function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys) {
     //Write the respondents and devices table to postgres
-    writeRespondentTablePostgres(respondents, function(err) {
-    if(err) {
-        console.log(err);
-    } else {
-       writeDevicesTablePostgres(devices, function(err) {
-       if(err) {
-           console.log(err);
-       } else {
-           writeEntryTablePostgres(entrySurveys, function(err) {
-           if(err) {
-               console.log(err);
-           } else {
-               writeExitTablePostgres(exitSurveys, function(err) {
-               if(err) {
-                   console.log(err);
-               } else {
-               }
-               });
-           }
-           });
-       }
-       });
-    }
-    });
+    async.series([async.apply(writeRespondentTablePostgres, respondents),
+                  async.apply(writeDevicesTablePostgres, devices),
+                  async.apply(writeEntryTablePostgres,entrySurveys),
+                  async.apply(writeExitTablePostgres,exitSurveys)],
+        function(err, result) {
+            console.log(err);
+        });
 }
 
 function lookupCoreID(core_id, devices) {
@@ -595,20 +488,12 @@ function getDevicesTable(callback) {
 }
 
 function getAppID(survey) {
-    //g_appQR_nr
-    //appQR1
-    var QR1 = null;
-    if(survey.appQR1 != null) {
-        QR1 = survey.appQR1.toUpperCase();
-    }
 
     var QRn = survey.g_appQR_nr1.toUpperCase();
     var QRbar = survey.g_appQRbar.toUpperCase();
 
     if(QRbar.length == 15 || QRbar.length == 16) {
         return QRbar;
-    } else if(typeof QR1 != 'undefined' && QR1 != null && (QR1.length == 15 || QR1.length == 16)) {
-        return QR1;
     } else {
         if(QRn.length == 15 || QRn.length == 16) {
             return QRn;
@@ -618,7 +503,7 @@ function getAppID(survey) {
     }
 }
 
-function getGenericID(survey, qrField, qrBarField, manualField, devices) {
+function getGenericID(survey, qrBarField, manualField, devices) {
     //Attempt to parse the QR code
     var parsed_core_id = null;
     var parsed_shield_id = null;
@@ -626,19 +511,6 @@ function getGenericID(survey, qrField, qrBarField, manualField, devices) {
     //If the qrbar field is good we should just go with that
     if(typeof survey[qrBarField] != 'undefined' && survey[qrBarField] != null) {
        let id_to_parse = survey[qrBarField].split(':');
-       if(id_to_parse.length == 3) {
-          parsed_core_id = id_to_parse[1];
-          parsed_shield_id = id_to_parse[2];
-          let ids = lookupCoreID(parsed_core_id, devices);
-          if(ids != null) {
-             return ids;
-          }
-       }
-    }
-
-    //Now lets try the normal QR field
-    if(typeof survey[qrField] != 'undefined' && survey[qrField] != null) {
-       let id_to_parse = survey[qrField].split(':');
        if(id_to_parse.length == 3) {
           parsed_core_id = id_to_parse[1];
           parsed_shield_id = id_to_parse[2];
@@ -660,21 +532,21 @@ function getExitGiveDeviceID(survey, devices) {
     //g_deviceID_retrieve
     //deviceRetrieveQR
 
-    return getGenericID(survey, 'deviceGiveQR', 'g_deviceQRbar_give', 'g_deviceID_give', devices);
+    return getGenericID(survey, 'g_deviceQRbar_give', 'g_deviceID_give', devices);
 }
 
 function getExitRetrieveDeviceID(survey, devices) {
     //g_deviceID_retrieve
     //deviceRetrieveQR
 
-    return getGenericID(survey, 'deviceRetrieveQR', 'g_deviceQRbar_retrieve', 'g_deviceID_retrieve', devices);
+    return getGenericID(survey, 'g_deviceQRbar_retrieve', 'g_deviceID_retrieve', devices);
 }
 
 function getEntryDeviceID(survey, devices) {
     //g_deviceID
     //deviceQR
 
-    return getGenericID(survey, 'deviceQR', 'g_deviceQRbar', 'g_deviceID', devices);
+    return getGenericID(survey, 'g_deviceQRbar', 'g_deviceID', devices);
 }
 
 function getEntryCoordinates(survey) {
@@ -710,9 +582,6 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
     exitSurveys.sort(function(a,b) {
        return Date.parse(a.endtime) - Date.parse(b.endtime);
     });
-
-
-
 
     //Okay the high level idea here is to generate a json blob describing
     //the entire deployment from the surveys. We actually want two - a respondent-centric
@@ -774,7 +643,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
                entrySurveys[i].error_field = 'a_respid';
                entrySurveys[i].error_comment = 'Invalid Respondent ID';
                continue;
-          } 
+          }
 
            //Okay, first, have we already processed an entry survey for
            //this respondent ID
@@ -931,9 +800,10 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
                   //Update the respondent to say that they do have a powerwatch
                   respondent_info.powerwatch = true;
-                  respondent_info.powerwatch_core_id = core_id;
-                  respondent_info.powerwatch_shield_id = shield_id;
-                  respondent_info.powerwatch_deployment_time = entrySurveys[i].endtime;
+                  respondent_info.deployment_number = 1;
+                  respondent_info.powerwatch_core_ids = [core_id];
+                  respondent_info.powerwatch_shield_ids = [shield_id];
+                  respondent_info.powerwatch_deployment_start_times = [entrySurveys[i].endtime];
               }//end device IDs are valid
            } else {//end device was installed
                //User did not get a powerwatch
@@ -1112,13 +982,21 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
                    //Update the respondent
                    respondents[respondent_id].powerwatch = false;
-                   respondents[respondent_id].change_survey_time = device_removal_info.removal_time;
-                   respondents[respondent_id].change_survey_id = exitSurveys[i].instanceID;
-                   respondents[respondent_id].powerwatch_removal_time = device_removal_info.removal_time;
+
+                   if(typeof respondents[respondent_id].change_survey_ids == 'undefined') {
+                      respondents[respondent_id].change_survey_ids = [];
+                   }
+
+                   if(typeof respondents[respondent_id].deployment_end_times == 'undefined') {
+                      respondents[respondent_id].powerwatch_deployment_end_times = [];
+                   }
+
+                   respondents[respondent_id].change_survey_ids.push(exitSurveys[i].instanceID);
+                   respondents[respondent_id].powerwatch_deployment_end_times.push(device_removal_info.removal_time);
                    console.log("Updated respondent info:", respondents[respondent_id])
                }
 
-               
+
                //Was a device deployed
                if(device_add_info != null) {
                   console.log("Adding device with info");
@@ -1127,9 +1005,14 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
 
                   //Update the respondent to say that they do have a powerwatch
                   respondents[respondent_id].powerwatch = true;
-                  respondents[respondent_id].powerwatch_core_id = device_add_info.core_id;
-                  respondents[respondent_id].powerwatch_shield_id = device_add_info.shield_id;
-                  respondents[respondent_id].powerwatch_deployment_time = device_add_info.deployment_start_time;
+                  respondents[respondent_id].deployment_number += 1;
+                  respondents[respondent_id].powerwatch_core_ids.push(device_add_info.core_id);
+                  respondents[respondent_id].powerwatch_shield_ids.push(device_add_info.shield_id);
+                  respondents[respondent_id].powerwatch_deployment_start_times.push(device_add_info.deployment_start_time);
+
+                  if(respondents[respondent_id].change_survey_ids.indexOf(exitSurveys[i].instanceID) == -1) {
+                      respondents[respondent_id].change_survey_ids.push(exitSurveys[i].instanceID);
+                  }
                }
 
                surveys_to_remove.push(i);
@@ -1155,20 +1038,6 @@ function processSurveys(entrySurveys, exitSurveys) {
     getDevicesTable(function(devices) {
        //Okay we should not have completely processed entry and exit surveys
        generateTrackingTables(entrySurveys, exitSurveys, devices);
-    });
-
-    //Parse out the QR codes
-    extractQRCodes(entrySurveys, "g_deviceQR", "deviceQR", function(entrySurveys) {
-        extractQRCodes(entrySurveys, "g_appQR_pic1", "appQR1", function(entrySurveys) {
-            extractQRCodes(exitSurveys, "g_deviceQR_retrieve", "deviceRetrieveQR", function(exitSurveys) {
-                extractQRCodes(exitSurveys, "g_deviceQR_give", "deviceGiveQR", function(exitSurveys) {
-                    getDevicesTable(function(devices) {
-                       //Okay we should not have completely processed entry and exit surveys
-                       generateTrackingTables(entrySurveys, exitSurveys, devices);
-                    });
-                });
-            });
-        });
     });
 }
 
