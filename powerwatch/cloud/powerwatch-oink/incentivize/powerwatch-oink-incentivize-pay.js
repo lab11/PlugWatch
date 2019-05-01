@@ -92,7 +92,7 @@ function incentivize_users(incentive_function, callback) {
             var qstring = format.withArray('INSERT INTO %I (phone_number, carrier, respondent_id, ' +
                 'time_created, amount, incentive_id, incentive_type, payment_attempt, ' +
                 'status, external_transaction_id) VALUES (%L, %L, %L, NOW(), %L, %L, ' +
-                '%L, %L, %L, %L) ON CONFLICT (external_transaction_id) DO NOTHING',
+                '%L, %L, %L, %L) ON CONFLICT DO NOTHING',
                 [PAYMENTS_TABLE, r.phone_number, r.carrier, r.respondent_id,
                  item.amount, item.incentive_id, item.incentive_type, 1, 'waiting', transaction_id]);
 
