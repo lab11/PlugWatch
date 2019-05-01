@@ -7,7 +7,7 @@ Modify postgres-config.json, survey-config.json, oink-config.json to fit the par
 deployment then add then as a kubernetes configmap
 
 ```
-$ kubectl create configmap deployment-manager-config --from-file=postgres-config.json --from-file=survey-config.json --from-file=oink-config.json
+$ kubectl create configmap deployment-manager-config --from-file=postgres-config.json --from-file=survey-config.json
 ```
 
 ## Add secrets

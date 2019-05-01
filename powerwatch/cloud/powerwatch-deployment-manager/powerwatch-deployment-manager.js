@@ -1314,12 +1314,12 @@ function fetchNewSurveys() {
                                     entrySurveys = entrySurveys.concat(deployment);
                                     entrySurveys = entrySurveys.concat(DWSurveys);
                                     exitSurveys = exitSurveys.concat(removal);
-                                    processSurveys(entrySurveys, exitSurveys);
-                                    /*if(entry_changed || exit_changed || dw_changed) {
+                                    //processSurveys(entrySurveys, exitSurveys);
+                                    if(entry_changed || exit_changed || dw_changed) {
                                         processSurveys(entrySurveys, exitSurveys);
                                     } else {
                                         console.log("No new surveys, no new processing scripts. Exiting.")
-                                    }*/
+                                    }
                                 });
                             });
                         }
