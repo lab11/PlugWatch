@@ -1295,25 +1295,34 @@ function fetchNewSurveys() {
             newEntrySurveys = JSON.parse(JSON.stringify(entrySurveys));
             generateBackcheckList(newEntrySurveys);
 
-            fetchSurveys(survey_config.exitSurveyName, survey_config.exitCleaningPath, survey_config.gitRepoPath, function(exitSurveys, exit_changed, err) {
+            fetchSurveys(survey_config.DWSurveyName, survey_config.DWCleaningPath, survey_config.gitRepoPath, function(DWSurveys, dw_changed, err) {
                 if(err) {
                     console.log("Error fetching and processing forms");
                     console.log(err);
                     return;
                 } else {
-                    //now get the two csv from the achimota deployment
-                    csv().fromFile(survey_config.gitRepoPath +  '/old_deployment/deployment.csv').then(function(deployment) {
-                        csv().fromFile(survey_config.gitRepoPath +  '/old_removal/removal.csv').then(function(removal) {
-                            //now append the json arrays to the entry and exit surveys
-                            entrySurveys = entrySurveys.concat(deployment);
-                            exitSurveys = exitSurveys.concat(removal);
-                            //processSurveys(entrySurveys, exitSurveys);
-                            if(entry_changed || exit_changed) {
-                                processSurveys(entrySurveys, exitSurveys);
-                            } else {
-                                console.log("No new surveys, no new processing scripts. Exiting.")
-                            }
-                        });
+                    fetchSurveys(survey_config.exitSurveyName, survey_config.exitCleaningPath, survey_config.gitRepoPath, function(exitSurveys, exit_changed, err) {
+                        if(err) {
+                            console.log("Error fetching and processing forms");
+                            console.log(err);
+                            return;
+                        } else {
+                            //now get the two csv from the achimota deployment
+                            csv().fromFile(survey_config.gitRepoPath +  '/old_deployment/deployment.csv').then(function(deployment) {
+                                csv().fromFile(survey_config.gitRepoPath +  '/old_removal/removal.csv').then(function(removal) {
+                                    //now append the json arrays to the entry and exit surveys
+                                    entrySurveys = entrySurveys.concat(deployment);
+                                    entrySurveys = entrySurveys.concat(DWSurveys);
+                                    exitSurveys = exitSurveys.concat(removal);
+                                    processSurveys(entrySurveys, exitSurveys);
+                                    /*if(entry_changed || exit_changed || dw_changed) {
+                                        processSurveys(entrySurveys, exitSurveys);
+                                    } else {
+                                        console.log("No new surveys, no new processing scripts. Exiting.")
+                                    }*/
+                                });
+                            });
+                        }
                     });
                 }
             });

@@ -2,6 +2,8 @@
     "host": "domain.surveyCTO.com",
     "entrySurveyName": "Entry",
     "entryCleaningPath": "path/to/a_private_PII_repo/entry_example.R",
+    "DWSurveyName": "Entry",
+    "DWCleaningPath": "path/to/a_private_PII_repo/entry_example.R",
     "exitSurveyName": "Exit",
     "exitCleaningPath": "path/to/a_private_PII_repo/exit_example.R",
     "gitRepoURL": "keybase://a_private_PII_repo",
