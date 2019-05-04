@@ -80,28 +80,8 @@ function get_type(name, meas) {
 }
 
 function dropTempTableGeneric(table_name, callback) {
-    //Remove the temp table if it exists
-    pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name+'_temp'], (err, res) => {
-        if (err) {
-            console.log(err);
-            return callback(err);
-        } else {
-            if(res.rows[0].exists == true) {
-                //Just go ahead and move the shadow table to respondnets
-                pg_pool.query('DROP TABLE ' + table_name + '_temp', (err, res) => {
-                    if(err) {
-                        console.log("Error dropping temp table");
-                        return callback(err);
-                    } else {
-                        console.log("Dropped temp table");
-                        return callback(null);
-                    }
-                });
-            } else {
-                console.log("Temp table doesnt exits. Proceeding");
-                callback(null);
-            }
-        }
+    pg_pool.query('DROP TABLE IF EXISTS ' + table_name + '_temp', (err, res) => {
+        callback(err);
     });
 }
 
@@ -113,11 +93,8 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
         return outer_callback();
     }
 
-    dropTempTableGeneric(table_name, function(err) {
-        if(err) {
-            return outer_callback(err);
-        } else {
-            //Find the object in the object array with the most fields that are not null
+    function createTempTable(objects, table_name, callback) {
+        //Find the object in the object array with the most fields that are not null
             //So that we get all the fields for creating the table
             var max = 0;
             var index = 0;
@@ -172,128 +149,142 @@ function writeGenericTablePostgres(objects, table_name, outer_callback) {
             console.log("Creating new temporary table");
             var qstring = format.withArray('CREATE TABLE %I (' + cols + ')', names);
             pg_pool.query(qstring, (err, res) => {
+                callback(err);
+            });
+    }
 
-                if(err) {
-                    console.log("Error creating shadow table");
-                    console.log(err);
-                    return outer_callback(err);
-                } else {
-                    console.log("Created temp table successfully. Inserting values");
+    function addObjects(objects, table_name, callback) {
 
-                    //Add all the respondents
-                    async.forEachLimit(objects, 10, function(value, callback) {
-                        var cols = "";
-                        var vals = "";
-                        var names = [];
-                        var values = [];
-                        var i = 1;
-                        names.push(table_name + '_temp');
-                        for (var name in value) {
-                            if(value.hasOwnProperty(name)) {
-                                if(typeof value[name] == 'object') {
-                                   if(Array.isArray(value[name])) {
-                                       cols = cols + "%I, ";
-                                       names.push(name);
-                                       vals = vals + "$" + i.toString() + ',';
-                                       values.push(value[name]);
-                                       i = i + 1;
-                                   } else {
-                                       for(var subname in value[name]) {
-                                            if(value[name].hasOwnProperty(subname)) {
-                                                cols = cols + "%I, ";
-                                                names.push(name + '_' + subname);
-                                                vals = vals + "$" + i.toString() + ',';
-                                                values.push(value[name][subname]);
-                                                i = i + 1;
-                                            }
-                                        }
-                                   }
-                                } else {
+        //Add all the respondents
+        //Don't try to speed this up or else you will screw up the transaction
+        //No parrallelism
+        async.forEachLimit(objects, 1, function(value, callback) {
+            var cols = "";
+            var vals = "";
+            var names = [];
+            var values = [];
+            var i = 1;
+            names.push(table_name + '_temp');
+            for (var name in value) {
+                if(value.hasOwnProperty(name)) {
+                    if(typeof value[name] == 'object') {
+                       if(Array.isArray(value[name])) {
+                           cols = cols + "%I, ";
+                           names.push(name);
+                           vals = vals + "$" + i.toString() + ',';
+                           values.push(value[name]);
+                           i = i + 1;
+                       } else {
+                           for(var subname in value[name]) {
+                                if(value[name].hasOwnProperty(subname)) {
                                     cols = cols + "%I, ";
-                                    names.push(name);
+                                    names.push(name + '_' + subname);
                                     vals = vals + "$" + i.toString() + ',';
-                                    values.push(value[name]);
+                                    values.push(value[name][subname]);
                                     i = i + 1;
                                 }
                             }
-                        }
+                       }
+                    } else {
+                        cols = cols + "%I, ";
+                        names.push(name);
+                        vals = vals + "$" + i.toString() + ',';
+                        values.push(value[name]);
+                        i = i + 1;
+                    }
+                }
+            }
 
-                        cols = cols.substring(0, cols.length-2);
-                        vals = vals.substring(0, vals.length-1);
+            cols = cols.substring(0, cols.length-2);
+            vals = vals.substring(0, vals.length-1);
 
-                        var qstring = format.withArray("INSERT INTO %I (" + cols + ") VALUES (" + vals + ")", names);
-                        pg_pool.query(qstring, values, (err, res) => {
-                            if(err) {
-                                console.log("Error inserting into temp table");
-                                console.log(err);
-                                callback(err);
-                            } else {
-                                console.log('posted successfully!');
-                                callback();
-                            }
-                        });
-                    }, function(err) {
-                        if(err) {
-                            console.log("Some error with async");
-                        }
-
-                        //Okay now that we have successfully created the temp table
-                        //Let's move the table that already exists and change
-                        //the name of this one to the primary table
-                        //is there a table that exists for this device?
-                        console.log("Checking for table existence");
-                        pg_pool.query("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)",[table_name], (err, res) => {
-                            if (err) {
-                                console.log(err);
-                                return outer_callback(err);
-                            } else {
-                                if(res.rows[0].exists == false) {
-                                    //Just go ahead and move the shadow table to respondnets
-                                    console.log("Table does not exist. Altering temp table name");
-                                    pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
-                                        if(err) {
-                                            console.log("Error renaming table");
-                                            return outer_callback(err);
-                                        } else {
-                                            console.log("Created new table");
-                                            return outer_callback(null);
-                                        }
-                                    });
-                                } else {
-                                   //Rename, then move the table
-                                   console.log("Table does exist. Renaming old table and moving it's schema");
-                                   var new_name = table_name + '_' + Math.round((Date.now()/1000)).toString();
-                                   pg_pool.query('ALTER TABLE ' + table_name + ' RENAME to ' + new_name, (err, res) => {
-                                       if(err) {
-                                          console.log(err);
-                                          return outer_callback(err);
-                                       } else {
-                                           pg_pool.query('ALTER TABLE ' + new_name + ' SET SCHEMA backup', (err, res) => {
-                                               if(err) {
-                                                   console.log(err);
-                                                   return outer_callback(err);
-                                               } else {
-                                                   pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
-                                                       if(err) {
-                                                           console.log("Error renaming table");
-                                                           return outer_callback(err);
-                                                       } else {
-                                                           console.log("Created new table");
-                                                           return outer_callback(null);
-                                                       }
-                                                   });
-                                               }
-                                           });
-                                        }
-                                   });
-                                }
-                            }
-                        });
-                    });
+            var qstring = format.withArray("INSERT INTO %I (" + cols + ") VALUES (" + vals + ")", names);
+            pg_pool.query(qstring, values, (err, res) => {
+                if(err) {
+                    console.log("Error inserting into temp table");
+                    console.log(err);
+                    callback(err);
+                } else {
+                    console.log('posted successfully!');
+                    callback();
                 }
             });
+        }, function(err) {
+            callback(err);
+        });
+    }
+
+    function changeTableNames(table_name, callback) {
+
+        function renameOld(table_name, new_name, callback) {
+            pg_pool.query('ALTER TABLE IF EXISTS ' + table_name + ' RENAME to ' + new_name, (err, res) => {
+                callback(err);
+            });
         }
-    });
+
+        function changeSchema(new_name, callback) {
+            pg_pool.query('ALTER TABLE IF EXISTS ' + new_name + ' SET SCHEMA backup', (err, res) => {
+                callback(err);
+            });
+        }
+
+        function correctName(table_name, callback) {
+            pg_pool.query('ALTER TABLE ' + table_name + '_temp RENAME to ' + table_name, (err, res) => {
+                callback(err);
+            });
+        }
+
+        var new_name = table_name + '_' + Math.round((Date.now()/1000)).toString();
+
+        async.series([async.apply(renameOld, table_name, new_name),
+                      async.apply(changeSchema, new_name),
+                      async.apply(correctName, table_name)],
+            function(err, res) {
+                callback(err);
+            });
+    }
+
+    function begin(callback) {
+        pg_pool.query('BEGIN', (err, res) => {
+            callback(err);
+        });
+    }
+
+    console.log("Starting writing asnyc");
+    async.series([begin,
+                  async.apply(dropTempTableGeneric, table_name),
+                  async.apply(createTempTable, objects, table_name),
+                  async.apply(addObjects, objects, table_name),
+                  async.apply(changeTableNames, table_name)],
+          function(err, res) {
+              if(err) {
+                  console.log(err);
+                  console.log('rolling back');
+                  pg_pool.query('ROLLBACK', (err) => {
+                      if(err) {
+                          console.log(err);
+                          console.log('error rolling back');
+                          outer_callback(err);
+                      } else {
+                          console.log('rolled back');
+                          outer_callback(err);
+                      }
+                  });
+              } else {
+                  console.log('committing');
+                  pg_pool.query('COMMIT', (err) => {
+                      if(err) {
+                          console.log(err);
+                          console.log('Error committing');
+                          outer_callback(err);
+                      } else {
+                          console.log('committed');
+                          outer_callback(err);
+                      }
+                  });
+              }
+          });
+
 }
 
 function writeRespondentTablePostgres(respondents, outer_callback) {
