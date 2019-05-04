@@ -46,7 +46,7 @@ const pg_pool = new  Pool( {
     database: timescale_config.database,
     password: timescale_config.password,
     port: timescale_config.port,
-    max: 20,
+    max: 1,
 });
 
 function get_type(name, meas) {
