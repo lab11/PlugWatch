@@ -429,7 +429,7 @@ function writeExitTablePostgres(exitSurveys, outer_callback) {
     writeGenericTablePostgres(error_table, 'change_errors', outer_callback);
 }
 
-function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys) {
+function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys, callback) {
     //Write the respondents and devices table to postgres
     async.series([async.apply(writeRespondentTablePostgres, respondents),
                   async.apply(writeDevicesTablePostgres, devices),
@@ -437,6 +437,7 @@ function updateTrackingTables(respondents, devices, entrySurveys, exitSurveys) {
                   async.apply(writeExitTablePostgres,exitSurveys)],
         function(err, result) {
             console.log(err);
+            callback(err);
         });
 }
 
@@ -563,7 +564,7 @@ carrier_map['3'] = 'Vodaphone';
 carrier_map['4'] = 'Tigo';
 carrier_map['5'] = 'GLO';
 
-function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
+function generateTrackingTables(entrySurveys, exitSurveys, device_table, callback) {
     //Sort the surveys by submission time
     //This assumption makes it easier to process the surveys
     entrySurveys.sort(function(a,b) {
@@ -1021,14 +1022,18 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table) {
    //We should also write the updated respondent and device tables to postgres
    console.log();
    console.log("Updating tracking tables after processing surveys");
-   updateTrackingTables(respondents, devices, entrySurveys, exitSurveys);
+   updateTrackingTables(respondents, devices, entrySurveys, exitSurveys, function(err) {
+      callback(err);
+   });
 }
 
-function processSurveys(entrySurveys, exitSurveys) {
+function processSurveys(entrySurveys, exitSurveys, callback) {
     //This should enter a powerwatch user into the postgres deployment table and the oink table
     getDevicesTable(function(devices) {
        //Okay we should not have completely processed entry and exit surveys
-       generateTrackingTables(entrySurveys, exitSurveys, devices);
+       generateTrackingTables(entrySurveys, exitSurveys, devices, function(err) {
+          callback(err);
+       });
     });
 }
 
@@ -1271,6 +1276,116 @@ function generateBackcheckList(entrySurveys) {
     })
 }
 
+function updatePayments(callback) {
+   console.log('Updating to payments');
+   function drop(callback) {
+      pg_pool.query('DROP VIEW IF EXISTS payments_per_respondent', (err, res) => {
+         callback(err);
+      });
+   }
+
+   function create(callback) {
+      pg_pool.query('CREATE VIEW payments_per_respondent AS ' +
+		   `SELECT max(respondents.respondent_id) AS respondent_id,
+  		      count(payments.amount) AS number_payments_issued,
+  		      sum(payments.amount) AS total_amount_paid,
+  		      max(payments.time_submitted) AS last_payment_time,
+  		      array_to_string(array_agg(date(payments.time_submitted)), ',') AS list_of_payment_dates,
+  		      array_to_string(array_agg(payments.amount), ',') AS list_of_payment_amounts,
+  		      array_to_string(array_agg(payments.external_transaction_id), ',') AS list_of_payment_ids,
+  		      max(respondents.respondent_firstname) AS respondent_firstname,
+  		      max(respondents.respondent_surnname) AS respondent_surname,
+  		      max(respondents.respondent_popularname) AS respondent_popularname,
+  		      max(respondents.phone_number) AS phone_number,
+  		      max(respondents.carrier) AS carrier,
+  		      max(respondents.second_phone_number) AS second_phone_number,
+  		      max(respondents.alternate_contact_name) AS alternate_contact_name,
+  		      max(respondents.alternate_phone_number) AS alternate_phone_number,
+  		      bool_and(respondents.powerwatch) AS powerwatch
+  		     FROM respondents
+  		       RIGHT JOIN payments ON respondents.respondent_id = payments.respondent_id
+  		    WHERE payments.status = 'complete'
+  		    GROUP BY respondents.respondent_id` , (err, res) => {
+         callback(err);
+      });
+   }
+
+   async.series([drop, create], function(err, res) {
+      callback(err);
+   });
+}
+function updateVisit(callback) {
+   console.log('Updating to visit');
+   function drop(callback) {
+      pg_pool.query('DROP VIEW IF EXISTS powerwatches_to_visit', (err, res) => {
+         callback(err);
+      });
+   }
+
+   function create(callback) {
+      pg_pool.query('CREATE VIEW powerwatches_to_visit AS ' +
+                 `SELECT d.respondent_id,
+  		  d.respondent_firstname,
+  		  d.respondent_surnname,
+  		  d.respondent_popularname,
+  		  d.fo_name,
+  		  d.site_id,
+  		  d.phone_number,
+  		  d.second_phone_number,
+  		  d.alternate_contact_name,
+  		  d.alternate_phone_number,
+  		  d.currently_deployed,
+  		  d.core_id
+  		 FROM backup.deployment_1556868406 d
+  		   LEFT JOIN ( SELECT powerwatch.core_id,
+  		          min(now() - powerwatch."time") AS min
+  		         FROM powerwatch
+  		        WHERE powerwatch."time" > (now() - '5 days'::interval)
+  		        GROUP BY powerwatch.core_id) p ON d.core_id = p.core_id
+  		WHERE p.core_id IS NULL AND d.currently_deployed = true
+			AND (now() - d.deployment_start_time) > '5 days'::interval`, (err, res) => {
+         callback(err);
+      });
+   }
+
+   async.series([drop, create], function(err, res) {
+      callback(err);
+   });
+}
+
+function updateSiteSummary(callback) {
+   console.log('Updating site summary');
+   function drop(callback) {
+      pg_pool.query('DROP VIEW IF EXISTS site_deployment_count', (err, res) => {
+         callback(err);
+      });
+   }
+
+   function create(callback) {
+      pg_pool.query('CREATE VIEW site_deployment_count AS ' +
+                    'SELECT CAST(deployment.site_id AS INTEGER) AS site, count(deployment.core_id) AS count ' +
+                    'FROM deployment ' +
+                    'WHERE deployment.currently_deployed = true ' +
+                    'GROUP BY deployment.site_id ' +
+                    'ORDER BY CAST(deployment.site_id AS INTEGER) ASC', (err, res) => {
+         callback(err);
+      });
+   }
+
+   async.series([drop, create], function(err, res) {
+      callback(err);
+   });
+}
+
+function updateViews(callback) {
+    console.log('Updating Views');
+    async.series([updateVisit,
+		  updateSiteSummary,
+		  updatePayments], function(err, res) {
+         callback(err);
+    });
+}
+
 //function to fetch surveys from surveyCTO
 function fetchNewSurveys() {
     //fetch all surveys moving forward
@@ -1305,9 +1420,15 @@ function fetchNewSurveys() {
                                     entrySurveys = entrySurveys.concat(deployment);
                                     entrySurveys = entrySurveys.concat(DWSurveys);
                                     exitSurveys = exitSurveys.concat(removal);
-                                    //processSurveys(entrySurveys, exitSurveys);
+                                    async.series([async.apply(processSurveys, entrySurveys, exitSurveys),
+                                                  updateViews], function(err,res) {
+                                                      console.log(err);
+                                    });
                                     if(entry_changed || exit_changed || dw_changed) {
-                                        processSurveys(entrySurveys, exitSurveys);
+                                       async.series([async.apply(processSurveys, entrySurveys, exitSurveys),
+                                                     updateViews], function(err,res) {
+                                                         console.log(err);
+                                       });
                                     } else {
                                         console.log("No new surveys, no new processing scripts. Exiting.")
                                     }
