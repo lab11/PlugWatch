@@ -3,6 +3,7 @@
 const { Pool }  = require('pg');
 var format      = require('pg-format');
 var async      = require('async');
+var moment      = require('moment');
 
 var timescale_insert = function(options) {
     if(typeof options.workers == 'undefined') {
@@ -27,12 +28,10 @@ var timescale_insert = function(options) {
 function get_type(meas) {
     switch(typeof meas) {
         case "string":
-            //is it a time string
-            var test = Date.parse(meas);
-            if(Number.isNaN(test)) {
-                return 'TEXT';
-            } else {
+            if(moment(meas, moment.ISO_8601, true).isValid()) {
                 return 'TIMESTAMPTZ';
+            } else {
+                return 'TEXT';
             }
         break;
         case "boolean":
@@ -46,11 +45,10 @@ function get_type(meas) {
             if(meas.length > 0) {
                 switch(typeof meas[0]) {
                     case "string":
-                        var test = Date.parse(meas[0]);
-                        if(Number.isNaN(test)) {
-                            return 'TEXT[]';
-                        } else {
+                        if(moment(meas, moment.ISO_8601, true).isValid()) {
                             return 'TIMESTAMPTZ[]';
+                        } else {
+                            return 'TEXT[]';
                         }
                     break;
                     case "boolean":
@@ -76,7 +74,7 @@ function get_type(meas) {
     }
 }
 
-function create_table(table_name, object, callback) {
+function create_table(querier, table_name, object, callback) {
     //I think this can be done better with timescale internal data converter!!
     var cols = "";
     var names = [];
@@ -100,13 +98,14 @@ function create_table(table_name, object, callback) {
     //but I can't get that to work, so I'm going to run it client-side
     //Therefore we are as safe as the node-pg-format library
     var qstring = format.withArray('CREATE TABLE %I (TIME TIMESTAMPTZ NOT NULL' + cols + ')',names);
-    this.pg_pool.query(qstring, [], (err, res) => {
+    console.log(qstring);
+    querier.query(qstring, [], (err, res) => {
         if(err) {
             return callback(err);
         } else {
             //make it a hyptertable!
             console.log("Making it a hypertable");
-            this.pg_pool.query("SELECT create_hypertable($1,'time')",[table_name], (err, res) => {
+            querier.query("SELECT create_hypertable($1,'time')",[table_name], (err, res) => {
                 return callback(err);
             });
         }
@@ -114,7 +113,7 @@ function create_table(table_name, object, callback) {
 }
 
 
-function alter_table(table_name, column_name, object, callback) {
+function alter_table(querier, table_name, column_name, object, callback) {
     var type = get_type(object[column_name]);
     var params = [];
 
@@ -131,13 +130,13 @@ function alter_table(table_name, column_name, object, callback) {
     //then add the column to the table
     console.log(params);
     var astring = format.withArray("ALTER TABLE %I ADD COLUMN %I %s",params);
-    this.pg_pool.query(astring, (err, res) => {
+    querier.query(astring, (err, res) => {
         callback(err);
     });
 }
 
 
-function insert_data(table_name, timestamp, object, callback) {
+function insert_data(querier, table_name, timestamp, object, callback) {
     //console.log("Insterting the data now!");
 
     var cols = "";
@@ -161,7 +160,7 @@ function insert_data(table_name, timestamp, object, callback) {
 
     var qstring = format.withArray("INSERT INTO %I (TIME" + cols + ") VALUES ($1" + vals + ")",names);
     console.log(qstring);
-    this.pg_pool.query(qstring, values, (err, res) => {
+    querier.query(qstring, values, (err, res) => {
         if(err) {
             console.log(err)
             //was this error due to adding a field?
@@ -170,21 +169,21 @@ function insert_data(table_name, timestamp, object, callback) {
                 //we can pull the erroneous column out of the err code
                 var column_name = err.toString().split("\"")[1];
 
-                alter_table.call(this, table_name, column_name, object, function(err) {
+                alter_table(querier, table_name, column_name, object, function(err) {
                     if(err) {
                         callback(err);
                     } else {
-                        insert_data.call(this, table_name, timestamp, object, callback);
+                        insert_data(querier, table_name, timestamp, object, callback);
                     }
                 });
 
             } else if (err.code == '42P01') {
                 console.log('Attempting to create table');
-                create_table.call(this, table_name, timestamp, object, function(err) {
+                create_table(querier, table_name, object, function(err) {
                     if(err) {
                         callback(err);
                     } else {
-                        insert_data.call(this, table_name, timestamp, object, callback);
+                        insert_data(querier, table_name, timestamp, object, callback);
                     }
                 });
             }
@@ -197,14 +196,14 @@ function insert_data(table_name, timestamp, object, callback) {
 
 
 timescale_insert.prototype.insertOne = function(table_name, timestamp, object, callback) {
-    insert_data.call(this, table_name, timestamp, object, callback);
+    insert_data(this.pg_pool, table_name, timestamp, object, callback);
 }
 
 timescale_insert.prototype.insertMany = function(table_name, objects, callback) {
     async.forEach(objects, function(object, callback) {
         timestamp = object['timestamp'];
         delete object['timestamp'];
-        insert_data.call(this, table_name, timestamp, object, callback);
+        insert_data(this.pg_pool, table_name, timestamp, object, callback);
     }, function(err) {
         callback(err);
     });

@@ -1,12 +1,13 @@
 {
     "name": "timescale-insert",
-    "version": "0.0.2",
+    "version": "0.0.4",
     "description": "Inserts into a timescale table for you",
     "dependencies": {
         "pg": "^7.3.0",
         "async": "",
         "pg-format": "",
-        "commander": ""
+        "commander": "",
+        "moment": ""
     },
     "scripts": {
         "start": "timescale-insert.js"
