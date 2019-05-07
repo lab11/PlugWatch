@@ -1,6 +1,6 @@
 {
     "name": "timescale-insert",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Inserts into a timescale table for you",
     "dependencies": {
         "pg": "^7.3.0",

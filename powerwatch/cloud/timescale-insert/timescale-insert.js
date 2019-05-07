@@ -23,10 +23,17 @@ var timescale_insert = function(options) {
     });
 }
 
+//can interpret ISO TIME Strings and JS native date objects
 function get_type(meas) {
     switch(typeof meas) {
         case "string":
-            return 'TEXT';
+            //is it a time string
+            var test = Date.parse(meas);
+            if(Number.isNaN(test)) {
+                return 'TEXT';
+            } else {
+                return 'TIMESTAMPTZ';
+            }
         break;
         case "boolean":
             return 'BOOLEAN';
@@ -39,7 +46,12 @@ function get_type(meas) {
             if(meas.length > 0) {
                 switch(typeof meas[0]) {
                     case "string":
-                        return 'TEXT[]';
+                        var test = Date.parse(meas[0]);
+                        if(Number.isNaN(test)) {
+                            return 'TEXT[]';
+                        } else {
+                            return 'TIMESTAMPTZ[]';
+                        }
                     break;
                     case "boolean":
                         return 'BOOLEAN[]';
@@ -51,9 +63,13 @@ function get_type(meas) {
                         return 'err';
                     break;
                 }
+            } else if (typeof meas[0] == 'object' && meas[0] instanceof Date) {
+                return 'TIMESTAMPTZ[]';
             } else {
                 return 'err';
             }
+        } else if (typeof meas == 'object' && meas instanceof Date) {
+            return 'TIMESTAMPTZ';
         } else {
             return 'err';
         }
