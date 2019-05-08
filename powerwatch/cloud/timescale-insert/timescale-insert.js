@@ -4,6 +4,7 @@ const { Pool }  = require('pg');
 var format      = require('pg-format');
 var async      = require('async');
 var moment      = require('moment');
+const debug = require('debug')('timescale-insert');
 
 var timescale_insert = function(options) {
     if(typeof options.workers == 'undefined') {
@@ -91,20 +92,20 @@ function create_table(querier, table_name, object, callback) {
         }
     }
 
-    console.log("Trying to create table!");
+    debug("Trying to create table!");
     //These are dynamic queries!!!
     //Which means the are prone to sql injection attacks
     //timescale supports 'format' execution statements to prevent against this
     //but I can't get that to work, so I'm going to run it client-side
     //Therefore we are as safe as the node-pg-format library
     var qstring = format.withArray('CREATE TABLE %I (TIME TIMESTAMPTZ NOT NULL' + cols + ')',names);
-    console.log(qstring);
+    debug(qstring);
     querier.query(qstring, [], (err, res) => {
         if(err) {
             return callback(err);
         } else {
             //make it a hyptertable!
-            console.log("Making it a hypertable");
+            debug("Making it a hypertable");
             querier.query("SELECT create_hypertable($1,'time')",[table_name], (err, res) => {
                 return callback(err);
             });
@@ -122,13 +123,13 @@ function alter_table(querier, table_name, column_name, object, callback) {
         params.push(column_name);
         params.push(type);
     } else {
-        console.log('Error with field ' + key);
-        console.log('Table alteration failed');
+        debug('Error with field ' + key);
+        debug('Table alteration failed');
         return;
     }
 
     //then add the column to the table
-    console.log(params);
+    debug(params);
     var astring = format.withArray("ALTER TABLE %I ADD COLUMN %I %s",params);
     querier.query(astring, (err, res) => {
         callback(err);
@@ -137,7 +138,7 @@ function alter_table(querier, table_name, column_name, object, callback) {
 
 
 function insert_data(querier, table_name, timestamp, object, callback) {
-    //console.log("Insterting the data now!");
+    //debug("Insterting the data now!");
 
     var cols = "";
     var vals = "";
@@ -158,14 +159,14 @@ function insert_data(querier, table_name, timestamp, object, callback) {
         values.push(meas);
     }
 
-    var qstring = format.withArray("INSERT INTO %I (TIME" + cols + ") VALUES ($1" + vals + ")",names);
-    console.log(qstring);
+    var qstring = format.withArray("INSERT INTO %I (TIME" + cols + ") VALUES ($1" + vals + ") ON CONFLICT DO NOTHING",names);
+    debug(qstring);
     querier.query(qstring, values, (err, res) => {
         if(err) {
-            console.log(err)
+            debug(err)
             //was this error due to adding a field?
             if(err.code == 42703) {
-                console.log('Attempting to alter the table!');
+                debug('Attempting to alter the table!');
                 //we can pull the erroneous column out of the err code
                 var column_name = err.toString().split("\"")[1];
 
@@ -178,7 +179,7 @@ function insert_data(querier, table_name, timestamp, object, callback) {
                 });
 
             } else if (err.code == '42P01') {
-                console.log('Attempting to create table');
+                debug('Attempting to create table');
                 create_table(querier, table_name, object, function(err) {
                     if(err) {
                         callback(err);
@@ -188,7 +189,7 @@ function insert_data(querier, table_name, timestamp, object, callback) {
                 });
             }
         } else {
-            console.log('posted successfully!');
+            debug('posted successfully!');
             return callback(err);
         }
     });
