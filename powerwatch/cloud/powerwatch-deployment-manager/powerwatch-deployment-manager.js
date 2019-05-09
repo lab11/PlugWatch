@@ -1336,7 +1336,7 @@ function updateVisit(callback) {
   		  d.alternate_phone_number,
   		  d.currently_deployed,
   		  d.core_id
-  		 FROM backup.deployment_1556868406 d
+  		 FROM deployment d
   		   LEFT JOIN ( SELECT powerwatch.core_id,
   		          min(now() - powerwatch."time") AS min
   		         FROM powerwatch
