@@ -210,4 +210,11 @@ timescale_insert.prototype.insertMany = function(table_name, objects, callback) 
     });
 }
 
+timescale_insert.prototype.disconnect = function(callback) {
+    this.pg_pool.end(() => {
+        debug("connection ended");
+        callback();
+    });
+}
+
 module.exports = timescale_insert;
