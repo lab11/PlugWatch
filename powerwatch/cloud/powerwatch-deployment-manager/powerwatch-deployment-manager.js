@@ -1314,6 +1314,46 @@ function updatePayments(callback) {
       callback(err);
    });
 }
+
+function updateApp(callback) {
+   console.log('Updating problem apps');
+
+   function drop(callback) {
+      pg_pool.query('DROP VIEW IF EXISTS apps_to_visit', (err, res) => {
+         callback(err);
+      });
+   }
+
+   function create(callback) {
+      pg_pool.query('CREATE VIEW apps_to_visit AS ' +
+         `SELECT r.respondent_id,
+           r.respondent_firstname,
+           r.respondent_surnname,
+           r.respondent_popularname,
+           r.fo_name,
+           r.site_id,
+           r.phone_number,
+           r.second_phone_number,
+           r.alternate_contact_name,
+           r.alternate_phone_number,
+           r.currently_active, r.app_id
+          FROM respondents r
+          LEFT JOIN ( SELECT dumsorwatch.user_id, dumsorwatch.phone_imei,
+            min(now() - dumsorwatch."time") AS min
+            FROM dumsorwatch
+            WHERE dumsorwatch."time" > (now() - '10 days'::interval)
+            GROUP BY dumsorwatch.user_id, dumsorwatch.phone_imei) d 
+               ON UPPER(r.app_id) = UPPER(d.user_id) OR r.app_id = d.phone_imei
+         WHERE d.user_id IS NULL AND r.currently_active = true`, (err, res) => {
+         callback(err);
+      });
+   }
+
+   async.series([drop, create], function(err, res) {
+      callback(err);
+   });
+}
+
 function updateVisit(callback) {
    console.log('Updating to visit');
    function drop(callback) {
@@ -1380,6 +1420,7 @@ function updateSiteSummary(callback) {
 function updateViews(callback) {
     console.log('Updating Views');
     async.series([updateVisit,
+          updateApp,
 		  updateSiteSummary,
 		  updatePayments], function(err, res) {
          callback(err);
