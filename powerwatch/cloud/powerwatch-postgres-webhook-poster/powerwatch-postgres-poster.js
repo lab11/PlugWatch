@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+var fs = require('fs');
 var powerwatch_parser = require('lab11-powerwatch-parser');
 var timescale_insert = require('timescale-insert');
 var command = require('commander');
@@ -28,7 +29,7 @@ if(typeof command.config !== 'undefined') {
 var webhook_config = null;
 if(typeof command.webhook !== 'undefined') {
     webhook_config = require(command.webhook);
-    webhook_config.passowrd = fs.readFileSync(command.webhookpass,'utf8').trim()
+    webhook_config.password = fs.readFileSync(command.webhookpass,'utf8').trim()
 } else {
     webhook_config = require('./webhook-config.json');
 }
@@ -191,6 +192,7 @@ function setup_webhooks(event_name, products, url, access_token, callback) {
 
             var  uri = 'https://api.particle.io/v1/products/'+value.toString()+'/integrations?access_token='+access_token;
 
+            console.log(form);
             request.post(uri, {'form':form}, function(err, response, body) {
                 if(err) {
                     console.log(err);
@@ -224,7 +226,7 @@ app.post('/data*', (req, res) => {
     event = req.body;
 
     if(typeof event['password'] == 'undefined' || event['password'] != webhook_config.password) {
-        res.send(401, "No authorized");
+        return res.status(401).send("Not authorized");
     }
 
     //extract the end of the path
@@ -252,7 +254,7 @@ app.post('/errors*', (req, res) => {
     event = req.body;
 
     if(typeof event['password'] == 'undefined' || event['password'] != webhook_config.password) {
-        res.send(401, "No authorized");
+        return res.status(401).send("Not authorized");
     }
 
     //extract the end of the path
