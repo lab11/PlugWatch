@@ -1,0 +1,19 @@
+{
+    "name": "powerwatch-postgres-poster",
+    "version": "0.0.1",
+    "description": "Instantiate and consume webhook calls and post them to postgres",
+    "private": true,
+    "dependencies": {
+        "lab11-powerwatch-parser":"0.0.6",
+        "timescale-insert": "0.0.8",
+        "request": "",
+        "express": "",
+        "async": ""
+    },
+    "scripts": {
+        "start": "./powerwatch-postgres-poster.js -c /etc/config/config.json -d /etc/config/postgres.json -w /etc/config/webhook.json -a /etc/config/particle/auth-token -u /etc/config/postgres/username -p /etc/config/postgres/password -b /etc/config/webhook/password"
+    },
+    "engines": {
+        "node": ">=4.3.2"
+    }
+}
