@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: webhook-pass
+type: Opaque
+data:
+  password: ${WEBHOOK_PASSWORD}

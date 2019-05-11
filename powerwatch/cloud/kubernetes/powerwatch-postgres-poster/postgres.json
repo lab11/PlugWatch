@@ -1,0 +1,5 @@
+{
+    "host": "timescale",
+    "port": 5432,
+    "database": "powerwatch"
+}

@@ -1,0 +1,3 @@
+{
+    "url": "https://${POWERWATCH_POSTGRES_POSTER_DOMAIN_NAME}"
+}

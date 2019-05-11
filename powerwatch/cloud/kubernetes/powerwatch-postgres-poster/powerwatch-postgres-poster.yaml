@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: powerwatch-postgres-poster
+  labels:
+    app: powerwatch-postgres-poster
+spec:
+  selector:
+    matchLabels:
+      app: powerwatch-postgres-poster
+  template:
+    metadata:
+      labels:
+        app: powerwatch-postgres-poster
+    spec:
+      containers:
+      - name: powerwatch-postgres-poster
+        image: lab11/powerwatch-postgres-webhook-poster:production
+        ports:
+          - containerPort: 5000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config
+          readOnly: true
+
+        - name: particle-secret
+          mountPath: /etc/config/particle
+          readOnly: true
+
+        - name: postgres-secret
+          mountPath: /etc/config/postgres
+          readOnly: true
+
+        - name: webhook-secret
+          mountPath: /etc/config/webhook
+          readOnly: true
+
+      volumes:
+      - name: config
+        configMap:
+          name: config
+          items:
+          - key: config.json
+            path: config.json
+
+          - key: postgres.json
+            path: postgres.json
+
+          - key: webhook.json
+            path: webhook.json
+
+      - name: particle-secret
+        secret:
+          secretName: particle-auth-token
+          items:
+          - key: auth-token
+            path: auth-token
+
+      - name: postgres-secret
+        secret:
+          secretName: postgres-user-pass
+          items:
+          - key: username
+            path: username
+          - key: password
+            path: password
+
+      - name: webhook-secret
+        secret:
+          secretName: webhook-pass
+          items:
+          - key: password
+            path: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: powerwatch-postgres-poster
+  labels:
+    app: powerwatch-postgres-poster
+spec:
+  type: NodePort
+  ports:
+   - port: 80
+     targetPort: 5000
+  selector:
+    app: powerwatch-postgres-poster
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: powerwatch-postgres-poster
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: ${POWERWATCH_POSTGRES_POSTER_IP_ADDRESS}
+spec:
+  backend:
+    serviceName: powerwatch-postgres-poster
+    servicePort: 80
+  tls:
+  - secretName: powerwatch-postgres-poster-tls
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: powerwatch-postgres-poster-tls
+spec:
+  secretName: powerwatch-postgres-poster-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: ${POWERWATCH_POSTGRES_POSTER_DOMAIN_NAME}
+  dnsNames:
+  - ${POWERWATCH_POSTGRES_POSTER_DOMAIN_NAME}
+  acme:
+    config:
+    - http01:
+        ingress: powerwatch-postgres-poster
+      domains:
+      - ${POWERWATCH_POSTGRES_POSTER_DOMAIN_NAME}
