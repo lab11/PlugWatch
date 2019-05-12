@@ -836,7 +836,7 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table, callbac
            var device_removal_info = null;
            var removed_device = null;
            var device_add_info = null;
-           let respondent_id = exitSurveys[i].a_respid;
+           let respondent_id = exitSurveys[i].a_respid.toUpperCase();
            console.log("Processing exit survey for respondent ", respondent_id);
 
            //Does this repondent exist?
@@ -1001,6 +1001,10 @@ function generateTrackingTables(entrySurveys, exitSurveys, device_table, callbac
                   respondents[respondent_id].powerwatch_core_ids.push(device_add_info.core_id);
                   respondents[respondent_id].powerwatch_shield_ids.push(device_add_info.shield_id);
                   respondents[respondent_id].powerwatch_deployment_start_times.push(device_add_info.deployment_start_time);
+
+                  if(typeof respondents[respondent_id].change_survey_ids == 'undefined') {
+                     respondents[respondent_id].change_survey_ids = [];
+                  }
 
                   if(respondents[respondent_id].change_survey_ids.indexOf(exitSurveys[i].instanceID) == -1) {
                       respondents[respondent_id].change_survey_ids.push(exitSurveys[i].instanceID);
@@ -1342,7 +1346,7 @@ function updateApp(callback) {
             min(now() - dumsorwatch."time") AS min
             FROM dumsorwatch
             WHERE dumsorwatch."time" > (now() - '10 days'::interval)
-            GROUP BY dumsorwatch.user_id, dumsorwatch.phone_imei) d 
+            GROUP BY dumsorwatch.user_id, dumsorwatch.phone_imei) d
                ON UPPER(r.app_id) = UPPER(d.user_id) OR r.app_id = d.phone_imei
          WHERE d.user_id IS NULL AND r.currently_active = true`, (err, res) => {
          callback(err);
