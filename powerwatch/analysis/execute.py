@@ -69,8 +69,7 @@ if(cluster_exists == False):
                             '--num-workers=' + str(num_workers),
                             '--worker-machine-type=' + worker_machine_type,
                             '--master-machine-type=' + master_machine_type,
-                            '--bucket=' + bucket,
-                            '--initialization-actions=gs://dataproc-initialization-actions/python/pip-install.sh'])
+                            '--bucket=' + bucket])
 
     print()
 else:
