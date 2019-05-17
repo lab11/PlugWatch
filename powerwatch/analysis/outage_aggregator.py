@@ -23,11 +23,11 @@ args = parser.parse_args()
 spark = SparkSession.builder.appName("SAIDI/SAIFI cluster size").getOrCreate()
 
 ### It's really important that you partition on this data load!!! otherwise your executors will timeout and the whole thing will fail
-start_time = '2019-03-01'
-end_time = '2019-05-15'
+start_time = '2019-04-01'
+end_time = '2019-05-01'
 
 #Roughly one partition per week of data is pretty fast and doesn't take too much chuffling
-num_partitions = 30
+num_partitions = 10
 
 # This builds a list of predicates to query the data in parrallel. Makes everything much faster
 start_time_timestamp = calendar.timegm(datetime.strptime(start_time, "%Y-%m-%d").timetuple())
@@ -100,7 +100,9 @@ def timeCorrect(time, millis, unplugMillis):
         return time - timedelta(microseconds = (int(millis)-int(unplugMillis))*1000)
 udftimeCorrect = udf(timeCorrect, TimestampType())
 pw_df = pw_df.withColumn("outage_time", udftimeCorrect("time","millis","last_unplug_millis"))
+pw_df = pw_df.withColumn("outage_time", F.unix_timestamp("outage_time"))
 pw_df = pw_df.withColumn("r_time", udftimeCorrect("time","millis","last_plug_millis"))
+pw_df = pw_df.withColumn("r_time", F.unix_timestamp("r_time"))
 
 #now denote the end time of the outage for saidi reasons
 time_lead = lead("r_time",1).over(w)
@@ -109,41 +111,95 @@ pw_df = pw_df.withColumn("restore_time", time_lead)
 #now filter out everything that is not an outage. We should have a time and end_time for every outage
 pw_df = pw_df.filter("outage != 0")
 
+pw_df = pw_df.select("core_id", "outage_time", "restore_time", "location_latitude", "location_longitude")
+
 # Okay now that we have the outages and times we should join it with the number of sensors reporting above
 # This allows us to calculate the relative portion of each device to SAIDI/SAIFI
-pw_df = pw_df.join(pw_distinct_core_id, F.date_trunc("day", pw_df['outage_time']) == F.date_trunc("day", pw_distinct_core_id["window_mid_point"]))
+#pw_df = pw_df.join(pw_distinct_core_id, F.date_trunc("day", pw_df['outage_time']) == F.date_trunc("day", pw_distinct_core_id["window_mid_point"]))
 
 #record the duration of the outage
-def calculateDuration(startTime, endTime):
-    delta = endTime-startTime
-    seconds = delta.total_seconds()
-    return int(seconds)
+#def calculateDuration(startTime, endTime):
+#    delta = endTime-startTime
+#    seconds = delta.total_seconds()
+#    return int(seconds)
 
-udfcalculateDuration = udf(calculateDuration, IntegerType())
-pw_df = pw_df.withColumn("outage_duration", udfcalculateDuration("outage_time","restore_time"))
+#udfcalculateDuration = udf(calculateDuration, IntegerType())
+#pw_df = pw_df.withColumn("outage_duration", udfcalculateDuration("outage_time","restore_time"))
 
-window_size = 150
-w = Window.partitionBy(dayofyear("outage_time")).orderBy(asc("outage_time")).rowsBetween(-1*window_size,window_size)
-pw_df = pw_df.withColumn("outage_window_list",collect_list(F.struct("outage_time","core_id")).over(w))
+#Okay so the best way to actually do outage clustering is through an iterative hierarchical approach
 
-def filterOutage(time, core_id, timeList):
-    count = 1
-    used = []
-    used.append(core_id)
-    for i in timeList:
-        if abs((time - i[0]).total_seconds()) < 5 and i[1] not in used:
-            used.append(i[1])
-            count += 1
+#Steps:
+#Iterate:
+# Sort by outage time
+#   Note the distance to the nearest point in time leading or lagging you
+#   Note the distance to of that nearest point to its neighbor
+#   If you are closer to your neighbor than it is to it's closest merge and create a new point with a new outage time
 
-    if count > window_size:
-        return window_size
-    else:
-        return count
+def timestamp_average(timestamps):
+    seconds = 0
+    for i in range(0,len(timestamps)):
+        seconds += timestamps[i]
 
-udfFilterTransition = udf(filterOutage, IntegerType())
-pw_df = pw_df.withColumn("outage_cluster_size", udfFilterTransition("outage_time","core_id","outage_window_list"))
-pw_df = pw_df.filter("outage_cluster_size > 1")
-pw_df = pw_df.withColumn("outage_number",lit(1))
+    return (seconds/len(timestamps))
+
+max_cluster_size = 500
+for i in range(0,500):
+    w = Window.partitionBy(dayofyear(F.from_unixtime("outage_time"))).orderBy(asc("outage_time"))
+    lead1 = lead("outage_time",1).over(w)
+    lead2 = lead("outage_time",2).over(w)
+    lag1 = lag("outage_time",1).over(w)
+    lag2 = lag("outage_time",2).over(w)
+    pw_df = pw_df.withColumn("lead1",lead1)
+    pw_df = pw_df.withColumn("lead2",lead2)
+    pw_df = pw_df.withColumn("lag1",lag1)
+    pw_df = pw_df.withColumn("lag2",lag2)
+    pw_df = pw_df.withColumn("diff_lead1", col("lead1") - col("outage_time"))
+    pw_df = pw_df.withColumn("diff_lead2", col("lead2") - col("lead1"))
+    pw_df = pw_df.withColumn("diff_lag1", col("outage_time") - col("lag1"))
+    pw_df = pw_df.withColumn("diff_lag2", col("lag1") - col("lag2"))
+
+    merge_time = when((col("diff_lead1") < 60) & 
+                      (col("diff_lead1") <= col("diff_lead2")) & 
+                      (col("diff_lead1") <= col("diff_lag1")), col("lead1")).when(
+                              (col("diff_lag1") < 60) & 
+                              (col("diff_lag1") < col("diff_lag2")) & 
+                              (col("diff_lag1") <= col("diff_lead1")), col("outage_time")).otherwise(None)
+
+    pw_df = pw_df.withColumn("merge_time", merge_time)
+    pw_df = pw_df.groupBy("merge_time").agg(F.collect_list("core_id").alias("core_id"),
+                                            F.collect_list("outage_time").alias("outage_times"),
+                                            F.collect_list("restore_time").alias("restore_time"),
+                                            F.collect_list("location_latitude").alias("location_latitude"),
+                                            F.collect_list("location_longitude").alias("location_longitude"))
+
+    udfTimestampAverage = udf(timestamp_average, IntegerType())
+    pw_df = pw_df.withColumn("outage_time", udfTimestampAverage("outage_times"))
+
+    pw_df.show(1000)
+
+
+#change this to a range query
+#w = Window.partitionBy(dayofyear("outage_time")).orderBy(asc("outage_time")).rowsBetween(-1*window_size,window_size)
+#pw_df = pw_df.withColumn("outage_window_list",collect_list(F.struct("outage_time","core_id")).over(w))
+#
+#def filterOutage(time, core_id, timeList):
+#    count = 1
+#    used = []
+#    used.append(core_id)
+#    for i in timeList:
+#        if abs((time - i[0]).total_seconds()) < 5 and i[1] not in used:
+#            used.append(i[1])
+#            count += 1
+#
+#    if count > window_size:
+#        return window_size
+#    else:
+#        return count
+#
+#udfFilterTransition = udf(filterOutage, IntegerType())
+#pw_df = pw_df.withColumn("outage_cluster_size", udfFilterTransition("outage_time","core_id","outage_window_list"))
+#pw_df = pw_df.filter("outage_cluster_size > 1")
+#pw_df = pw_df.withColumn("outage_number",lit(1))
 
 #okay now we have a list of all outages where at least one other device also had an outage within a time window
 #pw_df.cache()
