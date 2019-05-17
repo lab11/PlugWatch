@@ -23,7 +23,7 @@ args = parser.parse_args()
 spark = SparkSession.builder.appName("SAIDI/SAIFI cluster size").getOrCreate()
 
 ### It's really important that you partition on this data load!!! otherwise your executors will timeout and the whole thing will fail
-start_time = '2018-07-01'
+start_time = '2019-03-01'
 end_time = '2019-05-15'
 
 #Roughly one partition per week of data is pretty fast and doesn't take too much chuffling
@@ -69,7 +69,10 @@ pw_df = spark.read.jdbc(
 pw_df.cache()
 
 #We should mark every row with the number of unique sensors reporting in +-5 days so we now the denominator for SAIDI/SAIFI
-pw_df.groupBy(weekofyear("time")).agg(countDistinct("time")).groupBy(month("time").avg().show()
+pw_distinct_core_id = pw_df.select("time","core_id")
+pw_distinct_core_id = pw_distinct_core_id.groupBy(F.window("time", '10 days', '1 day')).agg(F.countDistinct("core_id"))
+pw_distinct_core_id = pw_distinct_core_id.withColumn("window_mid_point", F.from_unixtime((F.unix_timestamp(col("window.start")) + F.unix_timestamp(col("window.end")))/2))
+pw_distinct_core_id = pw_distinct_core_id.select(col("count(DISTINCT core_id)").alias("sensors_reporting"), "window_mid_point")
 
 #now we need to created a window function that looks at the leading lagging edge of is powered and detects transitions
 #then we can filter out all data that is not a transition
@@ -105,6 +108,10 @@ pw_df = pw_df.withColumn("restore_time", time_lead)
 
 #now filter out everything that is not an outage. We should have a time and end_time for every outage
 pw_df = pw_df.filter("outage != 0")
+
+# Okay now that we have the outages and times we should join it with the number of sensors reporting above
+# This allows us to calculate the relative portion of each device to SAIDI/SAIFI
+pw_df = pw_df.join(pw_distinct_core_id, F.date_trunc("day", pw_df['outage_time']) == F.date_trunc("day", pw_distinct_core_id["window_mid_point"]))
 
 #record the duration of the outage
 def calculateDuration(startTime, endTime):
