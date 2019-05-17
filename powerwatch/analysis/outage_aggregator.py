@@ -43,7 +43,21 @@ for i in range(0,num_partitions):
     predicates.append(pred_string)
 
 #This query should only get data from deployed devices in the deployment table
-query = "(SELECT core_id, time, is_powered, product_id,millis, last_unplug_millis, last_plug_millis FROM powerwatch WHERE time >= '" + start_time + "' AND time < '" + end_time + "' AND (product_id = 7008 OR product_id = 7009 or product_id = 7010 or product_id = 7011 or product_id = 8462)) alias"
+query = ("""
+    (SELECT powerwatch.core_id, time, is_powered, product_id, millis, last_unplug_millis,
+            last_plug_millis, d.location_latitude, d.location_longitude FROM
+    powerwatch
+    INNER JOIN (
+      SELECT core_id,
+        location_latitude,
+        location_longitude,
+        COALESCE(deployment_start_time, '1970-01-01 00:00:00+0') as st,
+        COALESCE(deployment_end_time, '9999-01-01 00:00:00+0') as et
+      FROM deployment) d ON powerwatch.core_id = d.core_id
+    WHERE time >= st AND time <= et AND """ +
+        "time >= '" + start_time + "' AND " +
+        "time < '" + end_time + "' AND " +
+        "(product_id = 7008 OR product_id = 7009 or product_id = 7010 or product_id = 7011 or product_id = 8462)) alias")
 
 pw_df = spark.read.jdbc(
             url = "jdbc:postgresql://timescale.ghana.powerwatch.io/powerwatch",
@@ -53,6 +67,9 @@ pw_df = spark.read.jdbc(
 
 #if you have multiple saves below this prevents reloading the data every time
 pw_df.cache()
+
+#We should mark every row with the number of unique sensors reporting in +-5 days so we now the denominator for SAIDI/SAIFI
+pw_df.groupBy(weekofyear("time")).agg(countDistinct("time")).groupBy(month("time").avg().show()
 
 #now we need to created a window function that looks at the leading lagging edge of is powered and detects transitions
 #then we can filter out all data that is not a transition
@@ -107,7 +124,7 @@ def filterOutage(time, core_id, timeList):
     used = []
     used.append(core_id)
     for i in timeList:
-        if abs((time - i[0]).total_seconds()) < 120 and i[1] not in used:
+        if abs((time - i[0]).total_seconds()) < 5 and i[1] not in used:
             used.append(i[1])
             count += 1
 
