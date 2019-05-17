@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, window, asc, desc, lead, lag, udf, hour, month, dayofmonth, collect_list, lit, year, date_trunc, dayofweek
+from pyspark.sql.functions import col, window, asc, desc, lead, lag, udf, hour, month, dayofmonth, dayofyear, collect_list, lit, year, date_trunc, dayofweek, when, unix_timestamp
 import pyspark.sql.functions as F
 from pyspark.sql.window import Window
 from pyspark.sql.types import FloatType, IntegerType, DateType, TimestampType
 from pyspark import SparkConf
-import datetime
+from datetime import datetime, timedelta
 import os
 from math import isnan
 import argparse
 import json
+import calendar
 
 #read arguments
 parser = argparse.ArgumentParser()
@@ -21,43 +22,54 @@ args = parser.parse_args()
 #initiate spark context
 spark = SparkSession.builder.appName("SAIDI/SAIFI cluster size").getOrCreate()
 
-#connect to the database
-#it's more efficient to do the bulk of filter in the database, especially in the time dimensions
-query = "(SELECT core_id, time, is_powered, product_id,millis, last_unplug_millis, last_plug_millis FROM powerwatch WHERE time > '2018-07-01' AND time < '2018-12-01' AND (product_id = 7008 OR product_id = 7009)) alias"
+### It's really important that you partition on this data load!!! otherwise your executors will timeout and the whole thing will fail
+start_time = '2018-07-01'
+end_time = '2019-05-15'
 
-pw_df = spark.read.jdbc("jdbc:postgresql://timescale.ghana.powerwatch.io/powerwatch", query,
-        properties={"user": args.user, "password": args.password, "driver":"org.postgresql.Driver"})
+#Roughly one partition per week of data is pretty fast and doesn't take too much chuffling
+num_partitions = 30
 
-#caching this in memory up front makes this faster if it all fits
-pw_df.cache();
+# This builds a list of predicates to query the data in parrallel. Makes everything much faster
+start_time_timestamp = calendar.timegm(datetime.strptime(start_time, "%Y-%m-%d").timetuple())
+end_time_timestamp = calendar.timegm(datetime.strptime(end_time, "%Y-%m-%d").timetuple())
+stride = (end_time_timestamp - start_time_timestamp)/num_partitions
+predicates = []
+for i in range(0,num_partitions):
+    begin_timestamp = start_time_timestamp + i*stride
+    end_timestamp = start_time_timestamp + (i+1)*stride
+    pred_string = "time >= '" + datetime.utcfromtimestamp(int(begin_timestamp)).strftime("%Y-%m-%d %H:%M:%S")
+    pred_string += "' AND "
+    pred_string += "time < '" + datetime.utcfromtimestamp(int(end_timestamp)).strftime("%Y-%m-%d %H:%M:%S") + "'"
+    predicates.append(pred_string)
 
+#This query should only get data from deployed devices in the deployment table
+query = "(SELECT core_id, time, is_powered, product_id,millis, last_unplug_millis, last_plug_millis FROM powerwatch WHERE time >= '" + start_time + "' AND time < '" + end_time + "' AND (product_id = 7008 OR product_id = 7009 or product_id = 7010 or product_id = 7011 or product_id = 8462)) alias"
+
+pw_df = spark.read.jdbc(
+            url = "jdbc:postgresql://timescale.ghana.powerwatch.io/powerwatch",
+            table = query,
+            predicates = predicates,
+            properties={"user": args.user, "password": args.password, "driver":"org.postgresql.Driver"})
+
+#if you have multiple saves below this prevents reloading the data every time
+pw_df.cache()
 
 #now we need to created a window function that looks at the leading lagging edge of is powered and detects transitions
 #then we can filter out all data that is not a transition
-def detectTransition(value1, value2):
-    if(value1 == value2):
-        return 0
-    else:
-        return 1
-udfDetectTransition = udf(detectTransition, IntegerType())
 w = Window.partitionBy("core_id").orderBy(asc("time"))
-is_powered_lag = lag("is_powered",1).over(w)
-pw_df = pw_df.withColumn("transition", udfDetectTransition("is_powered",is_powered_lag))
+pw_df = pw_df.withColumn("previous_power_state", lag("is_powered").over(w))
 
-#filter out all transitions
-pw_df = pw_df.filter("transition != 0")
+#filter out every time that the state does not change
+pw_df = pw_df.filter(col("previous_power_state") != col("is_powered"))
 
-#now count each outage (really restoration)
-def countOutage(value1, value2, value3):
-    if(value1 == False and value2 == True and value3 == True):
-        return 1
-    else:
-        return 0
-udfCountTransition = udf(countOutage, IntegerType())
+#now we should only count this if it is an outage (on, off, on)
 is_powered_lead = lead("is_powered",1).over(w)
 is_powered_lag = lag("is_powered",1).over(w)
-pw_df = pw_df.withColumn("outage", udfCountTransition("is_powered", is_powered_lead, is_powered_lag))
+pw_df = pw_df.withColumn("lagging_power",is_powered_lag)
+pw_df = pw_df.withColumn("leading_power",is_powered_lead)
+pw_df = pw_df.withColumn("outage", when((col("is_powered") == 0) & (col("lagging_power") == 1) & (col("leading_power") == 1), 1).otherwise(0))
 
+#now need the most accurate outage time possible for outage event
 #now find all the exact outage and restore times using millis
 def timeCorrect(time, millis, unplugMillis):
     if(unplugMillis == 0 or millis == None or unplugMillis == None or isnan(millis) or isnan(unplugMillis)):
@@ -65,7 +77,7 @@ def timeCorrect(time, millis, unplugMillis):
     elif unplugMillis > millis:
         return time
     else:
-        return time - datetime.timedelta(microseconds = (int(millis)-int(unplugMillis))*1000)
+        return time - timedelta(microseconds = (int(millis)-int(unplugMillis))*1000)
 udftimeCorrect = udf(timeCorrect, TimestampType())
 pw_df = pw_df.withColumn("outage_time", udftimeCorrect("time","millis","last_unplug_millis"))
 pw_df = pw_df.withColumn("r_time", udftimeCorrect("time","millis","last_plug_millis"))
@@ -77,7 +89,6 @@ pw_df = pw_df.withColumn("restore_time", time_lead)
 #now filter out everything that is not an outage. We should have a time and end_time for every outage
 pw_df = pw_df.filter("outage != 0")
 
-
 #record the duration of the outage
 def calculateDuration(startTime, endTime):
     delta = endTime-startTime
@@ -88,7 +99,7 @@ udfcalculateDuration = udf(calculateDuration, IntegerType())
 pw_df = pw_df.withColumn("outage_duration", udfcalculateDuration("outage_time","restore_time"))
 
 window_size = 150
-w = Window.orderBy(asc("outage_time")).rowsBetween(-1*window_size,window_size)
+w = Window.partitionBy(dayofyear("outage_time")).orderBy(asc("outage_time")).rowsBetween(-1*window_size,window_size)
 pw_df = pw_df.withColumn("outage_window_list",collect_list(F.struct("outage_time","core_id")).over(w))
 
 def filterOutage(time, core_id, timeList):
@@ -111,7 +122,7 @@ pw_df = pw_df.filter("outage_cluster_size > 1")
 pw_df = pw_df.withColumn("outage_number",lit(1))
 
 #okay now we have a list of all outages where at least one other device also had an outage within a time window
-
+#pw_df.cache()
 
 ### SAIFI ###
 #note that this the raw number of sensors that go out rather than a single metric per "outage"
@@ -134,7 +145,7 @@ outages_by_hour = outages_by_hour.withColumn("outage_date_hour", date_trunc("hou
 outages_by_hour = outages_by_hour.groupBy("outage_date_hour").sum()
 outages_by_hour = outages_by_hour.withColumn("outage_hour", hour("outage_date_hour"))
 outages_by_hour = outages_by_hour.groupBy("outage_hour").avg().orderBy("outage_hour")
-outages_by_hour.show()
+outages_by_hour.show(30)
 
 
 #pw_df = pw_df.select("time","core_id","outage_duration","outage_number")
