@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, window, asc, desc, lead, lag, udf, hour, month, dayofmonth, dayofyear, collect_list, lit, year, date_trunc, dayofweek, when, unix_timestamp
+from pyspark.sql.functions import col, window, asc, desc, lead, lag, udf, hour, month, dayofmonth, dayofyear, collect_list, lit, year, date_trunc, dayofweek, when, unix_timestamp, array
 import pyspark.sql.functions as F
 from pyspark.sql.window import Window
-from pyspark.sql.types import FloatType, IntegerType, DateType, TimestampType
+from pyspark.sql.types import FloatType, IntegerType, DateType, TimestampType, LongType
 from pyspark import SparkConf
 from datetime import datetime, timedelta
 import os
@@ -111,7 +111,6 @@ pw_df = pw_df.withColumn("restore_time", time_lead)
 #now filter out everything that is not an outage. We should have a time and end_time for every outage
 pw_df = pw_df.filter("outage != 0")
 
-pw_df = pw_df.select("core_id", "outage_time", "restore_time", "location_latitude", "location_longitude")
 
 # Okay now that we have the outages and times we should join it with the number of sensors reporting above
 # This allows us to calculate the relative portion of each device to SAIDI/SAIFI
@@ -140,10 +139,45 @@ def timestamp_average(timestamps):
     for i in range(0,len(timestamps)):
         seconds += timestamps[i]
 
-    return (seconds/len(timestamps))
+    return int(seconds/len(timestamps))
 
 max_cluster_size = 500
+pw_df = pw_df.select(array("core_id").alias("core_id"),
+                    "outage_time",
+                    array("restore_time").alias("restore_time"),
+                    array("location_latitude").alias("location_latitude"),
+                    array("location_longitude").alias("location_longitude"))
+
+pw_df = pw_df.withColumn("outage_times", F.array("outage_time"))
+
+print("Starting with count:", pw_df.count())
+pw_finalized_outages = spark.createDataFrame([], pw_df.schema)
+
+pw_df.cache()
+
+#now run the iterative algorithm to cluster the remainder
 for i in range(0,500):
+
+    #first prune any outages that are not getting any larger and union them to finalized outages set
+    w = Window.partitionBy(dayofyear(F.from_unixtime("outage_time"))).orderBy(asc("outage_time"))
+    lead1 = lead("outage_time",1).over(w)
+    lag1 = lag("outage_time",1).over(w)
+    pw_df = pw_df.withColumn("lead1",lead1)
+    pw_df = pw_df.withColumn("lag1",lag1)
+    merge_time = when((col("lead1") - col("outage_time") >= 60) & (col("outage_time") - col("lag1") >= 60), None).otherwise(lit(0))
+    pw_df = pw_df.withColumn("merge_time", merge_time)
+
+    pw_final_outages = pw_df.filter(col("merge_time").isNull())
+    pw_final_outages = pw_final_outages.select("core_id","outage_time",
+                                                "restore_time","location_latitude",
+                                                "location_longitude", "outage_times")
+
+    pw_finalized_outages.union(pw_final_outages)
+    pw_finalized_outages.cache()
+    pw_df = pw_df.filter(col("merge_time").isNotNull())
+    print("Pruned to count:", pw_df.count())
+
+    #now do one step of merging for the ones that are still changing
     w = Window.partitionBy(dayofyear(F.from_unixtime("outage_time"))).orderBy(asc("outage_time"))
     lead1 = lead("outage_time",1).over(w)
     lead2 = lead("outage_time",2).over(w)
@@ -158,24 +192,35 @@ for i in range(0,500):
     pw_df = pw_df.withColumn("diff_lag1", col("outage_time") - col("lag1"))
     pw_df = pw_df.withColumn("diff_lag2", col("lag1") - col("lag2"))
 
-    merge_time = when((col("diff_lead1") < 60) & 
-                      (col("diff_lead1") <= col("diff_lead2")) & 
+    merge_time = when((col("diff_lead1") < 60) &
+                      (col("diff_lead1") <= col("diff_lead2")) &
                       (col("diff_lead1") <= col("diff_lag1")), col("lead1")).when(
-                              (col("diff_lag1") < 60) & 
-                              (col("diff_lag1") < col("diff_lag2")) & 
+                              (col("diff_lag1") < 60) &
+                              (col("diff_lag1") <= col("diff_lag2")) &
                               (col("diff_lag1") <= col("diff_lead1")), col("outage_time")).otherwise(None)
 
     pw_df = pw_df.withColumn("merge_time", merge_time)
-    pw_df = pw_df.groupBy("merge_time").agg(F.collect_list("core_id").alias("core_id"),
-                                            F.collect_list("outage_time").alias("outage_times"),
-                                            F.collect_list("restore_time").alias("restore_time"),
-                                            F.collect_list("location_latitude").alias("location_latitude"),
-                                            F.collect_list("location_longitude").alias("location_longitude"))
 
-    udfTimestampAverage = udf(timestamp_average, IntegerType())
+
+    pw_null_merge_time = pw_df.filter(col("merge_time").isNull())
+    pw_df = pw_df.filter(col("merge_time").isNotNull())
+
+    pw_df = pw_df.groupBy("merge_time").agg(F.flatten(F.collect_list("core_id")).alias("core_id"),
+                                            F.flatten(F.collect_list("outage_times")).alias("outage_times"),
+                                            F.flatten(F.collect_list("restore_time")).alias("restore_time"),
+                                            F.flatten(F.collect_list("location_latitude")).alias("location_latitude"),
+                                            F.flatten(F.collect_list("location_longitude")).alias("location_longitude"))
+
+    pw_df = pw_df.select("core_id","outage_times","restore_time","location_latitude","location_longitude")
+    pw_null_merge_time = pw_null_merge_time.select("core_id","outage_times","restore_time","location_latitude","location_longitude")
+    pw_df = pw_df.union(pw_null_merge_time)
+
+    udfTimestampAverage = udf(timestamp_average, LongType())
     pw_df = pw_df.withColumn("outage_time", udfTimestampAverage("outage_times"))
+    pw_df.cache()
 
-    pw_df.show(1000)
+    print("Merged to count:", pw_df.count())
+    print()
 
 
 #change this to a range query

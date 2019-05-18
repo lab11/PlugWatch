@@ -65,10 +65,12 @@ if(cluster_exists == False):
     subprocess.check_call(['gcloud', 'beta', 'dataproc','clusters','create',
                             cluster_name,
                             '--zone=' + zone,
+                            '--image-version=1.4',
                             '--max-idle=30m',
                             '--num-workers=' + str(num_workers),
                             '--worker-machine-type=' + worker_machine_type,
                             '--master-machine-type=' + master_machine_type,
+                            '--worker-boot-disk-size=250G',
                             '--bucket=' + bucket])
 
     print()
