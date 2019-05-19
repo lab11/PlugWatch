@@ -23,11 +23,13 @@ args = parser.parse_args()
 spark = SparkSession.builder.appName("SAIDI/SAIFI cluster size").getOrCreate()
 
 ### It's really important that you partition on this data load!!! otherwise your executors will timeout and the whole thing will fail
-start_time = '2019-04-01'
+start_time = '2018-07-01'
 end_time = '2019-05-01'
+cluster_distance_seconds = 180
+CD = cluster_distance_seconds
 
 #Roughly one partition per week of data is pretty fast and doesn't take too much chuffling
-num_partitions = 10
+num_partitions = int((datetime.strptime(end_time,"%Y-%m-%d").timestamp() - datetime.strptime(start_time,"%Y-%m-%d").timestamp())/(7*24*3600))
 
 # This builds a list of predicates to query the data in parrallel. Makes everything much faster
 start_time_timestamp = calendar.timegm(datetime.strptime(start_time, "%Y-%m-%d").timetuple())
@@ -150,21 +152,29 @@ pw_df = pw_df.select(array("core_id").alias("core_id"),
 
 pw_df = pw_df.withColumn("outage_times", F.array("outage_time"))
 
-print("Starting with count:", pw_df.count())
+#print("Starting with count:", pw_df.count())
 pw_finalized_outages = spark.createDataFrame([], pw_df.schema)
 
-pw_df.cache()
+# all of the local checkpoints should probably be switched to just checkpoints
+# note the checkpointing is CRITICAL to the function of the algorithm in spark
+# otherwise the RDD lineage is recalculated every loop and the plan creation time balloons exponentially
+# checkpointing truncates the plan
+# it is also critical that you reset the reference of the checkpoint
+# spark objects are immutable - there is no such thing as an in place modification
+# and checkpointing does modify the lineage of the underlying object
+# We *might* be able to get away with caching instead but I was having out of memory problems
+pw_finalized_outages = pw_finalized_outages.localCheckpoint(eager = True)
+pw_df = pw_df.localCheckpoint(eager = True)
 
 #now run the iterative algorithm to cluster the remainder
-for i in range(0,500):
-
+while pw_df.count() > 0:
     #first prune any outages that are not getting any larger and union them to finalized outages set
-    w = Window.partitionBy(dayofyear(F.from_unixtime("outage_time"))).orderBy(asc("outage_time"))
+    w = Window.partitionBy(F.weekofyear(F.from_unixtime("outage_time"))).orderBy(asc("outage_time"))
     lead1 = lead("outage_time",1).over(w)
     lag1 = lag("outage_time",1).over(w)
     pw_df = pw_df.withColumn("lead1",lead1)
     pw_df = pw_df.withColumn("lag1",lag1)
-    merge_time = when((col("lead1") - col("outage_time") >= 60) & (col("outage_time") - col("lag1") >= 60), None).otherwise(lit(0))
+    merge_time = when(((col("lead1") - col("outage_time") >= CD) | col("lead1").isNull()) & ((col("outage_time") - col("lag1") >= CD) | col("lag1").isNull()), None).otherwise(lit(0))
     pw_df = pw_df.withColumn("merge_time", merge_time)
 
     pw_final_outages = pw_df.filter(col("merge_time").isNull())
@@ -173,12 +183,13 @@ for i in range(0,500):
                                                 "location_longitude", "outage_times")
 
     pw_finalized_outages.union(pw_final_outages)
-    pw_finalized_outages.cache()
+    pw_finalized_outages = pw_finalized_outages.localCheckpoint()
     pw_df = pw_df.filter(col("merge_time").isNotNull())
-    print("Pruned to count:", pw_df.count())
+    pw_df = pw_df.localCheckpoint(eager = True)
+    print("Pruned to:", pw_df.count())
 
     #now do one step of merging for the ones that are still changing
-    w = Window.partitionBy(dayofyear(F.from_unixtime("outage_time"))).orderBy(asc("outage_time"))
+    w = Window.partitionBy(F.weekofyear(F.from_unixtime("outage_time"))).orderBy(asc("outage_time"))
     lead1 = lead("outage_time",1).over(w)
     lead2 = lead("outage_time",2).over(w)
     lag1 = lag("outage_time",1).over(w)
@@ -192,16 +203,14 @@ for i in range(0,500):
     pw_df = pw_df.withColumn("diff_lag1", col("outage_time") - col("lag1"))
     pw_df = pw_df.withColumn("diff_lag2", col("lag1") - col("lag2"))
 
-    merge_time = when((col("diff_lead1") < 60) &
-                      (col("diff_lead1") <= col("diff_lead2")) &
-                      (col("diff_lead1") <= col("diff_lag1")), col("lead1")).when(
-                              (col("diff_lag1") < 60) &
-                              (col("diff_lag1") <= col("diff_lag2")) &
-                              (col("diff_lag1") <= col("diff_lead1")), col("outage_time")).otherwise(None)
+    merge_time = when((col("diff_lead1") < CD) &
+                      ((col("diff_lead1") <= col("diff_lead2")) | col("diff_lead2").isNull()) &
+                      ((col("diff_lead1") <= col("diff_lag1")) | col("diff_lag1").isNull()), col("lead1")).when(
+                              (col("diff_lag1") < CD) &
+                              ((col("diff_lag1") <= col("diff_lag2")) | col("diff_lag2").isNull()) &
+                              ((col("diff_lag1") <= col("diff_lead1")) | col("diff_lead1").isNull()), col("outage_time")).otherwise(None)
 
     pw_df = pw_df.withColumn("merge_time", merge_time)
-
-
     pw_null_merge_time = pw_df.filter(col("merge_time").isNull())
     pw_df = pw_df.filter(col("merge_time").isNotNull())
 
@@ -217,11 +226,8 @@ for i in range(0,500):
 
     udfTimestampAverage = udf(timestamp_average, LongType())
     pw_df = pw_df.withColumn("outage_time", udfTimestampAverage("outage_times"))
-    pw_df.cache()
-
-    print("Merged to count:", pw_df.count())
-    print()
-
+    pw_df = pw_df.localCheckpoint(eager = True)
+    print("Merged to:", pw_df.count())
 
 #change this to a range query
 #w = Window.partitionBy(dayofyear("outage_time")).orderBy(asc("outage_time")).rowsBetween(-1*window_size,window_size)
