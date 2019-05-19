@@ -147,8 +147,7 @@ max_cluster_size = 500
 pw_df = pw_df.select(array("core_id").alias("core_id"),
                     "outage_time",
                     array("restore_time").alias("restore_time"),
-                    array("location_latitude").alias("location_latitude"),
-                    array("location_longitude").alias("location_longitude"))
+                    array(F.struct("location_latitude", "location_longitude")).alias("location"))
 
 pw_df = pw_df.withColumn("outage_times", F.array("outage_time"))
 
@@ -179,10 +178,10 @@ while pw_df.count() > 0:
 
     pw_final_outages = pw_df.filter(col("merge_time").isNull())
     pw_final_outages = pw_final_outages.select("core_id","outage_time",
-                                                "restore_time","location_latitude",
-                                                "location_longitude", "outage_times")
+                                                "restore_time",
+                                                "location", "outage_times")
 
-    pw_finalized_outages.union(pw_final_outages)
+    pw_finalized_outages = pw_finalized_outages.union(pw_final_outages)
     pw_finalized_outages = pw_finalized_outages.localCheckpoint()
     pw_df = pw_df.filter(col("merge_time").isNotNull())
     pw_df = pw_df.localCheckpoint(eager = True)
@@ -217,49 +216,61 @@ while pw_df.count() > 0:
     pw_df = pw_df.groupBy("merge_time").agg(F.flatten(F.collect_list("core_id")).alias("core_id"),
                                             F.flatten(F.collect_list("outage_times")).alias("outage_times"),
                                             F.flatten(F.collect_list("restore_time")).alias("restore_time"),
-                                            F.flatten(F.collect_list("location_latitude")).alias("location_latitude"),
-                                            F.flatten(F.collect_list("location_longitude")).alias("location_longitude"))
+                                            F.flatten(F.collect_list("location")).alias("location"))
 
-    pw_df = pw_df.select("core_id","outage_times","restore_time","location_latitude","location_longitude")
-    pw_null_merge_time = pw_null_merge_time.select("core_id","outage_times","restore_time","location_latitude","location_longitude")
+    pw_df = pw_df.select("core_id","outage_times","restore_time","location")
+    pw_null_merge_time = pw_null_merge_time.select("core_id","outage_times","restore_time","location")
     pw_df = pw_df.union(pw_null_merge_time)
 
     udfTimestampAverage = udf(timestamp_average, LongType())
     pw_df = pw_df.withColumn("outage_time", udfTimestampAverage("outage_times"))
     pw_df = pw_df.localCheckpoint(eager = True)
     print("Merged to:", pw_df.count())
+    print()
 
-#change this to a range query
-#w = Window.partitionBy(dayofyear("outage_time")).orderBy(asc("outage_time")).rowsBetween(-1*window_size,window_size)
-#pw_df = pw_df.withColumn("outage_window_list",collect_list(F.struct("outage_time","core_id")).over(w))
-#
-#def filterOutage(time, core_id, timeList):
-#    count = 1
-#    used = []
-#    used.append(core_id)
-#    for i in timeList:
-#        if abs((time - i[0]).total_seconds()) < 5 and i[1] not in used:
-#            used.append(i[1])
-#            count += 1
-#
-#    if count > window_size:
-#        return window_size
-#    else:
-#        return count
-#
-#udfFilterTransition = udf(filterOutage, IntegerType())
-#pw_df = pw_df.withColumn("outage_cluster_size", udfFilterTransition("outage_time","core_id","outage_window_list"))
-#pw_df = pw_df.filter("outage_cluster_size > 1")
-#pw_df = pw_df.withColumn("outage_number",lit(1))
+#Okay now we have a list of outages, restore_times, locations, core_ids
+#First let's calculate some high level metrics
 
-#okay now we have a list of all outages where at least one other device also had an outage within a time window
-#pw_df.cache()
+#size of outages
+pw_finalized_outages = pw_finalized_outages.withColumn("cluster_size", F.size(F.array_distinct("core_id")))
+
+#standard deviation outage times
+pw_finalized_outages = pw_finalized_outages.withColumn("outage_times_stddev", F.explode("outage_times"))
+
+#this expression essentially takes the first value of each column (which should all be the same after the explode)
+exprs = [F.first(x).alias(x) for x in pw_finalized_outages.columns if x != 'outage_times_stddev' and x != 'outage_time']
+pw_finalized_outages = pw_finalized_outages.groupBy("outage_time").agg(F.stddev_pop("outage_times_stddev").alias("outage_times_stddev"),*exprs)
+
+#range of outage times
+pw_finalized_outages = pw_finalized_outages.withColumn("outage_times_range", F.array_max("outage_times") - F.array_min("outage_times"))
+
+#standard deviation and range of restore times
+pw_finalized_outages = pw_finalized_outages.withColumn("restore_times", col("restore_time"))
+pw_finalized_outages = pw_finalized_outages.withColumn("restore_time", F.explode("restore_time"))
+
+#this expression essentially takes the first value of each column (which should all be the same after the explode)
+exprs = [F.first(x).alias(x) for x in pw_finalized_outages.columns if x != 'restore_time' and x != 'outage_time']
+pw_finalized_outages = pw_finalized_outages.groupBy("outage_time").agg(F.avg("restore_time").alias("restore_time_mean"),*exprs)
+
+pw_finalized_outages = pw_finalized_outages.withColumn("restore_times_stddev", F.explode("restore_times"))
+
+#this expression essentially takes the first value of each column (which should all be the same after the explode)
+exprs = [F.first(x).alias(x) for x in pw_finalized_outages.columns if x != 'restore_times_stddev' and x != 'outage_time']
+pw_finalized_outages = pw_finalized_outages.groupBy("outage_time").agg(F.stddev_pop("restore_times_stddev").alias("restore_times_stddev"),*exprs)
+pw_finalized_outages = pw_finalized_outages.withColumn("restore_times_range", F.array_max("restore_times") - F.array_min("restore_times"))
+
+#Okay now to effectively calculate SAIDI/SAIFI we need to know the sensor population
+#join the number of sensors reporting metric above with our outage groupings
+#then we can calculate the relative SAIDI/SAIFI contribution of each outage
+pw_finalized_outages = pw_finalized_outages.join(pw_distinct_core_id, F.date_trunc("day", F.from_unixtime(pw_finalized_outages["outage_time"])) == F.date_trunc("day", pw_distinct_core_id["window_mid_point"]))
 
 ### SAIFI ###
-#note that this the raw number of sensors that go out rather than a single metric per "outage"
-#by month (no averages because we only saw one month)
-outages_by_month = pw_df.select("outage_time","outage_number")
-outages_by_month = outages_by_month.groupBy(month("outage_time")).sum().orderBy(month("outage_time"))
+#by month of year
+outages_by_month = pw_finalized_outages.select(F.from_unixtime("outage_time").alias("outage_time"),"cluster_size")
+outages_by_month = outages_by_month.withColumn("outage_date_month", date_trunc("month", "outage_time"))
+outages_by_month = outages_by_month.groupBy("outage_date_month").sum()
+outages_by_month = outages_by_month.withColumn("outage_month", month("outage_date_month"))
+outages_by_month = outages_by_month.groupBy("outage_month").avg().orderBy("outage_month")
 outages_by_month.show()
 
 #by day of week (averaged across day)
