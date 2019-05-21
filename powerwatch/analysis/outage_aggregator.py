@@ -24,7 +24,7 @@ spark = SparkSession.builder.appName("SAIDI/SAIFI cluster size").getOrCreate()
 
 ### It's really important that you partition on this data load!!! otherwise your executors will timeout and the whole thing will fail
 start_time = '2018-07-01'
-end_time = '2019-05-01'
+end_time = '2018-12-01'
 cluster_distance_seconds = 180
 CD = cluster_distance_seconds
 
@@ -250,7 +250,7 @@ pw_finalized_outages = pw_finalized_outages.withColumn("restore_time", F.explode
 
 #this expression essentially takes the first value of each column (which should all be the same after the explode)
 exprs = [F.first(x).alias(x) for x in pw_finalized_outages.columns if x != 'restore_time' and x != 'outage_time']
-pw_finalized_outages = pw_finalized_outages.groupBy("outage_time").agg(F.avg("restore_time").alias("restore_time_mean"),*exprs)
+pw_finalized_outages = pw_finalized_outages.groupBy("outage_time").agg(F.avg("restore_time").alias("restore_times_mean"),*exprs)
 
 pw_finalized_outages = pw_finalized_outages.withColumn("restore_times_stddev", F.explode("restore_times"))
 
@@ -264,33 +264,103 @@ pw_finalized_outages = pw_finalized_outages.withColumn("restore_times_range", F.
 #then we can calculate the relative SAIDI/SAIFI contribution of each outage
 pw_finalized_outages = pw_finalized_outages.join(pw_distinct_core_id, F.date_trunc("day", F.from_unixtime(pw_finalized_outages["outage_time"])) == F.date_trunc("day", pw_distinct_core_id["window_mid_point"]))
 
+pw_finalized_outages = pw_finalized_outages.select("outage_time","restore_times_mean","cluster_size","sensors_reporting","outage_times","outage_times_range","outage_times_stddev","restore_times","restore_times_range","restore_times_stddev", "location")
+pw_finalized_outages = pw_finalized_outages.withColumn("relative_cluster_size",col("cluster_size")/col("sensors_reporting"))
+
+pw_finalized_with_string = pw_finalized_outages.withColumn("outage_times",F.to_json("outage_times"))
+pw_finalized_with_string = pw_finalized_with_string.withColumn("restore_times",F.to_json("restore_times"))
+pw_finalized_with_string = pw_finalized_with_string.withColumn("location",F.to_json("location"))
+
+#okay we should save this
+pw_finalized_with_string.repartition(1).write.format("com.databricks.spark.csv").mode('overwrite').option("header", "true").save(args.result + '/full_outage_list')
+
+
+
+
+#We need to zero fill for every date and cluster size not already present in the dataset
+#to do this create a dataframe for range date_min to date_max and cluster_size cluster_size_min to cluster_size max with 0 rel saifi
+#then join it with the actual DF preferentially choosing the non zero value
+print(pw_finalized_outages.agg(F.min("outage_time")).collect())
+outage_dates = spark.range(pw_finalized_outages.agg(F.min("outage_time")).collect()[0], pw_finalized_outages.agg(F.max("outage_time")).collect()[0],24*3600).select(col("id").alias("outage_time"))
+cluster_sizes = spark.range(pw_finalized_outages.agg(F.min("cluster_size")).collect()[0], pw_finalized_outages.agg(F.max("cluster_size")).collect()[0],1).select(col("id").alias("cluster_size"))
+outage_zeros = outage_dates.crossJoin(cluster_sizes)
+outage_zeros = outage_zeros.withColumn("relative_cluster_size_zero", lit(0))
+outage_zeros = outage_zeros.select(F.from_unixtime("outage_time").alias("outage_time"),"cluster_size","relative_cluster_size")
+
+
+
+### SAIFI/OUTAGE SIZE HISTOGRAM ###
+#month - outage cluster size - monthly SAIFI for that cluster size
+outages_by_month = pw_finalized_outages.select(F.from_unixtime("outage_time").alias("outage_time"),
+                                                                "relative_cluster_size","cluster_size")
+outages_by_month = outages_by_month.withColumn("outage_date_month", date_trunc("month", "outage_time"))
+outages_by_month = outages_by_month.groupBy("outage_date_month","cluster_size").sum()
+outages_by_month = outages_by_month.withColumn("outage_month", month("outage_date_month"))
+outages_by_month = outages_by_month.groupBy("outage_month","cluster_size").avg().orderBy("outage_month","cluster_size")
+outages_by_month = outages_by_month.select("outage_month","cluster_size",col("avg(sum(relative_cluster_size))").alias("monthly_SAIFI"))
+outages_by_month.show(500)
+outages_by_month.repartition(1).write.format("com.databricks.spark.csv").mode('overwrite').option("header", "true").save(args.result + '/monthly_SAIFI_size_histogram')
+
+#day of week - outage cluster size - daily SAIFI for that cluster size
+outages_by_day = pw_finalized_outages.select(F.from_unixtime("outage_time").alias("outage_time"),
+                                                        "relative_cluster_size", "cluster_size")
+outages_by_day = outages_by_day.withColumn("outage_date", date_trunc("day", "outage_time"))
+outages_by_day = outages_by_day.groupBy("outage_date","cluster_size").sum()
+
+outage_zeros_by_day = outage_zeros_by_day.withColumn("outage_date",date_trunc("day","outage_time"))
+outages_by_day = outages_by_day.join(outage_zeros_by_day, outage_zeros_by_day["outage_date"] == outages_by_date["outage_date"] &
+                                     outage_zeros_by_day["cluster_size"] == outages_by_date["cluster_size"], 'full_outer')
+outages_by_day.orderBy("outage_date","cluster_size").show(1000)
+
+outages_by_day = outages_by_day.withColumn("outage_day_of_week", dayofweek("outage_date"))
+outages_by_day = outages_by_day.groupBy("outage_day_of_week","cluster_size").avg().alias("daily_SAIFI").orderBy("outage_day_of_week","cluster_size")
+outages_by_day = outages_by_day.select("outage_day_of_week","cluster_size",col("avg(sum(relative_cluster_size))").alias("daily_SAIFI"))
+outages_by_day.show(500)
+outages_by_day.repartition(1).write.format("com.databricks.spark.csv").mode('overwrite').option("header", "true").save(args.result + '/daily_SAIFI_size_histogram')
+
+#hour of day - outage cluster size - daily SAIFI for that cluster size
+outages_by_hour = pw_finalized_outages.select(F.from_unixtime("outage_time").alias("outage_time"),
+                                                        "relative_cluster_size", "cluster_size")
+outages_by_hour = outages_by_hour.withColumn("outage_date_hour", date_trunc("hour", "outage_time"))
+outages_by_hour = outages_by_hour.groupBy("outage_date_hour", "cluster_size").sum()
+outages_by_hour = outages_by_hour.withColumn("outage_hour", hour("outage_date_hour"))
+outages_by_hour = outages_by_hour.groupBy("outage_hour","cluster_size").avg().alias("hourly_SAIFI").orderBy("outage_hour","cluster_size")
+outages_by_hour = outages_by_hour.select("outage_hour","cluster_size",col("avg(sum(relative_cluster_size))").alias("hourly_SAIFI"))
+outages_by_hour.show(500)
+outages_by_hour.repartition(1).write.format("com.databricks.spark.csv").mode('overwrite').option("header", "true").save(args.result + '/hourly_SAIFI_size_histogram')
+
+#now filter the outages so that at least two devices went out
+pw_finalized_outages = pw_finalized_outages.filter(col("cluster_size") >= 2)
+
 ### SAIFI ###
-#by month of year
-outages_by_month = pw_finalized_outages.select(F.from_unixtime("outage_time").alias("outage_time"),"cluster_size")
+#month - monthly SAIFI
+outages_by_month = pw_finalized_outages.select(F.from_unixtime("outage_time").alias("outage_time"),"relative_cluster_size")
 outages_by_month = outages_by_month.withColumn("outage_date_month", date_trunc("month", "outage_time"))
 outages_by_month = outages_by_month.groupBy("outage_date_month").sum()
 outages_by_month = outages_by_month.withColumn("outage_month", month("outage_date_month"))
-outages_by_month = outages_by_month.groupBy("outage_month").avg().orderBy("outage_month")
+outages_by_month = outages_by_month.groupBy("outage_month").avg().alias("monthly_SAIFI").orderBy("outage_month")
+outages_by_month = outages_by_month.select("outage_month",col("avg(sum(relative_cluster_size))").alias("monthly_SAIFI"))
 outages_by_month.show()
+outages_by_month.repartition(1).write.format("com.databricks.spark.csv").mode('overwrite').option("header", "true").save(args.result + '/monthly_SAIFI_cluster_size_gte2')
 
 #by day of week (averaged across day)
-outages_by_day = pw_df.select("outage_time","outage_number")
+# day of week - daily SAIFI
+outages_by_day = pw_finalized_outages.select(F.from_unixtime("outage_time").alias("outage_time"),"relative_cluster_size")
 outages_by_day = outages_by_day.withColumn("outage_date", date_trunc("day", "outage_time"))
 outages_by_day = outages_by_day.groupBy("outage_date").sum()
 outages_by_day = outages_by_day.withColumn("outage_day_of_week", dayofweek("outage_date"))
-outages_by_day = outages_by_day.groupBy("outage_day_of_week").avg().orderBy("outage_day_of_week")
+outages_by_day = outages_by_day.groupBy("outage_day_of_week").avg().alias("daily_SAIFI").orderBy("outage_day_of_week")
+outages_by_day = outages_by_day.select("outage_day_of_week",col("avg(sum(relative_cluster_size))").alias("daily_SAIFI"))
 outages_by_day.show()
+outages_by_day.repartition(1).write.format("com.databricks.spark.csv").mode('overwrite').option("header", "true").save(args.result + '/daily_SAIFI_cluster_size_gte2')
 
-#by hour of day (averaged by hour)
-outages_by_hour = pw_df.select("outage_time","outage_number")
+# by hour of day (averaged by hour)
+# hour of day - hourly SAIFI
+outages_by_hour = pw_finalized_outages.select(F.from_unixtime("outage_time").alias("outage_time"),"relative_cluster_size")
 outages_by_hour = outages_by_hour.withColumn("outage_date_hour", date_trunc("hour", "outage_time"))
 outages_by_hour = outages_by_hour.groupBy("outage_date_hour").sum()
 outages_by_hour = outages_by_hour.withColumn("outage_hour", hour("outage_date_hour"))
-outages_by_hour = outages_by_hour.groupBy("outage_hour").avg().orderBy("outage_hour")
+outages_by_hour = outages_by_hour.groupBy("outage_hour").avg().alias("hourly_SAIFI").orderBy("outage_hour")
+outages_by_hour = outages_by_hour.select("outage_hour",col("avg(sum(relative_cluster_size))").alias("hourly_SAIFI"))
 outages_by_hour.show(30)
-
-
-#pw_df = pw_df.select("time","core_id","outage_duration","outage_number")
-#pw_df = pw_df.groupBy("core_id",month("time"),dayofmonth("time")).sum().orderBy("core_id",month("time"),dayofmonth("time"))
-#output to where the execution script specifies the results should go
-#pw_df.repartition(1).write.format("com.databricks.spark.csv").mode('overwrite').option("header", "true").save(args.result)
+outages_by_hour.repartition(1).write.format("com.databricks.spark.csv").mode('overwrite').option("header", "true").save(args.result + '/hourly_SAIFI_cluster_size_gte2')
