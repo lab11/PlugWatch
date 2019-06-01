@@ -261,7 +261,7 @@ xhttp.onreadystatechange = function() {
         lats = blob.latitudes;
         longs = blob.longitudes;
 
-        low_voltage_data = blob.low_voltage;
+        //low_voltage_data = blob.low_voltage;
 
         map.on("load", function() {
             //Generate the feature set
@@ -293,22 +293,22 @@ xhttp.onreadystatechange = function() {
 
             // Okay we got back all the data from the backend
             // Now add that as a data source to a mapbox layer
-            map.addSource('low_voltage_data', {
-                'type':'geojson',
-                'data': low_voltage_data
-            });
+            // map.addSource('low_voltage_data', {
+            //     'type':'geojson',
+            //     'data': low_voltage_data
+            // });
             
             // Add the layer with color matching based on state
-            var low_voltage_layer = {};
-            low_voltage_layer.id = 'low_voltage';
-            low_voltage_layer.type = 'line';
-            low_voltage_layer.source = 'low_voltage_data';
-            low_voltage_layer.paint = {};
+            // var low_voltage_layer = {};
+            // low_voltage_layer.id = 'low_voltage';
+            // low_voltage_layer.type = 'line';
+            // low_voltage_layer.source = 'low_voltage_data';
+            // low_voltage_layer.paint = {};
             //low_voltage_layer.paint['circle-color'] = '#aaaaaa';
-            low_voltage_layer.paint['line-width'] = 0.6;
-            low_voltage_layer.paint['line-opacity'] = 0.6;
-            map.addLayer(low_voltage_layer);
-            map.setLayoutProperty('low_voltage','visibility','none');
+            // low_voltage_layer.paint['line-width'] = 0.6;
+            // low_voltage_layer.paint['line-opacity'] = 0.6;
+            // map.addLayer(low_voltage_layer);
+            // map.setLayoutProperty('low_voltage','visibility','none');
 
         });
 
@@ -447,7 +447,8 @@ function retrieve_data() {
         xhttp=new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-
+                
+                console.log("got data")
                 document.body.style.cursor = 'default';
                 var blob = JSON.parse(this.responseText);
 
@@ -473,8 +474,9 @@ function retrieve_data() {
                     2, '#ff3300',
                     3, '#33cc33',
                 ];
-                power_circles_layer.paint['circle-radius'] = 6;
+                power_circles_layer.paint['circle-radius'] = 5;
                 power_circles_layer.paint['circle-opacity'] = 0.7;
+                console.log("adding layer")
                 map.addLayer(power_circles_layer);
                 
                 data_valid = true;

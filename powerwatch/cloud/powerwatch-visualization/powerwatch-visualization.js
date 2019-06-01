@@ -105,7 +105,7 @@ app.get('/init', (req, resp, next) => {
     }
 
     console.log('Received init request')
-    pg_pool.query("SELECT latitude, longitude, deployment_time from deployment", (err, res) => {
+    pg_pool.query("SELECT location_latitude, location_longitude, deployment_start_time from deployment where currently_deployed = true", (err, res) => {
         if(err) {
             console.log('Initial query error:' + err)
             resp.status(500).send('Database query error');
@@ -115,9 +115,9 @@ app.get('/init', (req, resp, next) => {
             var longitudes = [];
             var times = [];
             for(var i = 0; i < res.rows.length; i++) {
-                latitudes.push(res.rows[i].latitude) 
-                longitudes.push(res.rows[i].longitude)
-                times.push(res.rows[i].deployment_time)
+                latitudes.push(res.rows[i].location_latitude) 
+                longitudes.push(res.rows[i].location_longitude)
+                times.push(res.rows[i].deployment_start_time)
             }
 
             var lat_min = Math.min(...latitudes);
@@ -131,10 +131,10 @@ app.get('/init', (req, resp, next) => {
             var lat_av = (lat_max + lat_min)/2;
             var long_av = (long_max + long_min)/2;
             blob = {};
-            blob.lat_min = lat_min-lat_dist*1.0;
-            blob.lat_max = lat_max+lat_dist*1.0;
-            blob.long_min = long_min-long_dist*1.0;
-            blob.long_max = long_max+long_dist*1.0;
+            blob.lat_min = lat_min-lat_dist*1.3;
+            blob.lat_max = lat_max+lat_dist*1.3;
+            blob.long_min = long_min-long_dist*1.3;
+            blob.long_max = long_max+long_dist*1.3;
             blob.lat_av = lat_av;
             blob.long_av = long_av;
             blob.latitudes = latitudes;
@@ -142,12 +142,12 @@ app.get('/init', (req, resp, next) => {
             blob.time_min = time_min;
             
             //load the low_voltage data
-            var fs = require('fs');
+            /*var fs = require('fs');
             var low_voltage_data = fs.readFileSync("./achimota_lines.geojson").toString('utf-8');
             var low_voltage_json = JSON.parse(low_voltage_data);
-            blob.low_voltage = low_voltage_json;
+            blob.low_voltage = low_voltage_json;*/
 
-            console.log(blob.time_min);
+            console.log(blob);
             resp.send(blob);
         }
     });
@@ -164,7 +164,8 @@ app.get('/getData', (req, resp) => {
     geoJSON.features = [];
     var last_features = [];
     var last_feature_dict = {};
-    pg_pool.query('SELECT core_id, latitude, longitude, cellular_carrier from deployment', (err, res) => {
+    console.log("querying deployment")
+    pg_pool.query('SELECT core_id, location_latitude, location_longitude from deployment WHERE currently_deployed = true', (err, res) => {
         if(err) {
             console.log('Postgress error');
             console.log(err);
@@ -179,8 +180,8 @@ app.get('/getData', (req, resp) => {
                 feature.geometry = {};
                 feature.geometry.type = "Point";
                 // Randomize fourth digit of latitude/longitude
-                randomized_longitude = (res.rows[i].longitude/0.001)*0.001 + 0.0002*long_dig;
-                randomized_latitude = (res.rows[i].latitude/0.001)*0.001 + 0.0002*lat_dig;
+                randomized_longitude = (res.rows[i].location_longitude/0.001)*0.001 + 0.0002*long_dig;
+                randomized_latitude = (res.rows[i].location_latitude/0.001)*0.001 + 0.0002*lat_dig;
                 feature.geometry.coordinates = [randomized_longitude,randomized_latitude];
                 feature.properties = {};
                 feature.properties.time = new Date(req.query.start_time).getTime()/1000;
@@ -198,7 +199,8 @@ app.get('/getData', (req, resp) => {
             last_features = JSON.parse(JSON.stringify(geoJSON.features));
             console.log(last_features.length);
 
-            pg_pool.query('SELECT time, powerwatch.core_id, is_powered, state_of_charge from powerwatch inner join deployment on deployment.core_id=powerwatch.core_id where time >deployment.deployment_time AND time > $1 AND time < $2 ORDER BY time asc', [req.query.start_time + 'UTC', req.query.end_time + 'UTC'], (err, res) => {
+            console.log("querying data")
+            pg_pool.query('SELECT time, powerwatch.core_id, is_powered, state_of_charge from powerwatch inner join deployment on deployment.core_id=powerwatch.core_id where currently_deployed = true AND time > $1 AND time < $2 ORDER BY time asc', [req.query.start_time + 'UTC', req.query.end_time + 'UTC'], (err, res) => {
                 if(err) {
                     console.log('Postgress error');
                     console.log(err);
@@ -270,7 +272,7 @@ app.get('/getData', (req, resp) => {
                     }
                     
                     console.log('sending response');
-                    console.log(geoJSON.features.slice(500,600));
+                    console.log(geoJSON.features);
                     resp.send(geoJSON);
                 }
             });
