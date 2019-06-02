@@ -16,6 +16,7 @@ var command = require('commander');
 
 command.option('-d, --database [database]', 'Database configuration file.')
         .option('-u, --username [username]', 'Database username file')
+        .option('-n, --no-auth', 'disables authentication')
         .option('-p, --password [password]', 'Database password file').parse(process.argv);
 
 var timescale_config = null;
@@ -99,7 +100,7 @@ console.log("Using timescale at " + timescale_config.host +
 
 // Do a query of the deployments table so that we can load a map
 app.get('/init', (req, resp, next) => {
-    if(!req.isAuthenticated()) {
+    if(!req.isAuthenticated() && command.auth) {
         resp.redirect('/login');
         return;
     }
@@ -154,7 +155,7 @@ app.get('/init', (req, resp, next) => {
 });
 
 app.get('/getData', (req, resp) => {
-    if(!req.isAuthenticated()) {
+    if(!req.isAuthenticated() && command.auth) {
         resp.redirect('/login');
         return;
     }
@@ -295,7 +296,7 @@ app.get('/login/google/return',
 
 
 app.get('/',  function(req, res) {
-    if(!req.isAuthenticated()) {
+    if(!req.isAuthenticated() && command.auth) {
         res.redirect('/login');
         return;
     }
