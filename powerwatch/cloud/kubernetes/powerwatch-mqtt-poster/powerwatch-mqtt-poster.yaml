@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: powerwatch-mqtt-poster
+  labels:
+    app: powerwatch-mqtt-poster
+spec:
+  selector:
+    matchLabels:
+      app: powerwatch-mqtt-poster
+  template:
+    metadata:
+      labels:
+        app: powerwatch-mqtt-poster
+    spec:
+      containers:
+      - name: powerwatch-mqtt-poster
+        image: lab11/powerwatch-mqtt-poster:production
+        ports:
+          - containerPort: 5000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config
+          readOnly: true
+
+        - name: particle-secret
+          mountPath: /etc/config/particle
+          readOnly: true
+
+        - name: webhook-secret
+          mountPath: /etc/config/webhook
+          readOnly: true
+
+      volumes:
+      - name: config
+        configMap:
+          name: mqtt-config
+          items:
+          - key: config.json
+            path: config.json
+
+          - key: webhook.json
+            path: webhook.json
+
+      - name: particle-secret
+        secret:
+          secretName: particle-auth-token
+          items:
+          - key: auth-token
+            path: auth-token
+
+      - name: webhook-secret
+        secret:
+          secretName: mqtt-webhook-pass
+          items:
+          - key: password
+            path: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: powerwatch-mqtt-poster
+  labels:
+    app: powerwatch-mqtt-poster
+spec:
+  type: NodePort
+  ports:
+   - port: 80
+     targetPort: 5000
+  selector:
+    app: powerwatch-mqtt-poster
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: powerwatch-mqtt-poster
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: ${POWERWATCH_MQTT_POSTER_IP_ADDRESS}
+spec:
+  backend:
+    serviceName: powerwatch-mqtt-poster
+    servicePort: 80
+  tls:
+  - secretName: powerwatch-mqtt-poster-tls
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: powerwatch-mqtt-poster-tls
+spec:
+  secretName: powerwatch-mqtt-poster-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: ${POWERWATCH_MQTT_POSTER_DOMAIN_NAME}
+  dnsNames:
+  - ${POWERWATCH_MQTT_POSTER_DOMAIN_NAME}
+  acme:
+    config:
+    - http01:
+        ingress: powerwatch-mqtt-poster
+      domains:
+      - ${POWERWATCH_MQTT_POSTER_DOMAIN_NAME}

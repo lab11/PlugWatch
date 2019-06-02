@@ -1,0 +1,3 @@
+{
+    "url": "https://${POWERWATCH_MQTT_POSTER_DOMAIN_NAME}"
+}
