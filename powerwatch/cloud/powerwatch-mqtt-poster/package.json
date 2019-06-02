@@ -1,0 +1,20 @@
+{
+    "name": "powerwatch-mqtt-poster",
+    "version": "0.0.1",
+    "description": "Instantiate and consume webhook calls and post them to postgres",
+    "private": true,
+    "dependencies": {
+        "lab11-powerwatch-parser": "0.0.6",
+        "request": "",
+        "express": "",
+        "async": "",
+        "commander": "",
+        "mqtt": "3.0.0"
+    },
+    "scripts": {
+        "start": "./powerwatch-mqtt-poster.js -c /etc/config/config.json -w /etc/config/webhook.json -a /etc/config/particle/auth-token -b /etc/config/webhook/password"
+    },
+    "engines": {
+        "node": ">=4.3.2"
+    }
+}
