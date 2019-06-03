@@ -9,6 +9,14 @@ var async = require('async');
 var mqtt = require('mqtt');
 var mqtt_client = mqtt.connect('mqtt://mqtt');
 
+mqtt_client.on('connect', function() {
+    console.log("MQTT client connected");
+});
+
+mqtt_client.on('disconnect', function() {
+    console.log("MQTT client disconnected");
+});
+
 var app = express();
 app.use(express.json())
 
@@ -62,8 +70,14 @@ function post_error(event) {
         var tstring = new Date(timestamp).toISOString();
 
         // Only publish if there is some data
-        console.log("Attempting to publish to mqtt");
-        mqtt_client.publish('powerwatch_error', fields)
+        console.log("Attempting to publish error to mqtt");
+        mqtt_client.publish('powerwatch_error', fields, {qos: 1}, function(err) {
+            if(err) {
+                console.log("Error publishing error:", err)
+            } else {
+                console.log("Error published successfully")
+            }
+        });
     }
 }
 
@@ -85,9 +99,14 @@ function post_event(event) {
         var tstring = new Date(timestamp).toISOString();
 
         // Only publish if there is some data
-        console.log("Attempting to push to mqtt");
-        //is there a table that exists for this device?
-        mqtt_client.publish('powerwatch', fields)
+        console.log("Attempting to publish data to mqtt");
+        mqtt_client.publish('powerwatch', fields, {qos: 1}, function(err) {
+            if(err) {
+                console.log("Error publishing data:", err)
+            } else {
+                console.log("Data published successfully")
+            }
+        });
     }
 }
 
