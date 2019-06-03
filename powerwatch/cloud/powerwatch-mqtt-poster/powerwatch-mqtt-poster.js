@@ -71,7 +71,7 @@ function post_error(event) {
 
         // Only publish if there is some data
         console.log("Attempting to publish error to mqtt");
-        mqtt_client.publish('powerwatch_error', fields, {qos: 1}, function(err) {
+        mqtt_client.publish('powerwatch_error', JSON.stringify(fields), {qos: 1}, function(err) {
             if(err) {
                 console.log("Error publishing error:", err)
             } else {
@@ -100,7 +100,7 @@ function post_event(event) {
 
         // Only publish if there is some data
         console.log("Attempting to publish data to mqtt");
-        mqtt_client.publish('powerwatch', fields, {qos: 1}, function(err) {
+        mqtt_client.publish('powerwatch', JSON.stringify(fields), {qos: 1}, function(err) {
             if(err) {
                 console.log("Error publishing data:", err)
             } else {
