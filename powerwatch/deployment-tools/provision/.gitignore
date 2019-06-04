@@ -1,0 +1,5 @@
+client_secret.json
+gen
+postgres_config.json
+psheets.pyc
+sheets.googleapis.com-python.json
