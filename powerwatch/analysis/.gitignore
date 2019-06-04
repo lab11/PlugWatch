@@ -1,1 +1,5 @@
 config.yaml
+config.json
+.ipynb_checkpoints
+outage_aggregator
+dumsorwatch_outage_aggregator
