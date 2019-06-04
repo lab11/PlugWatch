@@ -1,0 +1,5 @@
+*.jpg
+*.deb
+survey-config.json
+postgres-config.json
+deployment_management

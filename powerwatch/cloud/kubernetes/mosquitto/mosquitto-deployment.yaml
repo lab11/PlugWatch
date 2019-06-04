@@ -1,3 +1,25 @@
+#apiVersion: extensions/v1beta1
+#kind: Deployment
+#metadata:
+#  name: mqtt-cert-renewer
+#spec:
+#  replicas: 1
+#  template:
+#    metadata:
+#      labels:
+#        app: mqtt-cert-renewer
+#    spec:
+#      containers:
+#        - name: mqtt-cert-renewer
+#          image: lab11/empty-listener:production
+#          imagePullPolicy: "IfNotPresent"
+#          ports:
+#          - containerPort: 5000
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: 5000
+#---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -15,6 +37,55 @@ spec:
           imagePullPolicy: "IfNotPresent"
           ports:
             - containerPort: 1883
+            - containerPort: 8883
+          volumeMounts:
+          - name: mosquitto-config
+            mountPath: /mosquitto/config
+            readOnly: true
+
+          - name: mosquitto-cafile
+            mountPath: /mosquitto/cafile
+            readOnly: true
+
+          - name: mosquitto-password
+            mountPath: /mosquitto/password
+            readOnly: true
+
+#          - name: mosquitto-tls-secret
+#            mountPath: /mosquitto/tls
+#            readOnly: true
+
+      volumes:
+      - name: mosquitto-config
+        configMap:
+          name: mosquitto-config
+          items:
+          - key: mosquitto.conf
+            path: mosquitto.conf
+
+      - name: mosquitto-cafile
+        configMap:
+          name: mosquitto-cafile
+          items:
+          - key: chain.pem
+            path: chain.pem
+
+      - name: mosquitto-password
+        secret:
+          secretName: mosquitto-password
+          items:
+          - key: password.txt
+            path: password.txt
+
+#      - name: mosquitto-tls-secret
+#        secret:
+#          secretName: mosquitto-tls
+#          items:
+#          - key: tls.crt
+#            path: tls.crt
+#
+#          - key: tls.key
+#            path: tls.key
 ---
 apiVersion: v1
 kind: Service
@@ -25,7 +96,68 @@ metadata:
 spec:
   type: NodePort
   ports:
-   - port: 1833
-     targetPort: 1833
+   - port: 1883
+     targetPort: 1883
   selector:
    app: mqtt
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt-external
+  labels:
+    app: mqtt
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 35.230.104.11
+  ports:
+   - port: 8883
+     targetPort: 8883
+  selector:
+   app: mqtt
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: mqtt-ing
+#  labels:
+#    app: mqtt-cert-renewer
+#spec:
+#  type: NodePort
+#  ports:
+#   - port: 80
+#     targetPort: 5000
+#  selector:
+#   app: mqtt-cert-renewer
+#---
+#apiVersion: extensions/v1beta1
+#kind: Ingress
+#metadata:
+#  name: mosquitto
+#  annotations:
+#    kubernetes.io/ingress.global-static-ip-name: ghana-mqtt
+#spec:
+#  backend:
+#    serviceName: mqtt-ing
+#    servicePort: 80
+#  tls:
+#  - secretName: mosquitto-tls
+#---
+#apiVersion: certmanager.k8s.io/v1alpha1
+#kind: Certificate
+#metadata:
+#  name: mosquitto-tls
+#spec:
+#  secretName: mosquitto-tls
+#  issuerRef:
+#    name: letsencrypt-prod
+#    kind: ClusterIssuer
+#  commonName: mosquitto.ghana.powerwatch.io
+#  dnsNames:
+#  - mosquitto.ghana.powerwatch.io
+#  acme:
+#    config:
+#    - http01:
+#        ingress: mosquitto
+#      domains:
+#      - mosquitto.ghana.powerwatch.io
