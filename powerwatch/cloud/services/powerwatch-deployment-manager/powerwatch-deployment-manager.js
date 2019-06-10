@@ -1382,26 +1382,34 @@ function updateVisit(callback) {
 
    function create(callback) {
       pg_pool.query('CREATE VIEW powerwatches_to_visit AS ' +
-                 `SELECT d.respondent_id,
-  		  d.respondent_firstname,
-  		  d.respondent_surnname,
-  		  d.respondent_popularname,
-  		  d.fo_name,
-  		  d.site_id,
-  		  d.phone_number,
-  		  d.second_phone_number,
-  		  d.alternate_contact_name,
-  		  d.alternate_phone_number,
-  		  d.currently_deployed,
-  		  d.core_id
-  		 FROM deployment d
-  		   LEFT JOIN ( SELECT powerwatch.core_id,
-  		          min(now() - powerwatch."time") AS min
-  		         FROM powerwatch
-  		        WHERE powerwatch."time" > (now() - '5 days'::interval)
-  		        GROUP BY powerwatch.core_id) p ON d.core_id = p.core_id
-  		WHERE p.core_id IS NULL AND d.currently_deployed = true
-			AND (now() - d.deployment_start_time) > '5 days'::interval`, (err, res) => {
+      `SELECT d.respondent_id,
+          c.scount as "priority (0 is highest)",
+          d.respondent_firstname,
+          d.respondent_surnname,
+          d.respondent_popularname,
+          d.fo_name,
+          d.site_id,
+          d.phone_number,
+          d.second_phone_number,
+          d.alternate_contact_name,
+          d.alternate_phone_number,
+          d.currently_deployed,
+          d.core_id
+         FROM deployment d
+           LEFT JOIN ( SELECT powerwatch.core_id,
+                  min(now() - powerwatch."time") AS min
+                 FROM powerwatch
+                WHERE powerwatch."time" > (now() - '5 days'::interval)
+                GROUP BY powerwatch.core_id) p ON d.core_id = p.core_id
+           LEFT JOIN (select site_id, sum(count) as scount 
+                 from (select site_id, CAST(count(powerwatch.core_id) > 0 as integer) as count 
+                      from deployment full 
+                      outer join powerwatch on powerwatch.core_id = deployment.core_id and time > NOW() - interval '5 days' 
+                      where currently_deployed = true 
+                      group by deployment.site_id, deployment.core_id) as d 
+                  group by site_id) c ON c.site_id = d.site_id
+        WHERE p.core_id IS NULL AND d.currently_deployed = true AND (now() - d.deployment_start_time) > '5 days'::interval
+        ORDER BY c.scount`, (err, res) => {
          callback(err);
       });
    }
