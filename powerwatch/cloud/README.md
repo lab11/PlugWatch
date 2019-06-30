@@ -12,3 +12,6 @@ we just write manifests for them. Some of them we write ourselves and
 build Docker containers for.
 
 A picture of the current architecture is outlined below.
+
+![Alt text](./PowerWatch_Cloud.svg)
+<img src="./PowerWatch_Cloud.svg">
