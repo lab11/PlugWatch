@@ -23,8 +23,8 @@ args = parser.parse_args()
 spark = SparkSession.builder.appName("SAIDI/SAIFI cluster size").getOrCreate()
 
 ### It's really important that you partition on this data load!!! otherwise your executors will timeout and the whole thing will fail
-start_time = '2019-06-04'
-end_time = '2019-06-11'
+start_time = '2019-06-21'
+end_time = '2019-06-28'
 cluster_distance_seconds = 180
 CD = cluster_distance_seconds
 
@@ -48,9 +48,16 @@ for i in range(0,num_partitions):
 query = ("""
     (SELECT powerwatch.core_id, time, is_powered, site_id, grid_voltage, wit_voltage_volts
     FROM powerwatch
-    INNER JOIN 
-    achimota_device_share ON powerwatch.core_id = achimota_device_share.core_id""" +
-    " WHERE time >= '" + start_time + "' AND " + 
+    INNER JOIN (
+        select core_id,
+        site_id,
+        COALESCE(deployment_start_time, '1970-01-01 00:00:00+0') as st,
+        COALESCE(deployment_end_time, '9999-01-01 00:00:00+0') as et
+        from achimota_device_share) achimota_device_share
+    ON powerwatch.core_id = achimota_device_share.core_id""" +
+    " WHERE time >= st AND " +
+    " time <= et AND " +
+    " time >= '" + start_time + "' AND " + 
     " time < '" + end_time + "') alias")
 
 pw_df = spark.read.jdbc(
@@ -61,14 +68,16 @@ pw_df = spark.read.jdbc(
 
 grid = spark.read.jdbc(
             url = "jdbc:postgresql://timescale.ghana.powerwatch.io/powerwatch",
-            table = 'achimota_grid_share',
+            table = 'achimota_grid_grouped',
             properties={"user": args.user, "password": args.password, "driver":"org.postgresql.Driver"})
 
-devices = spark.read.jdbc(
+site_share = spark.read.jdbc(
             url = "jdbc:postgresql://timescale.ghana.powerwatch.io/powerwatch",
-            table = 'achimota_device_share',
+            table = 'achimota_site_share',
             properties={"user": args.user, "password": args.password, "driver":"org.postgresql.Driver"})
 
+#only share the grid the we can share
+grid = grid.join(site_share, on='site_id',how='inner');
 
 #now let's resample by core_id. So for each minute let's get 1) was the sensor powered and 2) what was the voltage
 #and we can do this with a sliding window. Just leave gaps if there are gaps
@@ -188,15 +197,15 @@ daily_summary = daily_summary.select("tx","date_day",
                                     F.round(((col("valid_voltage")/1440)*100),1).alias("Percent Time Voltage Monitored"),
                                     F.round(((col("under_voltage")/1440)*100),1).alias("Percent Total Time Under Voltage"),
                                     F.round(((col("over_voltage")/1440)*100),1).alias("Percent Total Time Over Voltage"),
-                                    F.round(((col("under_voltage")/col("valid_voltage"))*100),1).alias("Percent Monitored Time Under Voltage"),
-                                    F.round(((col("over_voltage")/col("valid_voltage"))*100),1).alias("Percent Monitored Time Over Voltage"),
+                                    F.round(((col("under_voltage")/col("total_measurements"))*100),1).alias("Percent Monitored Time Under Voltage"),
+                                    F.round(((col("over_voltage")/col("total_measurements"))*100),1).alias("Percent Monitored Time Over Voltage"),
                                     F.round(((col("power_out")/1440)*100),1).alias("Percent Total Time Power Out"),
                                     F.round(((col("power_out")/col("total_measurements"))*100),1).alias("Percent Monitored Time Power Out"),
                                     F.round(((col("power_ambiguous")/1440)*100),1).alias("Percent Total Time Power Ambiguous"),
                                     F.round(((col("power_ambiguous")/col("total_measurements"))*100),1).alias("Percent Monitored Time Power Ambiguous"))
 
 
-daily_summary.orderBy("date_day").show(35)
+daily_summary = daily_summary.orderBy("tx","date_day")
 daily_summary.orderBy("tx","date_day").repartition(1).write.format("com.databricks.spark.csv").mode('overwrite').option("header", "true").save(args.result + '/daily_summary')
 
 hourly_summary = pw_df_resampled.groupBy("tx",F.hour("time").alias("hour")).agg(F.avg("grid_voltage").alias("average_measured_voltage"),
@@ -213,11 +222,11 @@ hourly_summary = pw_df_resampled.groupBy("tx",F.hour("time").alias("hour")).agg(
                                                     power_ambiguous.alias("power_ambiguous"))
 
 hourly_summary = hourly_summary.select("tx","hour",
-                                    F.round(((col("under_voltage")/col("valid_voltage"))*100),1).alias("Percent Monitored Time Under Voltage"),
-                                    F.round(((col("over_voltage")/col("valid_voltage"))*100),1).alias("Percent Monitored Time Over Voltage"),
+                                    F.round(((col("under_voltage")/col("total_measurements"))*100),1).alias("Percent Monitored Time Under Voltage"),
+                                    F.round(((col("over_voltage")/col("total_measurements"))*100),1).alias("Percent Monitored Time Over Voltage"),
                                     F.round(((col("power_out")/col("total_measurements"))*100),1).alias("Percent Monitored Time Power Out"),
                                     F.round(((col("power_ambiguous")/col("total_measurements"))*100),1).alias("Percent Monitored Time Power Ambiguous"))
 
 
-hourly_summary.orderBy("tx","hour").show(150)
+hourly_summary = hourly_summary.orderBy("tx","hour")
 hourly_summary.orderBy("tx","hour").repartition(1).write.format("com.databricks.spark.csv").mode('overwrite').option("header", "true").save(args.result + '/hourly_summary')
