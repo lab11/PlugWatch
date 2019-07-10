@@ -168,33 +168,31 @@ function update_payment_status(new_status, transaction_id, callback) {
     });
 }
 
-function update_payment_state_from_status(error, result, body, transaction, callback) {
-    //update it's state
-
-    var new_payment_state = "";
-    if(error) {
-        return callback(error);
-    } else if ('success' in body && body['success'] == false) {
+function get_korba_new_payment_state(body) {
+    if ('success' in body && body['success'] == false) {
         if(body['error_code'] == 421) {
-            new_payment_state = 'error';
+            return 'error';
         } else {
-            return callback(error);
+            return null;
         }
     } else if ('success' in body && body['success'] == true) {
         if(body['status'] == 'success') {
-            new_payment_state = 'complete';
+            return 'complete';
         } else if(body['status'] == 'pending') {
             //for now just wait on this
             //TODO add a pending timeout where we retry
-            return callback();
+            return 'pending';
         } else if(body['status'] == 'failed') {
-            new_payment_state = 'failed';
+            return 'failed';
         } else {
-            return callback(body);
+            return null;
         }
     } else {
-        return callback(body);
+        return null;
     }
+}
+
+function update_payment_state_from_status(new_payment_state, transaction, callback) {
 
     if(new_payment_state == 'complete') {
         async.series([
@@ -220,7 +218,7 @@ function check_status(callback) {
     //If failed generate a new payment with the attempt number incremented
 
     function get_pending_transactions(callback) {
-        qstring = format.withArray("SELECT * from %I WHERE status = 'pending'", [PAYMENTS_TABLE]);
+        qstring = format.withArray("SELECT * from %I WHERE status = 'pending' OR status = 'success'", [PAYMENTS_TABLE]);
         pg_pool.query(qstring, (err, res) => {
             callback(err, res);
         });
@@ -231,16 +229,34 @@ function check_status(callback) {
         async.forEachLimit(transactions.rows, 10, function(row, callback) {
             //for each row
             //send it to korba
-            check_korba_status(row.external_transaction_id, function(error, result, body) {
-                if(result) {
-                    update_payment_state_from_status(error, result, body, row, function(err) {
+            if(row.payment_api == "korba") {
+                check_korba_status(row.external_transaction_id, function(error, result, body) {
+                    if(result) {
+                        var stat = get_korba_new_payment_state(body);
+                        //if it's pending just leave it alone
+                        if(stat != 'pending') {
+                            update_payment_state_from_status(stat, row, function(err) {
+                                callback(err);
+                            });
+                        } else {
+                            callback();
+                        }
+                    }
+                });
+            } else if (row.payment_api == "engagespark") {
+                if(row.status == "success") {
+                    update_payment_state_from_status('complete', row, function(err) {
+                        callback(err);
+                    });
+                } else {
+                    update_payment_state_from_status('failed', row, function(err) {
                         callback(err);
                     });
                 }
-            });
+            }
         }, function(err) {
             //iff there is an error just ignore it for now
-            console.log("Got korba status check error:", err)
+            console.log("Got status check error:", err)
             callback(err)
         });
     }

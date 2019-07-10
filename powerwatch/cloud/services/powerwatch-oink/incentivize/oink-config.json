@@ -1,6 +1,15 @@
 {
     "respondents_table": "respondents",
     "payments_table": "payments",
-    "incentives_file": "./incentives.js"
+    "incentives_file": "./incentives.js",
+    "payment_apis": [
+        {
+            "payment_api": "korba",
+            "proportion":0.999
+        }, {
+            "payment_api": "engagespark",
+            "proportion":0.001
+        }
+    ]
 }
 

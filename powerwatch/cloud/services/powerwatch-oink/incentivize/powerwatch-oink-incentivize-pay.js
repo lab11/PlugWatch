@@ -5,6 +5,7 @@ var format = require('pg-format');
 const request = require('request');
 const sortObj = require('sort-object');
 const fs = require('fs');
+const engagespark = require('engagespark-topup');
 var async = require('async');
 const crypto = require('crypto');
 var bodyParser = require("body-parser");
@@ -16,7 +17,9 @@ command.option('-d, --database [database]', 'Database configuration file.')
         .option('-p, --password [password]', 'Database password file')
         .option('-o, --oink [oink]', 'Oink configuration file')
         .option('-s, --secret [secret]', 'Korba secret key')
-        .option('-c, --client [client]', 'Korba client key').parse(process.argv);
+        .option('-c, --client [client]', 'Korba client key')
+        .option('-a, --apiKey [apiKey]', 'engageSpark api key')
+        .option('-i, --orgID [orgID]', 'engageSpark org ID').parse(process.argv);
 
 var timescale_config = null;
 if(typeof command.database !== 'undefined') {
@@ -45,6 +48,18 @@ if(typeof command.secret !== 'undefined') {
 } else {
     korba_config = require('./korba-config.json');
 }
+
+var engagespark_config = null;
+if(typeof command.apiKey !== 'undefined') {
+    engagespark_config = {};
+    engagespark_config.apiKey = fs.readFileSync(command.apiKey,'utf8').trim();
+    engagespark_config.orgID = fs.readFileSync(command.orgID,'utf8').trim();
+} else {
+    engagespark_config = require('./engagespark-config.json');
+}
+
+//initialize engagespark
+var topup = new engagespark(engagespark_config.orgID, engagespark_config.apiKey);
 
 var oink_config = null;
 if(typeof command.oink !== 'undefined') {
@@ -89,12 +104,27 @@ function incentivize_users(incentive_function, callback) {
             var r = item.respondent_info;
             var transaction_id = [r.phone_number, r.carrier, item.incentive_type, item.incentive_id, 1].join('-');
 
+            //generate incentives that target the APIs at the correct proportion
+            var r = Math.random() 
+            var payment_api = "";
+            var sum = 0;
+            for(var i in oink_config.payment_apis) {
+                sum += i['proportion'];
+                if(r  < sum) {
+                    payment_api = i['payment_api'];
+                }
+            }
+
+            if(payment_api == "") {
+                payment_api = oink_config.payment_apis[0]['name'];
+            }
+
             var qstring = format.withArray('INSERT INTO %I (phone_number, carrier, respondent_id, ' +
                 'time_created, amount, incentive_id, incentive_type, payment_attempt, ' +
-                'status, external_transaction_id) VALUES (%L, %L, %L, NOW(), %L, %L, ' +
-                '%L, %L, %L, %L) ON CONFLICT DO NOTHING',
+                'status, external_transaction_id, payment_api) VALUES (%L, %L, %L, NOW(), %L, %L, ' +
+                '%L, %L, %L, %L, %L) ON CONFLICT DO NOTHING',
                 [PAYMENTS_TABLE, r.phone_number, r.carrier, r.respondent_id,
-                 item.amount, item.incentive_id, item.incentive_type, 1, 'waiting', transaction_id]);
+                 item.amount, item.incentive_id, item.incentive_type, 1, 'waiting', transaction_id, payment_api]);
 
             console.log(qstring);
             pg_pool.query(qstring, (err, res) => {
@@ -187,32 +217,50 @@ function send_to_korba(phone_number, carrier, amount, external_transaction_id, c
 function issue_payments(callback) {
     //take payments in the waiting state added above and send them to Korba
     //change them to pending
-    function set_to_pending(qstring, callback) {
+    function update_status(qstring, callback) {
         pg_pool.query(qstring, (err, res) => {
             callback(err, res);
         });
     }
 
-    var qstring = format.withArray("SELECT phone_number, carrier, amount, external_transaction_id from %I WHERE status = 'waiting'", [PAYMENTS_TABLE]);
+    var qstring = format.withArray("SELECT phone_number, carrier, amount, external_transaction_id, payment_api from %I WHERE status = 'waiting'", [PAYMENTS_TABLE]);
     console.log(qstring);
     pg_pool.query(qstring, (err, res) => {
         if(err) {
             console.log("Error getting waiting payments:",err);
         } else {
             async.forEachLimit(res.rows, 10, function(row, callback) {
-                //for each row
-                //send it to korba
-                var qstring = format.withArray("UPDATE %I SET status = 'pending', time_submitted = NOW() " +
-                              "WHERE external_transaction_id = %L",[PAYMENTS_TABLE, row.external_transaction_id]);
-                async.series([
-                    async.apply(send_to_korba, row.phone_number, row.carrier, row.amount, row.external_transaction_id),
-                    async.apply(set_to_pending, qstring)
-                ], function(err, result) {
-                    //we actually dont' want to error here because it will stop
-                    //everyone from being paid
-                    console.log(err);
-                    callback();
-                });
+                if(row.payment_api == "korba") {
+                    //for each row
+                    //issue the payment
+                    var pending_qstring = format.withArray("UPDATE %I SET status = 'pending', time_submitted = NOW() " +
+                                  "WHERE external_transaction_id = %L",[PAYMENTS_TABLE, row.external_transaction_id]);
+                    async.series([
+                        async.apply(send_to_korba, row.phone_number, row.carrier, row.amount, row.external_transaction_id),
+                        async.apply(update_status, pending_qstring)
+                    ], function(err, result) {
+                        //we actually dont' want to error here because it will stop
+                        //everyone from being paid
+                        console.log(err);
+                        callback();
+                    });
+                } else if (row.payment_api == "engagespark") {
+                    var success_qstring = format.withArray("UPDATE %I SET status = 'success', time_submitted = NOW() " +
+                                  "WHERE external_transaction_id = %L",[PAYMENTS_TABLE, row.external_transaction_id]);
+
+                    var pending_qstring = format.withArray("UPDATE %I SET status = 'pending', time_submitted = NOW() " +
+                                  "WHERE external_transaction_id = %L",[PAYMENTS_TABLE, row.external_transaction_id]);
+
+                    async.series([
+                        async.apply(topup.send_topup, '233' + row.phone_number, row.amount, row.external_transaction_id),
+                        async.apply(update_status, success_qstring)
+                    ], function(err, result) {
+                        console.log(err);
+                        update_status(pending_qstring, function(err, res) {
+                            callback(err);
+                        });
+                    });
+                }
             }, function(err) {
                 callback(err)
             });

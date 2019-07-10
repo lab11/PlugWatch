@@ -4,13 +4,14 @@
     "description": "Pays powerwatch users",
     "private": true,
     "dependencies": {
-        "pg": "^7.3.0",
-        "request": "2.88.0",
-        "pg-format": "",
-        "commander": "",
         "async": "2.6.1",
-        "sort-object": "3.0.2",
         "body-parser": "^1.18.3",
+        "commander": "",
+        "jshint": "^2.10.2",
+        "pg": "^7.3.0",
+        "pg-format": "",
+        "request": "2.88.0",
+        "sort-object": "3.0.2",
         "twilio": "3.29.2"
     },
     "scripts": {

@@ -4,13 +4,14 @@
     "description": "Pays powerwatch users",
     "private": true,
     "dependencies": {
-        "pg": "^7.3.0",
-        "request": "2.88.0",
-        "pg-format": "",
-        "commander": "",
         "async": "2.6.1",
-        "sort-object": "3.0.2",
-        "body-parser": "^1.18.3"
+        "body-parser": "^1.18.3",
+        "commander": "",
+        "jshint": "^2.10.2",
+        "pg": "^7.3.0",
+        "pg-format": "",
+        "request": "2.88.0",
+        "sort-object": "3.0.2"
     },
     "scripts": {
         "start": "./powerwatch-oink-incentivize-pay.js -d /etc/config/postgres.json -u /etc/config/postgres/username -p /etc/config/postgres/password -s /etc/config/korba/secret -c /etc/config/korba/client -o /etc/config/oink.json"
