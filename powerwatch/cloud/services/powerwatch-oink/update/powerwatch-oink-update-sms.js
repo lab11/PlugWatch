@@ -140,10 +140,10 @@ function retry_payment(external_transaction_id, callback) {
 
             var qstring = format.withArray('INSERT INTO %I (phone_number, carrier, respondent_id, ' +
                 'time_created, amount, incentive_id, incentive_type, payment_attempt, ' +
-                'status, external_transaction_id) VALUES (%L, %L, %L, NOW(), %L, %L, ' +
-                '%L, %L, %L, %L) ON CONFLICT (external_transaction_id) DO NOTHING',
+                'status, external_transaction_id, payment_api) VALUES (%L, %L, %L, NOW(), %L, %L, ' +
+                '%L, %L, %L, %L, %L) ON CONFLICT (external_transaction_id) DO NOTHING',
                 [PAYMENTS_TABLE, prev.phone_number, prev.carrier, prev.respondent_id,
-                    prev.amount, prev.incentive_id, prev.incentive_type, attempt, 'waiting', new_transaction_id]);
+                    prev.amount, prev.incentive_id, prev.incentive_type, attempt, 'waiting', new_transaction_id, prev.payment_api]);
 
             console.log(qstring);
             pg_pool.query(qstring, (err, res) => {
