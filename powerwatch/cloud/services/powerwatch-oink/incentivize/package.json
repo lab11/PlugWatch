@@ -11,7 +11,8 @@
         "pg": "^7.3.0",
         "pg-format": "",
         "request": "2.88.0",
-        "sort-object": "3.0.2"
+        "sort-object": "3.0.2",
+        "engagespark-topup": "0.0.7"
     },
     "scripts": {
         "start": "./powerwatch-oink-incentivize-pay.js -d /etc/config/postgres.json -u /etc/config/postgres/username -p /etc/config/postgres/password -s /etc/config/korba/secret -c /etc/config/korba/client -o /etc/config/oink.json"

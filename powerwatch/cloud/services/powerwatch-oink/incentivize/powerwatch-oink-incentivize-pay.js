@@ -105,19 +105,21 @@ function incentivize_users(incentive_function, callback) {
             var transaction_id = [r.phone_number, r.carrier, item.incentive_type, item.incentive_id, 1].join('-');
 
             //generate incentives that target the APIs at the correct proportion
-            var r = Math.random() 
+            var rand = Math.random();
             var payment_api = "";
             var sum = 0;
-            for(var i in oink_config.payment_apis) {
-                sum += i['proportion'];
-                if(r  < sum) {
-                    payment_api = i['payment_api'];
+            for(var i  = 0; i < oink_config['payment_apis'].length; i++) {
+                sum += oink_config['payment_apis'][i]['proportion'];
+                if(rand < sum) {
+                    payment_api = oink_config['payment_apis'][i]['payment_api'];
+                    break;
                 }
             }
 
             if(payment_api == "") {
-                payment_api = oink_config.payment_apis[0]['name'];
+                payment_api = oink_config['payment_apis'][0]['payment_api'];
             }
+
 
             var qstring = format.withArray('INSERT INTO %I (phone_number, carrier, respondent_id, ' +
                 'time_created, amount, incentive_id, incentive_type, payment_attempt, ' +
@@ -223,6 +225,12 @@ function issue_payments(callback) {
         });
     }
 
+    function send_engagespark(phone_number, amount, transaction_id, callback) {
+        topup.send_topup(phone_number, amount, transaction_id, function(error, result, body) {
+            callback(error, result, body);
+        });
+    }
+
     var qstring = format.withArray("SELECT phone_number, carrier, amount, external_transaction_id, payment_api from %I WHERE status = 'waiting'", [PAYMENTS_TABLE]);
     console.log(qstring);
     pg_pool.query(qstring, (err, res) => {
@@ -251,14 +259,19 @@ function issue_payments(callback) {
                     var pending_qstring = format.withArray("UPDATE %I SET status = 'pending', time_submitted = NOW() " +
                                   "WHERE external_transaction_id = %L",[PAYMENTS_TABLE, row.external_transaction_id]);
 
+                    console.log('Sending to engagespark', '233' + row.phone_number, row.amount, row.external_transaction_id);
                     async.series([
-                        async.apply(topup.send_topup, '233' + row.phone_number, row.amount, row.external_transaction_id),
+                        async.apply(send_engagespark, '233' + row.phone_number, row.amount, row.external_transaction_id),
                         async.apply(update_status, success_qstring)
                     ], function(err, result) {
                         console.log(err);
-                        update_status(pending_qstring, function(err, res) {
+                        if(err) {
+                            update_status(pending_qstring, function(err, res) {
+                                callback(err);
+                            });
+                        } else {
                             callback(err);
-                        });
+                        }
                     });
                 }
             }, function(err) {

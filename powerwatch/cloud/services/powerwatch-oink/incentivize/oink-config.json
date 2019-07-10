@@ -5,10 +5,10 @@
     "payment_apis": [
         {
             "payment_api": "korba",
-            "proportion":0.999
+            "proportion":0.95
         }, {
             "payment_api": "engagespark",
-            "proportion":0.001
+            "proportion":0.05
         }
     ]
 }
