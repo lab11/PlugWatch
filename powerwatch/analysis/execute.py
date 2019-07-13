@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import signal
 import argparse
 import subprocess
 import json
@@ -92,9 +93,23 @@ if(len(folder_name) > 1):
 else:
     folder_name = ""
 
+first_line = None
+
+#setup the handler to kill the job if you control C
+def signal_handler(sig, frame):
+    #strip out the job number
+    job = first_line.split(' ')[1]
+    job = job[1:-1]
+    print()
+    subprocess.check_call(['gcloud', 'dataproc', 'jobs','kill',job])
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+
+
 print("Starting job");
 try:
-    subprocess.check_call(['gcloud', 'dataproc', 'jobs','submit','pyspark',
+    child = subprocess.Popen(['gcloud', 'dataproc', 'jobs','submit','pyspark',
                           args.script,
                           '--cluster=' + cluster_name,
                           '--jars=gs://' + bucket + '/org.postgresql.jar',
@@ -102,12 +117,20 @@ try:
                           '--',
                           'gs://' + bucket + '/' + result_name,
                           config['user'],
-                          config['password']])
-except:
+                          config['password']], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+except Exception as e:
     print("Error executing analysis script")
     sys.exit(1)
 
-print()
+first_line = str(child.stderr.readline(),'utf-8')
+print(first_line.rstrip())
+while True:
+    line = child.stderr.readline()
+    if not line:
+        break
+    else:
+        print(str(line,'utf-8').rstrip())
+
 print()
 
 #now copy the results to the local folder
